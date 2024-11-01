@@ -1,0 +1,15 @@
+[project]
+name = "invoice-reader-app"
+version = "0.1.0"
+description = "Manage your invoices."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi[standard]>=0.115.4",
+    "pydantic>=2.9.2",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.3",
+]
