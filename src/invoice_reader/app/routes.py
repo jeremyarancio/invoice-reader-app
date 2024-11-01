@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from invoice_reader.settings import SRC_DIR
+from settings import SRC_DIR
 
 
 app = FastAPI()
