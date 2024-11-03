@@ -1,9 +1,11 @@
 from io import BytesIO
 
-from invoice_reader import settings
+from invoice_reader.core import extract, store
+from invoice_reader.core.schemas import InvoiceMetadata
 
-def upload(file: BytesIO):
-    filepath = settings.SRC_DIR / "uploaded_file.pdf" 
-    with filepath.open("wb") as f:
-        f.write(file.read())
-    return filepath
+
+def upload(file: BytesIO) -> InvoiceMetadata:
+    invoice_metadata = extract.extract(file=file)
+    if invoice_metadata.is_complete():
+        store.store()
+    return invoice_metadata  
