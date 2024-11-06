@@ -1,11 +1,16 @@
-from io import BytesIO
+from typing import BinaryIO
 
-from invoice_reader.core import extract, store
-from invoice_reader.core.schemas import InvoiceMetadata
+from invoice_reader.core import storage
+from invoice_reader.schemas import InvoiceMetadata
 
 
-def upload(file: BytesIO) -> InvoiceMetadata:
-    invoice_metadata = extract.extract(file=file)
-    if invoice_metadata.is_complete():
-        store.store()
-    return invoice_metadata  
+def submit(user_id: str, file: BinaryIO, metadata: InvoiceMetadata):
+    storage.store(user_id=user_id, file=file, metadata=metadata)
+    
+
+def extract(file: BinaryIO) -> InvoiceMetadata:
+    raise NotImplementedError
+    
+    
+def get_user_id(token: str): 
+    raise NotImplementedError

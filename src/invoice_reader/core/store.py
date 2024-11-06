@@ -1,5 +1,0 @@
-
-
-
-def store():
-    pass
