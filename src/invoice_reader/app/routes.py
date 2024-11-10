@@ -23,7 +23,12 @@ def submit(
     try:
         user_id = presenter.get_user_id()
         if metadata:
-            presenter.submit(user_id=user_id, file=file.file, metadata=metadata)
+            presenter.submit(
+                user_id=user_id, 
+                file=file.file,
+                filename=file.filename, 
+                metadata=metadata
+            )
             return {
                 "message": "The file and its information were successfully stored.",
                 "status": 200,
