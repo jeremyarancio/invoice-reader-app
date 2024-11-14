@@ -2,7 +2,6 @@ from dataclasses import dataclass
 from typing import BinaryIO
 
 import boto3
-import boto3.s3
 from botocore.exceptions import ClientError
 
 from invoice_reader.utils.logger import get_logger
@@ -31,7 +30,8 @@ class S3:
     def store(self, file: BinaryIO) -> None:
         s3_client = boto3.client("s3")
         try:
-            response = s3_client.upload_fileobj(file, self.bucket, self.suffix)
+            s3_client.upload_fileobj(file, self.bucket, self.suffix)
+            LOGGER.info("File successfully stored in S3.")
         except ClientError as e:
             LOGGER.error(e)
-            raise ClientError
+            raise ClientError from e

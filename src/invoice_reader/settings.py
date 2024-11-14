@@ -1,5 +1,13 @@
+import os
 from pathlib import Path
 
-SRC_DIR = Path("").parent.parent
+from dotenv import load_dotenv
 
-S3_BUCKET = "invoice-storage"
+
+load_dotenv()
+
+
+REPO_DIR = Path(__file__).parent.parent.parent
+
+# Storage
+S3_BUCKET = os.getenv("S3_BUCKET")
