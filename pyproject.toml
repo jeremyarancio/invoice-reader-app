@@ -9,6 +9,7 @@ dependencies = [
     "fastapi[standard]>=0.115.4",
     "pydantic>=2.9.2",
     "python-multipart>=0.0.17",
+    "sqlmodel>=0.0.22",
 ]
 
 [dependency-groups]
@@ -22,3 +23,11 @@ dev = [
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.format]
+indent-style = "tab"
+docstring-code-format = true
+docstring-code-line-length = 20
