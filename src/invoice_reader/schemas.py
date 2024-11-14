@@ -1,6 +1,9 @@
+import os
 from typing import Annotated
 from datetime import date
-from pydantic import BaseModel
+import uuid
+
+from pydantic import BaseModel, Field
 
 
 class Adresse(BaseModel):
@@ -26,4 +29,14 @@ class InvoiceMetadata(BaseModel):
         if all(self.model_dump().values()):
             return True
         return False
+    
+
+class FileData(BaseModel):
+    user_id: str
+    filename: str = Field(pattern=r"^\w+\.\w{2,3}$", description=".pdf, .png, ...")
+    file_id: str = uuid.uuid1()
+
+    @property
+    def file_format(self):
+            return os.path.splitext(self.filename)[-1]
 

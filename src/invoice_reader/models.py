@@ -5,7 +5,7 @@ import boto3
 from botocore.exceptions import ClientError
 
 from invoice_reader.utils.logger import get_logger
-
+from invoice_reader.schemas import FileData
 
 LOGGER = get_logger()
 
@@ -21,11 +21,11 @@ class S3:
         return f"s3://{self.bucket}/{self.suffix}"
 
     @classmethod
-    def init_from_id(
-        cls, bucket: str, user_id: str, file_id: str, file_format: str
-    ) -> "S3":
-        file_format = file_format if file_format.startswith(".") else "." + file_format
-        return cls(bucket=bucket, suffix=f"{user_id}/{file_id}{file_format}")
+    def init(cls, bucket: str, file_data: FileData) -> "S3":
+        return cls(
+            bucket=bucket,
+            suffix=f"{file_data.user_id}/{file_data.file_id}{file_data.file_format}",
+        )
 
     def store(self, file: BinaryIO) -> None:
         s3_client = boto3.client("s3")

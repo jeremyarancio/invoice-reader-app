@@ -1,17 +1,18 @@
-import os
 from typing import BinaryIO
 
 from invoice_reader.core import storage
 from invoice_reader.schemas import InvoiceMetadata
 from invoice_reader import settings
-
+from invoice_reader import schemas
 
 def submit(user_id: str, file: BinaryIO, filename: str, metadata: InvoiceMetadata):
-    file_format = os.path.splitext(filename)[-1]
-    storage.store(
+    file_data = schemas.FileData(
         user_id=user_id,
+        filename=filename
+    )
+    storage.store(
         file=file,
-        file_format=file_format,
+        file_data=file_data,
         metadata=metadata,
         bucket=settings.S3_BUCKET,
     )

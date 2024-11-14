@@ -1,33 +1,28 @@
 from typing import BinaryIO
-import uuid
 
 from invoice_reader.schemas import InvoiceMetadata
 from invoice_reader.models import S3
 from invoice_reader.utils.logger import get_logger
-
+from invoice_reader.schemas import FileData 
 
 LOGGER = get_logger()
 
 
 def store(
-    user_id: str,
     file: BinaryIO,
-    file_format: str,
+    file_data: FileData,
     metadata: InvoiceMetadata,
     bucket: str | None,
 ) -> None:
     if not bucket:
         raise ValueError("S3 bucket name was not found as environment variable.")
     try:
-        file_id = uuid.uuid1()
-        s3_model = S3.init_from_id(
+        s3_model = S3.init(
             bucket=bucket,
-            user_id=user_id,
-            file_id=file_id,
-            file_format=file_format
+            file_data=file_data
         )
         store_file(file=file, s3_model=s3_model)
-        store_metadata(user_id=user_id, metadata=metadata)
+        store_metadata(user_id=file_data.user_id, metadata=metadata)
     except Exception as e:
         LOGGER.error(e)
         # TODO: Rollback
