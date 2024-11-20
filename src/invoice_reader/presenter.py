@@ -17,7 +17,7 @@ def submit(
 	storage.store(
 		file=file,
 		file_data=file_data,
-		invoice_schema=invoice_schema,
+		invoice=invoice_schema,
 		bucket=settings.S3_BUCKET,
 		session=session
 	)

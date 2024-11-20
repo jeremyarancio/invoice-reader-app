@@ -48,19 +48,18 @@ class UserModel(SQLModel, table=True):
 	
 
 class InvoiceModel(SQLModel, table=True):
-	file_id: str | None = Field(primary_key=True, default_factory=uuid.uuid4)
-	user_id: str = Field(foreign_key="user.user_id")
-	s3_path: str | None = None
-	invoice_number: str | None = None
-	client_name: str | None = None
-	street_number: int | None = None
-	street_adress: str | None = None
-	zipcode: int | None = None
-	city: str | None = None
-	country: str | None = None
-	amount_excl_tax: float | None = None
-	amount_with_tax: float | None = None
-	vat: float | None = None
-	invoiced_date: datetime.date | None = None
-	uploaded_date: datetime.date | None = None
-	last_updated_date: datetime.date | None = None
+	file_id: uuid.UUID = Field(primary_key=True) # file_id is manually added to enable storing in s3 and DB
+	user_id: str | None = Field(default=None, foreign_key="usermodel.user_id")
+	s3_path: str
+	invoice_number: str
+	client_name: str
+	street_number: int
+	street_address: str
+	zipcode: int
+	city: str
+	country: str
+	amount_excluding_tax: float
+	vat: float
+	invoiced_date: datetime.date
+	uploaded_date: datetime.date | None = Field(default_factory=datetime.datetime.now)
+	last_updated_date: datetime.date | None = Field(default_factory=datetime.datetime.now)

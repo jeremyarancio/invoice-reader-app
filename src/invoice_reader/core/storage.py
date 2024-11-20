@@ -1,5 +1,6 @@
 from typing import BinaryIO
 import sqlmodel
+import uuid
 
 from invoice_reader.schemas import InvoiceSchema
 from invoice_reader.models import S3
@@ -13,7 +14,7 @@ LOGGER = get_logger()
 def store(
 	file: BinaryIO,
 	file_data: FileData,
-	invoice_schema: InvoiceSchema,
+	invoice: InvoiceSchema,
 	bucket: str | None,
 	session: sqlmodel.Session,
 ) -> None:
@@ -22,13 +23,13 @@ def store(
 	try:
 		s3_model = S3.init(bucket=bucket, file_data=file_data)
 		invoice_repository = InvoiceRepository(session=session)
-		file_id = store_invoice_data(
+		store_invoice_data(
+			file_id=file_data.file_id,
 			invoice_repository=invoice_repository,
-			invoice_schema=invoice_schema,
-			s3_path=s3_model.path
+			invoice_schema=invoice,
+			s3_path=s3_model.path,
 		)
-		
-		store_file(file=file, file_id=file_id, s3_model=s3_model)
+		store_file(file=file, s3_model=s3_model)
 	except Exception as e:
 		LOGGER.error(e)
 		# TODO: Rollback
@@ -40,9 +41,9 @@ def store_file(file: BinaryIO, s3_model: S3) -> None:
 
 
 def store_invoice_data(
-		invoice_schema: InvoiceSchema, 
-		s3_path: str, 
-		invoice_repository: InvoiceRepository
-	) -> str:
-	file_id = invoice_repository.add(invoice=invoice_schema, s3_path=s3_path)	
-	return file_id
+	file_id: uuid.UUID,
+	invoice_schema: InvoiceSchema,
+	s3_path: str,
+	invoice_repository: InvoiceRepository,
+) -> str:
+	invoice_repository.add(id_=file_id, invoice=invoice_schema, s3_path=s3_path)
