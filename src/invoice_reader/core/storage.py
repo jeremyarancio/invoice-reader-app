@@ -14,7 +14,7 @@ LOGGER = get_logger()
 def store(
 	file: BinaryIO,
 	file_data: FileData,
-	invoice: InvoiceSchema,
+	invoice_data: InvoiceSchema,
 	bucket: str | None,
 	session: sqlmodel.Session,
 ) -> None:
@@ -26,7 +26,7 @@ def store(
 		store_invoice_data(
 			file_id=file_data.file_id,
 			invoice_repository=invoice_repository,
-			invoice_schema=invoice,
+			invoice_data=invoice_data,
 			s3_path=s3_model.path,
 		)
 		store_file(file=file, s3_model=s3_model)
@@ -42,8 +42,8 @@ def store_file(file: BinaryIO, s3_model: S3) -> None:
 
 def store_invoice_data(
 	file_id: uuid.UUID,
-	invoice_schema: InvoiceSchema,
+	invoice_data: InvoiceSchema,
 	s3_path: str,
 	invoice_repository: InvoiceRepository,
 ) -> str:
-	invoice_repository.add(id_=file_id, invoice=invoice_schema, s3_path=s3_path)
+	invoice_repository.add(id_=file_id, invoice_data=invoice_data, s3_path=s3_path)

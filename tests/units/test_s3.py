@@ -16,7 +16,7 @@ FILEPATH = settings.REPO_DIR / "tests/units/assets/paper.pdf"
 class TestS3Storage:
 	@pytest.fixture
 	def file_data(self):
-		return FileData(user_id="user_id", file=BytesIO(b"file"), filename="filenmame.pdf")
+		return FileData(user_id=settings._USER_ID, file=BytesIO(b"file"), filename="filenmame.pdf")
 
 	@pytest.fixture
 	def bucket(self):
@@ -39,12 +39,12 @@ class TestS3Storage:
 
 	def test_s3_init(self, bucket: str, file_data: FileData):
 		s3_model = S3.init(bucket=bucket, file_data=file_data)
-		assert s3_model.suffix == f"user_id/{file_data.file_id}.pdf"
+		assert s3_model.suffix == f"{settings._USER_ID}/{file_data.file_id}.pdf"
 
 	def test_no_file_format(self, file: BinaryIO):
 		with pytest.raises(ValueError):
 			FileData(
-				user_id="user_id",
+				user_id=settings._USER_ID,
 				file=file,
 				filename="filename",  # missing file format
 			)

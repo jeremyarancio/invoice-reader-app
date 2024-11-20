@@ -11,19 +11,23 @@ from invoice_reader import presenter
 from invoice_reader.schemas import InvoiceSchema
 from invoice_reader import db
 from invoice_reader.utils import logger
+from invoice_reader import settings
 
 
 LOGGER = logger.get_logger(__name__)
-
-# TEMPORARY
-USER_ID = "jeremy1544"
 
 
 app = FastAPI()
 
 
 class Checker:
-	"""https://shorturl.at/Beaur"""
+	"""When POST File & Payload, HTTP sends a Form request.
+	However, HTTP protocole doesn't allow file & body.
+	Therefor, we send data as Form as `{"data": json_dumps(invoice_data)} along the file.
+
+	More information here:
+	https://shorturl.at/Beaur
+	"""
 
 	def __init__(self, model: BaseModel):
 		self.model = model
@@ -55,7 +59,7 @@ def add_invoice(
 	try:
 		# token = auth.get_token()
 		# user_id = presenter.get_user_id(token=token)
-		user_id = USER_ID
+		user_id = settings._USER_ID
 		if invoice_schema:
 			presenter.submit(
 				user_id=user_id,

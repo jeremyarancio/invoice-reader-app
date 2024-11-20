@@ -3,10 +3,10 @@ import datetime
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlmodel import Session, SQLModel, create_engine, StaticPool
+from sqlmodel import Session, SQLModel, create_engine, StaticPool, select
 
 from invoice_reader.app.routes import app
-from invoice_reader.db import get_session
+from invoice_reader import db
 from invoice_reader import models  # noqa: F401
 from invoice_reader.schemas import (
 	InvoiceSchema,
@@ -14,10 +14,11 @@ from invoice_reader.schemas import (
 	UserSchema,
 )
 from invoice_reader.models import UserModel
+from invoice_reader import settings
 
 
 @pytest.fixture(name="session")
-def session_fixture():
+def session_fixture() -> Session: # type: ignore
 	engine = create_engine(
 		"sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool
 	)
@@ -37,9 +38,12 @@ def client_fixture(session: Session):
 	def get_session_override():
 		return session
 
-	app.dependency_overrides[get_session] = get_session_override
+	app.dependency_overrides[db.get_session] = get_session_override
 	client = TestClient(app)
-	add_user_to_db(user=UserSchema(token="ABCDEF", email="jeremy@hotmail.com"), session=session)
+	add_user_to_db(
+		user=UserSchema(user_id=settings._USER_ID, token="ABCDEF", email="jeremy@hotmail.com"),
+		session=session,
+	)
 	yield client
 	app.dependency_overrides.clear()
 
@@ -53,7 +57,12 @@ def files():
 
 @pytest.fixture
 def file_data() -> FileData:
-	return FileData(user_id="jeremy1234", filename="filename.pdf")
+	return FileData(user_id=settings._USER_ID, filename="filename.pdf")
+
+
+@pytest.fixture
+def s3_bucket() -> str:
+	return settings.S3_BUCKET
 
 
 @pytest.fixture
@@ -74,7 +83,7 @@ def bucket() -> str:
 
 
 @pytest.fixture
-def invoice_schema():
+def invoice_data():
 	return InvoiceSchema(
 		client_name="Sacha&Cie",
 		invoiced_date=datetime.date(2024, 11, 18),
@@ -85,8 +94,8 @@ def invoice_schema():
 		country="France",
 		zipcode=45777,
 		amount_excluding_tax=10000,
-		currency="€", 
-		vat="20"
+		currency="€",
+		vat="20",
 	)
 
 
@@ -94,11 +103,25 @@ def test_submit_invoice(
 	files,
 	client: TestClient,
 	s3_mocker: Mock,
-	invoice_schema: InvoiceSchema,
+	invoice_data: InvoiceSchema,
+	session: Session,
 ):
-	# Add user before testing sending invoice
-
-	data = invoice_schema.model_dump_json()
+	data = invoice_data.model_dump_json()
 	response = client.post(url="api/v1/files/submit/", data={"data": data}, files=files)
+	invoice_data_from_db = session.exec(
+		select(models.InvoiceModel)
+		.where(models.InvoiceModel.user_id == settings._USER_ID)
+	).one_or_none()
+
+	assert invoice_data_from_db is not None
 	assert response.status_code == 200
 	s3_mocker.upload_fileobj.assert_called_once()
+	assert invoice_data_from_db.city == invoice_data.city
+	assert invoice_data_from_db.country == invoice_data.country
+	assert invoice_data_from_db.client_name == invoice_data.client_name
+	assert invoice_data_from_db.street_address == invoice_data.street_address
+	assert invoice_data_from_db.street_number == invoice_data.street_number
+	assert invoice_data_from_db.amount_excluding_tax == invoice_data.amount_excluding_tax
+	assert invoice_data_from_db.invoice_number == invoice_data.invoice_number
+	assert invoice_data_from_db.invoiced_date == invoice_data.invoiced_date
+	assert invoice_data_from_db.uploaded_date is not None

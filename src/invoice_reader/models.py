@@ -35,21 +35,20 @@ class S3:
 		s3_client = boto3.client("s3")
 		try:
 			s3_client.upload_fileobj(file, self.bucket, self.suffix)
-			LOGGER.info("File successfully stored in S3.")
 		except ClientError as e:
 			LOGGER.error(e)
 			raise ClientError from e
 
 
 class UserModel(SQLModel, table=True):
-	user_id: uuid.UUID | None = Field(default_factory=uuid.uuid4, primary_key=True)
+	user_id: str | None = Field(default=None, primary_key=True)
 	token: str
 	email: EmailStr
 	
 
 class InvoiceModel(SQLModel, table=True):
-	file_id: uuid.UUID = Field(primary_key=True) # file_id is manually added to enable storing in s3 and DB
-	user_id: str | None = Field(default=None, foreign_key="usermodel.user_id")
+	file_id: str = Field(primary_key=True) # file_id is manually added to enable storing in s3 and DB
+	user_id: str | None = Field(foreign_key="usermodel.user_id")
 	s3_path: str
 	invoice_number: str
 	client_name: str

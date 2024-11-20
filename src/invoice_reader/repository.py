@@ -40,29 +40,29 @@ class InvoiceRepository(Repository[schemas.InvoiceSchema]):
 	def __init__(self, session: sqlmodel.Session):
 		self.session = session
 
-	def add(self, id_: uuid.UUID, invoice: schemas.InvoiceSchema, s3_path: str) -> str:
+	def add(self, id_: uuid.UUID, invoice_data: schemas.InvoiceSchema, s3_path: str) -> str:
 		is_existing_invoice = self.session.exec(
 			sqlmodel.select(models.InvoiceModel)
 			.where(models.InvoiceModel.file_id == id_)
 		).one_or_none()
 		if not is_existing_invoice:
-			invoice_model = models.InvoiceModel(file_id=id_, s3_path=s3_path, **invoice.model_dump())
+			invoice_model = models.InvoiceModel(file_id=id_, s3_path=s3_path, **invoice_data.model_dump())
 			self.session.add(invoice_model)
 			self.session.commit()
 			self.session.refresh(invoice_model)
-			LOGGER.info("Invoice %s add to database. Metadata: %s", id_, invoice)
+			LOGGER.info("Invoice %s added to database. Metadata: %s", id_, invoice_data)
 		else:
 			LOGGER.info("Invoice already existing. No change was performed.")
 
-	def update(self, id_: str, invoice: schemas.InvoiceSchema) -> None:
+	def update(self, id_: str, invoice_data: schemas.InvoiceSchema) -> None:
 		invoice_model = self.session.exec(
 			sqlmodel.select(models.InvoiceModel).where(models.InvoiceModel.file_id == id_)
 		).one()
-		invoice_model.sqlmodel_update(invoice)
+		invoice_model.sqlmodel_update(invoice_data)
 		self.session.add(invoice_model)
 		self.session.commit()
 		self.session.refresh(invoice_model)
-		LOGGER.info("Existing invoice %s data updated with new data: %s", id_, invoice)
+		LOGGER.info("Existing invoice %s data updated with new data: %s", id_, invoice_data)
 
 	def get(self, id_: str) -> schemas.InvoiceSchema:
 		invoice_model = self.session.exec(sqlmodel.select(models.InvoiceModel.file_id == id_)).one()
