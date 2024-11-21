@@ -1,6 +1,4 @@
 from typing import BinaryIO
-import sqlmodel
-import uuid
 
 from invoice_reader.schemas import InvoiceSchema
 from invoice_reader.models import S3
