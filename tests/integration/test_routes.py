@@ -161,11 +161,7 @@ def user() -> UserSchema:
 	return UserSchema(email="jeremy@email.com")
 
 
-def test_register_user(
-	client: TestClient,
-	session: Session,
-	user: UserSchema
-):
+def test_register_user(client: TestClient, session: Session, user: UserSchema):
 	response = client.post(
 		url="/api/v1/users/register/",
 		json=user.model_dump(),
