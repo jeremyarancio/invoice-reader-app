@@ -28,8 +28,8 @@ def session_fixture() -> Session:  # type: ignore
 		yield session
 
 
-def add_user_to_db(user: UserSchema, session: Session) -> uuid.UUID:
-	user_model = UserModel(**user.model_dump())
+def add_user_to_db(user: UserSchema, user_id: uuid.UUID, session: Session) -> uuid.UUID:
+	user_model = UserModel(user_id=user_id, **user.model_dump())
 	session.add(user_model)
 	session.commit()
 	return user_model.user_id
@@ -112,7 +112,8 @@ def test_submit_invoice(
 	data = invoice_data.model_dump_json()
 	response = client.post(url="api/v1/files/submit/", data={"data": data}, files=upload_files)
 	user_id = add_user_to_db(
-		user=UserSchema(user_id=settings._USER_ID, email="jeremy@hotmail.com"),
+		user=UserSchema(email="jeremy@hotmail.com"),
+		user_id=settings._USER_ID,
 		session=session,
 	)
 	invoice_data_from_db = session.exec(

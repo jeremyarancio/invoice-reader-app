@@ -7,10 +7,6 @@ from pydantic import BaseModel, Field, EmailStr
 
 
 class UserSchema(BaseModel):
-	user_id: uuid.UUID | None = Field(
-		default=None,
-		description="Only for debugging. SQLModel takes charge of generating it automatically",
-	)
 	email: EmailStr
 
 
