@@ -7,8 +7,10 @@ from pydantic import BaseModel, Field, EmailStr
 
 
 class UserSchema(BaseModel):
-	user_id: str
-	token: str
+	user_id: uuid.UUID | None = Field(
+		default=None,
+		description="Only for debugging. SQLModel takes charge of generating it automatically",
+	)
 	email: EmailStr
 
 
@@ -32,10 +34,10 @@ class InvoiceSchema(BaseModel):
 
 
 class FileData(BaseModel):
-	user_id: str
+	user_id: uuid.UUID
 	filename: str = Field(pattern=r"^\w+\.\w{2,3}$", description=".pdf, .png, ...")
-	file_id: str | None = Field(default_factory=lambda: str(uuid.uuid4()))
-	
+	file_id: uuid.UUID | None = Field(default_factory=lambda: uuid.uuid4())
+
 	@property
 	def file_format(self):
 		return os.path.splitext(self.filename)[-1]

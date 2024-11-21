@@ -1,15 +1,16 @@
 from typing import BinaryIO
 import sqlmodel
+import uuid
 
 from invoice_reader.core import storage
 from invoice_reader import settings
-from invoice_reader.schemas import InvoiceSchema, FileData
+from invoice_reader.schemas import InvoiceSchema, UserSchema, FileData
 from invoice_reader.models import S3
-from invoice_reader.repository import InvoiceRepository
-
+from invoice_reader.repository import InvoiceRepository, UserRepository
+from invoice_reader.core import users
 
 def submit(
-	user_id: str,
+	user_id: uuid.UUID,
 	file: BinaryIO,
 	filename: str,
 	invoice_data: InvoiceSchema,
@@ -36,3 +37,9 @@ def extract(file: BinaryIO) -> InvoiceSchema:
 
 def get_user_id(token: str):
 	raise NotImplementedError
+
+
+def register_user(user: UserSchema, session: sqlmodel.Session):
+	user_repository = UserRepository(session=session)
+	users.register(user=user, repository=user_repository)
+	

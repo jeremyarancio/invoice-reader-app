@@ -1,5 +1,6 @@
 from unittest.mock import Mock
 import datetime
+import uuid
 
 import pytest
 from fastapi.testclient import TestClient
@@ -27,10 +28,11 @@ def session_fixture() -> Session:  # type: ignore
 		yield session
 
 
-def add_user_to_db(user: UserSchema, session: Session) -> None:
+def add_user_to_db(user: UserSchema, session: Session) -> uuid.UUID:
 	user_model = UserModel(**user.model_dump())
 	session.add(user_model)
 	session.commit()
+	return user_model.user_id
 
 
 @pytest.fixture(name="client")
@@ -40,10 +42,6 @@ def client_fixture(session: Session):
 
 	app.dependency_overrides[db.get_session] = get_session_override
 	client = TestClient(app)
-	add_user_to_db(
-		user=UserSchema(user_id=settings._USER_ID, token="ABCDEF", email="jeremy@hotmail.com"),
-		session=session,
-	)
 	yield client
 	app.dependency_overrides.clear()
 
@@ -113,8 +111,12 @@ def test_submit_invoice(
 ):
 	data = invoice_data.model_dump_json()
 	response = client.post(url="api/v1/files/submit/", data={"data": data}, files=upload_files)
+	user_id = add_user_to_db(
+		user=UserSchema(user_id=settings._USER_ID, email="jeremy@hotmail.com"),
+		session=session,
+	)
 	invoice_data_from_db = session.exec(
-		select(models.InvoiceModel).where(models.InvoiceModel.user_id == settings._USER_ID)
+		select(models.InvoiceModel).where(models.InvoiceModel.user_id == user_id)
 	).one_or_none()
 
 	assert invoice_data_from_db is not None
@@ -151,3 +153,23 @@ def test_submit_invoice_with_wrong_format(wrong_files, client: TestClient, s3_mo
 	response = client.post(url="api/v1/files/submit/", files=wrong_files)
 	assert response.status_code == 422
 	s3_mocker.assert_not_called()
+
+
+@pytest.fixture
+def user() -> UserSchema:
+	return UserSchema(email="jeremy@email.com")
+
+
+def test_register_user(
+	client: TestClient,
+	session: Session,
+	user: UserSchema
+):
+	response = client.post(
+		url="/api/v1/users/register/",
+		json=user.model_dump(),
+	)
+	assert response.status_code == 200
+	user_model = session.exec(select(UserModel)).first()
+	assert user_model is not None
+	assert user_model.email == user.email

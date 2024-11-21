@@ -9,7 +9,7 @@ import sqlmodel
 from invoice_reader import presenter
 
 # from invoice_reader.app import auth
-from invoice_reader.schemas import InvoiceSchema
+from invoice_reader.schemas import InvoiceSchema, UserSchema
 from invoice_reader import db
 from invoice_reader.utils import logger
 from invoice_reader import settings
@@ -82,3 +82,15 @@ def add_invoice(
 	except Exception as e:
 		LOGGER.error(e)
 		raise HTTPException(status_code=500, detail=f"File submition failed: {str(e)}")
+
+
+@app.post("/api/v1/users/register/")
+def register(
+	user: UserSchema,
+	session: sqlmodel.Session = Depends(db.get_session)
+):
+	try:
+		presenter.register_user(user=user, session=session)
+	except Exception as e:
+		LOGGER.error(e)
+		HTTPException(status_code=400, detail=f"User registration failed: {str(e)}",)

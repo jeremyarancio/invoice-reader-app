@@ -1,7 +1,7 @@
 import datetime
-import uuid
 from dataclasses import dataclass
 from typing import BinaryIO
+import uuid
 
 import boto3
 from botocore.exceptions import ClientError
@@ -41,14 +41,17 @@ class S3:
 
 
 class UserModel(SQLModel, table=True):
-	user_id: str | None = Field(default=None, primary_key=True)
-	token: str
+	user_id: uuid.UUID | None = Field(default_factory=uuid.uuid4, primary_key=True)
+	token: uuid.UUID | None = Field(default_factory=uuid.uuid4)
 	email: EmailStr
-	
+
 
 class InvoiceModel(SQLModel, table=True):
-	file_id: str = Field(primary_key=True) # file_id is manually added to enable storing in s3 and DB
-	user_id: str | None = Field(foreign_key="usermodel.user_id")
+	file_id: uuid.UUID = Field(
+		primary_key=True,
+		description="file_id is required since manually added to store both in S3 and in the DB",
+	)
+	user_id: uuid.UUID | None = Field(foreign_key="usermodel.user_id")
 	s3_path: str
 	invoice_number: str
 	client_name: str
