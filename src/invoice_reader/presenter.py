@@ -12,7 +12,7 @@ def submit(
 	user_id: str,
 	file: BinaryIO,
 	filename: str,
-	invoice_schema: InvoiceSchema,
+	invoice_data: InvoiceSchema,
 	session: sqlmodel.Session,
 ):
 	file_data = FileData(user_id=user_id, filename=filename)
@@ -24,7 +24,7 @@ def submit(
 	storage.store(
 		file=file,
 		file_data=file_data,
-		invoice_data=invoice_schema,
+		invoice_data=invoice_data,
 		s3_model=s3_model,
 		invoice_repository=invoice_repository,
 	)

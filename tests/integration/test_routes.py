@@ -18,7 +18,7 @@ from invoice_reader import settings
 
 
 @pytest.fixture(name="session")
-def session_fixture() -> Session: # type: ignore
+def session_fixture() -> Session:  # type: ignore
 	engine = create_engine(
 		"sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool
 	)
@@ -49,8 +49,13 @@ def client_fixture(session: Session):
 
 
 @pytest.fixture
-def files():
-	with open("tests/assets/paper.pdf", "rb") as f:
+def filepath() -> str:
+	return "tests/assets/paper.pdf"
+
+
+@pytest.fixture
+def upload_files(filepath):
+	with open(filepath, "rb") as f:
 		files = {"upload_file": ("filename.pdf", f, "application/pdf")}
 		yield files
 
@@ -100,17 +105,16 @@ def invoice_data():
 
 
 def test_submit_invoice(
-	files,
+	upload_files,
 	client: TestClient,
 	s3_mocker: Mock,
 	invoice_data: InvoiceSchema,
 	session: Session,
 ):
 	data = invoice_data.model_dump_json()
-	response = client.post(url="api/v1/files/submit/", data={"data": data}, files=files)
+	response = client.post(url="api/v1/files/submit/", data={"data": data}, files=upload_files)
 	invoice_data_from_db = session.exec(
-		select(models.InvoiceModel)
-		.where(models.InvoiceModel.user_id == settings._USER_ID)
+		select(models.InvoiceModel).where(models.InvoiceModel.user_id == settings._USER_ID)
 	).one_or_none()
 
 	assert invoice_data_from_db is not None
@@ -127,4 +131,23 @@ def test_submit_invoice(
 	assert invoice_data_from_db.uploaded_date is not None
 
 
-# def test_submit_invoice_with_
+@pytest.fixture
+def wrong_files(request, filepath: str):
+	key, mime_type = request.param
+	with open(filepath, "rb") as f:
+		files = {key: (key, f, mime_type)}
+		yield files
+
+
+@pytest.mark.parametrize(
+	"wrong_files",
+	[
+		("wrong_filename", "application/json"),
+		("upload_file", "image/jpeg"),
+	],
+	indirect=True,
+)
+def test_submit_invoice_with_wrong_format(wrong_files, client: TestClient, s3_mocker: Mock):
+	response = client.post(url="api/v1/files/submit/", files=wrong_files)
+	assert response.status_code == 422
+	s3_mocker.assert_not_called()

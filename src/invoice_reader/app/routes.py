@@ -1,6 +1,7 @@
 from typing import Annotated
 
-from fastapi import FastAPI, UploadFile, File, HTTPException, Depends, Form, status
+from fastapi import FastAPI, UploadFile, File, Depends, Form, status
+from fastapi.exceptions import HTTPException
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel, ValidationError
 import sqlmodel
@@ -23,7 +24,7 @@ app = FastAPI()
 class Checker:
 	"""When POST File & Payload, HTTP sends a Form request.
 	However, HTTP protocole doesn't allow file & body.
-	Therefor, we send data as Form as `{"data": json_dumps(invoice_data)} along the file.
+	Therefore, we send data as Form as `{"data": json_dumps(invoice_data)} along with the file.
 
 	More information here:
 	https://shorturl.at/Beaur
@@ -45,27 +46,27 @@ class Checker:
 
 @app.get("/")
 async def root():
-	return {"message": "Hello World"}
+	return {"message": "Welcome to the Invoice Reader API!"}
 
 
 @app.post("/api/v1/files/submit/")
 def add_invoice(
 	upload_file: Annotated[UploadFile, File()],
-	invoice_schema: Annotated[InvoiceSchema | None, Depends(Checker(InvoiceSchema))],
+	invoice_data: Annotated[InvoiceSchema | None, Depends(Checker(InvoiceSchema))],
 	session: sqlmodel.Session = Depends(db.get_session),
 ):
 	if upload_file.content_type != "application/pdf":
-		raise HTTPException(status_code=400, detail="Only PDF files are allowed.")
+		raise HTTPException(status_code=422, detail="Only PDF files are allowed.")
 	try:
 		# token = auth.get_token()
 		# user_id = presenter.get_user_id(token=token)
 		user_id = settings._USER_ID
-		if invoice_schema:
+		if invoice_data:
 			presenter.submit(
 				user_id=user_id,
 				file=upload_file.file,
 				filename=upload_file.filename,
-				invoice_schema=invoice_schema,
+				invoice_data=invoice_data,
 				session=session,
 			)
 			return {
@@ -75,7 +76,7 @@ def add_invoice(
 		extracted_metadata = presenter.extract(file=upload_file.file)
 		return {
 			"message": "File was successfully parsed and metadata were extracted.",
-			"metadata": extracted_metadata.model_dump_json(indent=2),
+			"invoice_data": extracted_metadata.model_dump_json(indent=2),
 			"status": 200,
 		}
 	except Exception as e:
