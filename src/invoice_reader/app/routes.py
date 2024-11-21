@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import FastAPI, UploadFile, File, Depends, Form, status
+from fastapi import FastAPI, UploadFile, File, Depends, Form, status, Response
 from fastapi.exceptions import HTTPException
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel, ValidationError
@@ -81,7 +81,7 @@ def add_invoice(
 		}
 	except Exception as e:
 		LOGGER.error(e)
-		raise HTTPException(status_code=500, detail=f"File submition failed: {str(e)}")
+		raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.post("/api/v1/users/register/")
@@ -91,6 +91,10 @@ def register(
 ):
 	try:
 		presenter.register_user(user=user, session=session)
+		return Response(
+			content="User has been added to the database.",
+			status_code=200
+		)
 	except Exception as e:
 		LOGGER.error(e)
-		HTTPException(status_code=400, detail=f"User registration failed: {str(e)}",)
+		raise HTTPException(status_code=400, detail=str(e))

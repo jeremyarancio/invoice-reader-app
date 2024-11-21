@@ -9,6 +9,7 @@ from invoice_reader.models import S3
 from invoice_reader.repository import InvoiceRepository, UserRepository
 from invoice_reader.core import users
 
+
 def submit(
 	user_id: uuid.UUID,
 	file: BinaryIO,
@@ -39,7 +40,9 @@ def get_user_id(token: str):
 	raise NotImplementedError
 
 
-def register_user(user: UserSchema, session: sqlmodel.Session):
+def register_user(user: UserSchema, session: sqlmodel.Session) -> None:
 	user_repository = UserRepository(session=session)
+	existing_user = user_repository.get_by_email(email=user.email)
+	if existing_user:
+		raise Exception("User already exists.")
 	users.register(user=user, repository=user_repository)
-	

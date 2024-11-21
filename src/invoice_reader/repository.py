@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from typing import TypeVar
 
 import sqlmodel
+from pydantic import EmailStr
 
 from invoice_reader.schemas import InvoiceSchema, UserSchema
 from invoice_reader.models import InvoiceModel, UserModel
@@ -98,7 +99,7 @@ class UserRepository(Repository):
 		self.session.refresh(user_model)
 		LOGGER.info("Existing user %s udpated: %s", id_, user_model)
 
-	def get(self, id_: str) -> InvoiceSchema:
+	def get(self, id_: str) -> UserSchema:
 		user_model = self.session.exec(sqlmodel.select(UserModel.file_id == id_)).one()
 		invoice = InvoiceSchema.model_validate(user_model)
 		LOGGER.info("Invoice data retrieved from database: %s", invoice)
@@ -110,8 +111,17 @@ class UserRepository(Repository):
 		self.session.commit()
 		LOGGER.info("Invoice %s deleted from database.", id_)
 
-	def get_all(self, limit: int = 10) -> list[InvoiceSchema]:
-		user_models = self.session.exec(sqlmodel.select(UserModel).limit(limit)).all()
-		invoices = [InvoiceSchema(**user_model.model_dump()) for user_model in user_models]
+	def get_all(self, limit: int = 10) -> list[UserSchema]:
+		user_model = self.session.exec(sqlmodel.select(UserModel).limit(limit)).all()
+		invoices = [InvoiceSchema(**user_model.model_dump()) for user_model in user_model]
 		LOGGER("List of invoices returned from database: %s", invoices)
-		return user_models
+		return user_model
+
+	def get_by_email(self, email: EmailStr) -> UserSchema | None:
+		user_model = self.session.exec(
+			sqlmodel.select(UserModel)
+			.where(UserModel.email == email)
+		).one_or_none()
+		if user_model:
+			user_data = UserSchema(**user_model.model_dump())
+			return user_data

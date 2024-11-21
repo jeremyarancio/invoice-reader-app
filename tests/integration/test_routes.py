@@ -28,7 +28,7 @@ def session_fixture() -> Session:  # type: ignore
 		yield session
 
 
-def add_user_to_db(user: UserSchema, user_id: uuid.UUID, session: Session) -> uuid.UUID:
+def add_user_to_db(user: UserSchema, session: Session, user_id: uuid.UUID = settings._USER_ID) -> uuid.UUID:
 	user_model = UserModel(user_id=user_id, **user.model_dump())
 	session.add(user_model)
 	session.commit()
@@ -113,7 +113,6 @@ def test_submit_invoice(
 	response = client.post(url="api/v1/files/submit/", data={"data": data}, files=upload_files)
 	user_id = add_user_to_db(
 		user=UserSchema(email="jeremy@hotmail.com"),
-		user_id=settings._USER_ID,
 		session=session,
 	)
 	invoice_data_from_db = session.exec(
@@ -170,3 +169,12 @@ def test_register_user(client: TestClient, session: Session, user: UserSchema):
 	user_model = session.exec(select(UserModel)).first()
 	assert user_model is not None
 	assert user_model.email == user.email
+
+
+def test_register_existing_user(client: TestClient, session: Session, user: UserSchema):
+	add_user_to_db(user=user, session=session)
+	response = client.post(
+		url="/api/v1/users/register/",
+		json=user.model_dump(),
+	)
+	assert response.status_code == 400
