@@ -6,7 +6,8 @@ from invoice_reader.schemas import InvoiceSchema
 from invoice_reader.models import S3
 from invoice_reader.utils.logger import get_logger
 from invoice_reader.schemas import FileData
-from invoice_reader.repository import InvoiceRepository
+from invoice_reader.repository import Repository
+
 
 LOGGER = get_logger()
 
@@ -15,16 +16,12 @@ def store(
 	file: BinaryIO,
 	file_data: FileData,
 	invoice_data: InvoiceSchema,
-	bucket: str | None,
-	session: sqlmodel.Session,
+	invoice_repository: Repository,
+	s3_model: S3,
 ) -> None:
-	if not bucket:
-		raise ValueError("S3 bucket name was not found as environment variable.")
 	try:
-		s3_model = S3.init(bucket=bucket, file_data=file_data)
-		invoice_repository = InvoiceRepository(session=session)
 		store_invoice_data(
-			file_id=file_data.file_id,
+			file_data=file_data,
 			invoice_repository=invoice_repository,
 			invoice_data=invoice_data,
 			s3_path=s3_model.path,
@@ -41,9 +38,14 @@ def store_file(file: BinaryIO, s3_model: S3) -> None:
 
 
 def store_invoice_data(
-	file_id: uuid.UUID,
+	file_data: FileData,
 	invoice_data: InvoiceSchema,
 	s3_path: str,
-	invoice_repository: InvoiceRepository,
+	invoice_repository: Repository,
 ) -> str:
-	invoice_repository.add(id_=file_id, invoice_data=invoice_data, s3_path=s3_path)
+	invoice_repository.add(
+		id_=file_data.file_id, 
+		user_id=file_data.user_id, 
+		invoice_data=invoice_data, 
+		s3_path=s3_path,
+	)

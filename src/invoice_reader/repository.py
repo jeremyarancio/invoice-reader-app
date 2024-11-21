@@ -40,13 +40,13 @@ class InvoiceRepository(Repository[schemas.InvoiceSchema]):
 	def __init__(self, session: sqlmodel.Session):
 		self.session = session
 
-	def add(self, id_: uuid.UUID, invoice_data: schemas.InvoiceSchema, s3_path: str) -> str:
+	def add(self, id_: uuid.UUID, user_id: uuid.UUID, invoice_data: schemas.InvoiceSchema, s3_path: str) -> str:
 		is_existing_invoice = self.session.exec(
 			sqlmodel.select(models.InvoiceModel)
 			.where(models.InvoiceModel.file_id == id_)
 		).one_or_none()
 		if not is_existing_invoice:
-			invoice_model = models.InvoiceModel(file_id=id_, s3_path=s3_path, **invoice_data.model_dump())
+			invoice_model = models.InvoiceModel(file_id=id_, user_id=user_id, s3_path=s3_path, **invoice_data.model_dump())
 			self.session.add(invoice_model)
 			self.session.commit()
 			self.session.refresh(invoice_model)
