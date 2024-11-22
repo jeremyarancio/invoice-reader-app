@@ -4,7 +4,7 @@ from invoice_reader.schemas import InvoiceSchema
 from invoice_reader.models import S3
 from invoice_reader.utils.logger import get_logger
 from invoice_reader.schemas import FileData
-from invoice_reader.repository import Repository
+from invoice_reader.repository import Repository, InvoiceRepository
 
 
 LOGGER = get_logger()
@@ -17,17 +17,14 @@ def store(
 	invoice_repository: Repository,
 	s3_model: S3,
 ) -> None:
-	try:
-		store_invoice_data(
-			file_data=file_data,
-			invoice_repository=invoice_repository,
-			invoice_data=invoice_data,
-			s3_path=s3_model.path,
-		)
-		store_file(file=file, s3_model=s3_model)
-	except Exception as e:
-		LOGGER.error(e)
-		# TODO: Rollback
+	store_invoice_data(
+		file_data=file_data,
+		invoice_repository=invoice_repository,
+		invoice_data=invoice_data,
+		s3_path=s3_model.path,
+	)
+	store_file(file=file, s3_model=s3_model)
+	# TODO: Rollback
 
 
 def store_file(file: BinaryIO, s3_model: S3) -> None:
@@ -39,7 +36,7 @@ def store_invoice_data(
 	file_data: FileData,
 	invoice_data: InvoiceSchema,
 	s3_path: str,
-	invoice_repository: Repository,
+	invoice_repository: InvoiceRepository,
 ) -> str:
 	invoice_repository.add(
 		id_=file_data.file_id, 

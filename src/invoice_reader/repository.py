@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 from typing import TypeVar
 
 import sqlmodel
-from pydantic import EmailStr
 
 from invoice_reader.schemas import InvoiceSchema, UserSchema
 from invoice_reader.models import InvoiceModel, UserModel
@@ -41,6 +40,12 @@ class InvoiceRepository(Repository[InvoiceSchema]):
 		self.session = session
 
 	def add(self, id_: str, user_id: str, invoice_data: InvoiceSchema, s3_path: str) -> str:
+		existing_invoice = self.session.exec(
+			sqlmodel.select(InvoiceModel)
+			.where(InvoiceModel.invoice_number == invoice_data.invoice_number)
+		).first()
+		if existing_invoice:
+			raise Exception("Existing invoice in the database. Process aborted.")
 		invoice_model = InvoiceModel(
 			file_id=id_, user_id=user_id, s3_path=s3_path, **invoice_data.model_dump()
 		)
@@ -59,8 +64,10 @@ class InvoiceRepository(Repository[InvoiceSchema]):
 		self.session.refresh(invoice_model)
 		LOGGER.info("Existing invoice %s data updated with new data: %s", id_, invoice_data)
 
-	def get(self, id_: str) -> InvoiceSchema:
-		invoice_model = self.session.exec(sqlmodel.select(InvoiceModel.file_id == id_)).one()
+	def get(self, id_: str) -> InvoiceSchema | None:
+		invoice_model = self.session.exec(
+			sqlmodel.select(InvoiceModel.file_id == id_)
+		).one_or_none()
 		invoice = InvoiceSchema.model_validate(invoice_model)
 		LOGGER.info("Invoice data retrieved from database: %s", invoice)
 		return invoice
@@ -77,6 +84,16 @@ class InvoiceRepository(Repository[InvoiceSchema]):
 		LOGGER("List of invoices returned from database: %s", invoices)
 		return invoice_models
 
+	def get_by_invoice_number(self, invoice_number: str) -> InvoiceModel | None:
+		invoice_model = self.session.exec(
+			sqlmodel.select(InvoiceModel)
+			.where(InvoiceModel.invoice_number == invoice_number)
+		).one_or_none()
+		if invoice_model:
+			invoice = InvoiceSchema.model_validate(invoice_model)
+			LOGGER.info("Invoice data retrieved from database: %s", invoice)
+			return invoice
+
 
 class UserRepository(Repository):
 	def __init__(self, session: sqlmodel.Session):
@@ -84,6 +101,12 @@ class UserRepository(Repository):
 
 	def add(self, user_data: UserSchema):
 		user_model = UserModel(**user_data.model_dump())
+		existing_user = self.session.exec(
+			sqlmodel.select(UserModel)
+			.where(UserModel.email == user_data.email)
+		).first()
+		if existing_user:
+			raise Exception("Existing user in the database. Insertion aborted.")
 		self.session.add(user_model)
 		self.session.commit()
 		self.session.refresh(user_model)
@@ -116,12 +139,3 @@ class UserRepository(Repository):
 		invoices = [InvoiceSchema(**user_model.model_dump()) for user_model in user_model]
 		LOGGER("List of invoices returned from database: %s", invoices)
 		return user_model
-
-	def get_by_email(self, email: EmailStr) -> UserSchema | None:
-		user_model = self.session.exec(
-			sqlmodel.select(UserModel)
-			.where(UserModel.email == email)
-		).one_or_none()
-		if user_model:
-			user_data = UserSchema(**user_model.model_dump())
-			return user_data

@@ -28,11 +28,14 @@ def session_fixture() -> Session:  # type: ignore
 		yield session
 
 
-def add_user_to_db(user: UserSchema, session: Session, user_id: uuid.UUID = settings._USER_ID) -> uuid.UUID:
+def add_user_to_db(user: UserSchema, session: Session, user_id: uuid.UUID | None = None) -> None:
+	"""
+	Args:
+		user_id (uuid.UUID | None): Some tests require a specific user_id. Deprecated.
+	"""
 	user_model = UserModel(user_id=user_id, **user.model_dump())
 	session.add(user_model)
 	session.commit()
-	return user_model.user_id
 
 
 @pytest.fixture(name="client")
@@ -108,15 +111,13 @@ def test_submit_invoice(
 	s3_mocker: Mock,
 	invoice_data: InvoiceSchema,
 	session: Session,
+	user: UserSchema,
 ):
 	data = invoice_data.model_dump_json()
 	response = client.post(url="api/v1/files/submit/", data={"data": data}, files=upload_files)
-	user_id = add_user_to_db(
-		user=UserSchema(email="jeremy@hotmail.com"),
-		session=session,
-	)
+	add_user_to_db(user=user, user_id=settings._USER_ID, session=session)
 	invoice_data_from_db = session.exec(
-		select(models.InvoiceModel).where(models.InvoiceModel.user_id == user_id)
+		select(models.InvoiceModel).where(models.InvoiceModel.user_id == settings._USER_ID)
 	).one_or_none()
 
 	assert invoice_data_from_db is not None
