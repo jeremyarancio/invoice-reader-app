@@ -3,16 +3,18 @@ from typing import Annotated
 from fastapi import FastAPI, UploadFile, File, Depends, Form, status, Response
 from fastapi.exceptions import HTTPException
 from fastapi.encoders import jsonable_encoder
+from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel, ValidationError
 import sqlmodel
 
 from invoice_reader import presenter
 
 # from invoice_reader.app import auth
-from invoice_reader.schemas import InvoiceSchema, UserSchema
+from invoice_reader.schemas import InvoiceSchema, UserSchema, TokenSchema
 from invoice_reader import db
 from invoice_reader.utils import logger
 from invoice_reader import settings
+from invoice_reader.app import auth
 
 
 LOGGER = logger.get_logger(__name__)
@@ -49,18 +51,17 @@ async def root():
 	return {"message": "Welcome to the Invoice Reader API!"}
 
 
-@app.post("/api/v1/files/submit/")
+@app.post("/api/v1/files/submit")
 def add_invoice(
 	upload_file: Annotated[UploadFile, File()],
 	invoice_data: Annotated[InvoiceSchema | None, Depends(Checker(InvoiceSchema))],
-	session: sqlmodel.Session = Depends(db.get_session),
+	session: Annotated[sqlmodel.Session, Depends(db.get_session)],
+	user: Annotated[UserSchema, Depends(auth.get_user)],
 ):
 	if upload_file.content_type != "application/pdf":
-		raise HTTPException(status_code=422, detail="Only PDF files are allowed.")
+		raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Only PDF files are allowed.")
 	try:
-		# token = auth.get_token()
-		# user_id = presenter.get_user_id(token=token)
-		user_id = settings._USER_ID
+		user_id = settings._USER_ID #NOTE: Temporary
 		if invoice_data:
 			presenter.submit(
 				user_id=user_id,
@@ -84,7 +85,7 @@ def add_invoice(
 		raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.post("/api/v1/users/register/")
+@app.post("/api/v1/users/register")
 def register(
 	user: UserSchema,
 	session: sqlmodel.Session = Depends(db.get_session)
@@ -98,3 +99,20 @@ def register(
 	except Exception as e:
 		LOGGER.error(e)
 		raise HTTPException(status_code=400, detail=str(e))
+	
+
+@app.post("/api/v1/users/login/")
+def login(
+	form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+	session:Annotated[sqlmodel.Session, Depends(db.get_session)]
+) -> TokenSchema:
+	try: 
+		user = auth.authenticate_user(username=form_data.username, password=form_data.password, session=session)
+		access_token = auth.create_access_token(username=user.username)
+	except Exception:
+		raise HTTPException(
+			status_code=status.HTTP_401_UNAUTHORIZED,
+			detail="Invalid authentication credentials",
+			headers={"WWW-Authenticate": "Bearer"},
+		)
+	return TokenSchema(access_token=access_token, token_type="bearer")

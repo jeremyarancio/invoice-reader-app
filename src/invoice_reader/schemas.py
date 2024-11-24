@@ -6,8 +6,16 @@ import uuid
 from pydantic import BaseModel, Field, EmailStr
 
 
+class TokenSchema(BaseModel):
+    access_token: str
+    token_type: str
+
+
 class UserSchema(BaseModel):
+	username: str | None = None
 	email: EmailStr
+	is_disabled: bool | None = None
+	hashed_password: str | None = None
 
 
 class InvoiceSchema(BaseModel):

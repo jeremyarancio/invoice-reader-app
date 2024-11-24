@@ -7,7 +7,6 @@ from invoice_reader import settings
 from invoice_reader.schemas import InvoiceSchema, UserSchema, FileData
 from invoice_reader.models import S3
 from invoice_reader.repository import InvoiceRepository, UserRepository
-from invoice_reader.core import users
 
 
 def submit(
@@ -36,10 +35,16 @@ def extract(file: BinaryIO) -> InvoiceSchema:
 	raise NotImplementedError
 
 
-def get_user_id(token: str):
+def get_user(token: str):
 	raise NotImplementedError
 
 
 def register_user(user: UserSchema, session: sqlmodel.Session) -> None:
 	user_repository = UserRepository(session=session)
-	users.register(user=user, repository=user_repository)
+	user_repository.add(user)
+
+
+def get_user_for_authentification(username: str, session: sqlmodel.Session) -> UserSchema:
+	user_repository = UserRepository(session=session)
+	user = user_repository.get_by_username(username)
+	return user

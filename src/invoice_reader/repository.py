@@ -124,9 +124,9 @@ class UserRepository(Repository):
 
 	def get(self, id_: str) -> UserSchema:
 		user_model = self.session.exec(sqlmodel.select(UserModel.file_id == id_)).one()
-		invoice = InvoiceSchema.model_validate(user_model)
-		LOGGER.info("Invoice data retrieved from database: %s", invoice)
-		return invoice
+		user_data = UserSchema.model_validate(user_model)
+		LOGGER.info("User data retrieved from database: %s", user_data)
+		return user_data
 
 	def delete(self, id_: str) -> None:
 		user_model = self.session.exec(sqlmodel.select(UserModel.file_id == id_)).one()
@@ -136,6 +136,13 @@ class UserRepository(Repository):
 
 	def get_all(self, limit: int = 10) -> list[UserSchema]:
 		user_model = self.session.exec(sqlmodel.select(UserModel).limit(limit)).all()
-		invoices = [InvoiceSchema(**user_model.model_dump()) for user_model in user_model]
-		LOGGER("List of invoices returned from database: %s", invoices)
-		return user_model
+		users = [UserSchema(**user_model.model_dump()) for user_model in user_model]
+		LOGGER("List of users returned from database: %s", users)
+		return users
+
+
+	def get_by_username(self, username: str) -> UserSchema:
+		user_model = self.session.exec(sqlmodel.select(UserModel).where(UserModel.username == username)).one()
+		user = UserSchema.model_validate(user_model)
+		LOGGER.info("User data retrieved from database: %s", user)
+		return user

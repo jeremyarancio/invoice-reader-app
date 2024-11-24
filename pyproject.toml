@@ -7,7 +7,9 @@ requires-python = ">=3.12"
 dependencies = [
     "boto3>=1.35.56",
     "fastapi[standard]>=0.115.4",
+    "passlib[bcrypt]>=1.7.4",
     "pydantic>=2.9.2",
+    "pyjwt>=2.10.0",
     "python-multipart>=0.0.17",
     "sqlmodel>=0.0.22",
 ]
@@ -31,3 +33,6 @@ line-length = 100
 indent-style = "tab"
 docstring-code-format = true
 docstring-code-line-length = 20
+
+[tool.ruff.lint]
+extend-select = ["E501"]

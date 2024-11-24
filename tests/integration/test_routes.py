@@ -114,7 +114,7 @@ def test_submit_invoice(
 	user: UserSchema,
 ):
 	data = invoice_data.model_dump_json()
-	response = client.post(url="api/v1/files/submit/", data={"data": data}, files=upload_files)
+	response = client.post(url="/api/v1/files/submit", data={"data": data}, files=upload_files)
 	add_user_to_db(user=user, user_id=settings._USER_ID, session=session)
 	invoice_data_from_db = session.exec(
 		select(models.InvoiceModel).where(models.InvoiceModel.user_id == settings._USER_ID)
@@ -151,7 +151,7 @@ def wrong_files(request, filepath: str):
 	indirect=True,
 )
 def test_submit_invoice_with_wrong_format(wrong_files, client: TestClient, s3_mocker: Mock):
-	response = client.post(url="api/v1/files/submit/", files=wrong_files)
+	response = client.post(url="/api/v1/files/submit", files=wrong_files)
 	assert response.status_code == 422
 	s3_mocker.assert_not_called()
 
@@ -163,7 +163,7 @@ def user() -> UserSchema:
 
 def test_register_user(client: TestClient, session: Session, user: UserSchema):
 	response = client.post(
-		url="/api/v1/users/register/",
+		url="/api/v1/users/register",
 		json=user.model_dump(),
 	)
 	assert response.status_code == 200
@@ -175,7 +175,7 @@ def test_register_user(client: TestClient, session: Session, user: UserSchema):
 def test_register_existing_user(client: TestClient, session: Session, user: UserSchema):
 	add_user_to_db(user=user, session=session)
 	response = client.post(
-		url="/api/v1/users/register/",
+		url="/api/v1/users/register",
 		json=user.model_dump(),
 	)
 	assert response.status_code == 400

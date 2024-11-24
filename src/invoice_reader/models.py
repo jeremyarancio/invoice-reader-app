@@ -41,8 +41,10 @@ class S3:
 
 class UserModel(SQLModel, table=True):
 	user_id: uuid.UUID | None = Field(default_factory=uuid.uuid4, primary_key=True)
-	token: uuid.UUID | None = Field(default_factory=uuid.uuid4)
-	email: EmailStr
+	username: str
+	email: EmailStr 
+	is_disabled: bool = Field(default=False)
+	hashed_password: str
 
 
 class InvoiceModel(SQLModel, table=True):
