@@ -9,8 +9,7 @@ import sqlmodel
 
 from invoice_reader import presenter
 
-# from invoice_reader.app import auth
-from invoice_reader.schemas import InvoiceSchema, UserSchema, TokenSchema
+from invoice_reader.schemas import InvoiceSchema, UserSchema, UserCreateSchema, TokenSchema
 from invoice_reader import db
 from invoice_reader.utils import logger
 from invoice_reader import settings
@@ -56,15 +55,16 @@ def add_invoice(
 	upload_file: Annotated[UploadFile, File()],
 	invoice_data: Annotated[InvoiceSchema | None, Depends(Checker(InvoiceSchema))],
 	session: Annotated[sqlmodel.Session, Depends(db.get_session)],
-	user: Annotated[UserSchema, Depends(auth.get_user)],
+	user: Annotated[UserSchema, Depends(auth.get_current_user)],
 ):
 	if upload_file.content_type != "application/pdf":
-		raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Only PDF files are allowed.")
+		raise HTTPException(
+			status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Only PDF files are allowed."
+		)
 	try:
-		user_id = settings._USER_ID #NOTE: Temporary
 		if invoice_data:
 			presenter.submit(
-				user_id=user_id,
+				user_id=user.user_id,
 				file=upload_file.file,
 				filename=upload_file.filename,
 				invoice_data=invoice_data,
@@ -85,31 +85,27 @@ def add_invoice(
 		raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.post("/api/v1/users/register")
+@app.post("/api/v1/users/register/")
 def register(
-	user: UserSchema,
+	user: UserCreateSchema,
 	session: sqlmodel.Session = Depends(db.get_session)
 ):
-	try:
-		presenter.register_user(user=user, session=session)
-		return Response(
-			content="User has been added to the database.",
-			status_code=200
-		)
-	except Exception as e:
-		LOGGER.error(e)
-		raise HTTPException(status_code=400, detail=str(e))
-	
+	auth.register_user(user=user, session=session)
+	return Response(content="User has been added to the database.", status_code=200)
+
 
 @app.post("/api/v1/users/login/")
 def login(
 	form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
-	session:Annotated[sqlmodel.Session, Depends(db.get_session)]
-) -> TokenSchema:
-	try: 
-		user = auth.authenticate_user(username=form_data.username, password=form_data.password, session=session)
+	session: Annotated[sqlmodel.Session, Depends(db.get_session)],
+	) -> TokenSchema:
+	try:
+		user = auth.authenticate_user(
+			username=form_data.username, password=form_data.password, session=session
+		)
 		access_token = auth.create_access_token(username=user.username)
-	except Exception:
+	except Exception as e:
+		LOGGER.error(e)
 		raise HTTPException(
 			status_code=status.HTTP_401_UNAUTHORIZED,
 			detail="Invalid authentication credentials",

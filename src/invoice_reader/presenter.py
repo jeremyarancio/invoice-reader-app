@@ -44,7 +44,18 @@ def register_user(user: UserSchema, session: sqlmodel.Session) -> None:
 	user_repository.add(user)
 
 
-def get_user_for_authentification(username: str, session: sqlmodel.Session) -> UserSchema:
+def get_user_by_username(username: str, session: sqlmodel.Session) -> UserSchema:
 	user_repository = UserRepository(session=session)
 	user = user_repository.get_by_username(username)
 	return user
+
+
+def get_user_by_email(email: str, session: sqlmodel.Session) -> UserSchema | None:
+	user_repository = UserRepository(session=session)
+	user = user_repository.get_user_by_email(email=email)
+	return user
+
+
+def add_user(user: UserSchema, session: sqlmodel.Session) -> None:
+	user_repository = UserRepository(session=session)
+	user = user_repository.add(user=user)

@@ -68,7 +68,7 @@ class InvoiceRepository(Repository[InvoiceSchema]):
 		invoice_model = self.session.exec(
 			sqlmodel.select(InvoiceModel.file_id == id_)
 		).one_or_none()
-		invoice = InvoiceSchema.model_validate(invoice_model)
+		invoice = InvoiceSchema.model_validate(invoice_model.model_dump())
 		LOGGER.info("Invoice data retrieved from database: %s", invoice)
 		return invoice
 
@@ -90,7 +90,7 @@ class InvoiceRepository(Repository[InvoiceSchema]):
 			.where(InvoiceModel.invoice_number == invoice_number)
 		).one_or_none()
 		if invoice_model:
-			invoice = InvoiceSchema.model_validate(invoice_model)
+			invoice = InvoiceSchema.model_validate(invoice_model.model_dump())
 			LOGGER.info("Invoice data retrieved from database: %s", invoice)
 			return invoice
 
@@ -99,14 +99,8 @@ class UserRepository(Repository):
 	def __init__(self, session: sqlmodel.Session):
 		self.session = session
 
-	def add(self, user_data: UserSchema):
-		user_model = UserModel(**user_data.model_dump())
-		existing_user = self.session.exec(
-			sqlmodel.select(UserModel)
-			.where(UserModel.email == user_data.email)
-		).first()
-		if existing_user:
-			raise Exception("Existing user in the database. Insertion aborted.")
+	def add(self, user: UserSchema):
+		user_model = UserModel(**user.model_dump())
 		self.session.add(user_model)
 		self.session.commit()
 		self.session.refresh(user_model)
@@ -124,7 +118,7 @@ class UserRepository(Repository):
 
 	def get(self, id_: str) -> UserSchema:
 		user_model = self.session.exec(sqlmodel.select(UserModel.file_id == id_)).one()
-		user_data = UserSchema.model_validate(user_model)
+		user_data = UserSchema.model_validate(user_model.model_dump())
 		LOGGER.info("User data retrieved from database: %s", user_data)
 		return user_data
 
@@ -141,8 +135,23 @@ class UserRepository(Repository):
 		return users
 
 
-	def get_by_username(self, username: str) -> UserSchema:
-		user_model = self.session.exec(sqlmodel.select(UserModel).where(UserModel.username == username)).one()
-		user = UserSchema.model_validate(user_model)
-		LOGGER.info("User data retrieved from database: %s", user)
-		return user
+	def get_by_username(self, username: str) -> UserSchema | None:
+		user_model = self.session.exec(
+			sqlmodel.select(UserModel)
+			.where(UserModel.username == username)
+		).one_or_none()
+		if user_model:
+			user = UserSchema.model_validate(user_model.model_dump())
+			LOGGER.info("User data retrieved from database: %s", user)
+			return user
+	
+
+	def get_user_by_email(self, email: str) -> UserSchema | None:
+		user_model = self.session.exec(
+			sqlmodel.select(UserModel)
+			.where(UserModel.email == email)
+		).one_or_none()
+		if user_model:
+			user = UserSchema.model_validate(user_model.model_dump())
+			LOGGER.info("User data retrieved from database: %s", user)
+			return user

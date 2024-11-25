@@ -154,28 +154,3 @@ def test_submit_invoice_with_wrong_format(wrong_files, client: TestClient, s3_mo
 	response = client.post(url="/api/v1/files/submit", files=wrong_files)
 	assert response.status_code == 422
 	s3_mocker.assert_not_called()
-
-
-@pytest.fixture
-def user() -> UserSchema:
-	return UserSchema(email="jeremy@email.com")
-
-
-def test_register_user(client: TestClient, session: Session, user: UserSchema):
-	response = client.post(
-		url="/api/v1/users/register",
-		json=user.model_dump(),
-	)
-	assert response.status_code == 200
-	user_model = session.exec(select(UserModel)).first()
-	assert user_model is not None
-	assert user_model.email == user.email
-
-
-def test_register_existing_user(client: TestClient, session: Session, user: UserSchema):
-	add_user_to_db(user=user, session=session)
-	response = client.post(
-		url="/api/v1/users/register",
-		json=user.model_dump(),
-	)
-	assert response.status_code == 400

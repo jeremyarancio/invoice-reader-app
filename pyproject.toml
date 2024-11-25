@@ -30,7 +30,7 @@ build-backend = "hatchling.build"
 line-length = 100
 
 [tool.ruff.format]
-indent-style = "tab"
+indent-style = "spaces"
 docstring-code-format = true
 docstring-code-line-length = 20
 

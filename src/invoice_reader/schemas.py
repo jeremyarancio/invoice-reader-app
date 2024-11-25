@@ -11,13 +11,24 @@ class TokenSchema(BaseModel):
     token_type: str
 
 
+class TokenDataSchema(BaseModel):
+	username: str
+	
+
 class UserSchema(BaseModel):
-	username: str | None = None
+	user_id: uuid.UUID | None = None
+	username: str
 	email: EmailStr
 	is_disabled: bool | None = None
-	hashed_password: str | None = None
+	hashed_password: str
 
 
+class UserCreateSchema(BaseModel):
+	username: str = Field(..., min_length=3, max_length=30, pattern="^[a-zA-Z0-9_]+$")
+	password: str = Field(..., min_length=8, description="Password must be at least 8 characters")
+	email: EmailStr
+
+	
 class InvoiceSchema(BaseModel):
 	client_name: str
 	amount_excluding_tax: float
