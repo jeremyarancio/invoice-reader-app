@@ -1,12 +1,13 @@
-from typing import BinaryIO
-import sqlmodel
 import uuid
+from typing import BinaryIO
 
-from invoice_reader.core import storage
+import sqlmodel
+
 from invoice_reader import settings
-from invoice_reader.schemas import InvoiceSchema, UserSchema, FileData
+from invoice_reader.core import storage
 from invoice_reader.models import S3
 from invoice_reader.repository import InvoiceRepository, UserRepository
+from invoice_reader.schemas import FileData, InvoiceSchema, UserSchema
 
 
 def submit(

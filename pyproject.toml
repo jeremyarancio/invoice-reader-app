@@ -30,9 +30,31 @@ build-backend = "hatchling.build"
 line-length = 100
 
 [tool.ruff.format]
-indent-style = "spaces"
+indent-style = "space"
 docstring-code-format = true
 docstring-code-line-length = 20
 
 [tool.ruff.lint]
 extend-select = ["E501"]
+select = [
+    # pycodestyle
+    "E",
+    # Pyflakes
+    "F",
+    # pyupgrade
+    "UP",
+    # flake8-bugbear
+    "B",
+    # flake8-simplify
+    "SIM",
+    # isort
+    "I",
+]
+
+[tool.pylint.master]
+disable = ["all"]
+enable = [
+    "missing-kwo-arg", 
+    "unexpected-keyword-arg", 
+    "no-value-for-parameter",
+]

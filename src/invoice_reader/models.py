@@ -1,7 +1,7 @@
 import datetime
+import uuid
 from dataclasses import dataclass
 from typing import BinaryIO
-import uuid
 
 import boto3
 from botocore.exceptions import ClientError

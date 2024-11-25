@@ -1,14 +1,14 @@
-import pytest
 import uuid
 
-from sqlmodel import SQLModel, create_engine, Session, StaticPool, select
+import pytest
 from fastapi.testclient import TestClient
+from sqlmodel import Session, SQLModel, StaticPool, create_engine, select
 
-from invoice_reader.schemas import UserSchema, UserCreateSchema
-from invoice_reader.models import UserModel
-from invoice_reader.app.routes import app
 from invoice_reader import db
 from invoice_reader.app import auth
+from invoice_reader.app.routes import app
+from invoice_reader.models import UserModel
+from invoice_reader.schemas import UserCreateSchema, UserSchema
 
 
 @pytest.fixture(name="session")

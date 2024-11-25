@@ -1,11 +1,9 @@
 from typing import BinaryIO
 
-from invoice_reader.schemas import InvoiceSchema
 from invoice_reader.models import S3
+from invoice_reader.repository import InvoiceRepository, Repository
+from invoice_reader.schemas import FileData, InvoiceSchema
 from invoice_reader.utils.logger import get_logger
-from invoice_reader.schemas import FileData
-from invoice_reader.repository import Repository, InvoiceRepository
-
 
 LOGGER = get_logger()
 

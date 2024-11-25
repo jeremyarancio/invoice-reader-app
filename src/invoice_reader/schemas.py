@@ -1,9 +1,9 @@
 import os
-from typing import Annotated
-from datetime import date
 import uuid
+from datetime import date
+from typing import Annotated
 
-from pydantic import BaseModel, Field, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 
 
 class TokenSchema(BaseModel):

@@ -1,14 +1,13 @@
 from io import BytesIO
-from unittest.mock import Mock
 from typing import BinaryIO
+from unittest.mock import Mock
 
 import pytest
 
-from invoice_reader.core import storage
 from invoice_reader import settings
+from invoice_reader.core import storage
 from invoice_reader.models import S3
 from invoice_reader.schemas import FileData
-
 
 FILEPATH = settings.REPO_DIR / "tests/units/assets/paper.pdf"
 

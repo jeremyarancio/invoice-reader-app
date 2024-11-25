@@ -1,21 +1,23 @@
-from unittest.mock import Mock
 import datetime
 import uuid
+from unittest.mock import Mock
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlmodel import Session, SQLModel, create_engine, StaticPool, select
+from sqlmodel import Session, SQLModel, StaticPool, create_engine, select
 
+from invoice_reader import (
+	db,
+	models,  # noqa: F401
+	settings,
+)
 from invoice_reader.app.routes import app
-from invoice_reader import db
-from invoice_reader import models  # noqa: F401
+from invoice_reader.models import UserModel
 from invoice_reader.schemas import (
-	InvoiceSchema,
 	FileData,
+	InvoiceSchema,
 	UserSchema,
 )
-from invoice_reader.models import UserModel
-from invoice_reader import settings
 
 
 @pytest.fixture(name="session")

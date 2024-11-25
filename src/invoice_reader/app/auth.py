@@ -1,18 +1,15 @@
-from typing import Annotated
 from datetime import datetime, timedelta
+from typing import Annotated
 
 import jwt
-from jwt.exceptions import InvalidTokenError
-from fastapi import Depends, HTTPException, status  
-from fastapi.security import OAuth2PasswordBearer
-from passlib.context import CryptContext
 import sqlmodel
+from fastapi import Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
+from jwt.exceptions import InvalidTokenError
+from passlib.context import CryptContext
 
-from invoice_reader.schemas import UserSchema, UserCreateSchema, TokenDataSchema
-from invoice_reader import presenter
-from invoice_reader import settings
-from invoice_reader import db
-
+from invoice_reader import db, presenter, settings
+from invoice_reader.schemas import TokenDataSchema, UserCreateSchema, UserSchema
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")

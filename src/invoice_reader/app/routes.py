@@ -1,20 +1,16 @@
 from typing import Annotated
 
-from fastapi import FastAPI, UploadFile, File, Depends, Form, status, Response
-from fastapi.exceptions import HTTPException
+import sqlmodel
+from fastapi import Depends, FastAPI, File, Form, Response, UploadFile, status
 from fastapi.encoders import jsonable_encoder
+from fastapi.exceptions import HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel, ValidationError
-import sqlmodel
 
-from invoice_reader import presenter
-
-from invoice_reader.schemas import InvoiceSchema, UserSchema, UserCreateSchema, TokenSchema
-from invoice_reader import db
-from invoice_reader.utils import logger
-from invoice_reader import settings
+from invoice_reader import db, presenter
 from invoice_reader.app import auth
-
+from invoice_reader.schemas import InvoiceSchema, TokenSchema, UserCreateSchema, UserSchema
+from invoice_reader.utils import logger
 
 LOGGER = logger.get_logger(__name__)
 
