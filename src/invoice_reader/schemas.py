@@ -6,16 +6,16 @@ from typing import Annotated
 from pydantic import BaseModel, EmailStr, Field
 
 
-class TokenSchema(BaseModel):
+class Token(BaseModel):
     access_token: str
     token_type: str
 
 
-class TokenDataSchema(BaseModel):
+class TokenData(BaseModel):
     username: str
-    
 
-class UserSchema(BaseModel):
+
+class User(BaseModel):
     user_id: uuid.UUID | None = None
     username: str
     email: EmailStr
@@ -23,13 +23,15 @@ class UserSchema(BaseModel):
     hashed_password: str
 
 
-class UserCreateSchema(BaseModel):
+class UserCreate(BaseModel):
     username: str = Field(..., min_length=3, max_length=30, pattern="^[a-zA-Z0-9_]+$")
-    password: str = Field(..., min_length=8, description="Password must be at least 8 characters")
+    password: str = Field(
+        ..., min_length=8, description="Password must be at least 8 characters"
+    )
     email: EmailStr
 
-    
-class InvoiceSchema(BaseModel):
+
+class InvoiceData(BaseModel):
     client_name: str
     amount_excluding_tax: float
     vat: Annotated[float, "In percentage: 20, 21, ..."]
@@ -43,9 +45,7 @@ class InvoiceSchema(BaseModel):
     country: str
 
     def is_complete(self) -> bool:
-        if all(self.model_dump().values()):
-            return True
-        return False
+        return bool(all(self.model_dump().values()))
 
 
 class FileData(BaseModel):

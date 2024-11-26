@@ -10,10 +10,10 @@ from pydantic import BaseModel, ValidationError
 from invoice_reader import db, presenter
 from invoice_reader.app import auth
 from invoice_reader.schemas import (
-    InvoiceSchema,
-    TokenSchema,
-    UserCreateSchema,
-    UserSchema,
+    InvoiceData,
+    Token,
+    UserCreate,
+    User,
 )
 from invoice_reader.utils import logger
 
@@ -54,9 +54,9 @@ async def root():
 @app.post("/api/v1/files/submit")
 def submit(
     upload_file: Annotated[UploadFile, File()],
-    invoice_data: Annotated[InvoiceSchema | None, Depends(Checker(InvoiceSchema))],
+    invoice_data: Annotated[InvoiceData | None, Depends(Checker(InvoiceData))],
     session: Annotated[sqlmodel.Session, Depends(db.get_session)],
-    user: Annotated[UserSchema, Depends(auth.get_current_user)],
+    user: Annotated[User, Depends(auth.get_current_user)],
 ):
     if upload_file.content_type != "application/pdf":
         raise HTTPException(
@@ -88,7 +88,7 @@ def submit(
 
 @app.post("/api/v1/users/register/")
 def register(
-    user: UserCreateSchema,
+    user: UserCreate,
     session: sqlmodel.Session = Depends(db.get_session)
 ):
     auth.register_user(user=user, session=session)
@@ -99,7 +99,7 @@ def register(
 def login(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     session: Annotated[sqlmodel.Session, Depends(db.get_session)],
-    ) -> TokenSchema:
+    ) -> Token:
     try:
         user = auth.authenticate_user(
             username=form_data.username, password=form_data.password, session=session
@@ -112,4 +112,4 @@ def login(
             detail="Invalid authentication credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    return TokenSchema(access_token=access_token, token_type="bearer")
+    return Token(access_token=access_token, token_type="bearer")

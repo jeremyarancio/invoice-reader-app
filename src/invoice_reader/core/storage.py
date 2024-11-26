@@ -2,7 +2,7 @@ from typing import BinaryIO
 
 from invoice_reader.models import S3
 from invoice_reader.repository import InvoiceRepository, Repository
-from invoice_reader.schemas import FileData, InvoiceSchema
+from invoice_reader.schemas import FileData, InvoiceData
 from invoice_reader.utils.logger import get_logger
 
 LOGGER = get_logger()
@@ -11,7 +11,7 @@ LOGGER = get_logger()
 def store(
     file: BinaryIO,
     file_data: FileData,
-    invoice_data: InvoiceSchema,
+    invoice_data: InvoiceData,
     invoice_repository: Repository,
     s3_model: S3,
 ) -> None:
@@ -32,7 +32,7 @@ def store_file(file: BinaryIO, s3_model: S3) -> None:
 
 def store_invoice_data(
     file_data: FileData,
-    invoice_data: InvoiceSchema,
+    invoice_data: InvoiceData,
     s3_path: str,
     invoice_repository: InvoiceRepository,
 ) -> str:

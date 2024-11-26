@@ -4,7 +4,7 @@ from typing import TypeVar
 import sqlmodel
 
 from invoice_reader.models import InvoiceModel, UserModel
-from invoice_reader.schemas import InvoiceSchema, UserSchema
+from invoice_reader.schemas import InvoiceData, User
 from invoice_reader.utils.logger import get_logger
 
 LOGGER = get_logger(__name__)
@@ -34,11 +34,11 @@ class Repository[T](ABC):
         raise NotImplementedError
 
 
-class InvoiceRepository(Repository[InvoiceSchema]):
+class InvoiceRepository(Repository[InvoiceData]):
     def __init__(self, session: sqlmodel.Session):
         self.session = session
 
-    def add(self, id_: str, user_id: str, invoice_data: InvoiceSchema, s3_path: str) -> str:
+    def add(self, id_: str, user_id: str, invoice_data: InvoiceData, s3_path: str) -> str:
         existing_invoice = self.session.exec(
             sqlmodel.select(InvoiceModel)
             .where(InvoiceModel.invoice_number == invoice_data.invoice_number)
@@ -53,7 +53,7 @@ class InvoiceRepository(Repository[InvoiceSchema]):
         self.session.refresh(invoice_model)
         LOGGER.info("Invoice %s added to database. Metadata: %s", id_, invoice_model)
 
-    def update(self, id_: str, invoice_data: InvoiceSchema) -> None:
+    def update(self, id_: str, invoice_data: InvoiceData) -> None:
         invoice_model = self.session.exec(
             sqlmodel.select(InvoiceModel).where(InvoiceModel.file_id == id_)
         ).one()
@@ -63,11 +63,11 @@ class InvoiceRepository(Repository[InvoiceSchema]):
         self.session.refresh(invoice_model)
         LOGGER.info("Existing invoice %s data updated with new data: %s", id_, invoice_data)
 
-    def get(self, id_: str) -> InvoiceSchema | None:
+    def get(self, id_: str) -> InvoiceData | None:
         invoice_model = self.session.exec(
             sqlmodel.select(InvoiceModel.file_id == id_)
         ).one_or_none()
-        invoice = InvoiceSchema.model_validate(invoice_model.model_dump())
+        invoice = InvoiceData.model_validate(invoice_model.model_dump())
         LOGGER.info("Invoice data retrieved from database: %s", invoice)
         return invoice
 
@@ -77,9 +77,9 @@ class InvoiceRepository(Repository[InvoiceSchema]):
         self.session.commit()
         LOGGER.info("Invoice %s deleted from database.", id_)
 
-    def get_all(self, limit: int = 10) -> list[InvoiceSchema]:
+    def get_all(self, limit: int = 10) -> list[InvoiceData]:
         invoice_models = self.session.exec(sqlmodel.select(InvoiceModel).limit(limit)).all()
-        invoices = [InvoiceSchema(**invoice_model.model_dump()) for invoice_model in invoice_models]
+        invoices = [InvoiceData(**invoice_model.model_dump()) for invoice_model in invoice_models]
         LOGGER("List of invoices returned from database: %s", invoices)
         return invoice_models
 
@@ -89,7 +89,7 @@ class InvoiceRepository(Repository[InvoiceSchema]):
             .where(InvoiceModel.invoice_number == invoice_number)
         ).one_or_none()
         if invoice_model:
-            invoice = InvoiceSchema.model_validate(invoice_model.model_dump())
+            invoice = InvoiceData.model_validate(invoice_model.model_dump())
             LOGGER.info("Invoice data retrieved from database: %s", invoice)
             return invoice
 
@@ -98,14 +98,14 @@ class UserRepository(Repository):
     def __init__(self, session: sqlmodel.Session):
         self.session = session
 
-    def add(self, user: UserSchema):
+    def add(self, user: User):
         user_model = UserModel(**user.model_dump())
         self.session.add(user_model)
         self.session.commit()
         self.session.refresh(user_model)
         LOGGER.info("New user added to database: %s", user_model)
 
-    def update(self, id_: str, user_data: UserSchema) -> None:
+    def update(self, id_: str, user_data: User) -> None:
         user_model = self.session.exec(
             sqlmodel.select(UserModel).where(UserModel.user_id == id_)
         ).one()
@@ -115,9 +115,9 @@ class UserRepository(Repository):
         self.session.refresh(user_model)
         LOGGER.info("Existing user %s udpated: %s", id_, user_model)
 
-    def get(self, id_: str) -> UserSchema:
+    def get(self, id_: str) -> User:
         user_model = self.session.exec(sqlmodel.select(UserModel.file_id == id_)).one()
-        user_data = UserSchema.model_validate(user_model.model_dump())
+        user_data = User.model_validate(user_model.model_dump())
         LOGGER.info("User data retrieved from database: %s", user_data)
         return user_data
 
@@ -127,30 +127,30 @@ class UserRepository(Repository):
         self.session.commit()
         LOGGER.info("Invoice %s deleted from database.", id_)
 
-    def get_all(self, limit: int = 10) -> list[UserSchema]:
+    def get_all(self, limit: int = 10) -> list[User]:
         user_model = self.session.exec(sqlmodel.select(UserModel).limit(limit)).all()
-        users = [UserSchema(**user_model.model_dump()) for user_model in user_model]
+        users = [User(**user_model.model_dump()) for user_model in user_model]
         LOGGER("List of users returned from database: %s", users)
         return users
 
 
-    def get_by_username(self, username: str) -> UserSchema | None:
+    def get_by_username(self, username: str) -> User | None:
         user_model = self.session.exec(
             sqlmodel.select(UserModel)
             .where(UserModel.username == username)
         ).one_or_none()
         if user_model:
-            user = UserSchema.model_validate(user_model.model_dump())
+            user = User.model_validate(user_model.model_dump())
             LOGGER.info("User data retrieved from database: %s", user)
             return user
     
 
-    def get_user_by_email(self, email: str) -> UserSchema | None:
+    def get_user_by_email(self, email: str) -> User | None:
         user_model = self.session.exec(
             sqlmodel.select(UserModel)
             .where(UserModel.email == email)
         ).one_or_none()
         if user_model:
-            user = UserSchema.model_validate(user_model.model_dump())
+            user = User.model_validate(user_model.model_dump())
             LOGGER.info("User data retrieved from database: %s", user)
             return user

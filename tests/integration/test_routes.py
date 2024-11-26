@@ -16,9 +16,9 @@ from invoice_reader.app.routes import app
 from invoice_reader.models import UserModel
 from invoice_reader.schemas import (
     FileData,
-    InvoiceSchema,
-    TokenSchema,
-    UserSchema,
+    InvoiceData,
+    Token,
+    User,
 )
 
 
@@ -34,7 +34,7 @@ def session_fixture() -> Session:  # type: ignore
 
 @pytest.fixture
 def user():
-    return UserSchema(
+    return User(
         user_id=uuid.uuid4(),
         email="jeremy@email.com",
         username="jeremy",
@@ -43,7 +43,7 @@ def user():
     )
 
 
-def add_user_to_db(user: UserSchema, session: Session) -> None:
+def add_user_to_db(user: User, session: Session) -> None:
     """
     Args:
             user_id (uuid.UUID | None): Some tests require a specific user_id. Deprecated.
@@ -77,7 +77,7 @@ def upload_files(filepath):
 
 
 @pytest.fixture
-def file_data(user: UserSchema) -> FileData:
+def file_data(user: User) -> FileData:
     return FileData(user_id=user.user_id, filename="filename.pdf")
 
 
@@ -105,7 +105,7 @@ def bucket() -> str:
 
 @pytest.fixture
 def invoice_data():
-    return InvoiceSchema(
+    return InvoiceData(
         client_name="Sacha&Cie",
         invoiced_date=datetime.date(2024, 11, 18),
         invoice_number="14SQ456",
@@ -121,19 +121,19 @@ def invoice_data():
 
 
 @pytest.fixture
-def auth_token(user: UserSchema) -> TokenSchema:
+def auth_token(user: User) -> Token:
     access_token = auth.create_access_token(username=user.username)
-    return TokenSchema(access_token=access_token, token_type="bearer")
+    return Token(access_token=access_token, token_type="bearer")
 
 
 def test_submit_invoice(
     upload_files,
     client: TestClient,
     s3_mocker: Mock,
-    invoice_data: InvoiceSchema,
+    invoice_data: InvoiceData,
     session: Session,
-    user: UserSchema,
-    auth_token: TokenSchema,
+    user: User,
+    auth_token: Token,
 ):
     add_user_to_db(user=user, session=session)
     data = invoice_data.model_dump_json()
@@ -181,7 +181,7 @@ def test_submit_invoice_with_wrong_format(
     wrong_files, 
     client: TestClient, 
     s3_mocker: Mock,
-    auth_token: TokenSchema,
+    auth_token: Token,
 ):
     response = client.post(
         url="/api/v1/files/submit",

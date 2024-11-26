@@ -7,14 +7,14 @@ from invoice_reader import settings
 from invoice_reader.core import storage
 from invoice_reader.models import S3
 from invoice_reader.repository import InvoiceRepository, UserRepository
-from invoice_reader.schemas import FileData, InvoiceSchema, UserSchema
+from invoice_reader.schemas import FileData, InvoiceData, User
 
 
 def submit(
     user_id: uuid.UUID,
     file: BinaryIO,
     filename: str,
-    invoice_data: InvoiceSchema,
+    invoice_data: InvoiceData,
     session: sqlmodel.Session,
 ):
     file_data = FileData(user_id=user_id, filename=filename)
@@ -32,7 +32,7 @@ def submit(
     )
 
 
-def extract(file: BinaryIO) -> InvoiceSchema:
+def extract(file: BinaryIO) -> InvoiceData:
     raise NotImplementedError
 
 
@@ -40,23 +40,23 @@ def get_user(token: str):
     raise NotImplementedError
 
 
-def register_user(user: UserSchema, session: sqlmodel.Session) -> None:
+def register_user(user: User, session: sqlmodel.Session) -> None:
     user_repository = UserRepository(session=session)
     user_repository.add(user)
 
 
-def get_user_by_username(username: str, session: sqlmodel.Session) -> UserSchema:
+def get_user_by_username(username: str, session: sqlmodel.Session) -> User:
     user_repository = UserRepository(session=session)
     user = user_repository.get_by_username(username)
     return user
 
 
-def get_user_by_email(email: str, session: sqlmodel.Session) -> UserSchema | None:
+def get_user_by_email(email: str, session: sqlmodel.Session) -> User | None:
     user_repository = UserRepository(session=session)
     user = user_repository.get_user_by_email(email=email)
     return user
 
 
-def add_user(user: UserSchema, session: sqlmodel.Session) -> None:
+def add_user(user: User, session: sqlmodel.Session) -> None:
     user_repository = UserRepository(session=session)
     user = user_repository.add(user=user)

@@ -9,7 +9,7 @@ from jwt.exceptions import InvalidTokenError
 from passlib.context import CryptContext
 
 from invoice_reader import db, presenter, settings
-from invoice_reader.schemas import TokenDataSchema, UserCreateSchema, UserSchema
+from invoice_reader.schemas import TokenData, UserCreate, User
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -37,7 +37,7 @@ def get_password_hash(password: str) -> str:
 def get_current_user(
     token: Annotated[str, Depends(oauth2_scheme)],
     session: Annotated[sqlmodel.Session, Depends(db.get_session)]
-) -> UserSchema | None:
+) -> User | None:
     try:
         payload: dict = jwt.decode(
             token,
@@ -47,14 +47,14 @@ def get_current_user(
         username: str = payload.get("sub")
         if username is None:
             raise CREDENTIALS_EXCEPTION
-        token_data = TokenDataSchema(username=username)
+        token_data = TokenData(username=username)
     except InvalidTokenError:
         raise CREDENTIALS_EXCEPTION
     user = presenter.get_user_by_username(username=token_data.username, session=session)
     return user
 
 
-def authenticate_user(username: str, password: str, session: sqlmodel.Session) -> UserSchema | None:
+def authenticate_user(username: str, password: str, session: sqlmodel.Session) -> User | None:
     user = presenter.get_user_by_username(username=username, session=session)
     if verify_password(password, user.hashed_password):
         return user
@@ -72,10 +72,10 @@ def create_access_token(username: str) -> str:
     return encoded_jwt
 
 
-def register_user(user: UserCreateSchema, session: sqlmodel.Session) -> None:
+def register_user(user: UserCreate, session: sqlmodel.Session) -> None:
     existing_user = presenter.get_user_by_email(user.email, session=session)
     if existing_user:
         raise EXISTING_USER_EXCEPTION
     hashed_password = get_password_hash(user.password)
-    user = UserSchema(hashed_password=hashed_password, **user.model_dump())
+    user = User(hashed_password=hashed_password, **user.model_dump())
     presenter.add_user(user=user, session=session)

@@ -8,7 +8,7 @@ from invoice_reader import db
 from invoice_reader.app import auth
 from invoice_reader.app.routes import app
 from invoice_reader.models import UserModel
-from invoice_reader.schemas import UserCreateSchema, UserSchema
+from invoice_reader.schemas import UserCreate, User
 
 
 @pytest.fixture(name="session")
@@ -34,12 +34,12 @@ def client_fixture(session: Session):
 
 @pytest.fixture
 def user():
-    return UserCreateSchema(username="jeremy", email="jeremy@email.com", password="password")
+    return UserCreate(username="jeremy", email="jeremy@email.com", password="password")
 
 
 @pytest.fixture
 def existing_user():
-    return UserSchema(
+    return User(
         user_id=uuid.uuid4(),
         email="jeremy@email.com",
         username="jeremy",
@@ -48,7 +48,7 @@ def existing_user():
     )
 
 
-def add_user_to_db(user: UserSchema, session: Session) -> None:
+def add_user_to_db(user: User, session: Session) -> None:
     """
     Args:
         user_id (uuid.UUID | None): Some tests require a specific user_id. Deprecated.
@@ -58,7 +58,7 @@ def add_user_to_db(user: UserSchema, session: Session) -> None:
     session.commit()
 
 
-def test_register_user(client: TestClient, session: Session, user: UserCreateSchema):
+def test_register_user(client: TestClient, session: Session, user: UserCreate):
     response = client.post(
         url="/api/v1/users/register/",
         json=user.model_dump(),
@@ -72,7 +72,7 @@ def test_register_user(client: TestClient, session: Session, user: UserCreateSch
 
 
 def test_register_existing_user(
-    client: TestClient, session: Session, user: UserCreateSchema, existing_user: UserSchema
+    client: TestClient, session: Session, user: UserCreate, existing_user: User
 ):
     add_user_to_db(user=existing_user, session=session)
     response = client.post(
@@ -85,7 +85,7 @@ def test_register_existing_user(
 def test_user_login(
     client: TestClient, 
     session: Session, 
-    existing_user: UserSchema    
+    existing_user: User    
 ):
     add_user_to_db(user=existing_user, session=session)
     response = client.post(
