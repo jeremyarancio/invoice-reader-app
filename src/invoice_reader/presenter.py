@@ -18,10 +18,7 @@ def submit(
     session: sqlmodel.Session,
 ):
     file_data = FileData(user_id=user_id, filename=filename)
-    s3_model = S3.init(
-        bucket=settings.S3_BUCKET,
-        file_data=file_data
-    )
+    s3_model = S3.init(bucket=settings.S3_BUCKET, file_data=file_data)
     invoice_repository = InvoiceRepository(session=session)
     storage.store(
         file=file,

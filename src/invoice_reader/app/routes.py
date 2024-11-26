@@ -12,8 +12,8 @@ from invoice_reader.app import auth
 from invoice_reader.schemas import (
     InvoiceData,
     Token,
-    UserCreate,
     User,
+    UserCreate,
 )
 from invoice_reader.utils import logger
 
@@ -60,8 +60,8 @@ def submit(
 ):
     if upload_file.content_type != "application/pdf":
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, 
-            detail="Only PDF files are allowed."
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Only PDF files are allowed.",
         )
     try:
         if invoice_data:
@@ -74,8 +74,8 @@ def submit(
             )
             return Response(
                 content="The file and its information were successfully stored.",
-                status_code=200
-            ) 
+                status_code=200,
+            )
         extracted_metadata = presenter.extract(file=upload_file.file)
         return Response(
             content={"data": extracted_metadata},
@@ -87,10 +87,7 @@ def submit(
 
 
 @app.post("/api/v1/users/register/")
-def register(
-    user: UserCreate,
-    session: sqlmodel.Session = Depends(db.get_session)
-):
+def register(user: UserCreate, session: sqlmodel.Session = Depends(db.get_session)):
     auth.register_user(user=user, session=session)
     return Response(content="User has been added to the database.", status_code=200)
 
@@ -99,7 +96,7 @@ def register(
 def login(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     session: Annotated[sqlmodel.Session, Depends(db.get_session)],
-    ) -> Token:
+) -> Token:
     try:
         user = auth.authenticate_user(
             username=form_data.username, password=form_data.password, session=session

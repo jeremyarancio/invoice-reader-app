@@ -15,7 +15,9 @@ FILEPATH = settings.REPO_DIR / "tests/units/assets/paper.pdf"
 class TestS3Storage:
     @pytest.fixture
     def file_data(self):
-        return FileData(user_id=settings._USER_ID, file=BytesIO(b"file"), filename="filenmame.pdf")
+        return FileData(
+            user_id=settings._USER_ID, file=BytesIO(b"file"), filename="filenmame.pdf"
+        )
 
     @pytest.fixture
     def bucket(self):
@@ -31,7 +33,9 @@ class TestS3Storage:
         mocker.patch("boto3.client", return_value=mock_client)
         return mock_client
 
-    def test_store_file(self, file: BinaryIO, bucket: str, file_data: FileData, s3_mocker: Mock):
+    def test_store_file(
+        self, file: BinaryIO, bucket: str, file_data: FileData, s3_mocker: Mock
+    ):
         s3_model = S3.init(bucket=bucket, file_data=file_data)
         storage.store_file(file=file, s3_model=s3_model)
         s3_mocker.upload_fileobj.assert_called_with(file, bucket, s3_model.suffix)

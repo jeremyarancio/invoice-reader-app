@@ -35,14 +35,14 @@ class S3:
         s3_client = boto3.client("s3")
         try:
             s3_client.upload_fileobj(file, self.bucket, self.suffix)
-        except ClientError as e:
-            raise ClientError(e) from e 
+        except ClientError:
+            raise ClientError
 
 
 class UserModel(SQLModel, table=True):
     user_id: uuid.UUID | None = Field(default_factory=uuid.uuid4, primary_key=True)
     username: str
-    email: EmailStr 
+    email: EmailStr
     is_disabled: bool = Field(default=False)
     hashed_password: str
 
@@ -65,4 +65,6 @@ class InvoiceModel(SQLModel, table=True):
     vat: float
     invoiced_date: datetime.date
     uploaded_date: datetime.date | None = Field(default_factory=datetime.datetime.now)
-    last_updated_date: datetime.date | None = Field(default_factory=datetime.datetime.now)
+    last_updated_date: datetime.date | None = Field(
+        default_factory=datetime.datetime.now
+    )

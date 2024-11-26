@@ -6,7 +6,9 @@ from invoice_reader import (
 )
 
 connect_args = {"check_same_thread": False}
-engine = sqlmodel.create_engine(settings.DATABASE_URL, echo=True, connect_args=connect_args)
+engine = sqlmodel.create_engine(
+    settings.DATABASE_URL, echo=True, connect_args=connect_args
+)
 
 
 def create_db_and_tables():

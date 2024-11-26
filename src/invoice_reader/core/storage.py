@@ -37,8 +37,8 @@ def store_invoice_data(
     invoice_repository: InvoiceRepository,
 ) -> str:
     invoice_repository.add(
-        id_=file_data.file_id, 
-        user_id=file_data.user_id, 
-        invoice_data=invoice_data, 
+        id_=file_data.file_id,
+        user_id=file_data.user_id,
+        invoice_data=invoice_data,
         s3_path=s3_path,
     )

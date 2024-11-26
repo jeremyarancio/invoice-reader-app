@@ -38,10 +38,13 @@ class InvoiceRepository(Repository[InvoiceData]):
     def __init__(self, session: sqlmodel.Session):
         self.session = session
 
-    def add(self, id_: str, user_id: str, invoice_data: InvoiceData, s3_path: str) -> str:
+    def add(
+        self, id_: str, user_id: str, invoice_data: InvoiceData, s3_path: str
+    ) -> str:
         existing_invoice = self.session.exec(
-            sqlmodel.select(InvoiceModel)
-            .where(InvoiceModel.invoice_number == invoice_data.invoice_number)
+            sqlmodel.select(InvoiceModel).where(
+                InvoiceModel.invoice_number == invoice_data.invoice_number
+            )
         ).first()
         if existing_invoice:
             raise Exception("Existing invoice in the database. Process aborted.")
@@ -61,7 +64,9 @@ class InvoiceRepository(Repository[InvoiceData]):
         self.session.add(invoice_model)
         self.session.commit()
         self.session.refresh(invoice_model)
-        LOGGER.info("Existing invoice %s data updated with new data: %s", id_, invoice_data)
+        LOGGER.info(
+            "Existing invoice %s data updated with new data: %s", id_, invoice_data
+        )
 
     def get(self, id_: str) -> InvoiceData | None:
         invoice_model = self.session.exec(
@@ -72,21 +77,29 @@ class InvoiceRepository(Repository[InvoiceData]):
         return invoice
 
     def delete(self, id_: str) -> None:
-        invoice_model = self.session.exec(sqlmodel.select(InvoiceModel.file_id == id_)).one()
+        invoice_model = self.session.exec(
+            sqlmodel.select(InvoiceModel.file_id == id_)
+        ).one()
         self.session.delete(invoice_model)
         self.session.commit()
         LOGGER.info("Invoice %s deleted from database.", id_)
 
     def get_all(self, limit: int = 10) -> list[InvoiceData]:
-        invoice_models = self.session.exec(sqlmodel.select(InvoiceModel).limit(limit)).all()
-        invoices = [InvoiceData(**invoice_model.model_dump()) for invoice_model in invoice_models]
+        invoice_models = self.session.exec(
+            sqlmodel.select(InvoiceModel).limit(limit)
+        ).all()
+        invoices = [
+            InvoiceData(**invoice_model.model_dump())
+            for invoice_model in invoice_models
+        ]
         LOGGER("List of invoices returned from database: %s", invoices)
         return invoice_models
 
     def get_by_invoice_number(self, invoice_number: str) -> InvoiceModel | None:
         invoice_model = self.session.exec(
-            sqlmodel.select(InvoiceModel)
-            .where(InvoiceModel.invoice_number == invoice_number)
+            sqlmodel.select(InvoiceModel).where(
+                InvoiceModel.invoice_number == invoice_number
+            )
         ).one_or_none()
         if invoice_model:
             invoice = InvoiceData.model_validate(invoice_model.model_dump())
@@ -133,22 +146,18 @@ class UserRepository(Repository):
         LOGGER("List of users returned from database: %s", users)
         return users
 
-
     def get_by_username(self, username: str) -> User | None:
         user_model = self.session.exec(
-            sqlmodel.select(UserModel)
-            .where(UserModel.username == username)
+            sqlmodel.select(UserModel).where(UserModel.username == username)
         ).one_or_none()
         if user_model:
             user = User.model_validate(user_model.model_dump())
             LOGGER.info("User data retrieved from database: %s", user)
             return user
-    
 
     def get_user_by_email(self, email: str) -> User | None:
         user_model = self.session.exec(
-            sqlmodel.select(UserModel)
-            .where(UserModel.email == email)
+            sqlmodel.select(UserModel).where(UserModel.email == email)
         ).one_or_none()
         if user_model:
             user = User.model_validate(user_model.model_dump())

@@ -8,7 +8,7 @@ from invoice_reader import db
 from invoice_reader.app import auth
 from invoice_reader.app.routes import app
 from invoice_reader.models import UserModel
-from invoice_reader.schemas import UserCreate, User
+from invoice_reader.schemas import User, UserCreate
 
 
 @pytest.fixture(name="session")
@@ -82,18 +82,11 @@ def test_register_existing_user(
     assert response.status_code == 409
 
 
-def test_user_login(
-    client: TestClient, 
-    session: Session, 
-    existing_user: User    
-):
+def test_user_login(client: TestClient, session: Session, existing_user: User):
     add_user_to_db(user=existing_user, session=session)
     response = client.post(
         url="/api/v1/users/login/",
-        data={
-            "username": existing_user.username,
-            "password": "password"
-        }
+        data={"username": existing_user.username, "password": "password"},
     )
     payload = response.json()
     assert response.status_code == 200

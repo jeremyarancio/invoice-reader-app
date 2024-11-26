@@ -141,7 +141,7 @@ def test_submit_invoice(
         url="/api/v1/files/submit",
         data={"data": data},
         files=upload_files,
-        headers = {"Authorization": f"Bearer {auth_token.access_token}"},
+        headers={"Authorization": f"Bearer {auth_token.access_token}"},
     )
     invoice_data_from_db = session.exec(
         select(models.InvoiceModel).where(models.InvoiceModel.user_id == user.user_id)
@@ -155,7 +155,9 @@ def test_submit_invoice(
     assert invoice_data_from_db.client_name == invoice_data.client_name
     assert invoice_data_from_db.street_address == invoice_data.street_address
     assert invoice_data_from_db.street_number == invoice_data.street_number
-    assert invoice_data_from_db.amount_excluding_tax == invoice_data.amount_excluding_tax
+    assert (
+        invoice_data_from_db.amount_excluding_tax == invoice_data.amount_excluding_tax
+    )
     assert invoice_data_from_db.invoice_number == invoice_data.invoice_number
     assert invoice_data_from_db.invoiced_date == invoice_data.invoiced_date
     assert invoice_data_from_db.uploaded_date is not None
@@ -178,8 +180,8 @@ def wrong_files(request, filepath: str):
     indirect=True,
 )
 def test_submit_invoice_with_wrong_format(
-    wrong_files, 
-    client: TestClient, 
+    wrong_files,
+    client: TestClient,
     s3_mocker: Mock,
     auth_token: Token,
 ):
