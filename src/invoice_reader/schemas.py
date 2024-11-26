@@ -48,6 +48,12 @@ class InvoiceData(BaseModel):
         return bool(all(self.model_dump().values()))
 
 
+class InvoiceResponse(BaseModel):
+    file_id: uuid.UUID
+    s3_path: str
+    data: InvoiceData
+
+
 class FileData(BaseModel):
     user_id: uuid.UUID
     filename: str = Field(pattern=r"^\w+\.\w{2,3}$", description=".pdf, .png, ...")

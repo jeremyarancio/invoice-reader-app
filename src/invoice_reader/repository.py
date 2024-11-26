@@ -1,10 +1,11 @@
+import uuid
 from abc import ABC, abstractmethod
 from typing import TypeVar
 
 import sqlmodel
 
 from invoice_reader.models import InvoiceModel, UserModel
-from invoice_reader.schemas import InvoiceData, User
+from invoice_reader.schemas import InvoiceData, InvoiceResponse, User
 from invoice_reader.utils.logger import get_logger
 
 LOGGER = get_logger(__name__)
@@ -68,13 +69,18 @@ class InvoiceRepository(Repository[InvoiceData]):
             "Existing invoice %s data updated with new data: %s", id_, invoice_data
         )
 
-    def get(self, id_: str) -> InvoiceData | None:
+    def get(self, file_id: uuid.UUID, user_id: uuid.UUID) -> InvoiceResponse:
         invoice_model = self.session.exec(
-            sqlmodel.select(InvoiceModel.file_id == id_)
-        ).one_or_none()
-        invoice = InvoiceData.model_validate(invoice_model.model_dump())
-        LOGGER.info("Invoice data retrieved from database: %s", invoice)
-        return invoice
+            sqlmodel.select(InvoiceModel).where(
+                InvoiceModel.file_id == file_id and InvoiceModel.user_id == user_id
+            )
+        ).one()
+        invoice_data = InvoiceData.model_validate(invoice_model.model_dump())
+        invoice_response = InvoiceResponse(
+            file_id=file_id, s3_path=invoice_model.s3_path, data=invoice_data
+        )
+        LOGGER.info("Invoice data retrieved from database: %s", invoice_response)
+        return invoice_response
 
     def delete(self, id_: str) -> None:
         invoice_model = self.session.exec(

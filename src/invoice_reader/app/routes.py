@@ -1,3 +1,4 @@
+import uuid
 from typing import Annotated
 
 import sqlmodel
@@ -11,6 +12,7 @@ from invoice_reader import db, presenter
 from invoice_reader.app import auth
 from invoice_reader.schemas import (
     InvoiceData,
+    InvoiceResponse,
     Token,
     User,
     UserCreate,
@@ -84,6 +86,19 @@ def submit(
     except Exception as e:
         LOGGER.error(e)
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/v1/files/{file_id}")
+def get_file(
+    file_id: uuid.UUID,
+    session: Annotated[sqlmodel.Session, Depends(db.get_session)],
+    user: Annotated[User, Depends(auth.get_current_user)],
+) -> InvoiceResponse:
+    try:
+        invoice = presenter.get_invoice(user=user, file_id=file_id, session=session)
+        return invoice
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=e)
 
 
 @app.post("/api/v1/users/register/")
