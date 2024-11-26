@@ -9,7 +9,12 @@ from pydantic import BaseModel, ValidationError
 
 from invoice_reader import db, presenter
 from invoice_reader.app import auth
-from invoice_reader.schemas import InvoiceSchema, TokenSchema, UserCreateSchema, UserSchema
+from invoice_reader.schemas import (
+    InvoiceSchema,
+    TokenSchema,
+    UserCreateSchema,
+    UserSchema,
+)
 from invoice_reader.utils import logger
 
 LOGGER = logger.get_logger(__name__)
