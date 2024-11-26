@@ -13,87 +13,87 @@ from invoice_reader.schemas import UserCreateSchema, UserSchema
 
 @pytest.fixture(name="session")
 def session_fixture() -> Session:  # type: ignore
-	engine = create_engine(
-		"sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool
-	)
-	SQLModel.metadata.create_all(engine)
-	with Session(engine) as session:
-		yield session
+    engine = create_engine(
+        "sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool
+    )
+    SQLModel.metadata.create_all(engine)
+    with Session(engine) as session:
+        yield session
 
 
 @pytest.fixture(name="client")
 def client_fixture(session: Session):
-	def get_session_override():
-		return session
+    def get_session_override():
+        return session
 
-	app.dependency_overrides[db.get_session] = get_session_override
-	client = TestClient(app)
-	yield client
-	app.dependency_overrides.clear()
+    app.dependency_overrides[db.get_session] = get_session_override
+    client = TestClient(app)
+    yield client
+    app.dependency_overrides.clear()
 
 
 @pytest.fixture
 def user():
-	return UserCreateSchema(username="jeremy", email="jeremy@email.com", password="password")
+    return UserCreateSchema(username="jeremy", email="jeremy@email.com", password="password")
 
 
 @pytest.fixture
 def existing_user():
-	return UserSchema(
-		user_id=uuid.uuid4(),
-		email="jeremy@email.com",
-		username="jeremy",
-		hashed_password=auth.get_password_hash("password"),
-		is_disabled=False,
-	)
+    return UserSchema(
+        user_id=uuid.uuid4(),
+        email="jeremy@email.com",
+        username="jeremy",
+        hashed_password=auth.get_password_hash("password"),
+        is_disabled=False,
+    )
 
 
 def add_user_to_db(user: UserSchema, session: Session) -> None:
-	"""
-	Args:
-		user_id (uuid.UUID | None): Some tests require a specific user_id. Deprecated.
-	"""
-	user_model = UserModel(**user.model_dump())
-	session.add(user_model)
-	session.commit()
+    """
+    Args:
+        user_id (uuid.UUID | None): Some tests require a specific user_id. Deprecated.
+    """
+    user_model = UserModel(**user.model_dump())
+    session.add(user_model)
+    session.commit()
 
 
 def test_register_user(client: TestClient, session: Session, user: UserCreateSchema):
-	response = client.post(
-		url="/api/v1/users/register/",
-		json=user.model_dump(),
-	)
-	assert response.status_code == 200
-	user_model = session.exec(select(UserModel)).first()
-	assert user_model is not None
-	assert user_model.email == user.email
-	assert user_model.username == user.username
-	assert auth.verify_password(user.password, user_model.hashed_password)
+    response = client.post(
+        url="/api/v1/users/register/",
+        json=user.model_dump(),
+    )
+    assert response.status_code == 200
+    user_model = session.exec(select(UserModel)).first()
+    assert user_model is not None
+    assert user_model.email == user.email
+    assert user_model.username == user.username
+    assert auth.verify_password(user.password, user_model.hashed_password)
 
 
 def test_register_existing_user(
-	client: TestClient, session: Session, user: UserCreateSchema, existing_user: UserSchema
-):
-	add_user_to_db(user=existing_user, session=session)
-	response = client.post(
-		url="/api/v1/users/register/",
-		json=user.model_dump(),
-	)
-	assert response.status_code == 409
-
-
-def test_user_login(
-	client: TestClient, 
-	session: Session, 
-	existing_user: UserSchema	
+    client: TestClient, session: Session, user: UserCreateSchema, existing_user: UserSchema
 ):
     add_user_to_db(user=existing_user, session=session)
     response = client.post(
-		url="/api/v1/users/login/",
-		data={
-			"username": existing_user.username,
-			"password": "password"
-		}
+        url="/api/v1/users/register/",
+        json=user.model_dump(),
+    )
+    assert response.status_code == 409
+
+
+def test_user_login(
+    client: TestClient, 
+    session: Session, 
+    existing_user: UserSchema    
+):
+    add_user_to_db(user=existing_user, session=session)
+    response = client.post(
+        url="/api/v1/users/login/",
+        data={
+            "username": existing_user.username,
+            "password": "password"
+        }
     )
     payload = response.json()
     assert response.status_code == 200

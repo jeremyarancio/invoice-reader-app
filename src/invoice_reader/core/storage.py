@@ -9,36 +9,36 @@ LOGGER = get_logger()
 
 
 def store(
-	file: BinaryIO,
-	file_data: FileData,
-	invoice_data: InvoiceSchema,
-	invoice_repository: Repository,
-	s3_model: S3,
+    file: BinaryIO,
+    file_data: FileData,
+    invoice_data: InvoiceSchema,
+    invoice_repository: Repository,
+    s3_model: S3,
 ) -> None:
-	store_invoice_data(
-		file_data=file_data,
-		invoice_repository=invoice_repository,
-		invoice_data=invoice_data,
-		s3_path=s3_model.path,
-	)
-	store_file(file=file, s3_model=s3_model)
-	# TODO: Rollback
+    store_invoice_data(
+        file_data=file_data,
+        invoice_repository=invoice_repository,
+        invoice_data=invoice_data,
+        s3_path=s3_model.path,
+    )
+    store_file(file=file, s3_model=s3_model)
+    # TODO: Rollback
 
 
 def store_file(file: BinaryIO, s3_model: S3) -> None:
-	s3_model.store(file=file)
-	LOGGER.info("File stored succesfully at %s", s3_model.path)
+    s3_model.store(file=file)
+    LOGGER.info("File stored succesfully at %s", s3_model.path)
 
 
 def store_invoice_data(
-	file_data: FileData,
-	invoice_data: InvoiceSchema,
-	s3_path: str,
-	invoice_repository: InvoiceRepository,
+    file_data: FileData,
+    invoice_data: InvoiceSchema,
+    s3_path: str,
+    invoice_repository: InvoiceRepository,
 ) -> str:
-	invoice_repository.add(
-		id_=file_data.file_id, 
-		user_id=file_data.user_id, 
-		invoice_data=invoice_data, 
-		s3_path=s3_path,
-	)
+    invoice_repository.add(
+        id_=file_data.file_id, 
+        user_id=file_data.user_id, 
+        invoice_data=invoice_data, 
+        s3_path=s3_path,
+    )
