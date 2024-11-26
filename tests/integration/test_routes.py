@@ -11,11 +11,13 @@ from invoice_reader import (
     models,  # noqa: F401
     settings,
 )
+from invoice_reader.app import auth
 from invoice_reader.app.routes import app
 from invoice_reader.models import UserModel
 from invoice_reader.schemas import (
     FileData,
     InvoiceSchema,
+    TokenSchema,
     UserSchema,
 )
 
@@ -30,12 +32,23 @@ def session_fixture() -> Session:  # type: ignore
         yield session
 
 
-def add_user_to_db(user: UserSchema, session: Session, user_id: uuid.UUID | None = None) -> None:
+@pytest.fixture
+def user():
+    return UserSchema(
+        user_id=uuid.uuid4(),
+        email="jeremy@email.com",
+        username="jeremy",
+        hashed_password=auth.get_password_hash("password"),
+        is_disabled=False,
+    )
+
+
+def add_user_to_db(user: UserSchema, session: Session) -> None:
     """
     Args:
-        user_id (uuid.UUID | None): Some tests require a specific user_id. Deprecated.
+            user_id (uuid.UUID | None): Some tests require a specific user_id. Deprecated.
     """
-    user_model = UserModel(user_id=user_id, **user.model_dump())
+    user_model = UserModel(**user.model_dump())
     session.add(user_model)
     session.commit()
 
@@ -64,8 +77,8 @@ def upload_files(filepath):
 
 
 @pytest.fixture
-def file_data() -> FileData:
-    return FileData(user_id=settings._USER_ID, filename="filename.pdf")
+def file_data(user: UserSchema) -> FileData:
+    return FileData(user_id=user.user_id, filename="filename.pdf")
 
 
 @pytest.fixture
@@ -107,6 +120,12 @@ def invoice_data():
     )
 
 
+@pytest.fixture
+def auth_token(user: UserSchema) -> TokenSchema:
+    access_token = auth.create_access_token(username=user.username)
+    return TokenSchema(access_token=access_token, token_type="bearer")
+
+
 def test_submit_invoice(
     upload_files,
     client: TestClient,
@@ -114,12 +133,18 @@ def test_submit_invoice(
     invoice_data: InvoiceSchema,
     session: Session,
     user: UserSchema,
+    auth_token: TokenSchema,
 ):
+    add_user_to_db(user=user, session=session)
     data = invoice_data.model_dump_json()
-    response = client.post(url="/api/v1/files/submit", data={"data": data}, files=upload_files)
-    add_user_to_db(user=user, user_id=settings._USER_ID, session=session)
+    response = client.post(
+        url="/api/v1/files/submit",
+        data={"data": data},
+        files=upload_files,
+        headers = {"Authorization": f"Bearer {auth_token.access_token}"},
+    )
     invoice_data_from_db = session.exec(
-        select(models.InvoiceModel).where(models.InvoiceModel.user_id == settings._USER_ID)
+        select(models.InvoiceModel).where(models.InvoiceModel.user_id == user.user_id)
     ).one_or_none()
 
     assert invoice_data_from_db is not None
@@ -152,7 +177,16 @@ def wrong_files(request, filepath: str):
     ],
     indirect=True,
 )
-def test_submit_invoice_with_wrong_format(wrong_files, client: TestClient, s3_mocker: Mock):
-    response = client.post(url="/api/v1/files/submit", files=wrong_files)
+def test_submit_invoice_with_wrong_format(
+    wrong_files, 
+    client: TestClient, 
+    s3_mocker: Mock,
+    auth_token: TokenSchema,
+):
+    response = client.post(
+        url="/api/v1/files/submit",
+        files=wrong_files,
+        headers={"Authorization": f"Bearer {auth_token.access_token}"},
+    )
     assert response.status_code == 422
     s3_mocker.assert_not_called()
