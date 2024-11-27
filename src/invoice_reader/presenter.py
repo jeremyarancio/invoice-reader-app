@@ -7,7 +7,13 @@ from invoice_reader import settings
 from invoice_reader.core import storage
 from invoice_reader.models import S3
 from invoice_reader.repository import InvoiceRepository, UserRepository
-from invoice_reader.schemas import FileData, InvoiceData, InvoiceResponse, User
+from invoice_reader.schemas import (
+    FileData,
+    InvoiceData,
+    InvoiceResponse,
+    PagedInvoiceResponse,
+    User,
+)
 
 
 def submit(
@@ -65,3 +71,18 @@ def get_invoice(
     invoice_repository = InvoiceRepository(session=session)
     invoice_response = invoice_repository.get(user_id=user.user_id, file_id=file_id)
     return invoice_response
+
+
+def get_paged_invoices(
+    user: User, session: sqlmodel.Session, page: int, per_page: int
+) -> PagedInvoiceResponse:
+    invoice_repository = InvoiceRepository(session=session)
+    invoice_responses = invoice_repository.get_all(user_id=user.user_id)
+    start = (page - 1) * per_page
+    end = start + per_page
+    return PagedInvoiceResponse(
+        page=page,
+        per_page=per_page,
+        total=len(invoice_responses),
+        data=invoice_responses[start:end],
+    )

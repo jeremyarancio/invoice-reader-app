@@ -6,7 +6,7 @@ from typing import Annotated
 from pydantic import BaseModel, EmailStr, Field
 
 
-class Token(BaseModel):
+class AuthToken(BaseModel):
     access_token: str
     token_type: str
 
@@ -62,3 +62,10 @@ class FileData(BaseModel):
     @property
     def file_format(self):
         return os.path.splitext(self.filename)[-1]
+
+
+class PagedInvoiceResponse(BaseModel):
+    page: int
+    per_page: int
+    total: int
+    data: list[InvoiceResponse]

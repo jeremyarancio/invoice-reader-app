@@ -2,18 +2,19 @@ import uuid
 from typing import Annotated
 
 import sqlmodel
-from fastapi import Depends, FastAPI, File, Form, Response, UploadFile, status
+from fastapi import Depends, FastAPI, File, Form, Query, Response, UploadFile, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel, ValidationError
 
-from invoice_reader import db, presenter
+from invoice_reader import db, presenter, settings
 from invoice_reader.app import auth
 from invoice_reader.schemas import (
+    AuthToken,
     InvoiceData,
     InvoiceResponse,
-    Token,
+    PagedInvoiceResponse,
     User,
     UserCreate,
 )
@@ -101,6 +102,22 @@ def get_file(
         raise HTTPException(status_code=400, detail=e)
 
 
+@app.get("/api/v1/files/")
+def get_files(
+    session: Annotated[sqlmodel.Session, Depends(db.get_session)],
+    user: Annotated[User, Depends(auth.get_current_user)],
+    page: int = Query(1, ge=1),
+    per_page: int = Query(settings.PER_PAGE, ge=1),
+) -> PagedInvoiceResponse:
+    try:
+        paged_invoices = presenter.get_paged_invoices(
+            user=user, session=session, page=page, per_page=per_page
+        )
+        return paged_invoices
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=e)
+
+
 @app.post("/api/v1/users/register/")
 def register(user: UserCreate, session: sqlmodel.Session = Depends(db.get_session)):
     auth.register_user(user=user, session=session)
@@ -111,7 +128,7 @@ def register(user: UserCreate, session: sqlmodel.Session = Depends(db.get_sessio
 def login(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     session: Annotated[sqlmodel.Session, Depends(db.get_session)],
-) -> Token:
+) -> AuthToken:
     try:
         user = auth.authenticate_user(
             username=form_data.username, password=form_data.password, session=session
@@ -124,4 +141,4 @@ def login(
             detail="Invalid authentication credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    return Token(access_token=access_token, token_type="bearer")
+    return AuthToken(access_token=access_token, token_type="bearer")

@@ -90,16 +90,25 @@ class InvoiceRepository(Repository[InvoiceData]):
         self.session.commit()
         LOGGER.info("Invoice %s deleted from database.", id_)
 
-    def get_all(self, limit: int = 10) -> list[InvoiceData]:
+    def get_all(self, user_id: uuid.UUID) -> list[InvoiceResponse]:
+        invoice_responses = []
         invoice_models = self.session.exec(
-            sqlmodel.select(InvoiceModel).limit(limit)
+            sqlmodel.select(InvoiceModel).where(InvoiceModel.user_id == user_id)
         ).all()
-        invoices = [
-            InvoiceData(**invoice_model.model_dump())
-            for invoice_model in invoice_models
-        ]
-        LOGGER("List of invoices returned from database: %s", invoices)
-        return invoice_models
+        for invoice_model in invoice_models:
+            invoice_data = InvoiceData.model_validate(invoice_model.model_dump())
+            invoice_responses.append(
+                InvoiceResponse(
+                    file_id=invoice_model.file_id,
+                    s3_path=invoice_model.s3_path,
+                    data=invoice_data,
+                )
+            )
+        LOGGER.info(
+            "List of invoices returned from database. Number of invoices: %s",
+            len(invoice_responses),
+        )
+        return invoice_responses
 
     def get_by_invoice_number(self, invoice_number: str) -> InvoiceModel | None:
         invoice_model = self.session.exec(

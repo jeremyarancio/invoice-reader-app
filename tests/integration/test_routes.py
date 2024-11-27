@@ -9,15 +9,16 @@ from sqlmodel import Session, SQLModel, StaticPool, create_engine, select
 from invoice_reader import (
     db,
     models,  # noqa: F401
-    settings,
 )
 from invoice_reader.app import auth
 from invoice_reader.app.routes import app
-from invoice_reader.models import UserModel
+from invoice_reader.models import InvoiceModel, UserModel
 from invoice_reader.schemas import (
+    AuthToken,
     FileData,
     InvoiceData,
-    Token,
+    InvoiceResponse,
+    PagedInvoiceResponse,
     User,
 )
 
@@ -83,7 +84,7 @@ def file_data(user: User) -> FileData:
 
 @pytest.fixture
 def s3_bucket() -> str:
-    return settings.S3_BUCKET
+    return "bucket"
 
 
 @pytest.fixture
@@ -121,9 +122,9 @@ def invoice_data():
 
 
 @pytest.fixture
-def auth_token(user: User) -> Token:
+def auth_token(user: User) -> AuthToken:
     access_token = auth.create_access_token(username=user.username)
-    return Token(access_token=access_token, token_type="bearer")
+    return AuthToken(access_token=access_token, token_type="bearer")
 
 
 def test_submit_invoice(
@@ -133,7 +134,7 @@ def test_submit_invoice(
     invoice_data: InvoiceData,
     session: Session,
     user: User,
-    auth_token: Token,
+    auth_token: AuthToken,
 ):
     add_user_to_db(user=user, session=session)
     data = invoice_data.model_dump_json()
@@ -183,7 +184,7 @@ def test_submit_invoice_with_wrong_format(
     wrong_files,
     client: TestClient,
     s3_mocker: Mock,
-    auth_token: Token,
+    auth_token: AuthToken,
 ):
     response = client.post(
         url="/api/v1/files/submit",
@@ -192,3 +193,68 @@ def test_submit_invoice_with_wrong_format(
     )
     assert response.status_code == 422
     s3_mocker.assert_not_called()
+
+
+@pytest.fixture
+def invoice_models(
+    file_data: FileData, invoice_data: InvoiceData, s3_suffix: str
+) -> list[InvoiceModel]:
+    total = 3
+    invoice_models = [
+        InvoiceModel(
+            file_id=uuid.uuid4(),  # To respect unique primary key we update the id at each iteration
+            s3_path=s3_suffix,
+            user_id=file_data.user_id,
+            **invoice_data.model_dump(),
+        )
+        for _ in range(total)
+    ]
+    return invoice_models
+
+
+def add_invoices_to_db(invoice_models: list[InvoiceModel], session: Session) -> None:
+    session.add_all(invoice_models)
+    session.commit()
+
+
+def test_get_invoice(
+    client: TestClient,
+    auth_token: AuthToken,
+    user: User,
+    invoice_models: list[InvoiceModel],
+    session: Session,
+):
+    invoice_model = invoice_models[0]
+    add_user_to_db(user=user, session=session)
+    add_invoices_to_db(invoice_models=[invoice_model], session=session)
+    response = client.get(
+        url=f"/api/v1/files/{invoice_model.file_id}",
+        headers={"Authorization": f"Bearer {auth_token.access_token}"},
+    )
+    payload = InvoiceResponse.model_validate(response.json())
+    assert response.status_code == 200
+    assert payload.file_id == invoice_model.file_id
+    assert payload.s3_path == invoice_model.s3_path
+    assert payload.data.invoice_number == invoice_model.invoice_number
+
+
+def test_get_invoices(
+    client: TestClient,
+    auth_token: AuthToken,
+    user: User,
+    invoice_models: list[InvoiceModel],
+    session: Session,
+):
+    PAGE = 1
+    PER_PAGE = 2
+    add_user_to_db(user=user, session=session)
+    add_invoices_to_db(invoice_models=invoice_models, session=session)
+    response = client.get(
+        url="/api/v1/files/",
+        headers={"Authorization": f"Bearer {auth_token.access_token}"},
+        params={"page": PAGE, "per_page": PER_PAGE},
+    )
+    payload = PagedInvoiceResponse.model_validate(response.json())
+    assert response.status_code == 200
+    assert len(payload.data) == PER_PAGE
+    assert payload.total == len(invoice_models)
