@@ -60,9 +60,11 @@ def client_fixture(session: Session):
         return session
 
     app.dependency_overrides[db.get_session] = get_session_override
-    client = TestClient(app)
-    yield client
-    app.dependency_overrides.clear()
+    try:
+        client = TestClient(app)
+        yield client
+    finally:
+        app.dependency_overrides.clear()
 
 
 @pytest.fixture
@@ -258,3 +260,4 @@ def test_get_invoices(
     assert response.status_code == 200
     assert len(payload.data) == PER_PAGE
     assert payload.total == len(invoice_models)
+    assert all(item.data.invoice_number for item in payload.data)
