@@ -1,9 +1,13 @@
-import { useState } from 'react';
-import { Form, Button } from 'react-bootstrap';
+import { useState } from "react";
+import { Form, Button } from "react-bootstrap";
 
 const UploadInvoice = () => {
   const [file, setFile] = useState<File | null>(null);
 
+//   const uploadFile = (file: File, data: object) => {
+//     api.post("files/submit/", {"file": file, "data": data}); ////////
+//   };
+  
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       setFile(e.target.files[0]);
@@ -12,8 +16,9 @@ const UploadInvoice = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log(e)
+    console.log(e);
     if (file) {
+    //   uploadFile(file, data);
       alert(`Uploaded file: ${file.name}`);
     }
   };
@@ -24,7 +29,11 @@ const UploadInvoice = () => {
       <Form onSubmit={handleSubmit}>
         <Form.Group controlId="formFile" className="mb-3">
           <Form.Label>Select Invoice PDF</Form.Label>
-          <Form.Control type="file" accept="application/pdf" onChange={handleFileChange} />
+          <Form.Control
+            type="file"
+            accept="application/pdf"
+            onChange={handleFileChange}
+          />
         </Form.Group>
         <Button variant="primary" type="submit">
           Upload

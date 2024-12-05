@@ -6,4 +6,9 @@ export interface Invoice {
     revenue: number;
     paid: boolean;
   }
-  
+
+export interface UserRegistrationData {
+    username: string;
+    email: string;
+    password: string;
+  }

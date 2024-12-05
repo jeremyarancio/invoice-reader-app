@@ -25,7 +25,7 @@ const InvoiceList = () => {
   return (
     <div>
       <h2>Invoices</h2>
-      <Table>
+      <Table striped hover onClick={() => console.log("clicked")}>
         <thead>
           <tr>
             <th>#</th>
@@ -44,7 +44,7 @@ const InvoiceList = () => {
               <td>{invoice.clientName}</td>
               <td>{invoice.date}</td>
               <td>${invoice.revenue.toFixed(2)}</td>
-              <td>{invoice.paid ? "Yes" : "No"}</td>
+              <td >{invoice.paid ? "Yes" : "No"}</td>
             </tr>
           ))}
         </tbody>

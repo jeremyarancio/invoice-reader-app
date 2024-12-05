@@ -1,19 +1,47 @@
-import React, { useState } from 'react';
-import { Form, Button } from 'react-bootstrap';
+import React, { useState } from "react";
+import { Form, Button, Alert } from "react-bootstrap";
+import { registerUser } from "../../services/api";
+import { useMutation } from "@tanstack/react-query";
 
-const Register = () => {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+const RegisterUser = () => {
+  const [userName, setUserName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+
+  const registrationMutation = useMutation({
+    mutationFn: registerUser,
+    onSuccess: (data) => {
+      console.log("Registration successful", data);
+      alert("Registration successful! You can now log in.");
+      setUserName("");
+      setEmail("");
+      setPassword("");
+      setConfirmPassword("");
+      setError(null);
+    },
+    onError: (error: any) => {
+      const errorMessage =
+        error.response?.data?.message ||
+        "Registration failed. Please try again.";
+      setError(errorMessage);
+      console.log(errorMessage);
+    },
+  });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (password !== confirmPassword) {
-      alert('Passwords do not match!');
+      alert("Passwords do not match!");
       return;
     }
-    alert(`Account created for: ${name} (${email})`);
+    setError(null);
+    registrationMutation.mutate({
+      username: userName,
+      email: email,
+      password: password,
+    });
   };
 
   return (
@@ -21,11 +49,11 @@ const Register = () => {
       <h2>Register</h2>
       <Form onSubmit={handleSubmit}>
         <Form.Group className="mb-3">
-          <Form.Label>Name</Form.Label>
+          <Form.Label>Username</Form.Label>
           <Form.Control
             type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
+            value={userName}
+            onChange={(e) => setUserName(e.target.value)}
             placeholder="Enter your full name"
           />
         </Form.Group>
@@ -56,12 +84,22 @@ const Register = () => {
             placeholder="Re-enter your password"
           />
         </Form.Group>
-        <Button variant="primary" type="submit">
-          Register
+        <Button
+          variant="primary"
+          type="submit"
+          disabled={registrationMutation.isPending}
+          className="w-100"
+        >
+          {registrationMutation.isPending ? "Registering..." : "Register"}
         </Button>
       </Form>
+      {registrationMutation.isSuccess && (
+        <Alert variant="success" className="mt-3">
+          Registration successful! You can now log in.
+        </Alert>
+      )}
     </div>
   );
 };
 
-export default Register;
+export default RegisterUser;
