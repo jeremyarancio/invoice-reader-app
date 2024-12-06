@@ -5,6 +5,7 @@ import sqlmodel
 from fastapi import Depends, FastAPI, File, Form, Query, Response, UploadFile, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel, ValidationError
 
@@ -24,6 +25,17 @@ LOGGER = logger.get_logger(__name__)
 
 
 app = FastAPI()
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        settings.FRONT_END_URL,
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 class Checker:
@@ -131,7 +143,7 @@ def login(
 ) -> AuthToken:
     try:
         user = auth.authenticate_user(
-            username=form_data.username, password=form_data.password, session=session
+            email=form_data.username, password=form_data.password, session=session
         )
         access_token = auth.create_access_token(username=user.username)
     except Exception as e:

@@ -52,9 +52,9 @@ def get_current_user(
 
 
 def authenticate_user(
-    username: str, password: str, session: sqlmodel.Session
+    email: str, password: str, session: sqlmodel.Session
 ) -> User | None:
-    user = presenter.get_user_by_username(username=username, session=session)
+    user = presenter.get_user_by_email(email=email, session=session)
     if verify_password(password, user.hashed_password):
         return user
 

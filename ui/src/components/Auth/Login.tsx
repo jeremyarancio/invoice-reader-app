@@ -1,38 +1,45 @@
 import { useState } from "react";
-import { Form, Button } from "react-bootstrap";
+import { Form, Button, Alert } from "react-bootstrap";
 import { useMutation } from "@tanstack/react-query";
+import { loginUser } from "../../services/api";
 
 const Login = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [error, setError] = useState<string | null>(null);
 
-    const registrationMutation = useMutation({
-        mutationFn: registerUser,
+    const loginMutation = useMutation({
+        mutationFn: loginUser,
         onSuccess: (data) => {
-          console.log("Registration successful", data);
-          alert("Registration successful! You can now log in.");
-          setUserName("");
-          setEmail("");
-          setPassword("");
-          setConfirmPassword("");
-          setError(null);
+            // localStorage.setItem("accessToken", data.accessToken);
+            sessionStorage.setItem("accessToken", data.accessToken);
+            setEmail("");
+            setPassword("");
+            setError(null);
         },
         onError: (error: any) => {
-          const errorMessage =
-            error.response?.data?.message ||
-            "Registration failed. Please try again.";
-          setError(errorMessage);
-          console.log(errorMessage);
+            const errorMessage =
+                error.response?.data?.message ||
+                "Login failed. Please check your credentials.";
+            setError(errorMessage);
         },
-      });    
+    });
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (!email || !password) {
+            setError("Please enter both email and password");
+            return;
+        }
+
+        loginMutation.mutate({ username: email, password: password });
     };
 
     return (
         <div>
             <h2>Login</h2>
+            {error && <Alert variant="danger">{error}</Alert>}
             <Form onSubmit={handleSubmit}>
                 <Form.Group className="mb-3">
                     <Form.Label>Email</Form.Label>
@@ -40,6 +47,7 @@ const Login = () => {
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
+                        required
                     />
                 </Form.Group>
                 <Form.Group className="mb-3">
@@ -48,10 +56,15 @@ const Login = () => {
                         type="password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
+                        required
                     />
                 </Form.Group>
-                <Button variant="primary" type="submit">
-                    Login
+                <Button
+                    variant="primary"
+                    type="submit"
+                    disabled={loginMutation.isPending}
+                >
+                    {loginMutation.isPending ? "Logging in..." : "Login"}
                 </Button>
             </Form>
         </div>

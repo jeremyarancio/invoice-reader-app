@@ -47,7 +47,7 @@ def user():
 def add_user_to_db(user: User, session: Session) -> None:
     """
     Args:
-            user_id (uuid.UUID | None): Some tests require a specific user_id. Deprecated.
+        user_id (uuid.UUID | None): Some tests require a specific user_id. Deprecated.
     """
     user_model = UserModel(**user.model_dump())
     session.add(user_model)
@@ -204,7 +204,7 @@ def invoice_models(
     total = 3
     invoice_models = [
         InvoiceModel(
-            file_id=uuid.uuid4(),  # To respect unique primary key we update the id at each iteration
+            file_id=uuid.uuid4(), # To respect unique primary key we update the id at each iteration
             s3_path=s3_suffix,
             user_id=file_data.user_id,
             **invoice_data.model_dump(),
