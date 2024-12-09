@@ -38,7 +38,7 @@ export const submitInvoice = async (file: File, data: InvoiceData) => {
     const invoiceData = JSON.stringify(data);
 
     const formData = new FormData();
-    formData.append("file", file);
+    formData.append("upload_file", file);
     formData.append("data", invoiceData);
 
     const accessToken = sessionStorage.getItem("accessToken");

@@ -56,7 +56,7 @@ class InvoiceResponse(BaseModel):
 
 class FileData(BaseModel):
     user_id: uuid.UUID
-    filename: str = Field(pattern=r"^\w+\.\w{2,3}$", description=".pdf, .png, ...")
+    filename: str
     file_id: uuid.UUID | None = Field(default_factory=lambda: uuid.uuid4())
 
     @property

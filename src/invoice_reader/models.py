@@ -28,7 +28,7 @@ class S3:
     def init(cls, bucket: str, file_data: FileData) -> "S3":
         return cls(
             bucket=bucket,
-            suffix=f"{file_data.user_id}/{file_data.file_id}{file_data.file_format}",
+            suffix=f"user-{file_data.user_id}/file-{file_data.file_id}{file_data.file_format}",
         )
 
     def store(self, file: BinaryIO) -> None:
