@@ -60,7 +60,10 @@ const InvoiceList: React.FC = () => {
     };
 
     if (isLoading) return <div>Loading invoices...</div>;
-    if (error) return <Alert variant="danger">Log in to visualize your invoices...</Alert>;
+    if (error)
+        return (
+            <Alert variant="danger">Log in to visualize your invoices...</Alert>
+        );
 
     return (
         <div>

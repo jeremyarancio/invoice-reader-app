@@ -8,7 +8,7 @@ const Login = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState<string | null>(null);
-    const [logged, setLogged] = useState<boolean>(false)
+    const [logged, setLogged] = useState<boolean>(false);
     const navigate = useNavigate();
 
     const loginMutation = useMutation({
@@ -38,8 +38,8 @@ const Login = () => {
         }
 
         loginMutation.mutate({ username: email, password: password });
-        setLogged(true)
-        navigate("/")
+        setLogged(true);
+        navigate("/");
     };
 
     return (

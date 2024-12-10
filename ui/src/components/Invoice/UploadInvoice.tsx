@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Form, Button} from "react-bootstrap";
+import { Form, Button } from "react-bootstrap";
 import InvoiceDataForm from "./InvoiceDataForm";
 
 const UploadInvoice = () => {
