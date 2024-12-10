@@ -1,5 +1,10 @@
 import axios from "axios";
-import { UserRegistrationData, UserLoginData, InvoiceData } from "../types";
+import {
+    UserRegistrationData,
+    UserLoginData,
+    InvoiceData,
+    InvoiceListGetProps,
+} from "../types";
 import { QueryClient } from "@tanstack/react-query";
 
 const baseURL = "http://localhost:8000/api/v1/";
@@ -55,5 +60,23 @@ export const submitInvoice = async (file: File, data: InvoiceData) => {
         },
     });
 
+    return response.data;
+};
+
+export const getAllInvoice = async (props: InvoiceListGetProps) => {
+    const accessToken = sessionStorage.getItem("accessToken");
+    const tokenType = sessionStorage.getItem("tokenType") || "Bearer";
+
+    const response = await api.get("/files/", {
+        data: {
+            page: props.pageNumber,
+            per_page: props.perPage,
+        },
+        headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `${tokenType} ${accessToken}`,
+        },
+    });
+    console.log(response.data);
     return response.data;
 };

@@ -1,10 +1,11 @@
 export interface InvoiceDataRender {
-    id: number;
-    number: string;
+    invoiceNumber: string;
     clientName: string;
-    date: string;
-    revenue: number;
-    paid: boolean;
+    invoicedDate: Date;
+    amountExcludingTax: number;
+    vat: number;
+    currency: string;
+    paid?: boolean;
 }
 
 export interface InvoiceData {
@@ -30,4 +31,20 @@ export interface UserRegistrationData {
 export interface UserLoginData {
     username: string;
     password: string;
+}
+
+export interface InvoiceListGetProps {
+    pageNumber: number;
+    perPage: number;
+}
+
+export interface GetInvoiceResponse {
+    page: number;
+    per_page: number;
+    total: number;
+    data: {
+        file_id: string;
+        s3_path: string;
+        data: InvoiceData;
+    }[];
 }
