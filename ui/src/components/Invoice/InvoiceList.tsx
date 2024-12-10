@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Table } from "react-bootstrap";
+import { Table, Alert } from "react-bootstrap";
 import { getAllInvoice } from "../../services/api";
 import { useMutation } from "@tanstack/react-query";
 import { InvoiceDataRender, GetInvoiceResponse } from "../../types";
@@ -60,7 +60,7 @@ const InvoiceList: React.FC = () => {
     };
 
     if (isLoading) return <div>Loading invoices...</div>;
-    if (error) return <div>Error: {error}</div>;
+    if (error) return <Alert variant="danger">Log in to visualize your invoices...</Alert>;
 
     return (
         <div>

@@ -2,11 +2,14 @@ import { useState } from "react";
 import { Form, Button, Alert } from "react-bootstrap";
 import { useMutation } from "@tanstack/react-query";
 import { loginUser } from "../../services/api";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState<string | null>(null);
+    const [logged, setLogged] = useState<boolean>(false)
+    const navigate = useNavigate();
 
     const loginMutation = useMutation({
         mutationFn: loginUser,
@@ -35,12 +38,15 @@ const Login = () => {
         }
 
         loginMutation.mutate({ username: email, password: password });
+        setLogged(true)
+        navigate("/")
     };
 
     return (
         <div>
             <h2>Login</h2>
             {error && <Alert variant="danger">{error}</Alert>}
+            {logged && <Alert variant="success">You're logged!</Alert>}
             <Form onSubmit={handleSubmit}>
                 <Form.Group className="mb-3">
                     <Form.Label>Email</Form.Label>
