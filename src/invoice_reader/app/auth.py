@@ -8,21 +8,11 @@ from fastapi.security import OAuth2PasswordBearer
 from jwt.exceptions import InvalidTokenError
 from passlib.context import CryptContext
 
+from invoice_reader.app.exceptions import CREDENTIALS_EXCEPTION, EXISTING_USER_EXCEPTION
 from invoice_reader import db, presenter, settings
-from invoice_reader.schemas import TokenData, User, UserCreate
-
+from invoice_reader.schemas import User, UserCreate
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-CREDENTIALS_EXCEPTION = HTTPException(
-    status_code=status.HTTP_401_UNAUTHORIZED,
-    detail="Could not validate credentials",
-    headers={"WWW-Authenticate": "Bearer"},
-)
-
-EXISTING_USER_EXCEPTION = HTTPException(
-    status_code=status.HTTP_409_CONFLICT, detail="Email already used."
-)
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
@@ -36,7 +26,7 @@ def get_password_hash(password: str) -> str:
 def get_current_user(
     token: Annotated[str, Depends(oauth2_scheme)],
     session: Annotated[sqlmodel.Session, Depends(db.get_session)],
-) -> User | None:
+) -> User:
     try:
         payload: dict = jwt.decode(
             token, key=settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM]
@@ -44,7 +34,6 @@ def get_current_user(
         email: str = payload.get("sub")
         if email is None:
             raise CREDENTIALS_EXCEPTION
-        token_data = TokenData(email=email)
     except InvalidTokenError:
         raise CREDENTIALS_EXCEPTION
     user = presenter.get_user_by_email(email=email, session=session)
@@ -76,3 +65,4 @@ def register_user(user: UserCreate, session: sqlmodel.Session) -> None:
     hashed_password = get_password_hash(user.password)
     user = User(hashed_password=hashed_password, **user.model_dump())
     presenter.add_user(user=user, session=session)
+    

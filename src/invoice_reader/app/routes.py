@@ -13,11 +13,13 @@ from invoice_reader import db, presenter, settings
 from invoice_reader.app import auth
 from invoice_reader.schemas import (
     AuthToken,
-    InvoiceData,
+    Invoice,
     InvoiceResponse,
     PagedInvoiceResponse,
     User,
     UserCreate,
+    Client,
+    InvoiceCreate,
 )
 from invoice_reader.utils import logger
 
@@ -69,7 +71,7 @@ async def root():
 @app.post("/api/v1/files/submit")
 def submit(
     upload_file: Annotated[UploadFile, File()],
-    invoice_data: Annotated[InvoiceData | None, Depends(Checker(InvoiceData))],
+    data: Annotated[Invoice | None, Depends(Checker(InvoiceCreate))],
     session: Annotated[sqlmodel.Session, Depends(db.get_session)],
     user: Annotated[User, Depends(auth.get_current_user)],
 ):
@@ -79,12 +81,12 @@ def submit(
             detail="Only PDF files are allowed.",
         )
     try:
-        if invoice_data:
+        if data:
             presenter.submit(
                 user_id=user.user_id,
                 file=upload_file.file,
                 filename=upload_file.filename,
-                invoice_data=invoice_data,
+                invoice_data=data,
                 session=session,
             )
             return Response(
@@ -127,7 +129,7 @@ def get_files(
         )
         return paged_invoices
     except Exception as e:
-        raise HTTPException(status_code=400, detail=e)
+        raise HTTPException(status_code=400, detail=e) from e
 
 
 @app.post("/api/v1/users/register/")
@@ -152,5 +154,25 @@ def login(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid authentication credentials",
             headers={"WWW-Authenticate": "Bearer"},
-        )
+        ) from e
     return AuthToken(access_token=access_token, token_type="bearer")
+
+
+@app.post("/api/v1/clients/add/")
+def add_client(
+    client: Client,
+    session: Annotated[sqlmodel.Session, Depends(db.get_session)],
+    user: Annotated[User, Depends(auth.get_current_user)],
+) -> Response:
+    try:
+        presenter.add_client(user=user, client=client, session=session)
+        return Response(
+            content="New client added to the database.",
+            status_code=200,
+        )
+    except HTTPException as e:
+        LOGGER.error(e)
+        raise HTTPException from e
+    except Exception as e:
+        LOGGER.error(e)
+        raise HTTPException(status_code=400, detail=e) from e

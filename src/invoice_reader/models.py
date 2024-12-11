@@ -57,15 +57,10 @@ class InvoiceModel(SQLModel, table=True):
         primary_key=True,
         description="file_id is required since manually added to store both in S3 and in the DB",
     )
-    user_id: uuid.UUID | None = Field(foreign_key="user.user_id")
+    user_id: uuid.UUID = Field(foreign_key="user.user_id")
+    client_id: uuid.UUID = Field(foreign_key="client.client_id") 
     s3_path: str
     invoice_number: str
-    client_name: str
-    street_number: int
-    street_address: str
-    zipcode: int
-    city: str
-    country: str
     amount_excluding_tax: float
     vat: float
     invoiced_date: datetime.date
@@ -73,3 +68,17 @@ class InvoiceModel(SQLModel, table=True):
     last_updated_date: datetime.date | None = Field(
         default_factory=datetime.datetime.now
     )
+
+
+class ClientModel(SQLModel, table=True):
+
+    __tablename__ = "client"
+
+    client_id: uuid.UUID | None = Field(primary_key=True, default_factory=uuid.uuid4)
+    user_id: uuid.UUID = Field(foreign_key="user.user_id")
+    client_name: str
+    street_number: int
+    street_address: str
+    zipcode: int
+    city: str
+    country: str
