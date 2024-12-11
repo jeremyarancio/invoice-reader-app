@@ -38,7 +38,6 @@ def user():
     return User(
         user_id=uuid.uuid4(),
         email="jeremy@email.com",
-        username="jeremy",
         hashed_password=auth.get_password_hash("password"),
         is_disabled=False,
     )
@@ -125,7 +124,7 @@ def invoice_data():
 
 @pytest.fixture
 def auth_token(user: User) -> AuthToken:
-    access_token = auth.create_access_token(username=user.username)
+    access_token = auth.create_access_token(username=user.email)
     return AuthToken(access_token=access_token, token_type="bearer")
 
 

@@ -145,7 +145,7 @@ def login(
         user = auth.authenticate_user(
             email=form_data.username, password=form_data.password, session=session
         )
-        access_token = auth.create_access_token(username=user.username)
+        access_token = auth.create_access_token(username=user.email)
     except Exception as e:
         LOGGER.error(e)
         raise HTTPException(

@@ -15,7 +15,6 @@ const RegisterUser = () => {
         onSuccess: (data) => {
             console.log("Registration successful", data);
             alert("Registration successful! You can now log in.");
-            setUserName("");
             setEmail("");
             setPassword("");
             setConfirmPassword("");
@@ -38,7 +37,6 @@ const RegisterUser = () => {
         }
         setError(null);
         registrationMutation.mutate({
-            username: userName,
             email: email,
             password: password,
         });
@@ -48,15 +46,6 @@ const RegisterUser = () => {
         <div>
             <h2>Register</h2>
             <Form onSubmit={handleSubmit}>
-                <Form.Group className="mb-3">
-                    <Form.Label>Username</Form.Label>
-                    <Form.Control
-                        type="text"
-                        value={userName}
-                        onChange={(e) => setUserName(e.target.value)}
-                        placeholder="Enter your full name"
-                    />
-                </Form.Group>
                 <Form.Group className="mb-3">
                     <Form.Label>Email</Form.Label>
                     <Form.Control

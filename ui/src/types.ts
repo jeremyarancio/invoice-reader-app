@@ -23,13 +23,12 @@ export interface InvoiceData {
 }
 
 export interface UserRegistrationData {
-    username: string;
     email: string;
     password: string;
 }
 
 export interface UserLoginData {
-    username: string;
+    email: string;
     password: string;
 }
 

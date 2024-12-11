@@ -41,13 +41,13 @@ def get_current_user(
         payload: dict = jwt.decode(
             token, key=settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM]
         )
-        username: str = payload.get("sub")
-        if username is None:
+        email: str = payload.get("sub")
+        if email is None:
             raise CREDENTIALS_EXCEPTION
-        token_data = TokenData(username=username)
+        token_data = TokenData(email=email)
     except InvalidTokenError:
         raise CREDENTIALS_EXCEPTION
-    user = presenter.get_user_by_username(username=token_data.username, session=session)
+    user = presenter.get_user_by_email(email=email, session=session)
     return user
 
 

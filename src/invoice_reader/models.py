@@ -40,19 +40,24 @@ class S3:
 
 
 class UserModel(SQLModel, table=True):
+
+    __tablename__ = "user"
+
     user_id: uuid.UUID | None = Field(default_factory=uuid.uuid4, primary_key=True)
-    username: str
     email: EmailStr
     is_disabled: bool = Field(default=False)
     hashed_password: str
 
 
 class InvoiceModel(SQLModel, table=True):
+
+    __tablename__ = "invoice"
+
     file_id: uuid.UUID = Field(
         primary_key=True,
         description="file_id is required since manually added to store both in S3 and in the DB",
     )
-    user_id: uuid.UUID | None = Field(foreign_key="usermodel.user_id")
+    user_id: uuid.UUID | None = Field(foreign_key="user.user_id")
     s3_path: str
     invoice_number: str
     client_name: str

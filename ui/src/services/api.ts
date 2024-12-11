@@ -33,7 +33,7 @@ export const registerUser = async (userData: UserRegistrationData) => {
 
 export const loginUser = async (loginData: UserLoginData) => {
     const formData = new FormData();
-    formData.append("username", loginData.username);
+    formData.append("username", loginData.email);
     formData.append("password", loginData.password);
     const response = await api.post("users/login/", formData);
     return response.data;
