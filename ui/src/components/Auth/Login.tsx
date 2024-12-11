@@ -37,7 +37,7 @@ const Login = () => {
             return;
         }
 
-        loginMutation.mutate({ username: email, password: password });
+        loginMutation.mutate({ email: email, password: password });
         setLogged(true);
         navigate("/");
     };

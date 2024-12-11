@@ -12,19 +12,17 @@ class AuthToken(BaseModel):
 
 
 class TokenData(BaseModel):
-    username: str
+    email: str
 
 
 class User(BaseModel):
     user_id: uuid.UUID | None = None
-    username: str
     email: EmailStr
     is_disabled: bool | None = None
     hashed_password: str
 
 
 class UserCreate(BaseModel):
-    username: str = Field(..., min_length=3, max_length=30, pattern="^[a-zA-Z0-9_]+$")
     password: str = Field(
         ..., min_length=8, description="Password must be at least 8 characters"
     )
@@ -56,7 +54,7 @@ class InvoiceResponse(BaseModel):
 
 class FileData(BaseModel):
     user_id: uuid.UUID
-    filename: str
+    filename: str = Field(pattern=r"^.+\.\w{2,3}$", description=".pdf, .png, ...")
     file_id: uuid.UUID | None = Field(default_factory=lambda: uuid.uuid4())
 
     @property
