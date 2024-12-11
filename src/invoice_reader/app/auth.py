@@ -3,14 +3,15 @@ from typing import Annotated
 
 import jwt
 import sqlmodel
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
 from jwt.exceptions import InvalidTokenError
 from passlib.context import CryptContext
 
-from invoice_reader.app.exceptions import CREDENTIALS_EXCEPTION, EXISTING_USER_EXCEPTION
 from invoice_reader import db, presenter, settings
+from invoice_reader.app.exceptions import CREDENTIALS_EXCEPTION, EXISTING_USER_EXCEPTION
 from invoice_reader.schemas import User, UserCreate
+
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -37,6 +38,8 @@ def get_current_user(
     except InvalidTokenError:
         raise CREDENTIALS_EXCEPTION
     user = presenter.get_user_by_email(email=email, session=session)
+    if not user:
+        raise CREDENTIALS_EXCEPTION
     return user
 
 
@@ -65,4 +68,3 @@ def register_user(user: UserCreate, session: sqlmodel.Session) -> None:
     hashed_password = get_password_hash(user.password)
     user = User(hashed_password=hashed_password, **user.model_dump())
     presenter.add_user(user=user, session=session)
-    

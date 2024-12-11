@@ -4,8 +4,8 @@ from typing import TypeVar
 
 import sqlmodel
 
-from invoice_reader.models import InvoiceModel, UserModel, ClientModel
-from invoice_reader.schemas import Invoice, InvoiceResponse, User, Client
+from invoice_reader.models import ClientModel, InvoiceModel, UserModel
+from invoice_reader.schemas import Client, Invoice, InvoiceResponse, User
 from invoice_reader.utils.logger import get_logger
 
 LOGGER = get_logger(__name__)

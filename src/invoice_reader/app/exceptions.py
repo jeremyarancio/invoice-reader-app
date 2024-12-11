@@ -1,9 +1,7 @@
 from fastapi import HTTPException, status
 
-
 EXISTING_CLIENT_EXCEPTION = HTTPException(
-    status_code=status.HTTP_409_CONFLICT, 
-    detail="Client already exisiting. "
+    status_code=status.HTTP_409_CONFLICT, detail="Client already exisiting. "
 )
 
 CREDENTIALS_EXCEPTION = HTTPException(

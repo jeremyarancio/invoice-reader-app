@@ -1,7 +1,7 @@
 import datetime
+import json
 import uuid
 from unittest.mock import Mock
-import json
 
 import pytest
 from fastapi.testclient import TestClient
@@ -13,16 +13,16 @@ from invoice_reader import (
 )
 from invoice_reader.app import auth
 from invoice_reader.app.routes import app
-from invoice_reader.models import InvoiceModel, UserModel, ClientModel
+from invoice_reader.models import ClientModel, InvoiceModel, UserModel
 from invoice_reader.schemas import (
     AuthToken,
+    Client,
     FileData,
     Invoice,
     InvoiceCreate,
     InvoiceResponse,
     PagedInvoiceResponse,
     User,
-    Client,
 )
 
 

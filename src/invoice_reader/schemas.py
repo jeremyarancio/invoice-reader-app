@@ -4,7 +4,7 @@ from datetime import date
 from typing import Annotated
 
 from pydantic import BaseModel, EmailStr, Field
-from pydantic.functional_serializers import field_serializer
+
 
 class AuthToken(BaseModel):
     access_token: str
@@ -34,7 +34,7 @@ class Invoice(BaseModel):
 
     def is_complete(self) -> bool:
         return bool(all(self.model_dump().values()))
-    
+
 
 class Client(BaseModel):
     client_name: str

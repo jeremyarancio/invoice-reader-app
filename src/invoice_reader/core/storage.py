@@ -2,7 +2,7 @@ from typing import BinaryIO
 
 from invoice_reader.models import S3
 from invoice_reader.repository import InvoiceRepository, Repository
-from invoice_reader.schemas import FileData, Invoice, InvoiceCreate
+from invoice_reader.schemas import FileData, InvoiceCreate
 from invoice_reader.utils.logger import get_logger
 
 LOGGER = get_logger()
