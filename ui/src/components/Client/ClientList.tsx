@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { Table, Alert } from "react-bootstrap";
+import { Table, Alert, Button } from "react-bootstrap";
 import { getAllClient } from "../../services/api";
 import { useMutation } from "@tanstack/react-query";
 import { ClientDataRender, GetClientsResponse } from "../../types";
+import ClientForm from "./ClientForm";
 
 const ClientList: React.FC = () => {
     const [pageNumber, setPageNumber] = useState<number>(1);
@@ -10,6 +11,7 @@ const ClientList: React.FC = () => {
     const [ClientRenderList, setClientList] = useState<ClientDataRender[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
+    const [showForm, setShowForm] = useState<boolean>(false);
 
     const ClientListMutation = useMutation({
         mutationFn: getAllClient,
@@ -44,6 +46,7 @@ const ClientList: React.FC = () => {
     }, [pageNumber, perPage]);
 
     if (isLoading) return <div>Loading invoices...</div>;
+    if (showForm) return <ClientForm />;
     if (error)
         return (
             <Alert variant="danger">Log in to visualize your invoices...</Alert>
@@ -56,6 +59,10 @@ const ClientList: React.FC = () => {
     const handlePerPageChange = (newPerPage: number) => {
         setPerPage(newPerPage);
         setPageNumber(1);
+    };
+
+    const addClient = () => {
+        setShowForm(true);
     };
 
     return (
@@ -72,6 +79,7 @@ const ClientList: React.FC = () => {
                     {ClientRenderList.map((item) => (
                         <tr key={item.name}>
                             <td>{item.name}</td>
+                            <td>{item.total}€</td>
                         </tr>
                     ))}
                 </tbody>
@@ -107,6 +115,11 @@ const ClientList: React.FC = () => {
                         </select>
                     </label>
                 </div>
+            </div>
+            <div className="mb-3 d-flex justify-content-end align-items-center">
+                <Button onClick={addClient} variant="primary">
+                    New client
+                </Button>
             </div>
         </div>
     );

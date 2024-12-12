@@ -33,6 +33,7 @@ def get_current_user(
             token, key=settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM]
         )
         email: str = payload.get("sub")
+        print(payload)
         if email is None:
             raise CREDENTIALS_EXCEPTION
     except InvalidTokenError:
@@ -51,8 +52,8 @@ def authenticate_user(
         return user
 
 
-def create_access_token(username: str) -> str:
-    to_encode = {"sub": username}
+def create_access_token(email: str) -> str:
+    to_encode = {"sub": email}
     expire = datetime.now() + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(

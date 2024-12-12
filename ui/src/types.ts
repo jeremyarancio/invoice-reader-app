@@ -53,20 +53,22 @@ export interface ClientDataRender {
     total: number;
 }
 
-export interface GetClientsResponse {
-    per_page: number;
-    total: number;
-    data: {
-        client_name: string;
-        street_number: number;
-        street_address: string;
-        zipcode: number;
-        city: string;
-        country: string;
-    }[];
-}
-
 export interface ClientListGetProps {
     perPage: number;
     pageNumber: number;
+}
+
+export interface ClientData {
+    client_name: string;
+    street_number: number;
+    street_address: string;
+    zipcode: number;
+    city: string;
+    country: string;
+}
+
+export interface GetClientsResponse {
+    per_page: number;
+    total: number;
+    data: [ClientData];
 }

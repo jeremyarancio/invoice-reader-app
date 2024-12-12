@@ -134,7 +134,7 @@ def client_data():
 
 @pytest.fixture
 def auth_token(user: User) -> AuthToken:
-    access_token = auth.create_access_token(username=user.email)
+    access_token = auth.create_access_token(email=user.email)
     return AuthToken(access_token=access_token, token_type="bearer")
 
 

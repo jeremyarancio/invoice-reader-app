@@ -5,6 +5,7 @@ import {
     InvoiceData,
     InvoiceListGetProps,
     ClientListGetProps,
+    ClientData,
 } from "../types";
 import { QueryClient } from "@tanstack/react-query";
 
@@ -97,5 +98,28 @@ export const getAllClient = async (props: ClientListGetProps) => {
         },
     });
     console.log(response.data);
+    return response.data;
+};
+
+export const addClient = async (data: ClientData) => {
+    const clientData = JSON.stringify(data);
+    const accessToken = sessionStorage.getItem("accessToken");
+    const tokenType = sessionStorage.getItem("tokenType") || "Bearer";
+
+    if (!accessToken) {
+        throw new Error("No authentication token found. Please log in.");
+    }
+
+    const response = await api.post(
+        "/clients/add/",
+        JSON.parse(clientData), // Parse the stringified data back to an object
+        {
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `${tokenType} ${accessToken}`,
+            },
+        }
+    );
+
     return response.data;
 };
