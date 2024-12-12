@@ -21,6 +21,7 @@ from invoice_reader.schemas import (
     Invoice,
     InvoiceCreate,
     InvoiceResponse,
+    PagedClientResponse,
     PagedInvoiceResponse,
     User,
 )
@@ -303,3 +304,45 @@ def test_add_client(
     assert response.status_code == 200
     assert client_data_from_db
     assert client_data_from_db.client_name == client_data.client_name
+
+
+@pytest.fixture
+def client_models(user: User):
+    return [
+        ClientModel(
+            user_id=user.user_id,
+            client_name=f"client_{i}",
+            zipcode=75000,
+            city="Paris",
+            country="France",
+            street_address="Rivoli",
+            street_number=155,
+        )
+        for i in range(5)
+    ]
+
+
+def add_clients(
+    client_models: list[ClientModel],
+    session: Session,
+) -> None:
+    session.add_all(client_models)
+    session.commit()
+
+
+def test_get_clients(
+    session: Session,
+    client_models: list[ClientModel],
+    auth_token: AuthToken,
+    client: TestClient,
+    user: User,
+):
+    add_user_to_db(user=user, session=session)
+    add_clients(client_models=client_models, session=session)
+    response = client.get(
+        url="/api/v1/clients/",
+        headers={"Authorization": f"Bearer {auth_token.access_token}"},
+    )
+    payload = PagedClientResponse.model_validate(response.json())
+    assert response.status_code == 200
+    assert payload.total == len(client_models)

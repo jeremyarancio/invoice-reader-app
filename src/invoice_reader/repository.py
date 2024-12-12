@@ -159,8 +159,8 @@ class UserRepository(Repository):
         pass
 
     def get_all(self, limit: int = 10) -> list[User]:
-        user_model = self.session.exec(sqlmodel.select(UserModel).limit(limit)).all()
-        users = [User(**user_model.model_dump()) for user_model in user_model]
+        users_model = self.session.exec(sqlmodel.select(UserModel).limit(limit)).all()
+        users = [User(**user_model.model_dump()) for user_model in users_model]
         LOGGER("List of users returned from database: %s", users)
         return users
 
@@ -195,8 +195,15 @@ class ClientRepository(Repository):
     def get(self, user_id: uuid.UUID, client_id: uuid.UUID) -> Client:
         pass
 
-    def get_all(self, limit: int) -> list[Client]:
-        pass
+    def get_all(self, user_id: uuid.UUID, limit: int) -> list[Client]:
+        clients_model = self.session.exec(
+            sqlmodel.select(ClientModel).where(ClientModel.user_id == user_id)
+        ).all()
+        clients = [
+            Client.model_validate(client_model.model_dump())
+            for client_model in clients_model
+        ]
+        return clients
 
     def update():
         pass

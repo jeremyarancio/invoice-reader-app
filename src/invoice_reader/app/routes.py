@@ -158,6 +158,28 @@ def login(
     return AuthToken(access_token=access_token, token_type="bearer")
 
 
+@app.get("/api/v1/clients/")
+def get_clients(
+    session: Annotated[sqlmodel.Session, Depends(db.get_session)],
+    user: Annotated[User, Depends(auth.get_current_user)],
+    page: int = Query(1, ge=1),
+    per_page: int = Query(settings.PER_PAGE, ge=1),
+):
+    try:
+        paged_client_response = presenter.get_paged_clients(
+            user=user,
+            session=session,
+            page=page,
+            per_page=per_page,
+        )
+        return paged_client_response
+    except Exception as e:
+        raise HTTPException(
+            status_code=400,
+            detail=e,
+        ) from e
+
+
 @app.post("/api/v1/clients/add/")
 def add_client(
     client: Client,

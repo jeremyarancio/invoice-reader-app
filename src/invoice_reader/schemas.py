@@ -71,3 +71,10 @@ class PagedInvoiceResponse(BaseModel):
     per_page: int
     total: int
     data: list[InvoiceResponse]
+
+
+class PagedClientResponse(BaseModel):
+    page: int
+    per_page: int
+    total: int
+    data: list[Client]
