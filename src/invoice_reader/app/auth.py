@@ -36,7 +36,7 @@ def get_current_user(
         if email is None:
             raise CREDENTIALS_EXCEPTION
     except InvalidTokenError:
-        raise CREDENTIALS_EXCEPTION
+        raise CREDENTIALS_EXCEPTION from None
     user = presenter.get_user_by_email(email=email, session=session)
     if not user:
         raise CREDENTIALS_EXCEPTION

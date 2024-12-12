@@ -203,7 +203,10 @@ def test_submit_invoice_with_wrong_format(
     client: TestClient,
     s3_mocker: Mock,
     auth_token: AuthToken,
+    user: User,
+    session: Session,
 ):
+    add_user_to_db(user, session)
     response = client.post(
         url="/api/v1/files/submit",
         files=wrong_files,
