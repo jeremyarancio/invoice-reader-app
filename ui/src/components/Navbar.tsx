@@ -13,6 +13,9 @@ const Navbar = () => (
                     <Nav.Link as={Link} to="/upload">
                         Upload Invoice
                     </Nav.Link>
+                    <Nav.Link as={Link} to="/clients">
+                        Clients
+                    </Nav.Link>
                 </Nav>
                 <Nav>
                     <Nav.Link as={Link} to="/profile">

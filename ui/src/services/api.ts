@@ -4,6 +4,7 @@ import {
     UserLoginData,
     InvoiceData,
     InvoiceListGetProps,
+    ClientListGetProps,
 } from "../types";
 import { QueryClient } from "@tanstack/react-query";
 
@@ -68,6 +69,24 @@ export const getAllInvoice = async (props: InvoiceListGetProps) => {
     const tokenType = sessionStorage.getItem("tokenType") || "Bearer";
 
     const response = await api.get("/files/", {
+        data: {
+            page: props.pageNumber,
+            per_page: props.perPage,
+        },
+        headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `${tokenType} ${accessToken}`,
+        },
+    });
+    console.log(response.data);
+    return response.data;
+};
+
+export const getAllClient = async (props: ClientListGetProps) => {
+    const accessToken = sessionStorage.getItem("accessToken");
+    const tokenType = sessionStorage.getItem("tokenType") || "Bearer";
+
+    const response = await api.get("/clients/", {
         data: {
             page: props.pageNumber,
             per_page: props.perPage,
