@@ -37,6 +37,7 @@ class Invoice(BaseModel):
 
 
 class Client(BaseModel):
+    client_id: uuid.UUID | None = None
     client_name: str
     street_number: int
     street_address: str

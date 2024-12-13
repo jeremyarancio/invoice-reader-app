@@ -13,3 +13,7 @@ CREDENTIALS_EXCEPTION = HTTPException(
 EXISTING_USER_EXCEPTION = HTTPException(
     status_code=status.HTTP_409_CONFLICT, detail="Email already used."
 )
+
+EXISTING_INVOICE_EXCEPTION = HTTPException(
+    status_code=status.HTTP_409_CONFLICT, detail="Invoice already exisiting."
+)

@@ -4,6 +4,7 @@ from typing import TypeVar
 
 import sqlmodel
 
+from invoice_reader.app.exceptions import EXISTING_INVOICE_EXCEPTION
 from invoice_reader.models import ClientModel, InvoiceModel, UserModel
 from invoice_reader.schemas import Client, Invoice, InvoiceResponse, User
 from invoice_reader.utils.logger import get_logger
@@ -53,7 +54,7 @@ class InvoiceRepository(Repository[Invoice]):
             )
         ).first()
         if existing_invoice:
-            raise Exception("Existing invoice in the database. Process aborted.")
+            raise EXISTING_INVOICE_EXCEPTION
         invoice_model = InvoiceModel(
             file_id=id_,
             user_id=user_id,
