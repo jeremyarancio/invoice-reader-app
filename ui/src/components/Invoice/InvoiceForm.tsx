@@ -1,40 +1,55 @@
 import React, { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
-import { Form, Button, Row, Col, Alert } from "react-bootstrap";
-import { submitInvoice } from "../../services/api";
-import { InvoiceData } from "../../types";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { Form, Button, Alert } from "react-bootstrap";
+import { submitInvoice, fetchClients } from "../../services/api";
+import {
+    InvoiceData,
+    GetClientsResponse,
+    AddInvoicePayload,
+} from "../../types";
 
 interface FormProperties {
     file: File;
 }
 
-const INITIAL_FORM_STATE: InvoiceData = {
-    client_name: "",
+const initialInvoicePayload: InvoiceData = {
     amount_excluding_tax: 0,
-    vat: 20,
+    vat: 0,
     currency: "€",
     invoiced_date: new Date(),
     invoice_number: "",
-    street_number: 0,
-    street_address: "",
-    zipcode: "",
-    city: "",
-    country: "",
 };
 
-function InvoiceDataForm({ file }: FormProperties) {
-    const [formData, setFormData] = useState<InvoiceData>(INITIAL_FORM_STATE);
+function InvoiceForm({ file }: FormProperties) {
+    const [clientId, setClientId] = useState<string>("");
+    const [invoicePayload, setInvoicePayload] = useState<InvoiceData>(
+        initialInvoicePayload
+    );
     const [error, setError] = useState<string | null>(null);
 
+    const { data: pagedClients, isError } = useQuery<GetClientsResponse, Error>(
+        {
+            queryKey: ["clients"],
+            queryFn: () => fetchClients({ pageNumber: 1, perPage: 100 }),
+        }
+    );
+
     const invoiceDataMutation = useMutation({
-        mutationFn: ({ file, data }: { file?: File; data: InvoiceData }) => {
+        mutationFn: ({
+            file,
+            data,
+        }: {
+            file?: File;
+            data: AddInvoicePayload;
+        }) => {
             if (!file) {
                 throw new Error("No valid file provided");
             }
             return submitInvoice(file, data);
         },
         onSuccess: () => {
-            setFormData(INITIAL_FORM_STATE);
+            setClientId("");
+            setInvoicePayload(initialInvoicePayload);
             setError(null);
         },
         onError: (error: Error) => {
@@ -46,18 +61,19 @@ function InvoiceDataForm({ file }: FormProperties) {
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
 
-        const processedValue = [
-            "amount_excluding_tax",
-            "vat",
-            "street_number",
-        ].includes(name)
+        const processedValue = ["amount_excluding_tax", "vat"].includes(name)
             ? Number(value)
             : value;
 
-        setFormData((prev) => ({
+        setInvoicePayload((prev) => ({
             ...prev,
             [name]: processedValue,
         }));
+    };
+
+    const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const { value } = e.target;
+        setClientId(value);
     };
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -68,11 +84,11 @@ function InvoiceDataForm({ file }: FormProperties) {
             return;
         }
 
-        error && <Alert>{error}</Alert>;
-
         try {
-            console.log(file, formData);
-            invoiceDataMutation.mutate({ file, data: formData });
+            invoiceDataMutation.mutate({
+                file,
+                data: { invoice: invoicePayload, client_id: clientId },
+            });
         } catch (err) {
             setError(
                 err instanceof Error
@@ -95,119 +111,64 @@ function InvoiceDataForm({ file }: FormProperties) {
                 </Alert>
             )}
             <Form onSubmit={handleSubmit}>
-                <Row>
-                    <Col md={6}>
-                        <h3>Invoice details</h3>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Invoice number</Form.Label>
-                            <Form.Control
-                                type="text"
-                                name="invoice_number"
-                                value={formData.invoice_number}
-                                onChange={handleInputChange}
-                                required
-                            />
-                        </Form.Group>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Revenue without tax (€)</Form.Label>
-                            <Form.Control
-                                type="number"
-                                name="amount_excluding_tax"
-                                onChange={handleInputChange}
-                                required
-                            />
-                        </Form.Group>
-
-                        <Form.Group className="mb-3">
-                            <Form.Label>VAT (%)</Form.Label>
-                            <Form.Control
-                                type="number"
-                                name="vat"
-                                onChange={handleInputChange}
-                                required
-                            />
-                        </Form.Group>
-
-                        <Form.Group className="mb-3">
-                            <Form.Label>Invoice date</Form.Label>
-                            <Form.Control
-                                type="date"
-                                name="invoiced_date"
-                                onChange={handleInputChange}
-                                required
-                            />
-                        </Form.Group>
-                    </Col>
-
-                    <Col md={6}>
-                        <h3>Client details</h3>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Client name</Form.Label>
-                            <Form.Control
-                                type="text"
-                                name="client_name"
-                                value={formData.client_name}
-                                onChange={handleInputChange}
-                                required
-                            />
-                        </Form.Group>
-
-                        <Form.Group className="mb-3">
-                            <Form.Label>Street Number</Form.Label>
-                            <Form.Control
-                                type="number"
-                                name="street_number"
-                                value={formData.street_number}
-                                onChange={handleInputChange}
-                                required
-                            />
-                        </Form.Group>
-
-                        <Form.Group className="mb-3">
-                            <Form.Label>Street Address</Form.Label>
-                            <Form.Control
-                                type="text"
-                                name="street_address"
-                                value={formData.street_address}
-                                onChange={handleInputChange}
-                                required
-                            />
-                        </Form.Group>
-
-                        <Form.Group className="mb-3">
-                            <Form.Label>Zipcode</Form.Label>
-                            <Form.Control
-                                type="text"
-                                name="zipcode"
-                                value={formData.zipcode}
-                                onChange={handleInputChange}
-                                required
-                            />
-                        </Form.Group>
-
-                        <Form.Group className="mb-3">
-                            <Form.Label>City</Form.Label>
-                            <Form.Control
-                                type="text"
-                                name="city"
-                                value={formData.city}
-                                onChange={handleInputChange}
-                                required
-                            />
-                        </Form.Group>
-
-                        <Form.Group className="mb-3">
-                            <Form.Label>Country</Form.Label>
-                            <Form.Control
-                                type="text"
-                                name="country"
-                                value={formData.country}
-                                onChange={handleInputChange}
-                                required
-                            />
-                        </Form.Group>
-                    </Col>
-                </Row>
+                <h3>Invoice details</h3>
+                <Form.Group className="mb-3">
+                    <Form.Label>Invoice number</Form.Label>
+                    <Form.Control
+                        type="text"
+                        name="invoice_number"
+                        onChange={handleInputChange}
+                        required
+                    />
+                </Form.Group>
+                <Form.Group className="mb-3">
+                    <Form.Label>Revenue without tax (€)</Form.Label>
+                    <Form.Control
+                        type="number"
+                        name="amount_excluding_tax"
+                        onChange={handleInputChange}
+                        required
+                    />
+                </Form.Group>
+                <Form.Group className="mb-3">
+                    <Form.Label>VAT (%)</Form.Label>
+                    <Form.Control
+                        type="number"
+                        name="vat"
+                        onChange={handleInputChange}
+                        required
+                    />
+                </Form.Group>
+                <Form.Group className="mb-3">
+                    <Form.Label>Invoice date</Form.Label>
+                    <Form.Control
+                        type="date"
+                        name="invoiced_date"
+                        onChange={handleInputChange}
+                        required
+                    />
+                </Form.Group>
+                <Form.Group>
+                    <Form.Select
+                        aria-label="Select a client"
+                        name="client_name"
+                        onChange={handleSelectChange}
+                        required
+                    >
+                        <option value="">Select a client</option>
+                        {isError && (
+                            <option disabled>Error loading clients</option>
+                        )}
+                        {pagedClients?.data.map((client) => (
+                            <option
+                                key={client.client_id}
+                                value={client.client_id}
+                            >
+                                {client.client_name}
+                            </option>
+                        ))}
+                    </Form.Select>
+                </Form.Group>
 
                 <div className="text-center mt-3">
                     <Button variant="primary" type="submit">
@@ -219,4 +180,4 @@ function InvoiceDataForm({ file }: FormProperties) {
     );
 }
 
-export default InvoiceDataForm;
+export default InvoiceForm;

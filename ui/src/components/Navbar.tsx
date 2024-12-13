@@ -10,9 +10,6 @@ const Navbar = () => (
             <BootstrapNavbar.Toggle aria-controls="basic-navbar-nav" />
             <BootstrapNavbar.Collapse id="basic-navbar-nav">
                 <Nav className="me-auto">
-                    <Nav.Link as={Link} to="/upload">
-                        Upload Invoice
-                    </Nav.Link>
                     <Nav.Link as={Link} to="/clients">
                         Clients
                     </Nav.Link>

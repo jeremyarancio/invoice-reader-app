@@ -2,10 +2,10 @@ import axios from "axios";
 import {
     UserRegistrationData,
     UserLoginData,
-    InvoiceData,
     InvoiceListGetProps,
     ClientListGetProps,
     ClientData,
+    AddInvoicePayload,
 } from "../types";
 import { QueryClient } from "@tanstack/react-query";
 
@@ -29,7 +29,6 @@ const api = axios.create({
 
 export const registerUser = async (userData: UserRegistrationData) => {
     const response = await api.post("users/register/", userData);
-    console.log(response);
     return response.data;
 };
 
@@ -41,7 +40,7 @@ export const loginUser = async (loginData: UserLoginData) => {
     return response.data;
 };
 
-export const submitInvoice = async (file: File, data: InvoiceData) => {
+export const submitInvoice = async (file: File, data: AddInvoicePayload) => {
     const invoiceData = JSON.stringify(data);
 
     const formData = new FormData();
@@ -55,7 +54,7 @@ export const submitInvoice = async (file: File, data: InvoiceData) => {
         throw new Error("No authentication token found. Please log in.");
     }
 
-    const response = await api.post("/files/submit/", formData, {
+    const response = await api.post("/invoices/submit/", formData, {
         headers: {
             "Content-Type": "multipart/form-data",
             Authorization: `${tokenType} ${accessToken}`,
@@ -69,7 +68,7 @@ export const getAllInvoice = async (props: InvoiceListGetProps) => {
     const accessToken = sessionStorage.getItem("accessToken");
     const tokenType = sessionStorage.getItem("tokenType") || "Bearer";
 
-    const response = await api.get("/files/", {
+    const response = await api.get("/invoices/", {
         data: {
             page: props.pageNumber,
             per_page: props.perPage,
@@ -79,11 +78,10 @@ export const getAllInvoice = async (props: InvoiceListGetProps) => {
             Authorization: `${tokenType} ${accessToken}`,
         },
     });
-    console.log(response.data);
     return response.data;
 };
 
-export const getAllClient = async (props: ClientListGetProps) => {
+export const fetchClients = async (props: ClientListGetProps) => {
     const accessToken = sessionStorage.getItem("accessToken");
     const tokenType = sessionStorage.getItem("tokenType") || "Bearer";
 
@@ -97,7 +95,6 @@ export const getAllClient = async (props: ClientListGetProps) => {
             Authorization: `${tokenType} ${accessToken}`,
         },
     });
-    console.log(response.data);
     return response.data;
 };
 

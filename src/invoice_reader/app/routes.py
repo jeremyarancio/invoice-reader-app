@@ -17,6 +17,7 @@ from invoice_reader.schemas import (
     Invoice,
     InvoiceCreate,
     InvoiceResponse,
+    PagedClientResponse,
     PagedInvoiceResponse,
     User,
     UserCreate,
@@ -68,7 +69,7 @@ async def root():
     return {"message": "Welcome to the Invoice Reader API!"}
 
 
-@app.post("/api/v1/files/submit")
+@app.post("/api/v1/invoices/submit")
 def submit(
     upload_file: Annotated[UploadFile, File()],
     data: Annotated[Invoice | None, Depends(Checker(InvoiceCreate))],
@@ -106,7 +107,7 @@ def submit(
         raise HTTPException(status_code=400, detail=str(e)) from e
 
 
-@app.get("/api/v1/files/{file_id}")
+@app.get("/api/v1/invoices/{file_id}")
 def get_file(
     file_id: uuid.UUID,
     session: Annotated[sqlmodel.Session, Depends(db.get_session)],
@@ -122,8 +123,8 @@ def get_file(
         raise HTTPException(status_code=400, detail=e) from e
 
 
-@app.get("/api/v1/files/")
-def get_files(
+@app.get("/api/v1/invoices/")
+def get_invoices(
     session: Annotated[sqlmodel.Session, Depends(db.get_session)],
     user: Annotated[User, Depends(auth.get_current_user)],
     page: int = Query(1, ge=1),
@@ -173,7 +174,7 @@ def get_clients(
     user: Annotated[User, Depends(auth.get_current_user)],
     page: int = Query(1, ge=1),
     per_page: int = Query(settings.PER_PAGE, ge=1),
-):
+) -> PagedClientResponse:
     try:
         paged_client_response = presenter.get_paged_clients(
             user=user,

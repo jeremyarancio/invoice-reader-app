@@ -9,17 +9,16 @@ export interface InvoiceDataRender {
 }
 
 export interface InvoiceData {
-    client_name: string;
     amount_excluding_tax: number;
     vat: number;
     currency: string;
     invoiced_date: Date;
     invoice_number: string;
-    street_number: number;
-    street_address: string;
-    zipcode: string;
-    city: string;
-    country: string;
+}
+
+export interface AddInvoicePayload {
+    invoice: InvoiceData;
+    client_id: string;
 }
 
 export interface UserRegistrationData {
@@ -59,6 +58,7 @@ export interface ClientListGetProps {
 }
 
 export interface ClientData {
+    client_id: string;
     client_name: string;
     street_number: number;
     street_address: string;

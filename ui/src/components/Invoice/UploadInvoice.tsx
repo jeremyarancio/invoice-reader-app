@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Form, Button } from "react-bootstrap";
-import InvoiceDataForm from "./InvoiceDataForm";
+import InvoiceForm from "./InvoiceForm";
 
 const UploadInvoice = () => {
     const [file, setFile] = useState<File | null>(null);
@@ -25,7 +25,7 @@ const UploadInvoice = () => {
     };
 
     if (showForm && file) {
-        return <InvoiceDataForm file={file} />;
+        return <InvoiceForm file={file} />;
     }
 
     return (

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Table, Alert, Button } from "react-bootstrap";
-import { getAllClient } from "../../services/api";
+import { fetchClients } from "../../services/api";
 import { useMutation } from "@tanstack/react-query";
 import { ClientDataRender, GetClientsResponse } from "../../types";
 import ClientForm from "./ClientForm";
@@ -14,7 +14,7 @@ const ClientList: React.FC = () => {
     const [showForm, setShowForm] = useState<boolean>(false);
 
     const ClientListMutation = useMutation({
-        mutationFn: getAllClient,
+        mutationFn: fetchClients,
         onSuccess: (response: GetClientsResponse) => {
             setError(null);
 

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { Table, Alert } from "react-bootstrap";
+import { Table, Alert, Button } from "react-bootstrap";
 import { getAllInvoice } from "../../services/api";
 import { useMutation } from "@tanstack/react-query";
 import { InvoiceDataRender, GetInvoicesResponse } from "../../types";
+import { useNavigate } from "react-router-dom";
 
 const InvoiceList: React.FC = () => {
     const [pageNumber, setPageNumber] = useState<number>(1);
@@ -13,6 +14,7 @@ const InvoiceList: React.FC = () => {
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
     const [totalInvoices, setTotalInvoices] = useState<number>(0);
+    const navigate = useNavigate();
 
     const InvoiceListMutation = useMutation({
         mutationFn: getAllInvoice,
@@ -57,6 +59,10 @@ const InvoiceList: React.FC = () => {
     const handlePerPageChange = (newPerPage: number) => {
         setPerPage(newPerPage);
         setPageNumber(1);
+    };
+
+    const addInvoice = () => {
+        navigate("/upload");
     };
 
     if (isLoading) return <div>Loading invoices...</div>;
@@ -126,6 +132,11 @@ const InvoiceList: React.FC = () => {
                         </select>
                     </label>
                 </div>
+            </div>
+            <div className="mb-3 d-flex justify-content-end align-items-center">
+                <Button onClick={addInvoice} variant="primary">
+                    Add invoice
+                </Button>
             </div>
         </div>
     );

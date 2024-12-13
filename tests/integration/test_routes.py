@@ -163,7 +163,7 @@ def test_submit_invoice(
         }
     )
     response = client.post(
-        url="/api/v1/files/submit",
+        url="/api/v1/invoices/submit",
         data={"data": data},
         files=upload_files,
         headers={"Authorization": f"Bearer {auth_token.access_token}"},
@@ -209,7 +209,7 @@ def test_submit_invoice_with_wrong_format(
 ):
     add_user_to_db(user, session)
     response = client.post(
-        url="/api/v1/files/submit",
+        url="/api/v1/invoices/submit",
         files=wrong_files,
         headers={"Authorization": f"Bearer {auth_token.access_token}"},
     )
@@ -251,7 +251,7 @@ def test_get_invoice(
     add_user_to_db(user=user, session=session)
     add_invoices_to_db(invoice_models=[invoice_model], session=session)
     response = client.get(
-        url=f"/api/v1/files/{invoice_model.file_id}",
+        url=f"/api/v1/invoices/{invoice_model.file_id}",
         headers={"Authorization": f"Bearer {auth_token.access_token}"},
     )
     payload = InvoiceResponse.model_validate(response.json())
@@ -273,7 +273,7 @@ def test_get_invoices(
     add_user_to_db(user=user, session=session)
     add_invoices_to_db(invoice_models=invoice_models, session=session)
     response = client.get(
-        url="/api/v1/files/",
+        url="/api/v1/invoices/",
         headers={"Authorization": f"Bearer {auth_token.access_token}"},
         params={"page": PAGE, "per_page": PER_PAGE},
     )
