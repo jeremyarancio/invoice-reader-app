@@ -7,6 +7,7 @@ import {
     GetClientsResponse,
     AddInvoicePayload,
 } from "../../types";
+import { useNavigate } from "react-router-dom";
 
 interface FormProperties {
     file: File;
@@ -26,6 +27,8 @@ function InvoiceForm({ file }: FormProperties) {
         initialInvoicePayload
     );
     const [error, setError] = useState<string | null>(null);
+    const [isComplete, setIsComplete] = useState<boolean>(false);
+    const navigate = useNavigate();
 
     const { data: pagedClients, isError } = useQuery<GetClientsResponse, Error>(
         {
@@ -51,6 +54,7 @@ function InvoiceForm({ file }: FormProperties) {
             setClientId("");
             setInvoicePayload(initialInvoicePayload);
             setError(null);
+            setIsComplete(true);
         },
         onError: (error: Error) => {
             setError(error.message || "Failed to submit invoice data");
@@ -110,6 +114,17 @@ function InvoiceForm({ file }: FormProperties) {
                     {error}
                 </Alert>
             )}
+            {isComplete && (
+                <Alert
+                    variant="success"
+                    dismissible
+                    onClose={() => navigate("/")}
+                    className="mb-4"
+                >
+                    Client successfully added
+                </Alert>
+            )}
+
             <Form onSubmit={handleSubmit}>
                 <h3>Invoice details</h3>
                 <Form.Group className="mb-3">

@@ -2,9 +2,10 @@ import React, { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { Form, Button, Alert } from "react-bootstrap";
 import { addClient } from "../../services/api";
-import { ClientData } from "../../types";
+import { CreateClient } from "../../types";
+import { useNavigate } from "react-router-dom";
 
-const INITIAL_FORM_STATE: ClientData = {
+const INITIAL_FORM_STATE: CreateClient = {
     client_name: "",
     street_number: 0,
     street_address: "",
@@ -14,16 +15,19 @@ const INITIAL_FORM_STATE: ClientData = {
 };
 
 const ClientForm = () => {
-    const [formData, setFormData] = useState<ClientData>(INITIAL_FORM_STATE);
+    const [formData, setFormData] = useState<CreateClient>(INITIAL_FORM_STATE);
     const [error, setError] = useState<string | null>(null);
+    const [isComplete, setIsComplete] = useState<boolean>(false);
+    const navigate = useNavigate();
 
     const ClientDataMutation = useMutation({
-        mutationFn: ({ data }: { data: ClientData }) => {
+        mutationFn: ({ data }: { data: CreateClient }) => {
             return addClient(data);
         },
         onSuccess: () => {
             setFormData(INITIAL_FORM_STATE);
             setError(null);
+            setIsComplete(true);
         },
         onError: (error: Error) => {
             setError(error.message || "Failed to submit invoice data");
@@ -70,6 +74,16 @@ const ClientForm = () => {
                     className="mb-4"
                 >
                     {error}
+                </Alert>
+            )}
+            {isComplete && (
+                <Alert
+                    variant="success"
+                    dismissible
+                    onClose={() => navigate("/")}
+                    className="mb-4"
+                >
+                    Client successfully added
                 </Alert>
             )}
             <Form onSubmit={handleSubmit}>

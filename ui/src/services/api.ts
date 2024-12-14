@@ -4,8 +4,8 @@ import {
     UserLoginData,
     InvoiceListGetProps,
     ClientListGetProps,
-    ClientData,
     AddInvoicePayload,
+    CreateClient,
 } from "../types";
 import { QueryClient } from "@tanstack/react-query";
 
@@ -98,7 +98,7 @@ export const fetchClients = async (props: ClientListGetProps) => {
     return response.data;
 };
 
-export const addClient = async (data: ClientData) => {
+export const addClient = async (data: CreateClient) => {
     const clientData = JSON.stringify(data);
     const accessToken = sessionStorage.getItem("accessToken");
     const tokenType = sessionStorage.getItem("tokenType") || "Bearer";

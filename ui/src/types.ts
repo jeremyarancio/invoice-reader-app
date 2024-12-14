@@ -67,6 +67,15 @@ export interface ClientData {
     country: string;
 }
 
+export interface CreateClient {
+    client_name: string;
+    street_number: number;
+    street_address: string;
+    zipcode: number;
+    city: string;
+    country: string;
+}
+
 export interface GetClientsResponse {
     per_page: number;
     total: number;
