@@ -1,4 +1,5 @@
 import datetime
+import json
 import uuid
 from unittest.mock import Mock
 
@@ -12,12 +13,15 @@ from invoice_reader import (
 )
 from invoice_reader.app import auth
 from invoice_reader.app.routes import app
-from invoice_reader.models import InvoiceModel, UserModel
+from invoice_reader.models import ClientModel, InvoiceModel, UserModel
 from invoice_reader.schemas import (
     AuthToken,
+    Client,
     FileData,
-    InvoiceData,
+    Invoice,
+    InvoiceCreate,
     InvoiceResponse,
+    PagedClientResponse,
     PagedInvoiceResponse,
     User,
 )
@@ -107,15 +111,9 @@ def bucket() -> str:
 
 @pytest.fixture
 def invoice_data():
-    return InvoiceData(
-        client_name="Sacha&Cie",
+    return Invoice(
         invoiced_date=datetime.date(2024, 11, 18),
         invoice_number="14SQ456",
-        street_number="19",
-        street_address="road of coal",
-        city="Carcassone",
-        country="France",
-        zipcode=45777,
         amount_excluding_tax=10000,
         currency="€",
         vat="20",
@@ -123,24 +121,49 @@ def invoice_data():
 
 
 @pytest.fixture
+def client_data():
+    return Client(
+        client_name="Sacha&Cie",
+        street_number="19",
+        street_address="road of coal",
+        city="Carcassone",
+        country="France",
+        zipcode=45777,
+    )
+
+
+@pytest.fixture
 def auth_token(user: User) -> AuthToken:
-    access_token = auth.create_access_token(username=user.email)
+    access_token = auth.create_access_token(email=user.email)
     return AuthToken(access_token=access_token, token_type="bearer")
+
+
+@pytest.fixture
+def client_id() -> str:
+    return str(uuid.uuid4())
 
 
 def test_submit_invoice(
     upload_files,
     client: TestClient,
     s3_mocker: Mock,
-    invoice_data: InvoiceData,
+    invoice_data: InvoiceCreate,
     session: Session,
     user: User,
     auth_token: AuthToken,
+    client_id: str,
 ):
     add_user_to_db(user=user, session=session)
-    data = invoice_data.model_dump_json()
+    data = json.dumps(
+        {
+            "invoice": json.loads(
+                invoice_data.model_dump_json()
+            ),  # Workaround because date not JSON serializable
+            "client_id": client_id,
+        }
+    )
     response = client.post(
-        url="/api/v1/files/submit",
+        url="/api/v1/invoices/submit",
         data={"data": data},
         files=upload_files,
         headers={"Authorization": f"Bearer {auth_token.access_token}"},
@@ -149,14 +172,9 @@ def test_submit_invoice(
         select(models.InvoiceModel).where(models.InvoiceModel.user_id == user.user_id)
     ).one_or_none()
 
-    assert invoice_data_from_db is not None
     assert response.status_code == 200
+    assert invoice_data_from_db is not None
     s3_mocker.upload_fileobj.assert_called_once()
-    assert invoice_data_from_db.city == invoice_data.city
-    assert invoice_data_from_db.country == invoice_data.country
-    assert invoice_data_from_db.client_name == invoice_data.client_name
-    assert invoice_data_from_db.street_address == invoice_data.street_address
-    assert invoice_data_from_db.street_number == invoice_data.street_number
     assert (
         invoice_data_from_db.amount_excluding_tax == invoice_data.amount_excluding_tax
     )
@@ -186,9 +204,12 @@ def test_submit_invoice_with_wrong_format(
     client: TestClient,
     s3_mocker: Mock,
     auth_token: AuthToken,
+    user: User,
+    session: Session,
 ):
+    add_user_to_db(user, session)
     response = client.post(
-        url="/api/v1/files/submit",
+        url="/api/v1/invoices/submit",
         files=wrong_files,
         headers={"Authorization": f"Bearer {auth_token.access_token}"},
     )
@@ -198,14 +219,15 @@ def test_submit_invoice_with_wrong_format(
 
 @pytest.fixture
 def invoice_models(
-    file_data: FileData, invoice_data: InvoiceData, s3_suffix: str
+    file_data: FileData, invoice_data: Invoice, s3_suffix: str
 ) -> list[InvoiceModel]:
     total = 3
     invoice_models = [
         InvoiceModel(
-            file_id=uuid.uuid4(), # To respect unique primary key we update the id at each iteration
+            file_id=uuid.uuid4(),  # To respect unique primary key we update the id at each iteration
             s3_path=s3_suffix,
             user_id=file_data.user_id,
+            client_id=uuid.uuid4(),
             **invoice_data.model_dump(),
         )
         for _ in range(total)
@@ -229,7 +251,7 @@ def test_get_invoice(
     add_user_to_db(user=user, session=session)
     add_invoices_to_db(invoice_models=[invoice_model], session=session)
     response = client.get(
-        url=f"/api/v1/files/{invoice_model.file_id}",
+        url=f"/api/v1/invoices/{invoice_model.file_id}",
         headers={"Authorization": f"Bearer {auth_token.access_token}"},
     )
     payload = InvoiceResponse.model_validate(response.json())
@@ -251,7 +273,7 @@ def test_get_invoices(
     add_user_to_db(user=user, session=session)
     add_invoices_to_db(invoice_models=invoice_models, session=session)
     response = client.get(
-        url="/api/v1/files/",
+        url="/api/v1/invoices/",
         headers={"Authorization": f"Bearer {auth_token.access_token}"},
         params={"page": PAGE, "per_page": PER_PAGE},
     )
@@ -260,3 +282,89 @@ def test_get_invoices(
     assert len(payload.data) == PER_PAGE
     assert payload.total == len(invoice_models)
     assert all(item.data.invoice_number for item in payload.data)
+
+
+def test_add_client(
+    client: TestClient,
+    client_data: Client,
+    auth_token: AuthToken,
+    user: User,
+    session: Session,
+):
+    add_user_to_db(user=user, session=session)
+    response = client.post(
+        url="/api/v1/clients/add/",
+        json=client_data.model_dump(),
+        headers={"Authorization": f"Bearer {auth_token.access_token}"},
+    )
+    client_data_from_db = session.exec(
+        select(ClientModel).where(ClientModel.user_id == user.user_id)
+    ).first()
+
+    assert response.status_code == 200
+    assert client_data_from_db
+    assert client_data_from_db.client_name == client_data.client_name
+
+
+@pytest.fixture
+def client_models(user: User) -> list[ClientModel]:
+    return [
+        ClientModel(
+            user_id=user.user_id,
+            client_name=f"client_{i}",
+            zipcode=75000,
+            city="Paris",
+            country="France",
+            street_address="Rivoli",
+            street_number=155,
+        )
+        for i in range(5)
+    ]
+
+
+def add_clients(
+    client_models: list[ClientModel],
+    session: Session,
+) -> None:
+    session.add_all(client_models)
+    session.commit()
+
+
+def test_add_existing_client(
+    client: TestClient,
+    auth_token: AuthToken,
+    session: Session,
+    client_models: list[ClientModel],
+    user: User,
+):
+    add_user_to_db(user=user, session=session)
+    add_clients(client_models=client_models, session=session)
+    client_model = client_models[0]
+    session.refresh(
+        client_model
+    )  # Since added to the database, the object is now empty.
+    client_data = Client.model_validate(client_model.model_dump())
+    response = client.post(
+        url="/api/v1/clients/add/",
+        json=client_data.model_dump(exclude="client_id"),
+        headers={"Authorization": f"Bearer {auth_token.access_token}"},
+    )
+    assert response.status_code == 409
+
+
+def test_get_clients(
+    session: Session,
+    client_models: list[ClientModel],
+    auth_token: AuthToken,
+    client: TestClient,
+    user: User,
+):
+    add_user_to_db(user=user, session=session)
+    add_clients(client_models=client_models, session=session)
+    response = client.get(
+        url="/api/v1/clients/",
+        headers={"Authorization": f"Bearer {auth_token.access_token}"},
+    )
+    payload = PagedClientResponse.model_validate(response.json())
+    assert response.status_code == 200
+    assert payload.total == len(client_models)

@@ -9,17 +9,16 @@ export interface InvoiceDataRender {
 }
 
 export interface InvoiceData {
-    client_name: string;
     amount_excluding_tax: number;
     vat: number;
     currency: string;
     invoiced_date: Date;
     invoice_number: string;
-    street_number: number;
-    street_address: string;
-    zipcode: string;
-    city: string;
-    country: string;
+}
+
+export interface AddInvoicePayload {
+    invoice: InvoiceData;
+    client_id: string;
 }
 
 export interface UserRegistrationData {
@@ -37,7 +36,7 @@ export interface InvoiceListGetProps {
     perPage: number;
 }
 
-export interface GetInvoiceResponse {
+export interface GetInvoicesResponse {
     page: number;
     per_page: number;
     total: number;
@@ -46,4 +45,39 @@ export interface GetInvoiceResponse {
         s3_path: string;
         data: InvoiceData;
     }[];
+}
+
+export interface ClientDataRender {
+    name: string;
+    total: number;
+}
+
+export interface ClientListGetProps {
+    perPage: number;
+    pageNumber: number;
+}
+
+export interface ClientData {
+    client_id: string;
+    client_name: string;
+    street_number: number;
+    street_address: string;
+    zipcode: number;
+    city: string;
+    country: string;
+}
+
+export interface CreateClient {
+    client_name: string;
+    street_number: number;
+    street_address: string;
+    zipcode: number;
+    city: string;
+    country: string;
+}
+
+export interface GetClientsResponse {
+    per_page: number;
+    total: number;
+    data: [ClientData];
 }

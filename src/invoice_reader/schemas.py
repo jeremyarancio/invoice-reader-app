@@ -11,10 +11,6 @@ class AuthToken(BaseModel):
     token_type: str
 
 
-class TokenData(BaseModel):
-    email: str
-
-
 class User(BaseModel):
     user_id: uuid.UUID | None = None
     email: EmailStr
@@ -29,27 +25,36 @@ class UserCreate(BaseModel):
     email: EmailStr
 
 
-class InvoiceData(BaseModel):
-    client_name: str
+class Invoice(BaseModel):
     amount_excluding_tax: float
     vat: Annotated[float, "In percentage: 20, 21, ..."]
     currency: str = "€"
     invoiced_date: date
     invoice_number: str
+
+    def is_complete(self) -> bool:
+        return bool(all(self.model_dump().values()))
+
+
+class Client(BaseModel):
+    client_id: uuid.UUID | None = None
+    client_name: str
     street_number: int
     street_address: str
     zipcode: int
     city: str
     country: str
 
-    def is_complete(self) -> bool:
-        return bool(all(self.model_dump().values()))
+
+class InvoiceCreate(BaseModel):
+    invoice: Invoice
+    client_id: uuid.UUID
 
 
 class InvoiceResponse(BaseModel):
     file_id: uuid.UUID
     s3_path: str
-    data: InvoiceData
+    data: Invoice
 
 
 class FileData(BaseModel):
@@ -67,3 +72,10 @@ class PagedInvoiceResponse(BaseModel):
     per_page: int
     total: int
     data: list[InvoiceResponse]
+
+
+class PagedClientResponse(BaseModel):
+    page: int
+    per_page: int
+    total: int
+    data: list[Client]

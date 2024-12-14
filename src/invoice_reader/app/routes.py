@@ -13,8 +13,11 @@ from invoice_reader import db, presenter, settings
 from invoice_reader.app import auth
 from invoice_reader.schemas import (
     AuthToken,
-    InvoiceData,
+    Client,
+    Invoice,
+    InvoiceCreate,
     InvoiceResponse,
+    PagedClientResponse,
     PagedInvoiceResponse,
     User,
     UserCreate,
@@ -58,7 +61,7 @@ class Checker:
                 raise HTTPException(
                     detail=jsonable_encoder(e.errors()),
                     status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                )
+                ) from e
 
 
 @app.get("/")
@@ -66,10 +69,10 @@ async def root():
     return {"message": "Welcome to the Invoice Reader API!"}
 
 
-@app.post("/api/v1/files/submit")
+@app.post("/api/v1/invoices/submit")
 def submit(
     upload_file: Annotated[UploadFile, File()],
-    invoice_data: Annotated[InvoiceData | None, Depends(Checker(InvoiceData))],
+    data: Annotated[Invoice | None, Depends(Checker(InvoiceCreate))],
     session: Annotated[sqlmodel.Session, Depends(db.get_session)],
     user: Annotated[User, Depends(auth.get_current_user)],
 ):
@@ -79,12 +82,12 @@ def submit(
             detail="Only PDF files are allowed.",
         )
     try:
-        if invoice_data:
+        if data:
             presenter.submit(
                 user_id=user.user_id,
                 file=upload_file.file,
                 filename=upload_file.filename,
-                invoice_data=invoice_data,
+                invoice_data=data,
                 session=session,
             )
             return Response(
@@ -96,12 +99,15 @@ def submit(
             content={"data": extracted_metadata},
             status_code=200,
         )
+    except HTTPException as e:
+        LOGGER.error(e)
+        raise e
     except Exception as e:
         LOGGER.error(e)
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from e
 
 
-@app.get("/api/v1/files/{file_id}")
+@app.get("/api/v1/invoices/{file_id}")
 def get_file(
     file_id: uuid.UUID,
     session: Annotated[sqlmodel.Session, Depends(db.get_session)],
@@ -110,12 +116,15 @@ def get_file(
     try:
         invoice = presenter.get_invoice(user=user, file_id=file_id, session=session)
         return invoice
+    except HTTPException as e:
+        LOGGER.error(e)
+        raise e
     except Exception as e:
-        raise HTTPException(status_code=400, detail=e)
+        raise HTTPException(status_code=400, detail=e) from e
 
 
-@app.get("/api/v1/files/")
-def get_files(
+@app.get("/api/v1/invoices/")
+def get_invoices(
     session: Annotated[sqlmodel.Session, Depends(db.get_session)],
     user: Annotated[User, Depends(auth.get_current_user)],
     page: int = Query(1, ge=1),
@@ -126,8 +135,11 @@ def get_files(
             user=user, session=session, page=page, per_page=per_page
         )
         return paged_invoices
+    except HTTPException as e:
+        LOGGER.error(e)
+        raise e
     except Exception as e:
-        raise HTTPException(status_code=400, detail=e)
+        raise HTTPException(status_code=400, detail=e) from e
 
 
 @app.post("/api/v1/users/register/")
@@ -145,12 +157,59 @@ def login(
         user = auth.authenticate_user(
             email=form_data.username, password=form_data.password, session=session
         )
-        access_token = auth.create_access_token(username=user.email)
+        access_token = auth.create_access_token(email=user.email)
     except Exception as e:
         LOGGER.error(e)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid authentication credentials",
             headers={"WWW-Authenticate": "Bearer"},
-        )
+        ) from e
     return AuthToken(access_token=access_token, token_type="bearer")
+
+
+@app.get("/api/v1/clients/")
+def get_clients(
+    session: Annotated[sqlmodel.Session, Depends(db.get_session)],
+    user: Annotated[User, Depends(auth.get_current_user)],
+    page: int = Query(1, ge=1),
+    per_page: int = Query(settings.PER_PAGE, ge=1),
+) -> PagedClientResponse:
+    try:
+        paged_client_response = presenter.get_paged_clients(
+            user=user,
+            session=session,
+            page=page,
+            per_page=per_page,
+        )
+        return paged_client_response
+    except HTTPException as e:
+        LOGGER.error(e)
+        raise e
+    except Exception as e:
+        LOGGER.error(e)
+        raise HTTPException(
+            status_code=400,
+            detail=e,
+        ) from e
+
+
+@app.post("/api/v1/clients/add/")
+def add_client(
+    client: Client,
+    session: Annotated[sqlmodel.Session, Depends(db.get_session)],
+    user: Annotated[User, Depends(auth.get_current_user)],
+) -> Response:
+    try:
+        LOGGER.info(f"Adding client for user: {user.email}")
+        presenter.add_client(user=user, client=client, session=session)
+        return Response(
+            content="New client added to the database.",
+            status_code=200,
+        )
+    except HTTPException as e:
+        LOGGER.error(e)
+        raise e
+    except Exception as e:
+        LOGGER.error(e)
+        raise HTTPException(status_code=400, detail=e) from e
