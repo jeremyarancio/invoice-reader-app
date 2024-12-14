@@ -307,7 +307,7 @@ def test_add_client(
 
 
 @pytest.fixture
-def client_models(user: User):
+def client_models(user: User) -> list[ClientModel]:
     return [
         ClientModel(
             user_id=user.user_id,
@@ -328,6 +328,28 @@ def add_clients(
 ) -> None:
     session.add_all(client_models)
     session.commit()
+
+
+def test_add_existing_client(
+    client: TestClient,
+    auth_token: AuthToken,
+    session: Session,
+    client_models: list[ClientModel],
+    user: User,
+):
+    add_user_to_db(user=user, session=session)
+    add_clients(client_models=client_models, session=session)
+    client_model = client_models[0]
+    session.refresh(
+        client_model
+    )  # Since added to the database, the object is now empty.
+    client_data = Client.model_validate(client_model.model_dump())
+    response = client.post(
+        url="/api/v1/clients/add/",
+        json=client_data.model_dump(exclude="client_id"),
+        headers={"Authorization": f"Bearer {auth_token.access_token}"},
+    )
+    assert response.status_code == 409
 
 
 def test_get_clients(

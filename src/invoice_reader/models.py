@@ -36,7 +36,7 @@ class S3:
         try:
             s3_client.upload_fileobj(file, self.bucket, self.suffix)
         except ClientError:
-            raise ClientError
+            raise
 
 
 class UserModel(SQLModel, table=True):
