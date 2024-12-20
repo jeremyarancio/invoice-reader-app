@@ -6,7 +6,7 @@ import sqlmodel
 
 from invoice_reader.app.exceptions import EXISTING_INVOICE_EXCEPTION
 from invoice_reader.models import ClientModel, InvoiceModel, UserModel
-from invoice_reader.schemas import Client, Invoice, InvoiceResponse, User
+from invoice_reader.schemas import Client, Invoice, InvoiceGetResponse, User
 from invoice_reader.utils.logger import get_logger
 
 LOGGER = get_logger(__name__)
@@ -79,14 +79,14 @@ class InvoiceRepository(Repository[Invoice]):
             "Existing invoice %s data updated with new data: %s", id_, invoice_data
         )
 
-    def get(self, file_id: uuid.UUID, user_id: uuid.UUID) -> InvoiceResponse:
+    def get(self, file_id: uuid.UUID, user_id: uuid.UUID) -> InvoiceGetResponse:
         invoice_model = self.session.exec(
             sqlmodel.select(InvoiceModel).where(
                 InvoiceModel.file_id == file_id and InvoiceModel.user_id == user_id
             )
         ).one()
         invoice_data = Invoice.model_validate(invoice_model.model_dump())
-        invoice_response = InvoiceResponse(
+        invoice_response = InvoiceGetResponse(
             file_id=file_id, s3_path=invoice_model.s3_path, data=invoice_data
         )
         LOGGER.info("Invoice data retrieved from database: %s", invoice_response)
@@ -100,7 +100,7 @@ class InvoiceRepository(Repository[Invoice]):
         self.session.commit()
         LOGGER.info("Invoice %s deleted from database.", id_)
 
-    def get_all(self, user_id: uuid.UUID) -> list[InvoiceResponse]:
+    def get_all(self, user_id: uuid.UUID) -> list[InvoiceGetResponse]:
         invoice_responses = []
         invoice_models = self.session.exec(
             sqlmodel.select(InvoiceModel).where(InvoiceModel.user_id == user_id)
@@ -108,7 +108,7 @@ class InvoiceRepository(Repository[Invoice]):
         for invoice_model in invoice_models:
             invoice_data = Invoice.model_validate(invoice_model.model_dump())
             invoice_responses.append(
-                InvoiceResponse(
+                InvoiceGetResponse(
                     file_id=invoice_model.file_id,
                     s3_path=invoice_model.s3_path,
                     data=invoice_data,
@@ -120,11 +120,21 @@ class InvoiceRepository(Repository[Invoice]):
         )
         return invoice_responses
 
-    def get_by_invoice_number(self, invoice_number: str) -> InvoiceModel | None:
+    def get_by_invoice_number(self, invoice_number: str) -> Invoice | None:
         invoice_model = self.session.exec(
             sqlmodel.select(InvoiceModel).where(
                 InvoiceModel.invoice_number == invoice_number
             )
+        ).one_or_none()
+        if invoice_model:
+            invoice = Invoice.model_validate(invoice_model.model_dump())
+            LOGGER.info("Invoice data retrieved from database: %s", invoice)
+            return invoice
+
+    def get_by_user_id(self, user_id: uuid.UUID) -> Invoice | None:
+        # DUPLICATE WITH other get_by
+        invoice_model = self.session.exec(
+            sqlmodel.select(InvoiceModel).where(InvoiceModel.user_id == user_id)
         ).one_or_none()
         if invoice_model:
             invoice = Invoice.model_validate(invoice_model.model_dump())

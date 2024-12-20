@@ -16,9 +16,9 @@ from invoice_reader.schemas import (
     Client,
     FileData,
     InvoiceCreate,
-    InvoiceResponse,
-    PagedClientResponse,
-    PagedInvoiceResponse,
+    InvoiceGetResponse,
+    PagedClientGetResponse,
+    PagedInvoiceGetResponse,
     User,
 )
 from invoice_reader.utils import logger
@@ -73,7 +73,7 @@ def add_user(user: User, session: sqlmodel.Session) -> None:
 
 def get_invoice(
     user: User, file_id: uuid.UUID, session: sqlmodel.Session
-) -> InvoiceResponse:
+) -> InvoiceGetResponse:
     invoice_repository = InvoiceRepository(session=session)
     invoice_response = invoice_repository.get(user_id=user.user_id, file_id=file_id)
     return invoice_response
@@ -81,12 +81,12 @@ def get_invoice(
 
 def get_paged_invoices(
     user: User, session: sqlmodel.Session, page: int, per_page: int
-) -> PagedInvoiceResponse:
+) -> PagedInvoiceGetResponse:
     invoice_repository = InvoiceRepository(session=session)
     invoice_responses = invoice_repository.get_all(user_id=user.user_id)
     start = (page - 1) * per_page
     end = start + per_page
-    return PagedInvoiceResponse(
+    return PagedInvoiceGetResponse(
         page=page,
         per_page=per_page,
         total=len(invoice_responses),
@@ -110,9 +110,9 @@ def get_paged_clients(
     session: sqlmodel.Session,
     page: int,
     per_page: int,
-) -> PagedClientResponse:
+) -> PagedClientGetResponse:
     client_repository = ClientRepository(session=session)
     clients = client_repository.get_all(user_id=user.user_id, limit=per_page)
-    return PagedClientResponse(
+    return PagedClientGetResponse(
         page=page, per_page=per_page, total=len(clients), data=clients
     )
