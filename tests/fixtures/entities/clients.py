@@ -6,6 +6,7 @@ from invoice_reader.schemas import Client
 
 TOTAL_NUMBER = 3
 
+
 @pytest.fixture
 def new_client():
     return Client(
@@ -31,6 +32,7 @@ def existing_client():
         zipcode=45777,
     )
 
+
 @pytest.fixture
 def existing_clients() -> list[Client]:
     return [
@@ -42,5 +44,6 @@ def existing_clients() -> list[Client]:
             city="Carcassone",
             country="France",
             zipcode=45777,
-        ) for i in range(TOTAL_NUMBER)
+        )
+        for i in range(TOTAL_NUMBER)
     ]

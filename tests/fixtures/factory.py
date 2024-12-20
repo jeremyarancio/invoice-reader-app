@@ -12,8 +12,8 @@ from invoice_reader.models import (
     UserModel,
 )
 from invoice_reader.repository import (
-    InvoiceRepository,
     ClientRepository,
+    InvoiceRepository,
     UserRepository,
 )
 from invoice_reader.schemas import (
@@ -21,6 +21,7 @@ from invoice_reader.schemas import (
     FileData,
     Invoice,
     User,
+    UserCreate,
 )
 
 
@@ -43,11 +44,13 @@ def session_fixture() -> Session:  # type: ignore
 
 
 @pytest.fixture
-def existing_user_model(existing_user: User) -> UserModel:
+def existing_user_model(
+    existing_user: User, existing_user_create: UserCreate
+) -> UserModel:
     return UserModel(
         user_id=existing_user.user_id,
         email=existing_user.email,
-        hashed_password=auth.get_password_hash(existing_user.hashed_password),
+        hashed_password=auth.get_password_hash(existing_user_create.password),
         is_disabled=False,
     )
 
@@ -58,7 +61,7 @@ def existing_invoice_model(
     existing_client: Client,
     s3_suffix: str,
     existing_invoice: Invoice,
-    file_data: FileData
+    file_data: FileData,
 ) -> InvoiceModel:
     return InvoiceModel(
         file_id=file_data.file_id,

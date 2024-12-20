@@ -1,8 +1,8 @@
 from fastapi.testclient import TestClient
 
-from invoice_reader.schemas import AuthToken, Client, PagedClientGetResponse
 from invoice_reader.models import ClientModel, UserModel
 from invoice_reader.repository import ClientRepository
+from invoice_reader.schemas import AuthToken, Client, PagedClientGetResponse
 
 
 def test_add_client(
