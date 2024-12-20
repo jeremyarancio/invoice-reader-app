@@ -1,3 +1,4 @@
+from io import BytesIO
 from pathlib import Path
 from unittest.mock import Mock
 
@@ -47,6 +48,11 @@ def upload_files(filepath):
 @pytest.fixture
 def file_data(existing_user: User, filepath: Path) -> FileData:
     return FileData(user_id=existing_user.user_id, filename=filepath.name)
+
+
+@pytest.fixture
+def file():
+    return BytesIO(b"Files")
 
 
 @pytest.fixture
