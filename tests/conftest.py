@@ -1,4 +1,3 @@
-
 from pathlib import Path
 from unittest.mock import Mock
 
@@ -10,12 +9,16 @@ from invoice_reader import db
 from invoice_reader.app import auth, routes
 from invoice_reader.schemas import (
     AuthToken,
-    Client,
     FileData,
-    Invoice,
-    InvoiceCreate,
     User,
 )
+
+pytest_plugins = [
+    "tests.fixtures.factory",
+    "tests.fixtures.entities.invoices",
+    "tests.fixtures.entities.users",
+    "tests.fixtures.entities.clients",
+]
 
 
 @pytest.fixture()
@@ -42,8 +45,8 @@ def upload_files(filepath):
 
 
 @pytest.fixture
-def file_data(user: User, filepath: Path) -> FileData:
-    return FileData(user_id=user.user_id, filename=filepath.name)
+def file_data(existing_user: User, filepath: Path) -> FileData:
+    return FileData(user_id=existing_user.user_id, filename=filepath.name)
 
 
 @pytest.fixture
@@ -69,8 +72,8 @@ def bucket() -> str:
 
 
 @pytest.fixture
-def auth_token(user: User) -> AuthToken:
-    access_token = auth.create_access_token(email=user.email)
+def auth_token(existing_user: User) -> AuthToken:
+    access_token = auth.create_access_token(email=existing_user.email)
     return AuthToken(access_token=access_token, token_type="bearer")
 
 
@@ -81,8 +84,3 @@ def wrong_files(request, filepath: str):
     with open(filepath, "rb") as f:
         files = {key: (key, f, mime_type)}
         yield files
-
-
-@pytest.fixture
-def invoice_create(client: Client, invoice: Invoice) -> InvoiceCreate:
-    return InvoiceCreate(client_id=client.client_id, invoice=invoice)

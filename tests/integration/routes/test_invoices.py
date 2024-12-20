@@ -1,93 +1,144 @@
+from unittest.mock import Mock
+
+import pytest
+from fastapi.testclient import TestClient
+
+from invoice_reader.models import InvoiceModel, UserModel
+from invoice_reader.repository import InvoiceRepository
+from invoice_reader.schemas import (
+    AuthToken,
+    FileData,
+    InvoiceCreate,
+    InvoiceGetResponse,
+    PagedInvoiceGetResponse,
+)
+
+PAGE = 1
+PER_PAGE = 2
+
 
 def test_submit_invoice(
     upload_files,
-    client: TestClient,
+    api_client: TestClient,
     s3_mocker: Mock,
-    invoice_data: InvoiceCreate,
-    session: Session,
-    user: User,
+    new_invoice_create: InvoiceCreate,
     auth_token: AuthToken,
-    client_id: str,
+    test_existing_user: UserModel,
+    invoice_repository: InvoiceRepository,
 ):
-    data = json.dumps(
-        {
-            "invoice": json.loads(
-                invoice_data.model_dump_json()
-            ),  # Workaround because date not JSON serializable
-            "client_id": client_id,
-        }
-    )
-    response = client.post(
+    data = new_invoice_create.model_dump_json()
+    response = api_client.post(
         url="/api/v1/invoices/submit",
         data={"data": data},
         files=upload_files,
-        headers={"Authorization": f"Bearer {auth_token.access_token}"},
+        headers={"Authorization": f"{auth_token.token_type} {auth_token.access_token}"},
     )
-    invoice_data_from_db = session.exec(
-        select(models.InvoiceModel).where(models.InvoiceModel.user_id == user.user_id)
-    ).one_or_none()
 
-    assert response.status_code == 200
-    assert invoice_data_from_db is not None
+    invoice = invoice_repository.get_by_invoice_number(
+        new_invoice_create.invoice.invoice_number
+    )
+
+    assert response.status_code == 201
     s3_mocker.upload_fileobj.assert_called_once()
-    assert (
-        invoice_data_from_db.amount_excluding_tax == invoice_data.amount_excluding_tax
+    assert invoice.invoice_number == new_invoice_create.invoice.invoice_number
+
+
+def test_submit_exisiting_invoice(
+    upload_files,
+    api_client: TestClient,
+    s3_mocker: Mock,
+    existing_invoice_create: InvoiceCreate,
+    auth_token: AuthToken,
+    test_existing_user: UserModel,
+    test_existing_invoice: InvoiceModel,
+):
+    data = existing_invoice_create.model_dump_json()
+    response = api_client.post(
+        url="/api/v1/invoices/submit",
+        data={"data": data},
+        files=upload_files,
+        headers={"Authorization": f"{auth_token.token_type} {auth_token.access_token}"},
     )
-    assert invoice_data_from_db.invoice_number == invoice_data.invoice_number
-    assert invoice_data_from_db.invoiced_date == invoice_data.invoiced_date
-    assert invoice_data_from_db.uploaded_date is not None
+    assert response.status_code == 409
+    s3_mocker.upload_fileobj.assert_not_called()
 
 
+@pytest.mark.parametrize(
+    "wrong_files",
+    [
+        ("wrong_filename", "application/json"),
+        ("upload_file", "image/jpeg"),
+    ],
+    indirect=True,
+)
 def test_submit_invoice_with_wrong_format(
     wrong_files,
-    client: TestClient,
+    api_client: TestClient,
     s3_mocker: Mock,
     auth_token: AuthToken,
+    test_existing_user: UserModel,
 ):
-    response = client.post(
+    response = api_client.post(
         url="/api/v1/invoices/submit",
         files=wrong_files,
-        headers={"Authorization": f"Bearer {auth_token.access_token}"},
+        headers={"Authorization": f"{auth_token.token_type} {auth_token.access_token}"},
     )
     assert response.status_code == 422
     s3_mocker.assert_not_called()
 
 
 def test_get_invoice(
-    client: TestClient,
+    file_data: FileData,
+    api_client: TestClient,
     auth_token: AuthToken,
-    user: User,
-    invoice_models: list[InvoiceModel],
-    session: Session,
+    test_existing_invoice: InvoiceModel,
+    test_existing_user: UserModel,
 ):
-    invoice_model = invoice_models[0]
-    response = client.get(
-        url=f"/api/v1/invoices/{invoice_model.file_id}",
-        headers={"Authorization": f"Bearer {auth_token.access_token}"},
+    response = api_client.get(
+        url=f"/api/v1/invoices/{file_data.file_id}",
+        headers={"Authorization": f"{auth_token.token_type} {auth_token.access_token}"},
     )
-    payload = InvoiceResponse.model_validate(response.json())
+    payload = InvoiceGetResponse.model_validate(response.json())
     assert response.status_code == 200
-    assert payload.file_id == invoice_model.file_id
-    assert payload.s3_path == invoice_model.s3_path
-    assert payload.data.invoice_number == invoice_model.invoice_number
+    assert payload.file_id == test_existing_invoice.file_id
+    assert payload.s3_path == test_existing_invoice.s3_path
+    assert payload.data.invoice_number == test_existing_invoice.invoice_number
 
 
 def test_get_invoices(
-    client: TestClient,
+    api_client: TestClient,
     auth_token: AuthToken,
-    user: User,
-    invoice_models: list[InvoiceModel],
-    session: Session,
+    test_existing_invoices: list[InvoiceModel],
+    test_existing_user: UserModel,
 ):
-    PAGE = 1
-    PER_PAGE = 2
-    response = client.get(
+    response = api_client.get(
         url="/api/v1/invoices/",
         headers={"Authorization": f"Bearer {auth_token.access_token}"},
         params={"page": PAGE, "per_page": PER_PAGE},
     )
-    payload = PagedInvoiceResponse.model_validate(response.json())
+    paged_invoices = PagedInvoiceGetResponse.model_validate(response.json())
+
     assert response.status_code == 200
-    assert len(payload.data) == PER_PAGE
-    assert payload.total == len(invoice_models)
-    assert all(item.data.invoice_number for item in payload.data)
+    assert len(paged_invoices.data) == PER_PAGE
+    assert paged_invoices.total == 3
+    assert (
+        test_existing_invoices[0].invoice_number
+        == paged_invoices.data[0].data.invoice_number
+    )
+
+
+def test_submit_invoice_unauthorized(
+    upload_files,
+    api_client: TestClient,
+    new_invoice_create: InvoiceCreate,
+    test_existing_user: UserModel,
+):
+    data = new_invoice_create.model_dump_json()
+    response = api_client.post(
+        url="/api/v1/invoices/submit",
+        data={"data": data},
+        files=upload_files,
+        headers={"Authorization": "Bearer invalid_token"},
+    )
+
+    assert response.status_code == 401

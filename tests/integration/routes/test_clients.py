@@ -1,12 +1,11 @@
-
 def test_add_client(
-    client: TestClient,
+    api_client: TestClient,
     client_data: Client,
     auth_token: AuthToken,
     user: User,
     session: Session,
 ):
-    response = client.post(
+    response = api_client.post(
         url="/api/v1/clients/add/",
         json=client_data.model_dump(),
         headers={"Authorization": f"Bearer {auth_token.access_token}"},
@@ -21,7 +20,7 @@ def test_add_client(
 
 
 def test_add_existing_client(
-    client: TestClient,
+    api_client: TestClient,
     auth_token: AuthToken,
     session: Session,
     client_models: list[ClientModel],
@@ -32,7 +31,7 @@ def test_add_existing_client(
         client_model
     )  # Since added to the database, the object is now empty.
     client_data = Client.model_validate(client_model.model_dump())
-    response = client.post(
+    response = api_client.post(
         url="/api/v1/clients/add/",
         json=client_data.model_dump(exclude="client_id"),
         headers={"Authorization": f"Bearer {auth_token.access_token}"},
@@ -43,9 +42,9 @@ def test_add_existing_client(
 def test_get_clients(
     client_models: list[ClientModel],
     auth_token: AuthToken,
-    client: TestClient,
+    api_client: TestClient,
 ):
-    response = client.get(
+    response = api_client.get(
         url="/api/v1/clients/",
         headers={"Authorization": f"Bearer {auth_token.access_token}"},
     )

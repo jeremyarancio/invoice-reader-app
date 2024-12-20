@@ -51,7 +51,7 @@ class InvoiceCreate(BaseModel):
     client_id: uuid.UUID
 
 
-class InvoiceResponse(BaseModel):
+class InvoiceGetResponse(BaseModel):
     file_id: uuid.UUID
     s3_path: str
     data: Invoice
@@ -67,11 +67,11 @@ class FileData(BaseModel):
         return os.path.splitext(self.filename)[-1]
 
 
-class PagedInvoiceResponse(BaseModel):
+class PagedInvoiceGetResponse(BaseModel):
     page: int
     per_page: int
     total: int
-    data: list[InvoiceResponse]
+    data: list[InvoiceGetResponse]
 
 
 class PagedClientResponse(BaseModel):

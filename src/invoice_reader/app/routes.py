@@ -16,9 +16,9 @@ from invoice_reader.schemas import (
     Client,
     Invoice,
     InvoiceCreate,
-    InvoiceResponse,
+    InvoiceGetResponse,
     PagedClientResponse,
-    PagedInvoiceResponse,
+    PagedInvoiceGetResponse,
     User,
     UserCreate,
 )
@@ -92,12 +92,12 @@ def submit(
             )
             return Response(
                 content="The file and its information were successfully stored.",
-                status_code=200,
+                status_code=201,
             )
         extracted_metadata = presenter.extract(file=upload_file.file)
         return Response(
             content={"data": extracted_metadata},
-            status_code=200,
+            status_code=201,
         )
     except HTTPException as e:
         LOGGER.error(e)
@@ -112,7 +112,7 @@ def get_file(
     file_id: uuid.UUID,
     session: Annotated[sqlmodel.Session, Depends(db.get_session)],
     user: Annotated[User, Depends(auth.get_current_user)],
-) -> InvoiceResponse:
+) -> InvoiceGetResponse:
     try:
         invoice = presenter.get_invoice(user=user, file_id=file_id, session=session)
         return invoice
@@ -129,7 +129,7 @@ def get_invoices(
     user: Annotated[User, Depends(auth.get_current_user)],
     page: int = Query(1, ge=1),
     per_page: int = Query(settings.PER_PAGE, ge=1),
-) -> PagedInvoiceResponse:
+) -> PagedInvoiceGetResponse:
     try:
         paged_invoices = presenter.get_paged_invoices(
             user=user, session=session, page=page, per_page=per_page
@@ -145,7 +145,7 @@ def get_invoices(
 @app.post("/api/v1/users/register/")
 def register(user: UserCreate, session: sqlmodel.Session = Depends(db.get_session)):
     auth.register_user(user=user, session=session)
-    return Response(content="User has been added to the database.", status_code=200)
+    return Response(content="User has been added to the database.", status_code=201)
 
 
 @app.post("/api/v1/users/login/")
@@ -205,7 +205,7 @@ def add_client(
         presenter.add_client(user=user, client=client, session=session)
         return Response(
             content="New client added to the database.",
-            status_code=200,
+            status_code=201,
         )
     except HTTPException as e:
         LOGGER.error(e)
