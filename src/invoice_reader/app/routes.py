@@ -17,7 +17,7 @@ from invoice_reader.schemas import (
     Invoice,
     InvoiceCreate,
     InvoiceGetResponse,
-    PagedClientResponse,
+    PagedClientGetResponse,
     PagedInvoiceGetResponse,
     User,
     UserCreate,
@@ -174,7 +174,7 @@ def get_clients(
     user: Annotated[User, Depends(auth.get_current_user)],
     page: int = Query(1, ge=1),
     per_page: int = Query(settings.PER_PAGE, ge=1),
-) -> PagedClientResponse:
+) -> PagedClientGetResponse:
     try:
         paged_client_response = presenter.get_paged_clients(
             user=user,

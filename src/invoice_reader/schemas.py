@@ -74,7 +74,7 @@ class PagedInvoiceGetResponse(BaseModel):
     data: list[InvoiceGetResponse]
 
 
-class PagedClientResponse(BaseModel):
+class PagedClientGetResponse(BaseModel):
     page: int
     per_page: int
     total: int

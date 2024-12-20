@@ -13,6 +13,8 @@ from invoice_reader.models import (
 )
 from invoice_reader.repository import (
     InvoiceRepository,
+    ClientRepository,
+    UserRepository,
 )
 from invoice_reader.schemas import (
     Client,
@@ -92,7 +94,6 @@ def existing_client_model(
     existing_client: Client,
 ) -> ClientModel:
     return ClientModel(
-        client_id=uuid.uuid4(),
         user_id=existing_user.user_id,
         **existing_client.model_dump(),
     )
@@ -105,7 +106,6 @@ def existing_client_models(
 ) -> list[ClientModel]:
     return [
         ClientModel(
-            client_id=uuid.uuid4(),
             user_id=existing_user.user_id,
             **client.model_dump(),
         )
@@ -157,3 +157,13 @@ def test_existing_client(
 @pytest.fixture
 def invoice_repository(session: Session) -> InvoiceRepository:
     return InvoiceRepository(session=session)
+
+
+@pytest.fixture
+def client_repository(session: Session) -> ClientRepository:
+    return ClientRepository(session=session)
+
+
+@pytest.fixture
+def user_repository(session: Session) -> UserRepository:
+    return UserRepository(session=session)

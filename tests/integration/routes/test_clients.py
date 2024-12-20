@@ -1,53 +1,58 @@
+from fastapi.testclient import TestClient
+
+from invoice_reader.schemas import AuthToken, Client, PagedClientGetResponse
+from invoice_reader.models import ClientModel, UserModel
+from invoice_reader.repository import ClientRepository
+
+
 def test_add_client(
     api_client: TestClient,
-    client_data: Client,
+    new_client: Client,
     auth_token: AuthToken,
-    user: User,
-    session: Session,
+    client_repository: ClientRepository,
+    test_existing_user: UserModel,
 ):
     response = api_client.post(
         url="/api/v1/clients/add/",
-        json=client_data.model_dump(),
-        headers={"Authorization": f"Bearer {auth_token.access_token}"},
+        data=new_client.model_dump_json(),
+        headers={"Authorization": f"{auth_token.token_type} {auth_token.access_token}"},
     )
-    client_data_from_db = session.exec(
-        select(ClientModel).where(ClientModel.user_id == user.user_id)
-    ).first()
 
-    assert response.status_code == 200
-    assert client_data_from_db
-    assert client_data_from_db.client_name == client_data.client_name
+    client = client_repository.get_by_name(
+        client_name=new_client.client_name, user_id=test_existing_user.user_id
+    )
+
+    assert response.status_code == 201
+    assert client
+    assert client.client_name == new_client.client_name
+    assert client.street_address == new_client.street_address
 
 
 def test_add_existing_client(
     api_client: TestClient,
     auth_token: AuthToken,
-    session: Session,
-    client_models: list[ClientModel],
-    user: User,
+    test_existing_user: UserModel,
+    test_existing_client: ClientModel,
 ):
-    client_model = client_models[0]
-    session.refresh(
-        client_model
-    )  # Since added to the database, the object is now empty.
-    client_data = Client.model_validate(client_model.model_dump())
     response = api_client.post(
         url="/api/v1/clients/add/",
-        json=client_data.model_dump(exclude="client_id"),
-        headers={"Authorization": f"Bearer {auth_token.access_token}"},
+        data=test_existing_client.model_dump_json(),
+        headers={"Authorization": f"{auth_token.token_type} {auth_token.access_token}"},
     )
     assert response.status_code == 409
 
 
 def test_get_clients(
-    client_models: list[ClientModel],
     auth_token: AuthToken,
     api_client: TestClient,
+    test_existing_clients: list[ClientModel],
+    test_existing_user: UserModel,
 ):
     response = api_client.get(
         url="/api/v1/clients/",
-        headers={"Authorization": f"Bearer {auth_token.access_token}"},
+        headers={"Authorization": f"{auth_token.token_type} {auth_token.access_token}"},
     )
-    payload = PagedClientResponse.model_validate(response.json())
+    paged_clients = PagedClientGetResponse.model_validate(response.json())
     assert response.status_code == 200
-    assert payload.total == len(client_models)
+    assert paged_clients.total == len(test_existing_clients)
+    assert paged_clients.data[0].client_name == test_existing_clients[0].client_name
