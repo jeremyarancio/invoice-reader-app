@@ -1,7 +1,7 @@
 from typing import BinaryIO
 
 from invoice_reader.models import S3
-from invoice_reader.repository import InvoiceRepository, Repository
+from invoice_reader.repository import InvoiceRepository
 from invoice_reader.schemas import FileData, InvoiceCreate
 from invoice_reader.utils.logger import get_logger
 
@@ -12,7 +12,7 @@ def store(
     file: BinaryIO,
     file_data: FileData,
     invoice_data: InvoiceCreate,
-    invoice_repository: Repository,
+    invoice_repository: InvoiceRepository,
     s3_model: S3,
 ) -> None:
     store_invoice_data(

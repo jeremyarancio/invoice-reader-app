@@ -1,6 +1,4 @@
 import uuid
-from abc import ABC, abstractmethod
-from typing import TypeVar
 
 import sqlmodel
 
@@ -11,32 +9,8 @@ from invoice_reader.utils.logger import get_logger
 
 LOGGER = get_logger(__name__)
 
-T = TypeVar("T")
 
-
-class Repository[T](ABC):
-    @abstractmethod
-    def get(self, id_: str) -> T:
-        raise NotImplementedError
-
-    @abstractmethod
-    def delete(self, id_: str) -> None:
-        raise NotImplementedError
-
-    @abstractmethod
-    def update(self, **kwargs: object) -> None:
-        raise NotImplementedError
-
-    @abstractmethod
-    def add(self, id_: str, **kwargs: object) -> None:
-        raise NotImplementedError
-
-    @abstractmethod
-    def get_all(self, limit: int) -> list[T]:
-        raise NotImplementedError
-
-
-class InvoiceRepository(Repository[Invoice]):
+class InvoiceRepository:
     def __init__(self, session: sqlmodel.Session):
         self.session = session
 
@@ -92,13 +66,14 @@ class InvoiceRepository(Repository[Invoice]):
         LOGGER.info("Invoice data retrieved from database: %s", invoice_response)
         return invoice_response
 
-    def delete(self, id_: str) -> None:
+    def delete(self, file_id: uuid.UUID, user_id: uuid.UUID) -> None:
         invoice_model = self.session.exec(
-            sqlmodel.select(InvoiceModel.file_id == id_)
+            sqlmodel.select(InvoiceModel).where(
+                InvoiceModel.file_id == file_id and InvoiceModel.user_id == user_id
+            )
         ).one()
         self.session.delete(invoice_model)
         self.session.commit()
-        LOGGER.info("Invoice %s deleted from database.", id_)
 
     def get_all(self, user_id: uuid.UUID) -> list[InvoiceGetResponse]:
         invoice_responses = []
@@ -142,7 +117,7 @@ class InvoiceRepository(Repository[Invoice]):
             return invoice
 
 
-class UserRepository(Repository):
+class UserRepository:
     def __init__(self, session: sqlmodel.Session):
         self.session = session
 
@@ -166,8 +141,12 @@ class UserRepository(Repository):
     def get(self, id_: str) -> User:
         pass
 
-    def delete(self, id_: str) -> None:
-        pass
+    def delete(self, user_id: uuid.UUID) -> None:
+        user_model = self.session.exec(
+            sqlmodel.select(UserModel).where(UserModel.user_id == user_id)
+        ).one()
+        self.session.delete(user_model)
+        self.session.commit()
 
     def get_all(self, limit: int = 10) -> list[User]:
         users_model = self.session.exec(sqlmodel.select(UserModel).limit(limit)).all()
@@ -194,7 +173,7 @@ class UserRepository(Repository):
             return user
 
 
-class ClientRepository(Repository):
+class ClientRepository:
     def __init__(self, session: sqlmodel.Session):
         self.session = session
 
@@ -219,8 +198,14 @@ class ClientRepository(Repository):
     def update():
         pass
 
-    def delete():
-        pass
+    def delete(self, client_id: uuid.UUID, user_id: uuid.UUID):
+        client_model = self.session.exec(
+            sqlmodel.select(ClientModel).where(
+                ClientModel.client_id == client_id and ClientModel.user_id == user_id
+            )
+        ).one()
+        self.session.delete(client_model)
+        self.session.commit()
 
     def get_by_name(self, user_id: uuid.UUID, client_name: str) -> Client | None:
         client_model = self.session.exec(
