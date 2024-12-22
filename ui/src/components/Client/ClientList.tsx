@@ -67,7 +67,7 @@ const ClientList: React.FC = () => {
 
     return (
         <div>
-            <h2>Invoices</h2>
+            <h2>Clients</h2>
             <Table striped hover>
                 <thead>
                     <tr>
