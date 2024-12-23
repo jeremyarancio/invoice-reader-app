@@ -1,35 +1,42 @@
 import React, { useState, useEffect } from "react";
-import { Table, Alert, Button } from "react-bootstrap";
+import { Table, Alert, Button, Form, Modal } from "react-bootstrap";
 import { getAllInvoice } from "../../services/api";
 import { useMutation } from "@tanstack/react-query";
-import { InvoiceDataRender, GetInvoicesResponse } from "../../types";
+import { InvoiceRender, GetInvoicesResponse, Invoice } from "../../types";
 import { useNavigate } from "react-router-dom";
 
 const InvoiceList: React.FC = () => {
     const [pageNumber, setPageNumber] = useState<number>(1);
     const [perPage, setPerPage] = useState<number>(10);
-    const [invoiceRenderList, setInvoiceRenderList] = useState<
-        InvoiceDataRender[]
-    >([]);
+    const [invoiceRenderList, setInvoiceRenderList] = useState<InvoiceRender[]>(
+        []
+    );
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
     const [totalInvoices, setTotalInvoices] = useState<number>(0);
+    const [selectedInvoices, setSelectedInvoices] = useState<Invoice[]>([]);
     const navigate = useNavigate();
 
     const InvoiceListMutation = useMutation({
         mutationFn: getAllInvoice,
         onSuccess: (response: GetInvoicesResponse) => {
             setError(null);
-
-            const ExtractedInvoiceRender: InvoiceDataRender[] =
-                response.data.map((item) => ({
-                    invoiceNumber: item.data.invoice_number,
-                    clientName: item.data.client_name,
-                    invoicedDate: item.data.invoiced_date,
-                    amountExcludingTax: item.data.amount_excluding_tax,
-                    vat: item.data.vat,
-                    currency: item.data.currency,
-                }));
+            console.log(response);
+            const ExtractedInvoiceRender: InvoiceRender[] = response.data.map(
+                (item) => ({
+                    data: {
+                        invoice_id: item.invoice_id,
+                        invoice_number: item.data.invoice_number,
+                        client_id: item.data.client_id,
+                        currency: item.data.currency,
+                        invoiced_date: item.data.invoiced_date,
+                        amount_excluding_tax: item.data.amount_excluding_tax,
+                        vat: item.data.vat,
+                    },
+                    clientName: item.data.client_id,
+                    paid: true,
+                })
+            );
 
             setInvoiceRenderList(ExtractedInvoiceRender);
             setTotalInvoices(response.total);
@@ -61,10 +68,28 @@ const InvoiceList: React.FC = () => {
         setPageNumber(1);
     };
 
+    const handleSelect = (invoice: Invoice) => {
+        setSelectedInvoices(prevSelected => {
+            if (prevSelected.includes(invoice)) {
+                return prevSelected.filter(item => item.invoice_id !== invoice.invoice_id);
+            }
+            return [...prevSelected, invoice];
+        });
+    };
+
+    const handleSelectAll = () => {
+        if (selectedInvoices.length === invoiceRenderList.length) {
+            setSelectedInvoices([]);
+        } else {
+            setSelectedInvoices(invoiceRenderList.map(item => item.data));
+        }
+    };
+
     const addInvoice = () => {
         navigate("/upload");
     };
 
+    console.log(selectedInvoices)
     if (isLoading) return <div>Loading invoices...</div>;
     if (error)
         return (
@@ -77,8 +102,15 @@ const InvoiceList: React.FC = () => {
             <Table striped hover>
                 <thead>
                     <tr>
+                        <th>
+                            <Form.Check
+                                type="checkbox"
+                                className="mb-1"
+                                onChange={() => handleSelectAll()}
+                            ></Form.Check>
+                        </th>
                         <th>Invoice Number</th>
-                        <th>Client Name</th>
+                        <th>Client id</th>
                         <th>Date</th>
                         <th>Amount (Excl. Tax)</th>
                         <th>VAT</th>
@@ -86,15 +118,23 @@ const InvoiceList: React.FC = () => {
                 </thead>
                 <tbody>
                     {invoiceRenderList.map((item) => (
-                        <tr key={item.invoiceNumber}>
-                            <td>{item.invoiceNumber}</td>
-                            <td>{item.clientName}</td>
-                            <td>{item.invoicedDate.toString()}</td>
+                        <tr key={item.data.invoice_number}>
                             <td>
-                                {item.currency}
-                                {item.amountExcludingTax.toFixed(0)}
+                                <Form.Check
+                                    type="checkbox"
+                                    className="mb-3"
+                                    onChange={() => handleSelect(item.data)}
+                                    checked={selectedInvoices.length === invoiceRenderList.length}
+                                ></Form.Check>
                             </td>
-                            <td>{item.vat}%</td>
+                            <td>{item.data.invoice_number}</td>
+                            <td>{item.clientName}</td>
+                            <td>{item.data.invoiced_date?.toString()}</td>
+                            <td>
+                                {item.data.currency}
+                                {item.data.amount_excluding_tax?.toFixed(0)}
+                            </td>
+                            <td>{item.data.vat}%</td>
                         </tr>
                     ))}
                 </tbody>

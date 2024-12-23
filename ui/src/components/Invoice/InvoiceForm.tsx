@@ -2,28 +2,26 @@ import React, { useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Form, Button, Alert } from "react-bootstrap";
 import { submitInvoice, fetchClients } from "../../services/api";
-import {
-    InvoiceData,
-    GetClientsResponse,
-    AddInvoicePayload,
-} from "../../types";
+import { Invoice, GetClientsResponse, AddInvoicePayload } from "../../types";
 import { useNavigate } from "react-router-dom";
 
 interface FormProperties {
     file: File;
 }
 
-const initialInvoicePayload: InvoiceData = {
+const initialInvoicePayload: Invoice = {
     amount_excluding_tax: 0,
     vat: 0,
     currency: "€",
     invoiced_date: new Date(),
     invoice_number: "",
+    invoice_id: "",
+    client_id: "",
 };
 
 function InvoiceForm({ file }: FormProperties) {
     const [clientId, setClientId] = useState<string>("");
-    const [invoicePayload, setInvoicePayload] = useState<InvoiceData>(
+    const [invoicePayload, setInvoicePayload] = useState<Invoice>(
         initialInvoicePayload
     );
     const [error, setError] = useState<string | null>(null);

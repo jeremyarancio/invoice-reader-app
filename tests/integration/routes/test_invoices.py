@@ -100,7 +100,7 @@ def test_get_invoice(
     )
     payload = InvoiceGetResponse.model_validate(response.json())
     assert response.status_code == 200
-    assert payload.file_id == test_existing_invoice.file_id
+    assert payload.invoice_id == test_existing_invoice.file_id
     assert payload.s3_path == test_existing_invoice.s3_path
     assert payload.data.invoice_number == test_existing_invoice.invoice_number
 

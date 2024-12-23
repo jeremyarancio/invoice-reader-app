@@ -61,7 +61,9 @@ class InvoiceRepository:
         ).one()
         invoice_data = Invoice.model_validate(invoice_model.model_dump())
         invoice_response = InvoiceGetResponse(
-            file_id=file_id, s3_path=invoice_model.s3_path, data=invoice_data
+            invoice_id=file_id,
+            s3_path=invoice_model.s3_path,
+            data=invoice_data,
         )
         LOGGER.info("Invoice data retrieved from database: %s", invoice_response)
         return invoice_response
@@ -84,7 +86,7 @@ class InvoiceRepository:
             invoice_data = Invoice.model_validate(invoice_model.model_dump())
             invoice_responses.append(
                 InvoiceGetResponse(
-                    file_id=invoice_model.file_id,
+                    invoice_id=invoice_model.file_id,
                     s3_path=invoice_model.s3_path,
                     data=invoice_data,
                 )

@@ -1,14 +1,12 @@
-export interface InvoiceDataRender {
-    invoiceNumber: string;
+export interface InvoiceRender {
+    data: Invoice;
     clientName: string;
-    invoicedDate: Date;
-    amountExcludingTax: number;
-    vat: number;
-    currency: string;
     paid?: boolean;
 }
 
-export interface InvoiceData {
+export interface Invoice {
+    invoice_id: string;
+    client_id: string;
     amount_excluding_tax: number;
     vat: number;
     currency: string;
@@ -17,7 +15,7 @@ export interface InvoiceData {
 }
 
 export interface AddInvoicePayload {
-    invoice: InvoiceData;
+    invoice: Invoice;
     client_id: string;
 }
 
@@ -41,9 +39,9 @@ export interface GetInvoicesResponse {
     per_page: number;
     total: number;
     data: {
-        file_id: string;
         s3_path: string;
-        data: InvoiceData;
+        invoice_id: string;
+        data: Invoice;
     }[];
 }
 
