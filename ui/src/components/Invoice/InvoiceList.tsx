@@ -1,13 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-    Table,
-    Alert,
-    Button,
-    Form,
-    Dropdown,
-    DropdownButton,
-    Modal,
-} from "react-bootstrap";
+import { Table, Alert, Button, Form, Dropdown, Modal } from "react-bootstrap";
 import { getAllInvoice, deleteInvoice } from "../../services/api";
 import { useMutation } from "@tanstack/react-query";
 import { InvoiceRender, GetInvoicesResponse, Invoice } from "../../types";
@@ -146,25 +138,30 @@ const InvoiceList: React.FC = () => {
         mutationFn: deleteInvoice,
         onSuccess: () => {
             setSelectedInvoices([]);
-            alert('Invoices deleted successfully');
+            alert("Invoices deleted successfully");
         },
         onError: (error) => {
-            alert('Failed to delete invoices: ' + error.message);
-        }
+            alert("Failed to delete invoices: " + error.message);
+        },
     });
 
     const handleDeleteSelected = () => {
         if (selectedInvoices.length === 0) {
-            alert('Please select invoices to delete');
+            alert("Please select invoices to delete");
             return;
         }
 
-        if (window.confirm('Are you sure you want to delete the selected invoices?')) {
-            const invoiceIds = selectedInvoices.map(invoice => invoice.invoice_id);
+        if (
+            window.confirm(
+                "Are you sure you want to delete the selected invoices?"
+            )
+        ) {
+            const invoiceIds = selectedInvoices.map(
+                (invoice) => invoice.invoice_id
+            );
             deleteInvoiceMutation.mutate(invoiceIds);
         }
     };
-
 
     const addInvoice = () => {
         navigate("/upload");
@@ -190,7 +187,10 @@ const InvoiceList: React.FC = () => {
                         </Dropdown.Toggle>
 
                         <Dropdown.Menu>
-                            <Dropdown.Item href="#/delete" onClick={handleDeleteSelected}>
+                            <Dropdown.Item
+                                href="#/delete"
+                                onClick={handleDeleteSelected}
+                            >
                                 <img src="src/assets/trash.svg"></img> Delete
                             </Dropdown.Item>
                         </Dropdown.Menu>

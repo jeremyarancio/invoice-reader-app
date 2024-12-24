@@ -131,15 +131,12 @@ export const deleteInvoice = async (invoice_ids: string[]) => {
 
     await Promise.all(
         invoice_ids.map(async (invoice_id) => {
-            await api.delete(
-                "invoices/" + invoice_id,
-                {
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `${tokenType} ${accessToken}`,
-                    },
-                }
-            );
+            await api.delete("invoices/" + invoice_id, {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `${tokenType} ${accessToken}`,
+                },
+            });
         })
     );
 };
