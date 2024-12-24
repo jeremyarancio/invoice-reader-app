@@ -8,9 +8,7 @@ import { useNavigate } from "react-router-dom";
 const InvoiceList: React.FC = () => {
     const [pageNumber, setPageNumber] = useState<number>(1);
     const [perPage, setPerPage] = useState<number>(10);
-    const [invoiceRenderList, setInvoiceRenderList] = useState<InvoiceRender[]>(
-        []
-    );
+    const [invoiceRenderList, setInvoiceRenderList] = useState<InvoiceRender[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
     const [totalInvoices, setTotalInvoices] = useState<number>(0);
@@ -70,7 +68,7 @@ const InvoiceList: React.FC = () => {
 
     const handleSelect = (invoice: Invoice) => {
         setSelectedInvoices(prevSelected => {
-            if (prevSelected.includes(invoice)) {
+            if (prevSelected.some(item => item.invoice_id === invoice.invoice_id)) {
                 return prevSelected.filter(item => item.invoice_id !== invoice.invoice_id);
             }
             return [...prevSelected, invoice];
@@ -78,23 +76,46 @@ const InvoiceList: React.FC = () => {
     };
 
     const handleSelectAll = () => {
-        if (selectedInvoices.length === invoiceRenderList.length) {
-            setSelectedInvoices([]);
+        const allCurrentPageInvoices = invoiceRenderList.map(item => item.data);
+        const areAllSelected = allCurrentPageInvoices.every(invoice => 
+            selectedInvoices.some(selected => selected.invoice_id === invoice.invoice_id)
+        );
+
+        if (areAllSelected) {
+            setSelectedInvoices(prevSelected => 
+                prevSelected.filter(selected => 
+                    !allCurrentPageInvoices.some(invoice => invoice.invoice_id === selected.invoice_id)
+                )
+            );
         } else {
-            setSelectedInvoices(invoiceRenderList.map(item => item.data));
+            setSelectedInvoices(prevSelected => {
+                const newSelected = [...prevSelected];
+                allCurrentPageInvoices.forEach(invoice => {
+                    if (!newSelected.some(selected => selected.invoice_id === invoice.invoice_id)) {
+                        newSelected.push(invoice);
+                    }
+                });
+                return newSelected;
+            });
         }
+    };
+
+    const isInvoiceSelected = (invoice: Invoice) => {
+        return selectedInvoices.some(selected => selected.invoice_id === invoice.invoice_id);
+    };
+
+    const areAllCurrentPageSelected = () => {
+        return invoiceRenderList.length > 0 && invoiceRenderList.every(item => 
+            isInvoiceSelected(item.data)
+        );
     };
 
     const addInvoice = () => {
         navigate("/upload");
     };
 
-    console.log(selectedInvoices)
     if (isLoading) return <div>Loading invoices...</div>;
-    if (error)
-        return (
-            <Alert variant="danger">Log in to visualize your invoices...</Alert>
-        );
+    if (error) return <Alert variant="danger">Log in to visualize your invoices...</Alert>;
 
     return (
         <div>
@@ -106,8 +127,9 @@ const InvoiceList: React.FC = () => {
                             <Form.Check
                                 type="checkbox"
                                 className="mb-1"
-                                onChange={() => handleSelectAll()}
-                            ></Form.Check>
+                                onChange={handleSelectAll}
+                                checked={areAllCurrentPageSelected()}
+                            />
                         </th>
                         <th>Invoice Number</th>
                         <th>Client id</th>
@@ -124,8 +146,8 @@ const InvoiceList: React.FC = () => {
                                     type="checkbox"
                                     className="mb-3"
                                     onChange={() => handleSelect(item.data)}
-                                    checked={selectedInvoices.length === invoiceRenderList.length}
-                                ></Form.Check>
+                                    checked={isInvoiceSelected(item.data)}
+                                />
                             </td>
                             <td>{item.data.invoice_number}</td>
                             <td>{item.clientName}</td>
@@ -147,9 +169,7 @@ const InvoiceList: React.FC = () => {
                         <input
                             type="number"
                             value={pageNumber}
-                            onChange={(e) =>
-                                handlePageChange(Number(e.target.value))
-                            }
+                            onChange={(e) => handlePageChange(Number(e.target.value))}
                             min="1"
                             max={Math.ceil(totalInvoices / perPage)}
                             className="form-control d-inline-block w-auto ms-2"
@@ -161,9 +181,7 @@ const InvoiceList: React.FC = () => {
                         Per Page:
                         <select
                             value={perPage}
-                            onChange={(e) =>
-                                handlePerPageChange(Number(e.target.value))
-                            }
+                            onChange={(e) => handlePerPageChange(Number(e.target.value))}
                             className="form-control d-inline-block w-auto ms-2"
                         >
                             <option value={10}>10</option>
