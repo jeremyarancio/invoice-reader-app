@@ -1,6 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { Table, Alert, Button, Form, Modal } from "react-bootstrap";
-import { getAllInvoice } from "../../services/api";
+import {
+    Table,
+    Alert,
+    Button,
+    Form,
+    Dropdown,
+    DropdownButton,
+    Modal,
+} from "react-bootstrap";
+import { getAllInvoice, deleteInvoice } from "../../services/api";
 import { useMutation } from "@tanstack/react-query";
 import { InvoiceRender, GetInvoicesResponse, Invoice } from "../../types";
 import { useNavigate } from "react-router-dom";
@@ -8,7 +16,9 @@ import { useNavigate } from "react-router-dom";
 const InvoiceList: React.FC = () => {
     const [pageNumber, setPageNumber] = useState<number>(1);
     const [perPage, setPerPage] = useState<number>(10);
-    const [invoiceRenderList, setInvoiceRenderList] = useState<InvoiceRender[]>([]);
+    const [invoiceRenderList, setInvoiceRenderList] = useState<InvoiceRender[]>(
+        []
+    );
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
     const [totalInvoices, setTotalInvoices] = useState<number>(0);
@@ -67,31 +77,50 @@ const InvoiceList: React.FC = () => {
     };
 
     const handleSelect = (invoice: Invoice) => {
-        setSelectedInvoices(prevSelected => {
-            if (prevSelected.some(item => item.invoice_id === invoice.invoice_id)) {
-                return prevSelected.filter(item => item.invoice_id !== invoice.invoice_id);
+        setSelectedInvoices((prevSelected) => {
+            if (
+                prevSelected.some(
+                    (item) => item.invoice_id === invoice.invoice_id
+                )
+            ) {
+                return prevSelected.filter(
+                    (item) => item.invoice_id !== invoice.invoice_id
+                );
             }
             return [...prevSelected, invoice];
         });
     };
 
     const handleSelectAll = () => {
-        const allCurrentPageInvoices = invoiceRenderList.map(item => item.data);
-        const areAllSelected = allCurrentPageInvoices.every(invoice => 
-            selectedInvoices.some(selected => selected.invoice_id === invoice.invoice_id)
+        const allCurrentPageInvoices = invoiceRenderList.map(
+            (item) => item.data
+        );
+        const areAllSelected = allCurrentPageInvoices.every((invoice) =>
+            selectedInvoices.some(
+                (selected) => selected.invoice_id === invoice.invoice_id
+            )
         );
 
         if (areAllSelected) {
-            setSelectedInvoices(prevSelected => 
-                prevSelected.filter(selected => 
-                    !allCurrentPageInvoices.some(invoice => invoice.invoice_id === selected.invoice_id)
+            setSelectedInvoices((prevSelected) =>
+                prevSelected.filter(
+                    (selected) =>
+                        !allCurrentPageInvoices.some(
+                            (invoice) =>
+                                invoice.invoice_id === selected.invoice_id
+                        )
                 )
             );
         } else {
-            setSelectedInvoices(prevSelected => {
+            setSelectedInvoices((prevSelected) => {
                 const newSelected = [...prevSelected];
-                allCurrentPageInvoices.forEach(invoice => {
-                    if (!newSelected.some(selected => selected.invoice_id === invoice.invoice_id)) {
+                allCurrentPageInvoices.forEach((invoice) => {
+                    if (
+                        !newSelected.some(
+                            (selected) =>
+                                selected.invoice_id === invoice.invoice_id
+                        )
+                    ) {
                         newSelected.push(invoice);
                     }
                 });
@@ -101,25 +130,73 @@ const InvoiceList: React.FC = () => {
     };
 
     const isInvoiceSelected = (invoice: Invoice) => {
-        return selectedInvoices.some(selected => selected.invoice_id === invoice.invoice_id);
+        return selectedInvoices.some(
+            (selected) => selected.invoice_id === invoice.invoice_id
+        );
     };
 
     const areAllCurrentPageSelected = () => {
-        return invoiceRenderList.length > 0 && invoiceRenderList.every(item => 
-            isInvoiceSelected(item.data)
+        return (
+            invoiceRenderList.length > 0 &&
+            invoiceRenderList.every((item) => isInvoiceSelected(item.data))
         );
     };
+
+    const deleteInvoiceMutation = useMutation({
+        mutationFn: deleteInvoice,
+        onSuccess: () => {
+            setSelectedInvoices([]);
+            alert('Invoices deleted successfully');
+        },
+        onError: (error) => {
+            alert('Failed to delete invoices: ' + error.message);
+        }
+    });
+
+    const handleDeleteSelected = () => {
+        if (selectedInvoices.length === 0) {
+            alert('Please select invoices to delete');
+            return;
+        }
+
+        if (window.confirm('Are you sure you want to delete the selected invoices?')) {
+            const invoiceIds = selectedInvoices.map(invoice => invoice.invoice_id);
+            deleteInvoiceMutation.mutate(invoiceIds);
+        }
+    };
+
 
     const addInvoice = () => {
         navigate("/upload");
     };
 
     if (isLoading) return <div>Loading invoices...</div>;
-    if (error) return <Alert variant="danger">Log in to visualize your invoices...</Alert>;
+    if (error)
+        return (
+            <Alert variant="danger">Log in to visualize your invoices...</Alert>
+        );
 
     return (
         <div>
             <h2>Invoices</h2>
+            {selectedInvoices.length > 0 && (
+                <div className="d-flex justify-content-end align-items-center">
+                    <Dropdown>
+                        <Dropdown.Toggle
+                            variant="secondary"
+                            id="dropdown-basic"
+                        >
+                            Actions
+                        </Dropdown.Toggle>
+
+                        <Dropdown.Menu>
+                            <Dropdown.Item href="#/delete" onClick={handleDeleteSelected}>
+                                <img src="src/assets/trash.svg"></img> Delete
+                            </Dropdown.Item>
+                        </Dropdown.Menu>
+                    </Dropdown>
+                </div>
+            )}
             <Table striped hover>
                 <thead>
                     <tr>
@@ -169,7 +246,9 @@ const InvoiceList: React.FC = () => {
                         <input
                             type="number"
                             value={pageNumber}
-                            onChange={(e) => handlePageChange(Number(e.target.value))}
+                            onChange={(e) =>
+                                handlePageChange(Number(e.target.value))
+                            }
                             min="1"
                             max={Math.ceil(totalInvoices / perPage)}
                             className="form-control d-inline-block w-auto ms-2"
@@ -181,7 +260,9 @@ const InvoiceList: React.FC = () => {
                         Per Page:
                         <select
                             value={perPage}
-                            onChange={(e) => handlePerPageChange(Number(e.target.value))}
+                            onChange={(e) =>
+                                handlePerPageChange(Number(e.target.value))
+                            }
                             className="form-control d-inline-block w-auto ms-2"
                         >
                             <option value={10}>10</option>

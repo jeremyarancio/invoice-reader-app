@@ -142,7 +142,7 @@ def get_invoices(
         raise HTTPException(status_code=400, detail=e) from e
 
 
-@app.delete("api/v1/invoices/{file_id}")
+@app.delete("/api/v1/invoices/{file_id}")
 def delete_invoice(
     file_id: uuid.UUID,
     session: Annotated[sqlmodel.Session, Depends(db.get_session)],
@@ -182,7 +182,7 @@ def login(
     return AuthToken(access_token=access_token, token_type="bearer")
 
 
-@app.delete("api/v1/users/")
+@app.delete("/api/v1/users/")
 def delete_user(
     session: Annotated[sqlmodel.Session, Depends(db.get_session)],
     user: Annotated[User, Depends(auth.get_current_user)],
@@ -240,7 +240,7 @@ def add_client(
         raise HTTPException(status_code=400, detail=e) from e
 
 
-@app.delete("api/v1/clients/{client_id}")
+@app.delete("/api/v1/clients/{client_id}")
 def delete_client(
     client_id: uuid.UUID,
     session: Annotated[sqlmodel.Session, Depends(db.get_session)],
