@@ -142,3 +142,21 @@ def test_submit_invoice_unauthorized(
     )
 
     assert response.status_code == 401
+
+
+def test_delete_invoice(
+    api_client: TestClient,
+    test_existing_user: UserModel,
+    test_existing_invoice: InvoiceModel,
+    auth_token: AuthToken,
+    invoice_repository: InvoiceRepository,
+):
+    response = api_client.delete(
+        url=f"/api/v1/invoices/{test_existing_invoice.file_id}",
+        headers={"Authorization": f"Bearer {auth_token.access_token}"},
+    )
+    invoice = invoice_repository.get_by_invoice_number(
+        invoice_number=test_existing_invoice.invoice_number
+    )
+    assert response.status_code == 200
+    assert not invoice
