@@ -55,7 +55,7 @@ export interface ClientListGetProps {
     pageNumber: number;
 }
 
-export interface ClientData {
+export interface Client {
     client_id: string;
     client_name: string;
     street_number: number;
@@ -77,5 +77,5 @@ export interface CreateClient {
 export interface GetClientsResponse {
     per_page: number;
     total: number;
-    data: [ClientData];
+    data: [Client];
 }
