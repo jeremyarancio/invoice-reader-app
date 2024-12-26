@@ -116,3 +116,22 @@ def get_paged_clients(
     return PagedClientGetResponse(
         page=page, per_page=per_page, total=len(clients), data=clients
     )
+
+
+def delete_invoice(
+    file_id: uuid.UUID, user_id: uuid.UUID, session: sqlmodel.Session
+) -> None:
+    invoice_repository = InvoiceRepository(session=session)
+    invoice_repository.delete(file_id=file_id, user_id=user_id)
+
+
+def delete_client(
+    client_id: uuid.UUID, user_id: uuid.UUID, session: sqlmodel.Session
+) -> None:
+    client_repository = ClientRepository(session=session)
+    client_repository.delete(client_id=client_id, user_id=user_id)
+
+
+def delete_user(user_id: uuid.UUID, session: sqlmodel.Session) -> None:
+    user_repository = UserRepository(session=session)
+    user_repository.delete(user_id=user_id)

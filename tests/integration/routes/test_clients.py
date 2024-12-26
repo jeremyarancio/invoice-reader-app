@@ -56,3 +56,21 @@ def test_get_clients(
     assert response.status_code == 200
     assert paged_clients.total == len(test_existing_clients)
     assert paged_clients.data[0].client_name == test_existing_clients[0].client_name
+
+
+def test_delete_client(
+    api_client: TestClient,
+    test_existing_user: UserModel,
+    test_existing_client: ClientModel,
+    auth_token: AuthToken,
+    client_repository: ClientRepository,
+):
+    response = api_client.delete(
+        url=f"/api/v1/clients/{test_existing_client.client_id}",
+        headers={"Authorization": f"Bearer {auth_token.access_token}"},
+    )
+    client = client_repository.get_by_name(
+        client_name=test_existing_client.client_name, user_id=test_existing_user.user_id
+    )
+    assert response.status_code == 200
+    assert not client

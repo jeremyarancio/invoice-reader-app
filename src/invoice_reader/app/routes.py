@@ -108,7 +108,7 @@ def submit(
 
 
 @app.get("/api/v1/invoices/{file_id}")
-def get_file(
+def get_invoice(
     file_id: uuid.UUID,
     session: Annotated[sqlmodel.Session, Depends(db.get_session)],
     user: Annotated[User, Depends(auth.get_current_user)],
@@ -142,8 +142,22 @@ def get_invoices(
         raise HTTPException(status_code=400, detail=e) from e
 
 
+@app.delete("/api/v1/invoices/{file_id}")
+def delete_invoice(
+    file_id: uuid.UUID,
+    session: Annotated[sqlmodel.Session, Depends(db.get_session)],
+    user: Annotated[User, Depends(auth.get_current_user)],
+) -> Response:
+    try:
+        presenter.delete_invoice(file_id=file_id, user_id=user.user_id, session=session)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=e) from e
+
+
 @app.post("/api/v1/users/register/")
-def register(user: UserCreate, session: sqlmodel.Session = Depends(db.get_session)):
+def register(
+    user: UserCreate, session: Annotated[sqlmodel.Session, Depends(db.get_session)]
+):
     auth.register_user(user=user, session=session)
     return Response(content="User has been added to the database.", status_code=201)
 
@@ -166,6 +180,17 @@ def login(
             headers={"WWW-Authenticate": "Bearer"},
         ) from e
     return AuthToken(access_token=access_token, token_type="bearer")
+
+
+@app.delete("/api/v1/users/")
+def delete_user(
+    session: Annotated[sqlmodel.Session, Depends(db.get_session)],
+    user: Annotated[User, Depends(auth.get_current_user)],
+) -> Response:
+    try:
+        presenter.delete_user(user_id=user.user_id, session=session)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=e) from e
 
 
 @app.get("/api/v1/clients/")
@@ -213,3 +238,17 @@ def add_client(
     except Exception as e:
         LOGGER.error(e)
         raise HTTPException(status_code=400, detail=e) from e
+
+
+@app.delete("/api/v1/clients/{client_id}")
+def delete_client(
+    client_id: uuid.UUID,
+    session: Annotated[sqlmodel.Session, Depends(db.get_session)],
+    user: Annotated[User, Depends(auth.get_current_user)],
+) -> Response:
+    try:
+        presenter.delete_client(
+            client_id=client_id, user_id=user.user_id, session=session
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=e) from e

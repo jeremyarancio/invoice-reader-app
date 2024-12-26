@@ -52,7 +52,7 @@ class InvoiceCreate(BaseModel):
 
 
 class InvoiceGetResponse(BaseModel):
-    file_id: uuid.UUID
+    invoice_id: uuid.UUID
     s3_path: str
     data: Invoice
 

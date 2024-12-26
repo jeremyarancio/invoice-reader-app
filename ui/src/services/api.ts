@@ -54,7 +54,7 @@ export const submitInvoice = async (file: File, data: AddInvoicePayload) => {
         throw new Error("No authentication token found. Please log in.");
     }
 
-    const response = await api.post("/invoices/submit/", formData, {
+    const response = await api.post("invoices/submit/", formData, {
         headers: {
             "Content-Type": "multipart/form-data",
             Authorization: `${tokenType} ${accessToken}`,
@@ -68,7 +68,7 @@ export const getAllInvoice = async (props: InvoiceListGetProps) => {
     const accessToken = sessionStorage.getItem("accessToken");
     const tokenType = sessionStorage.getItem("tokenType") || "Bearer";
 
-    const response = await api.get("/invoices/", {
+    const response = await api.get("invoices/", {
         data: {
             page: props.pageNumber,
             per_page: props.perPage,
@@ -85,7 +85,7 @@ export const fetchClients = async (props: ClientListGetProps) => {
     const accessToken = sessionStorage.getItem("accessToken");
     const tokenType = sessionStorage.getItem("tokenType") || "Bearer";
 
-    const response = await api.get("/clients/", {
+    const response = await api.get("clients/", {
         data: {
             page: props.pageNumber,
             per_page: props.perPage,
@@ -119,4 +119,44 @@ export const addClient = async (data: CreateClient) => {
     );
 
     return response.data;
+};
+
+export const deleteInvoices = async (invoice_ids: string[]) => {
+    const accessToken = sessionStorage.getItem("accessToken");
+    const tokenType = sessionStorage.getItem("tokenType") || "Bearer";
+
+    if (!accessToken) {
+        throw new Error("No authentication token found. Please log in.");
+    }
+
+    await Promise.all(
+        invoice_ids.map(async (invoice_id) => {
+            await api.delete("invoices/" + invoice_id, {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `${tokenType} ${accessToken}`,
+                },
+            });
+        })
+    );
+};
+
+export const deleteClients = async (client_ids: string[]) => {
+    const accessToken = sessionStorage.getItem("accessToken");
+    const tokenType = sessionStorage.getItem("tokenType") || "Bearer";
+
+    if (!accessToken) {
+        throw new Error("No authentication token found. Please log in.");
+    }
+
+    await Promise.all(
+        client_ids.map(async (client_id) => {
+            await api.delete("clients/" + client_id, {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `${tokenType} ${accessToken}`,
+                },
+            });
+        })
+    );
 };
