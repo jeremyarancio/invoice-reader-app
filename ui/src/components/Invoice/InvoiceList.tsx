@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Table, Alert, Button, Form, Dropdown, Modal } from "react-bootstrap";
-import { getAllInvoice, deleteClients } from "../../services/api";
+import { getAllInvoice, deleteClients, deleteInvoices } from "../../services/api";
 import { useMutation } from "@tanstack/react-query";
 import { InvoiceRender, GetInvoicesResponse, Invoice } from "../../types";
 import { useNavigate } from "react-router-dom";
@@ -135,7 +135,7 @@ const InvoiceList: React.FC = () => {
     };
 
     const deleteInvoiceMutation = useMutation({
-        mutationFn: deleteClients,
+        mutationFn: deleteInvoices,
         onSuccess: () => {
             setSelectedInvoices([]);
             alert("Invoices deleted successfully");
