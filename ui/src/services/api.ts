@@ -179,7 +179,7 @@ export const updateInvoice = async (invoice: Invoice) => {
         throw new Error("No authentication token found. Please log in.");
     }
 
-    const response = await api.put("invoice/", invoice, {
+    const response = await api.put("invoices/" + invoice.invoice_id, invoice, {
         headers: {
             "Content-Type": "application/json",
             Authorization: `${tokenType} ${accessToken}`,

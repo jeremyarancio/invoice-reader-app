@@ -210,10 +210,16 @@ const InvoiceList: React.FC = () => {
 
     const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
+        if (!(name in editedInvoice)) {
+            setError(`Invalid field name: ${name}`)
+            console.error(error)
+            return;
+        }
         setEditedInvoice((prev) => ({
             ...prev,
             [name]: value,
         }));
+        console.log(editedInvoice);
     };
 
     const updateInvoiceMutation = useMutation({
@@ -222,6 +228,7 @@ const InvoiceList: React.FC = () => {
             setError(null);
             window.alert("Invoice successfully updated.");
             handleClose();
+            // Need to update list of invoices with react-query
         },
         onError: (err) => {
             const errorMessage =
@@ -235,7 +242,7 @@ const InvoiceList: React.FC = () => {
 
     const handleSubmitEdition = (e: React.FormEvent) => {
         e.preventDefault();
-        updateInvoiceMutation.mutate(editedInvoice);
+        !error && updateInvoiceMutation.mutate(editedInvoice);
     };
 
     const addInvoice = () => {
@@ -276,7 +283,8 @@ const InvoiceList: React.FC = () => {
                             <Form.Control
                                 type="text"
                                 autoFocus
-                                name="amount"
+                                name="amount_excluding_tax"
+                                onChange={handleEditChange}
                                 placeholder={showedInvoice?.amount_excluding_tax.toString()}
                                 disabled={isFormDisabled}
                             />
@@ -287,6 +295,7 @@ const InvoiceList: React.FC = () => {
                                 type="number"
                                 autoFocus
                                 name="vat"
+                                onChange={handleEditChange}
                                 placeholder={showedInvoice?.vat + "%"}
                                 disabled={isFormDisabled}
                             />
@@ -297,6 +306,7 @@ const InvoiceList: React.FC = () => {
                                 type="date"
                                 autoFocus
                                 name="invoiced_date"
+                                onChange={handleEditChange}
                                 value={showedInvoice?.invoiced_date.toString()}
                                 disabled={isFormDisabled}
                             />

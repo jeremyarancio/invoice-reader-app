@@ -28,7 +28,7 @@ class UserCreate(BaseModel):
 class Invoice(BaseModel):
     amount_excluding_tax: float
     vat: Annotated[float, "In percentage: 20, 21, ..."]
-    currency: str = "€"
+    # currency: str = "€" #TODO: Forgotten in Models
     invoiced_date: date
     invoice_number: str
 

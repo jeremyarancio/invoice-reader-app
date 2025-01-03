@@ -41,17 +41,14 @@ class InvoiceRepository:
         self.session.refresh(invoice_model)
         LOGGER.info("Invoice %s added to database. Metadata: %s", id_, invoice_model)
 
-    def update(self, id_: str, invoice_data: Invoice) -> None:
+    def update(self, invoice_id: uuid.UUID, invoice: Invoice) -> None:
         invoice_model = self.session.exec(
-            sqlmodel.select(InvoiceModel).where(InvoiceModel.file_id == id_)
+            sqlmodel.select(InvoiceModel).where(InvoiceModel.file_id == invoice_id)
         ).one()
-        invoice_model.sqlmodel_update(invoice_data)
+        invoice_model.sqlmodel_update(invoice)
         self.session.add(invoice_model)
         self.session.commit()
         self.session.refresh(invoice_model)
-        LOGGER.info(
-            "Existing invoice %s data updated with new data: %s", id_, invoice_data
-        )
 
     def get(self, file_id: uuid.UUID, user_id: uuid.UUID) -> InvoiceGetResponse:
         invoice_model = self.session.exec(
