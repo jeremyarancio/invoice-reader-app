@@ -6,6 +6,8 @@ import {
     ClientListGetProps,
     AddInvoicePayload,
     CreateClient,
+    GetInvoiceResponse,
+    Invoice,
 } from "../types";
 import { QueryClient } from "@tanstack/react-query";
 
@@ -64,7 +66,20 @@ export const submitInvoice = async (file: File, data: AddInvoicePayload) => {
     return response.data;
 };
 
-export const getAllInvoice = async (props: InvoiceListGetProps) => {
+export const fetchInvoice = async (id: string): Promise<GetInvoiceResponse> => {
+    const accessToken = sessionStorage.getItem("accessToken");
+    const tokenType = sessionStorage.getItem("tokenType") || "Bearer";
+
+    const response = await api.get("invoices/" + id, {
+        headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `${tokenType} ${accessToken}`,
+        },
+    });
+    return response.data;
+};
+
+export const fetchInvoices = async (props: InvoiceListGetProps) => {
     const accessToken = sessionStorage.getItem("accessToken");
     const tokenType = sessionStorage.getItem("tokenType") || "Bearer";
 
@@ -98,8 +113,7 @@ export const fetchClients = async (props: ClientListGetProps) => {
     return response.data;
 };
 
-export const addClient = async (data: CreateClient) => {
-    const clientData = JSON.stringify(data);
+export const addClient = async (client: CreateClient) => {
     const accessToken = sessionStorage.getItem("accessToken");
     const tokenType = sessionStorage.getItem("tokenType") || "Bearer";
 
@@ -107,16 +121,12 @@ export const addClient = async (data: CreateClient) => {
         throw new Error("No authentication token found. Please log in.");
     }
 
-    const response = await api.post(
-        "/clients/add/",
-        JSON.parse(clientData), // Parse the stringified data back to an object
-        {
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `${tokenType} ${accessToken}`,
-            },
-        }
-    );
+    const response = await api.post("/clients/add/", client, {
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `${tokenType} ${accessToken}`,
+        },
+    });
 
     return response.data;
 };
@@ -159,4 +169,22 @@ export const deleteClients = async (client_ids: string[]) => {
             });
         })
     );
+};
+
+export const updateInvoice = async (invoice: Invoice) => {
+    const accessToken = sessionStorage.getItem("accessToken");
+    const tokenType = sessionStorage.getItem("tokenType") || "Bearer";
+
+    if (!accessToken) {
+        throw new Error("No authentication token found. Please log in.");
+    }
+
+    const response = await api.put("invoice/", invoice, {
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `${tokenType} ${accessToken}`,
+        },
+    });
+
+    return response.data;
 };

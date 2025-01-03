@@ -34,15 +34,16 @@ export interface InvoiceListGetProps {
     perPage: number;
 }
 
+export interface GetInvoiceResponse {
+    s3_path: string;
+    invoice_id: string;
+    data: Invoice;
+}
 export interface GetInvoicesResponse {
     page: number;
     per_page: number;
     total: number;
-    data: {
-        s3_path: string;
-        invoice_id: string;
-        data: Invoice;
-    }[];
+    data: GetInvoiceResponse[];
 }
 
 export interface ClientDataRender {

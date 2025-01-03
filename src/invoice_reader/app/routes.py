@@ -120,7 +120,7 @@ def get_invoice(
         LOGGER.error(e)
         raise e
     except Exception as e:
-        raise HTTPException(status_code=400, detail=e) from e
+        raise HTTPException(status_code=500, detail=e) from e
 
 
 @app.get("/api/v1/invoices/")
