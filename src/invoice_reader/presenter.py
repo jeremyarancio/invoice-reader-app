@@ -15,6 +15,7 @@ from invoice_reader.repository import (
 from invoice_reader.schemas import (
     Client,
     FileData,
+    Invoice,
     InvoiceCreate,
     InvoiceGetResponse,
     PagedClientGetResponse,
@@ -135,3 +136,10 @@ def delete_client(
 def delete_user(user_id: uuid.UUID, session: sqlmodel.Session) -> None:
     user_repository = UserRepository(session=session)
     user_repository.delete(user_id=user_id)
+
+
+def update_invoice(
+    invoice_id: uuid.UUID, invoice: Invoice, session: sqlmodel.Session
+) -> None:
+    invoice_repository = InvoiceRepository(session=session)
+    invoice_repository.update(invoice_id=invoice_id, invoice=invoice)

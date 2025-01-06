@@ -8,6 +8,7 @@ from invoice_reader.repository import InvoiceRepository
 from invoice_reader.schemas import (
     AuthToken,
     FileData,
+    Invoice,
     InvoiceCreate,
     InvoiceGetResponse,
     PagedInvoiceGetResponse,
@@ -160,3 +161,33 @@ def test_delete_invoice(
     )
     assert response.status_code == 200
     assert not invoice
+
+
+def test_update_invoice(
+    api_client: TestClient,
+    test_existing_user: UserModel,
+    test_existing_invoice: InvoiceModel,
+    auth_token: AuthToken,
+    invoice_repository: InvoiceRepository,
+):
+    updated_invoice = Invoice.model_validate(test_existing_invoice.model_dump())
+    updated_invoice.invoice_number = "number1234"
+    updated_invoice.amount_excluding_tax = 1234
+
+    response = api_client.put(
+        url=f"/api/v1/invoices/{test_existing_invoice.file_id}",
+        data=updated_invoice.model_dump_json(),
+        headers={"Authorization": f"Bearer {auth_token.access_token}"},
+    )
+
+    invoice = invoice_repository.get(
+        file_id=test_existing_invoice.file_id, user_id=test_existing_user.user_id
+    )
+
+    assert invoice
+    assert response.status_code == 200
+    assert invoice.data.invoice_number == updated_invoice.invoice_number
+    assert invoice.data.amount_excluding_tax == 1234
+
+
+# Add exception no change update

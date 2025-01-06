@@ -120,7 +120,7 @@ def get_invoice(
         LOGGER.error(e)
         raise e
     except Exception as e:
-        raise HTTPException(status_code=400, detail=e) from e
+        raise HTTPException(status_code=500, detail=e) from e
 
 
 @app.get("/api/v1/invoices/")
@@ -249,6 +249,21 @@ def delete_client(
     try:
         presenter.delete_client(
             client_id=client_id, user_id=user.user_id, session=session
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=e) from e
+
+
+@app.put("/api/v1/invoices/{invoice_id}")
+def update_invoice(
+    invoice_id: uuid.UUID,
+    invoice: Invoice,
+    session: Annotated[sqlmodel.Session, Depends(db.get_session)],
+    user: Annotated[User, Depends(auth.get_current_user)],
+) -> Response:
+    try:
+        presenter.update_invoice(
+            invoice_id=invoice_id, invoice=invoice, session=session
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=e) from e
