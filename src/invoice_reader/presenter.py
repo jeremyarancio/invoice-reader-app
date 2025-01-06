@@ -22,7 +22,7 @@ from invoice_reader.schemas import (
     PagedInvoiceGetResponse,
     User,
 )
-from invoice_reader.utils import logger
+from invoice_reader.utils import logger, s3_utils
 
 LOGGER = logger.get_logger()
 
@@ -35,14 +35,14 @@ def submit(
     session: sqlmodel.Session,
 ):
     file_data = FileData(user_id=user_id, filename=filename)
-    s3_model = S3.init(bucket=settings.S3_BUCKET, file_data=file_data)
+    s3_model = S3.init(bucket=settings.S3_BUCKET)
     invoice_repository = InvoiceRepository(session=session)
     storage.store(
         file=file,
         file_data=file_data,
         invoice_data=invoice_data,
-        s3_model=s3_model,
         invoice_repository=invoice_repository,
+        s3_model=s3_model,
     )
 
 
@@ -123,7 +123,12 @@ def delete_invoice(
     file_id: uuid.UUID, user_id: uuid.UUID, session: sqlmodel.Session
 ) -> None:
     invoice_repository = InvoiceRepository(session=session)
+    invoice = invoice_repository.get(file_id=file_id, user_id=user_id)
+
     invoice_repository.delete(file_id=file_id, user_id=user_id)
+    s3 = S3.init(bucket=settings.S3_BUCKET)
+    suffix = s3_utils.get_suffix_from_s3_path(invoice.s3_path)
+    s3.delete(suffix=suffix)
 
 
 def delete_client(
