@@ -152,15 +152,7 @@ class UserRepository:
         users = [User(**user_model.model_dump()) for user_model in users_model]
         LOGGER("List of users returned from database: %s", users)
         return users
-
-    def get_by_username(self, username: str) -> User | None:
-        user_model = self.session.exec(
-            sqlmodel.select(UserModel).where(UserModel.username == username)
-        ).one_or_none()
-        if user_model:
-            user = User.model_validate(user_model.model_dump())
-            LOGGER.info("User data retrieved from database: %s", user)
-            return user
+    
 
     def get_user_by_email(self, email: str) -> User | None:
         user_model = self.session.exec(
@@ -170,6 +162,8 @@ class UserRepository:
             user = User.model_validate(user_model.model_dump())
             LOGGER.info("User data retrieved from database: %s", user)
             return user
+        else:
+            return None
 
 
 class ClientRepository:

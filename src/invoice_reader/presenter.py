@@ -33,7 +33,7 @@ def submit(
     filename: str,
     invoice_data: InvoiceCreate,
     session: sqlmodel.Session,
-):
+) -> None:
     file_data = FileData(user_id=user_id, filename=filename)
     s3_model = S3.init(bucket=settings.S3_BUCKET)
     invoice_repository = InvoiceRepository(session=session)
@@ -46,20 +46,10 @@ def submit(
     )
 
 
-def get_user(token: str):
-    raise NotImplementedError
-
-
 def register_user(user: User, session: sqlmodel.Session) -> None:
     user_repository = UserRepository(session=session)
     user_repository.add(user)
-
-
-def get_user_by_username(username: str, session: sqlmodel.Session) -> User:
-    user_repository = UserRepository(session=session)
-    user = user_repository.get_by_username(username)
-    return user
-
+    
 
 def get_user_by_email(email: str, session: sqlmodel.Session) -> User | None:
     user_repository = UserRepository(session=session)
