@@ -8,7 +8,6 @@ from botocore.exceptions import ClientError
 from pydantic import EmailStr
 from sqlmodel import Field, SQLModel
 
-from invoice_reader.schemas import FileData
 from invoice_reader.utils.logger import get_logger
 
 LOGGER = get_logger()
@@ -17,24 +16,26 @@ LOGGER = get_logger()
 @dataclass
 class S3:
     bucket: str
-    suffix: str
     region: str | None = None
 
-    @property
-    def path(self):
-        return f"s3://{self.bucket}/{self.suffix}"
-
     @classmethod
-    def init(cls, bucket: str, file_data: FileData) -> "S3":
+    def init(cls, bucket: str) -> "S3":
         return cls(
             bucket=bucket,
-            suffix=f"user-{file_data.user_id}/file-{file_data.file_id}{file_data.file_format}",
+            # suffix=f"user-{file_data.user_id}/file-{file_data.file_id}{file_data.file_format}",
         )
 
-    def store(self, file: BinaryIO) -> None:
+    def store(self, file: BinaryIO, suffix: str) -> None:
         s3_client = boto3.client("s3")
         try:
-            s3_client.upload_fileobj(file, self.bucket, self.suffix)
+            s3_client.upload_fileobj(file, self.bucket, suffix)
+        except ClientError:
+            raise
+
+    def delete(self, suffix: str) -> None:
+        s3_client = boto3.client("s3")
+        try:
+            s3_client.delete_object(self.bucket, suffix)
         except ClientError:
             raise
 

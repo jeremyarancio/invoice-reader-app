@@ -66,6 +66,11 @@ def s3_suffix(file_data: FileData) -> str:
 
 
 @pytest.fixture
+def s3_path(s3_bucket: str, s3_suffix) -> str:
+    return f"s3://{s3_bucket}/{s3_suffix}"
+
+
+@pytest.fixture
 def s3_mocker(mocker) -> Mock:
     mock_client = Mock()
     mocker.patch("boto3.client", return_value=mock_client)

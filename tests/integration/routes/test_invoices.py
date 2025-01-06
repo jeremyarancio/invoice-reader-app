@@ -151,6 +151,7 @@ def test_delete_invoice(
     test_existing_invoice: InvoiceModel,
     auth_token: AuthToken,
     invoice_repository: InvoiceRepository,
+    s3_mocker: Mock,
 ):
     response = api_client.delete(
         url=f"/api/v1/invoices/{test_existing_invoice.file_id}",
@@ -161,6 +162,7 @@ def test_delete_invoice(
     )
     assert response.status_code == 200
     assert not invoice
+    s3_mocker.delete_object.assert_called_once()
 
 
 def test_update_invoice(
