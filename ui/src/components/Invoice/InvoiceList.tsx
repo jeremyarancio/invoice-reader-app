@@ -1,15 +1,13 @@
 import { useState, useEffect } from "react";
 import { Table, Alert, Button, Form, Dropdown, Modal } from "react-bootstrap";
 import {
-    fetchInvoice,
     fetchInvoices,
     deleteInvoices,
     updateInvoice,
 } from "../../services/api";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import {
     InvoiceRender,
-    GetInvoiceResponse,
     GetInvoicesResponse,
     Invoice,
 } from "../../types";
@@ -36,8 +34,6 @@ const InvoiceList: React.FC = () => {
     const [totalInvoices, setTotalInvoices] = useState<number>(0);
     const [selectedInvoices, setSelectedInvoices] = useState<Invoice[]>([]);
     const [show, setShow] = useState<boolean>(false);
-    const [selectedInvoice, setSelectedInvoice] =
-        useState<Invoice>(initialInvoice);
     const [showedInvoice, setShowedInvoice] = useState<Invoice>(initialInvoice);
     const [isFormDisabled, setIsFormDisabled] = useState<boolean>(true);
     const [editedInvoice, setEditedInvoice] = useState<Invoice>(initialInvoice);
@@ -172,8 +168,8 @@ const InvoiceList: React.FC = () => {
         },
     });
 
-    const handleDeleteSelected = () => {
-        if (selectedInvoices.length === 0) {
+    const handleDeleteSelected = (invoices: Invoice[]) => {
+        if (invoices.length === 0) {
             alert("Please select invoices to delete");
             return;
         }
@@ -183,16 +179,13 @@ const InvoiceList: React.FC = () => {
                 "Are you sure you want to delete the selected invoices?"
             )
         ) {
-            const invoiceIds = selectedInvoices.map(
-                (invoice) => invoice.invoice_id
-            );
-            deleteInvoiceMutation.mutate(invoiceIds);
+            const ids = invoices.map((invoice) => invoice.invoice_id);
+            deleteInvoiceMutation.mutate(ids);
         }
     };
 
     const handleClose = () => {
         setShow(false);
-        setSelectedInvoice(initialInvoice);
         setShowedInvoice(initialInvoice);
         setIsEditToSubmit(false);
     };
@@ -211,8 +204,8 @@ const InvoiceList: React.FC = () => {
     const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         if (!(name in editedInvoice)) {
-            setError(`Invalid field name: ${name}`)
-            console.error(error)
+            setError(`Invalid field name: ${name}`);
+            console.error(error);
             return;
         }
         setEditedInvoice((prev) => ({
@@ -250,10 +243,10 @@ const InvoiceList: React.FC = () => {
     };
 
     if (isLoading) return <div>Loading invoices...</div>;
-    // if (error)
-    //     return (
-    //         <Alert variant="danger">Log in to visualize your invoices...</Alert>
-    //     );
+    if (!sessionStorage.getItem("accessToken"))
+        return (
+            <Alert variant="danger">Log in to visualize your invoices...</Alert>
+        );
 
     return (
         <>
@@ -325,7 +318,15 @@ const InvoiceList: React.FC = () => {
                     <Button variant="secondary" onClick={handleClose}>
                         Close
                     </Button>
-                    <Button variant="outline-danger">Delete</Button>
+                    <Button
+                        variant="outline-danger"
+                        onClick={() => {
+                            handleDeleteSelected([showedInvoice]);
+                            setShow(false);
+                        }}
+                    >
+                        Delete
+                    </Button>
                     <Button
                         variant={isEditToSubmit ? "warning" : "primary"}
                         onClick={
@@ -352,7 +353,9 @@ const InvoiceList: React.FC = () => {
                             <Dropdown.Menu>
                                 <Dropdown.Item
                                     href="#/delete"
-                                    onClick={handleDeleteSelected}
+                                    onClick={() => {
+                                        handleDeleteSelected(selectedInvoices);
+                                    }}
                                 >
                                     <img src="src/assets/trash.svg"></img>{" "}
                                     Delete
@@ -381,12 +384,7 @@ const InvoiceList: React.FC = () => {
                     </thead>
                     <tbody>
                         {invoiceRenderList.map((item) => (
-                            <tr
-                                key={item.data.invoice_number}
-                                style={{ cursor: "pointer" }}
-                                className="hover:bg-gray-50"
-                                onClick={() => handleShow(item.data)}
-                            >
+                            <tr key={item.data.invoice_number}>
                                 <td>
                                     <Form.Check
                                         type="checkbox"
@@ -403,6 +401,13 @@ const InvoiceList: React.FC = () => {
                                     {item.data.amount_excluding_tax?.toFixed(0)}
                                 </td>
                                 <td>{item.data.vat}%</td>
+                                <td>
+                                    <img
+                                        onClick={() => handleShow(item.data)}
+                                        src="src/assets/eye-fill.svg"
+                                        style={{ cursor: "pointer" }}
+                                    ></img>
+                                </td>
                             </tr>
                         ))}
                     </tbody>

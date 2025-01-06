@@ -119,7 +119,7 @@ function InvoiceForm({ file }: FormProperties) {
                     onClose={() => navigate("/")}
                     className="mb-4"
                 >
-                    Client successfully added
+                    Invoice successfully added
                 </Alert>
             )}
 
