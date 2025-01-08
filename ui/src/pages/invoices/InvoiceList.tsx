@@ -1,29 +1,16 @@
 import { useState, useEffect } from "react";
-import { Table, Alert, Button, Form, Dropdown, Modal } from "react-bootstrap";
+import { Table, Alert, Button, Form, Dropdown } from "react-bootstrap";
 import {
     fetchInvoices,
     deleteInvoices,
     updateInvoice,
 } from "../../services/api";
+import EditModal from "../../common/components/EditModal";
 import { useMutation } from "@tanstack/react-query";
-import {
-    InvoiceRender,
-    GetInvoicesResponse,
-    Invoice,
-} from "../../types";
+import { InvoiceRender, GetInvoicesResponse, Invoice } from "../../types";
 import { useNavigate } from "react-router-dom";
 
-const initialInvoice: Invoice = {
-    amount_excluding_tax: 0,
-    vat: 0,
-    currency: "€",
-    invoiced_date: new Date(),
-    invoice_number: "",
-    invoice_id: "",
-    client_id: "",
-};
-
-const InvoiceList: React.FC = () => {
+const InvoiceList = () => {
     const [pageNumber, setPageNumber] = useState<number>(1);
     const [perPage, setPerPage] = useState<number>(10);
     const [invoiceRenderList, setInvoiceRenderList] = useState<InvoiceRender[]>(
@@ -33,11 +20,7 @@ const InvoiceList: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [totalInvoices, setTotalInvoices] = useState<number>(0);
     const [selectedInvoices, setSelectedInvoices] = useState<Invoice[]>([]);
-    const [show, setShow] = useState<boolean>(false);
-    const [showedInvoice, setShowedInvoice] = useState<Invoice>(initialInvoice);
-    const [isFormDisabled, setIsFormDisabled] = useState<boolean>(true);
-    const [editedInvoice, setEditedInvoice] = useState<Invoice>(initialInvoice);
-    const [isEditToSubmit, setIsEditToSubmit] = useState<boolean>(false);
+    const [showedInvoice, setShowedInvoice] = useState<Invoice | null>(null);
 
     const navigate = useNavigate();
 
@@ -174,68 +157,15 @@ const InvoiceList: React.FC = () => {
             return;
         }
 
-        if (
-            window.confirm(
-                "Are you sure you want to delete the selected invoices?"
-            )
-        ) {
+        if (window.confirm("Are you sure you want to delete this invoices?")) {
             const ids = invoices.map((invoice) => invoice.invoice_id);
             deleteInvoiceMutation.mutate(ids);
         }
     };
 
-    const handleClose = () => {
-        setShow(false);
-        setShowedInvoice(initialInvoice);
-        setIsEditToSubmit(false);
-    };
-
     const handleShow = (invoice: Invoice) => {
+        console.log("AAA")
         setShowedInvoice(invoice);
-        setEditedInvoice(invoice); // In case of edition, we create a copy
-        setShow(true);
-    };
-
-    const handleEdit = () => {
-        setIsFormDisabled(false);
-        setIsEditToSubmit(true);
-    };
-
-    const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        if (!(name in editedInvoice)) {
-            setError(`Invalid field name: ${name}`);
-            console.error(error);
-            return;
-        }
-        setEditedInvoice((prev) => ({
-            ...prev,
-            [name]: value,
-        }));
-        console.log(editedInvoice);
-    };
-
-    const updateInvoiceMutation = useMutation({
-        mutationFn: updateInvoice,
-        onSuccess: () => {
-            setError(null);
-            window.alert("Invoice successfully updated.");
-            handleClose();
-            // Need to update list of invoices with react-query
-        },
-        onError: (err) => {
-            const errorMessage =
-                err instanceof Error
-                    ? err.message
-                    : "An unexpected error occurred";
-            setError(errorMessage);
-            window.alert("Erreur: " + errorMessage);
-        },
-    });
-
-    const handleSubmitEdition = (e: React.FormEvent) => {
-        e.preventDefault();
-        !error && updateInvoiceMutation.mutate(editedInvoice);
     };
 
     const addInvoice = () => {
@@ -250,94 +180,15 @@ const InvoiceList: React.FC = () => {
 
     return (
         <>
-            <Modal show={show} onHide={handleClose}>
-                <Modal.Header closeButton>
-                    <Modal.Title>Invoice</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <Form onSubmit={handleSubmitEdition}>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Invoice number:</Form.Label>
-                            <Form.Control
-                                type="text"
-                                autoFocus
-                                name="invoice_number"
-                                placeholder={showedInvoice?.invoice_number}
-                                disabled={isFormDisabled}
-                                onChange={handleEditChange}
-                            />
-                        </Form.Group>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Client name:</Form.Label>
-                            <Form.Control type="text" autoFocus disabled />
-                        </Form.Group>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Amount excl. tax:</Form.Label>
-                            <Form.Control
-                                type="text"
-                                autoFocus
-                                name="amount_excluding_tax"
-                                onChange={handleEditChange}
-                                placeholder={showedInvoice?.amount_excluding_tax.toString()}
-                                disabled={isFormDisabled}
-                            />
-                        </Form.Group>
-                        <Form.Group className="mb-3">
-                            <Form.Label>VAT:</Form.Label>
-                            <Form.Control
-                                type="number"
-                                autoFocus
-                                name="vat"
-                                onChange={handleEditChange}
-                                placeholder={showedInvoice?.vat + "%"}
-                                disabled={isFormDisabled}
-                            />
-                        </Form.Group>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Invoiced date</Form.Label>
-                            <Form.Control
-                                type="date"
-                                autoFocus
-                                name="invoiced_date"
-                                onChange={handleEditChange}
-                                value={showedInvoice?.invoiced_date.toString()}
-                                disabled={isFormDisabled}
-                            />
-                        </Form.Group>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Last updated</Form.Label>
-                            <Form.Control
-                                type="text"
-                                autoFocus
-                                disabled // We keep this field disabled to let the BE takes charge of it
-                            />
-                        </Form.Group>
-                    </Form>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={handleClose}>
-                        Close
-                    </Button>
-                    <Button
-                        variant="outline-danger"
-                        onClick={() => {
-                            handleDeleteSelected([showedInvoice]);
-                            setShow(false);
-                        }}
-                    >
-                        Delete
-                    </Button>
-                    <Button
-                        variant={isEditToSubmit ? "warning" : "primary"}
-                        onClick={
-                            isEditToSubmit ? handleSubmitEdition : handleEdit
-                        }
-                        type={isEditToSubmit ? "submit" : "button"}
-                    >
-                        {isEditToSubmit ? "Submit" : "Edit"}
-                    </Button>
-                </Modal.Footer>
-            </Modal>
+            {showedInvoice && (
+                <EditModal<Invoice>
+                    entity={showedInvoice}
+                    disabled={["invoice_id", "client_id"]}
+                    onClose={() => setShowedInvoice(null)}
+                    updateFn={updateInvoice}
+                    deleteFn={() => deleteInvoices([showedInvoice.invoice_id])}
+                />
+            )}
             <div>
                 <h2>Invoices</h2>
                 {selectedInvoices.length > 0 && (

@@ -1,11 +1,11 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Navbar from "./components/Navbar";
-import InvoiceList from "./components/Invoice/InvoiceList";
-import ClientList from "./components/Client/ClientList";
-import UploadInvoice from "./components/Invoice/UploadInvoice";
-import Profile from "./components/Profile/Profile";
-import Login from "./components/Auth/Login";
-import RegisterUser from "./components/Auth/Register";
+import Navbar from "./common/Navbar";
+import InvoiceList from "./pages/invoices/InvoiceList";
+import ClientList from "./pages/clients/ClientList";
+import UploadInvoice from "./pages/invoices/UploadInvoice";
+import Profile from "./pages/profile/Profile";
+import Login from "./pages/login/Login";
+import RegisterUser from "./pages/login/Register";
 import { queryClient } from "./services/api";
 import { QueryClientProvider } from "@tanstack/react-query";
 
