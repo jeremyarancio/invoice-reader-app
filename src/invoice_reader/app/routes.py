@@ -69,7 +69,7 @@ async def root():
     return {"message": "Welcome to the Invoice Reader API!"}
 
 
-@app.post("/api/v1/invoices/submit")
+@app.post("/api/v1/invoices/submit/")
 def submit(
     upload_file: Annotated[UploadFile, File()],
     data: Annotated[Invoice | None, Depends(Checker(InvoiceCreate))],
