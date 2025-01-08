@@ -1,50 +1,23 @@
-import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { Modal, Form, Button } from "react-bootstrap";
 
 interface EditModalProps<T extends object> {
-    entity: T;
+    item: T;
     disabled: string[];
     onClose: () => void;
-    updateFn: (entity: T) => Promise<any>;
-    deleteFn: (entity: T) => Promise<any>;
+    onUpdateItem: (item: T) => void;
+    onDeleteItem: () => void;
 }
 
 function EditModal<T extends object>({
-    entity,
+    item,
     disabled,
     onClose,
-    updateFn,
-    deleteFn,
+    onUpdateItem,
+    onDeleteItem,
 }: EditModalProps<T>) {
-    const [formData, setFormData] = useState<T>(entity);
+    const [formData, setFormData] = useState<T>(item);
     const [isEditToSubmit, setIsEditToSubmit] = useState(false);
-
-    const updateMutation = useMutation({
-        mutationFn: updateFn,
-        onSuccess: () => {
-            window.alert("Successfully updated.");
-            onClose();
-        },
-        onError: (err) => {
-            const errorMessage =
-                err instanceof Error
-                    ? err.message
-                    : "An unexpected error occurred";
-            window.alert("Error: " + errorMessage);
-        },
-    });
-
-    const deleteMutation = useMutation({
-        mutationFn: deleteFn,
-        onSuccess: () => {
-            window.alert("Successfully deleted");
-            onClose();
-        },
-        onError: (error: Error) => {
-            window.alert("Failed to delete: " + error.message);
-        },
-    });
 
     const handleClose = () => {
         setIsEditToSubmit(false);
@@ -57,12 +30,12 @@ function EditModal<T extends object>({
 
     const handleEditSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        updateMutation.mutate(formData);
+        onUpdateItem(formData);
     };
 
     const handleDelete = () => {
         if (window.confirm("Are you sure you want to delete this item?")) {
-            deleteMutation.mutate(entity);
+            onDeleteItem();
         }
     };
 
@@ -74,7 +47,7 @@ function EditModal<T extends object>({
 
             <Modal.Body>
                 <Form onSubmit={handleEditSubmit}>
-                    {Object.entries(entity).map(([name, value]) => (
+                    {Object.entries(item).map(([name, value]) => (
                         <Form.Group className="mb-3" key={name}>
                             <Form.Label>{name}</Form.Label>
                             <Form.Control
