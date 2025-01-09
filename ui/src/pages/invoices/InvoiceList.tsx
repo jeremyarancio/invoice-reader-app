@@ -1,78 +1,43 @@
-import { useState, useEffect } from "react";
 import { Alert } from "react-bootstrap";
 import {
     fetchInvoices,
     updateInvoice,
     deleteInvoices,
 } from "../../services/api";
-import { useMutation } from "@tanstack/react-query";
-import { InvoiceRender, GetInvoicesResponse } from "../../types";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { Invoice } from "./types";
 import { useNavigate } from "react-router-dom";
 import TableRender from "../../common/components/TableRender";
+import {
+    mapInvoicePayloadToInvoice,
+    mapInvoiceToPutInvoice,
+} from "../../utils/mappers";
 
 const InvoiceList = () => {
-    const [isLoading, setIsLoading] = useState<boolean>(false);
-    const [error, setError] = useState<string | null>(null);
-
     const navigate = useNavigate();
+    const pageNumber = 1;
+    const perPage = 10;
 
-    const InvoiceListMutation = useMutation({
-        mutationFn: fetchInvoices,
-        onSuccess: (response: GetInvoicesResponse) => {
-            setError(null);
-            const ExtractedInvoiceRender: InvoiceRender[] = response.data.map(
-                (item) => ({
-                    data: {
-                        invoice_id: item.invoice_id,
-                        invoice_number: item.data.invoice_number,
-                        client_id: item.data.client_id,
-                        currency: item.data.currency,
-                        invoiced_date: item.data.invoiced_date,
-                        amount_excluding_tax: item.data.amount_excluding_tax,
-                        vat: item.data.vat,
-                    },
-                    clientName: item.data.client_id,
-                    paid: true,
-                })
-            );
-
-            setInvoiceRenderList(ExtractedInvoiceRender);
-            setTotalInvoices(response.total);
-            setIsLoading(false);
-        },
-        onError: (error: Error) => {
-            setError(error.message || "Failed to load invoices.");
-            console.error(error);
-            setIsLoading(false);
-        },
+    const { data, isLoading, error } = useQuery({
+        queryKey: ["invoices", pageNumber, perPage],
+        queryFn: () => fetchInvoices({ pageNumber, perPage }),
+        enabled: !!sessionStorage.getItem("accessToken"),
     });
 
-    useEffect(() => {
-        const fetchInvoices = () => {
-            setIsLoading(true);
-            setError(null);
-            InvoiceListMutation.mutate({ pageNumber, perPage });
-        };
-
-        fetchInvoices();
-    }, [pageNumber, perPage]);
-
-    
     const updateMutation = useMutation({
         mutationFn: updateInvoice,
         onSuccess: () => {
             window.alert("Successfully updated.");
-            onClose();
         },
         onError: (err) => {
             const errorMessage =
-            err instanceof Error
-            ? err.message
-            : "An unexpected error occurred";
+                err instanceof Error
+                    ? err.message
+                    : "An unexpected error occurred";
             window.alert("Error: " + errorMessage);
         },
     });
-        
+
     const deleteMutation = useMutation({
         mutationFn: deleteInvoices,
         onSuccess: () => {
@@ -83,12 +48,42 @@ const InvoiceList = () => {
         },
     });
 
-    const AddInvoice = () => {
+    const invoices =
+        data?.data.map((invoice) => mapInvoicePayloadToInvoice(invoice)) || [];
+
+    const onAddInvoice = () => {
         navigate("/upload");
     };
 
-    const updateInvoice = () => {}
-    const deleteInvoices = () => {}
+    const onUpdateInvoice = (invoice: Invoice) => {
+        updateMutation.mutate(mapInvoiceToPutInvoice(invoice));
+    };
+
+    const onDeleteInvoices = (invoices: Invoice[]) => {
+        deleteMutation.mutate(invoices.map((invoice) => invoice.id));
+    };
+
+    const tableColumns = [
+        {
+            header: "Invoice Number",
+            key: "invoiceNumber",
+        },
+        {
+            header: "Date",
+            key: "invoicedDate",
+            render: (item: Invoice) =>
+                new Date(item.invoicedDate).toLocaleDateString(),
+        },
+        {
+            header: "Amount",
+            key: "amount",
+            render: (item: Invoice) => `$${item.amountExcludingTax.toFixed(2)}`,
+        },
+        {
+            header: "Status",
+            key: "paid_status", // Not implemented yet
+        },
+    ];
 
     if (isLoading) return <div>Loading invoices...</div>;
     if (!sessionStorage.getItem("accessToken"))
@@ -96,16 +91,20 @@ const InvoiceList = () => {
             <Alert variant="danger">Log in to visualize your invoices...</Alert>
         );
 
+    // Fields that should be disabled in the Edition mode
+    const disabledFields = ["invoice_number", "invoiced_date"];
+
     return (
         <>
-            <TableRender 
-                name="Invoice" 
+            {error && <Alert variant="warning">Error: {error.message}</Alert>}
+            <TableRender<Invoice>
+                name="Invoice"
+                columns={tableColumns}
                 items={invoices}
-                columns={}
-                disabled={}
-                onAddItem={}
-                onUpdateItem={}
-                onDeleteItems={}
+                disabled={disabledFields}
+                onAddItem={onAddInvoice}
+                onUpdateItem={onUpdateInvoice}
+                onDeleteItems={onDeleteInvoices}
             />
         </>
     );

@@ -19,7 +19,7 @@ interface TableRenderProps<T extends BaseItem> {
     disabled: string[];
     onAddItem: () => void;
     onUpdateItem: (item: T) => void;
-    onDeleteItems: (ids: T["id"][]) => void;
+    onDeleteItems: (ids: T[]) => void;
 }
 
 function TableRender<T extends BaseItem>({
@@ -36,45 +36,23 @@ function TableRender<T extends BaseItem>({
 
     const handleSelect = (item: T) => {
         setSelectedItems((prev) => {
-            if (prev.some((elt) => elt.id === item.id)) {
-                return prev.filter((elt) => elt.id !== item.id);
+            if (prev.includes(item)) {
+                return prev.filter((elt) => elt !== item);
             }
             return [...prev, item];
         });
     };
 
     const handleSelectAll = () => {
-        const allCurrentPageItems = items.map((item) => item);
-        const areAllSelected = allCurrentPageItems.every((item) =>
-            selectedItems.some((selected) => selected.id === item.id)
+        const areAllSelected = items.every((item) =>
+            selectedItems.includes(item)
         );
 
         if (areAllSelected) {
-            setSelectedItems((prev) =>
-                prev.filter(
-                    (selected) =>
-                        !allCurrentPageItems.some(
-                            (item) => item.id === selected.id
-                        )
-                )
-            );
+            setSelectedItems([]);
         } else {
-            setSelectedItems((prev) => {
-                const newSelected = [...prev];
-                allCurrentPageItems.forEach((item) => {
-                    if (
-                        !newSelected.some((selected) => selected.id === item.id)
-                    ) {
-                        newSelected.push(item);
-                    }
-                });
-                return newSelected;
-            });
+            setSelectedItems(items);
         }
-    };
-
-    const isItemSelected = (item: T) => {
-        return items.some((selected) => selected.id === item.id);
     };
 
     const renderCell = (item: T, column: ColumnConfig<T>) => {
@@ -85,8 +63,10 @@ function TableRender<T extends BaseItem>({
         return String(value ?? "");
     };
 
-    const deleteItem = (id: T["id"]) => onDeleteItems([id]);
+    const handleDeleteItem = (item: T) => onDeleteItems([item]);
 
+    console.log(items);
+    console.log(selectedItems);
     return (
         <>
             {showedItem && (
@@ -95,11 +75,11 @@ function TableRender<T extends BaseItem>({
                     disabled={disabled}
                     onClose={() => setShowedItem(null)}
                     onUpdateItem={onUpdateItem}
-                    onDeleteItem={() => deleteItem(showedItem.id)}
+                    onDeleteItem={handleDeleteItem}
                 />
             )}
             <h2>{name}</h2>
-            {selectedItems && (
+            {selectedItems.length > 0 && (
                 <div className="d-flex justify-content-end align-items-center">
                     <Dropdown>
                         <Dropdown.Toggle
@@ -111,11 +91,7 @@ function TableRender<T extends BaseItem>({
                         <Dropdown.Menu>
                             <Dropdown.Item
                                 href="#/delete"
-                                onClick={() =>
-                                    onDeleteItems(
-                                        selectedItems.map((item) => item.id)
-                                    )
-                                }
+                                onClick={() => onDeleteItems(selectedItems)}
                             >
                                 <img src="src/assets/trash.svg"></img> Delete
                             </Dropdown.Item>
@@ -137,17 +113,16 @@ function TableRender<T extends BaseItem>({
                         {columns.map((column) => (
                             <th key={String(column.key)}>{column.header}</th>
                         ))}
-                        {selectedItems && <th>Actions</th>}
                     </tr>
                 </thead>
                 <tbody>
                     {items.map((item) => (
-                        <tr key={item.id}>
+                        <tr key={`row-${item.id}`}>
                             <td>
                                 <Form.Check
                                     type="checkbox"
                                     onChange={() => handleSelect(item)}
-                                    checked={isItemSelected(item)}
+                                    checked={selectedItems.includes(item)}
                                 />
                             </td>
                             {columns.map((column) => (

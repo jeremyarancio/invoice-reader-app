@@ -3,26 +3,25 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { Form, Button, Alert } from "react-bootstrap";
 import { submitInvoice, fetchClients } from "../../services/api";
 import { Invoice, GetClientsResponse, AddInvoicePayload } from "../../types";
+import { PostInvoice, PostInvoicePayload } from "./types";
 import { useNavigate } from "react-router-dom";
 
 interface FormProperties {
     file: File;
 }
 
-const initialInvoicePayload: Invoice = {
+const initialInvoice: PostInvoice = {
     amount_excluding_tax: 0,
     vat: 0,
     currency: "€",
     invoiced_date: new Date(),
     invoice_number: "",
-    invoice_id: "",
-    client_id: "",
 };
 
 function InvoiceForm({ file }: FormProperties) {
     const [clientId, setClientId] = useState<string>("");
-    const [invoicePayload, setInvoicePayload] = useState<Invoice>(
-        initialInvoicePayload
+    const [invoice, setInvoice] = useState<PostInvoice>(
+        initialInvoice
     );
     const [error, setError] = useState<string | null>(null);
     const [isComplete, setIsComplete] = useState<boolean>(false);
@@ -36,13 +35,7 @@ function InvoiceForm({ file }: FormProperties) {
     );
 
     const invoiceDataMutation = useMutation({
-        mutationFn: ({
-            file,
-            data,
-        }: {
-            file?: File;
-            data: AddInvoicePayload;
-        }) => {
+        mutationFn: ({ file, data }: { file?: File; data: PostInvoicePayload }) => {
             if (!file) {
                 throw new Error("No valid file provided");
             }
@@ -50,7 +43,7 @@ function InvoiceForm({ file }: FormProperties) {
         },
         onSuccess: () => {
             setClientId("");
-            setInvoicePayload(initialInvoicePayload);
+            setInvoice(initialInvoice);
             setError(null);
             setIsComplete(true);
         },
@@ -67,7 +60,7 @@ function InvoiceForm({ file }: FormProperties) {
             ? Number(value)
             : value;
 
-        setInvoicePayload((prev) => ({
+        setInvoice((prev) => ({
             ...prev,
             [name]: processedValue,
         }));
@@ -89,7 +82,7 @@ function InvoiceForm({ file }: FormProperties) {
         try {
             invoiceDataMutation.mutate({
                 file,
-                data: { invoice: invoicePayload, client_id: clientId },
+                data: {invoice: invoice, client_id: clientId},
             });
         } catch (err) {
             setError(

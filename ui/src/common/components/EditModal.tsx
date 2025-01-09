@@ -1,15 +1,19 @@
 import { useState } from "react";
 import { Modal, Form, Button } from "react-bootstrap";
 
-interface EditModalProps<T extends object> {
+interface BaseItem {
+    id: string;
+}
+
+interface EditModalProps<T extends BaseItem> {
     item: T;
     disabled: string[];
     onClose: () => void;
     onUpdateItem: (item: T) => void;
-    onDeleteItem: () => void;
+    onDeleteItem: (id: T) => void;
 }
 
-function EditModal<T extends object>({
+function EditModal<T extends BaseItem>({
     item,
     disabled,
     onClose,
@@ -35,7 +39,7 @@ function EditModal<T extends object>({
 
     const handleDelete = () => {
         if (window.confirm("Are you sure you want to delete this item?")) {
-            onDeleteItem();
+            onDeleteItem(item);
         }
     };
 
