@@ -1,13 +1,20 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Modal, Form, Button } from "react-bootstrap";
 
 interface BaseItem {
     id: string;
 }
 
+interface EditField<T> {
+    header: string;
+    key: keyof T | string;
+    render?: () => React.ReactNode;
+}
+
 interface EditModalProps<T extends BaseItem> {
     item: T;
     disabled: string[];
+    editFields: EditField<T>[];
     onClose: () => void;
     onUpdateItem: (item: T) => void;
     onDeleteItem: (id: T) => void;
@@ -16,6 +23,7 @@ interface EditModalProps<T extends BaseItem> {
 function EditModal<T extends BaseItem>({
     item,
     disabled,
+    editFields,
     onClose,
     onUpdateItem,
     onDeleteItem,
@@ -51,19 +59,25 @@ function EditModal<T extends BaseItem>({
 
             <Modal.Body>
                 <Form onSubmit={handleEditSubmit}>
-                    {Object.entries(item).map(([name, value]) => (
-                        <Form.Group className="mb-3" key={name}>
-                            <Form.Label>{name}</Form.Label>
+                    {editFields.map((field) => (
+                        <Form.Group className="mb-3" key={String(field.key)}>
+                            <Form.Label>{field.header}</Form.Label>
                             <Form.Control
                                 type="text"
-                                name={name}
-                                placeholder={String(value)}
-                                value={formData[name as keyof T] as string}
+                                name={field.header}
+                                placeholder={String(
+                                    formData[field.key as keyof T]
+                                )}
+                                value={formData[field.key as keyof T] as string}
                                 onChange={(e) =>
-                                    handleChange(name, e.target.value)
+                                    handleChange(
+                                        String(field.key),
+                                        e.target.value
+                                    )
                                 }
                                 disabled={
-                                    !isEditToSubmit || disabled.includes(name)
+                                    !isEditToSubmit ||
+                                    disabled.includes(String(field.key))
                                 }
                             />
                         </Form.Group>

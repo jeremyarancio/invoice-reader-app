@@ -6,6 +6,12 @@ interface BaseItem {
     id: string;
 }
 
+interface EditField<T> {
+    header: string;
+    key: keyof T | string;
+    render?: () => React.ReactNode;
+}
+
 interface ColumnConfig<T> {
     header: string;
     key: keyof T | string;
@@ -16,6 +22,7 @@ interface TableRenderProps<T extends BaseItem> {
     name: string;
     items: T[];
     columns: ColumnConfig<T>[];
+    editFields: EditField<T>[];
     disabled: string[];
     onAddItem: () => void;
     onUpdateItem: (item: T) => void;
@@ -26,6 +33,7 @@ function TableRender<T extends BaseItem>({
     name,
     items,
     columns,
+    editFields,
     disabled,
     onAddItem,
     onUpdateItem,
@@ -72,6 +80,7 @@ function TableRender<T extends BaseItem>({
             {showedItem && (
                 <EditModal<T>
                     item={showedItem}
+                    editFields={editFields}
                     disabled={disabled}
                     onClose={() => setShowedItem(null)}
                     onUpdateItem={onUpdateItem}

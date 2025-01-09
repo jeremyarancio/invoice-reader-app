@@ -85,6 +85,25 @@ const InvoiceList = () => {
         },
     ];
 
+    const editFields = [
+        {
+            header: "Invoice number",
+            key: "invoiceNumber",
+        },
+        {
+            header: "Amount excluding tax",
+            key: "amountExcludingTax",
+        },
+        {
+            header: "VAT",
+            key: "vat",
+        },
+        {
+            header: "Invoiced date",
+            key: "invoicedDate",
+        },
+    ];
+
     if (isLoading) return <div>Loading invoices...</div>;
     if (!sessionStorage.getItem("accessToken"))
         return (
@@ -92,7 +111,7 @@ const InvoiceList = () => {
         );
 
     // Fields that should be disabled in the Edition mode
-    const disabledFields = ["invoice_number", "invoiced_date"];
+    const disabledFields = ["invoiceNumber", "invoicedDate"];
 
     return (
         <>
@@ -101,6 +120,7 @@ const InvoiceList = () => {
                 name="Invoice"
                 columns={tableColumns}
                 items={invoices}
+                editFields={editFields}
                 disabled={disabledFields}
                 onAddItem={onAddInvoice}
                 onUpdateItem={onUpdateInvoice}
