@@ -33,7 +33,6 @@ def get_current_user(
             token, key=settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM]
         )
         email: str = payload.get("sub")
-        print(payload)
         if email is None:
             raise CREDENTIALS_EXCEPTION
     except InvalidTokenError:

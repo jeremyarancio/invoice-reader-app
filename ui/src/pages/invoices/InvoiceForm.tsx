@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Form, Button, Alert } from "react-bootstrap";
-import { submitInvoice, fetchClients } from "../../services/api";
-import { Invoice, GetClientsResponse, AddInvoicePayload } from "../../types";
+import { submitInvoice, fetchClients, queryClient } from "../../services/api";
+import { GetClientsResponse } from "../../types";
 import { PostInvoice, PostInvoicePayload } from "./types";
 import { useNavigate } from "react-router-dom";
 
@@ -20,9 +20,7 @@ const initialInvoice: PostInvoice = {
 
 function InvoiceForm({ file }: FormProperties) {
     const [clientId, setClientId] = useState<string>("");
-    const [invoice, setInvoice] = useState<PostInvoice>(
-        initialInvoice
-    );
+    const [invoice, setInvoice] = useState<PostInvoice>(initialInvoice);
     const [error, setError] = useState<string | null>(null);
     const [isComplete, setIsComplete] = useState<boolean>(false);
     const navigate = useNavigate();
@@ -35,7 +33,13 @@ function InvoiceForm({ file }: FormProperties) {
     );
 
     const invoiceDataMutation = useMutation({
-        mutationFn: ({ file, data }: { file?: File; data: PostInvoicePayload }) => {
+        mutationFn: ({
+            file,
+            data,
+        }: {
+            file?: File;
+            data: PostInvoicePayload;
+        }) => {
             if (!file) {
                 throw new Error("No valid file provided");
             }
@@ -46,6 +50,7 @@ function InvoiceForm({ file }: FormProperties) {
             setInvoice(initialInvoice);
             setError(null);
             setIsComplete(true);
+            queryClient.invalidateQueries({ queryKey: ["invoices"] });
         },
         onError: (error: Error) => {
             setError(error.message || "Failed to submit invoice data");
@@ -82,7 +87,7 @@ function InvoiceForm({ file }: FormProperties) {
         try {
             invoiceDataMutation.mutate({
                 file,
-                data: {invoice: invoice, client_id: clientId},
+                data: { invoice: invoice, client_id: clientId },
             });
         } catch (err) {
             setError(

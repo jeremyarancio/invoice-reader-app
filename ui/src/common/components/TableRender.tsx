@@ -26,7 +26,7 @@ interface TableRenderProps<T extends BaseItem> {
     disabled: string[];
     onAddItem: () => void;
     onUpdateItem: (item: T) => void;
-    onDeleteItems: (ids: T[]) => void;
+    onDeleteItems: (items: T[]) => void;
 }
 
 function TableRender<T extends BaseItem>({
@@ -73,8 +73,6 @@ function TableRender<T extends BaseItem>({
 
     const handleDeleteItem = (item: T) => onDeleteItems([item]);
 
-    console.log(items);
-    console.log(selectedItems);
     return (
         <>
             {showedItem && (

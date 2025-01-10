@@ -3,6 +3,7 @@ import {
     fetchInvoices,
     updateInvoice,
     deleteInvoices,
+    queryClient,
 } from "../../services/api";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Invoice } from "./types";
@@ -28,6 +29,7 @@ const InvoiceList = () => {
         mutationFn: updateInvoice,
         onSuccess: () => {
             window.alert("Successfully updated.");
+            queryClient.invalidateQueries({ queryKey: ["invoices"] });
         },
         onError: (err) => {
             const errorMessage =
@@ -42,6 +44,7 @@ const InvoiceList = () => {
         mutationFn: deleteInvoices,
         onSuccess: () => {
             window.alert("Successfully deleted");
+            queryClient.invalidateQueries({ queryKey: ["invoices"] });
         },
         onError: (error: Error) => {
             window.alert("Failed to delete: " + error.message);
@@ -60,7 +63,8 @@ const InvoiceList = () => {
     };
 
     const onDeleteInvoices = (invoices: Invoice[]) => {
-        deleteMutation.mutate(invoices.map((invoice) => invoice.id));
+        const invoiceIds = invoices.map((invoice) => invoice.id);
+        deleteMutation.mutate(invoiceIds);
     };
 
     const tableColumns = [

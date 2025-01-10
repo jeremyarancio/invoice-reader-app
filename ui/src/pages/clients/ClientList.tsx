@@ -136,7 +136,7 @@ const ClientList: React.FC = () => {
             const clientIds = selectedClients.map((client) => client.client_id);
             deleteInvoiceMutation.mutate(clientIds);
         }
-    };  
+    };
 
     if (isLoading) return <div>Loading invoices...</div>;
     if (showForm) return <ClientForm />;
