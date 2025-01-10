@@ -4,12 +4,15 @@ import {
     UserLoginData,
     InvoiceListGetProps,
     ClientListGetProps,
-    AddInvoicePayload,
     CreateClient,
     GetInvoiceResponse,
-    Invoice,
 } from "../types";
 import { QueryClient } from "@tanstack/react-query";
+import {
+    GetPagedInvoices,
+    PostInvoicePayload,
+    PutInvoice,
+} from "../pages/invoices/types";
 
 const baseURL = "http://localhost:8000/api/v1/";
 
@@ -17,10 +20,11 @@ export const queryClient = new QueryClient({
     defaultOptions: {
         queries: {
             refetchOnWindowFocus: false,
-            retry: 1,
+            retry: false,
+            staleTime: 30000,
         },
         mutations: {
-            retry: 1,
+            retry: false,
         },
     },
 });
@@ -42,7 +46,7 @@ export const loginUser = async (loginData: UserLoginData) => {
     return response.data;
 };
 
-export const submitInvoice = async (file: File, data: AddInvoicePayload) => {
+export const submitInvoice = async (file: File, data: PostInvoicePayload) => {
     const invoiceData = JSON.stringify(data);
 
     const formData = new FormData();
@@ -79,17 +83,19 @@ export const fetchInvoice = async (id: string): Promise<GetInvoiceResponse> => {
     return response.data;
 };
 
-export const fetchInvoices = async (props: InvoiceListGetProps) => {
+export const fetchInvoices = async (
+    props: InvoiceListGetProps
+): Promise<GetPagedInvoices> => {
     const accessToken = sessionStorage.getItem("accessToken");
     const tokenType = sessionStorage.getItem("tokenType") || "Bearer";
 
     const response = await api.get("invoices/", {
-        data: {
+        params: {
             page: props.pageNumber,
             per_page: props.perPage,
         },
         headers: {
-            "Content-Type": "multipart/form-data",
+            "Content-Type": "application/json",
             Authorization: `${tokenType} ${accessToken}`,
         },
     });
@@ -101,12 +107,12 @@ export const fetchClients = async (props: ClientListGetProps) => {
     const tokenType = sessionStorage.getItem("tokenType") || "Bearer";
 
     const response = await api.get("clients/", {
-        data: {
+        params: {
             page: props.pageNumber,
             per_page: props.perPage,
         },
         headers: {
-            "Content-Type": "multipart/form-data",
+            "Content-Type": "application/json",
             Authorization: `${tokenType} ${accessToken}`,
         },
     });
@@ -138,7 +144,6 @@ export const deleteInvoices = async (invoice_ids: string[]) => {
     if (!accessToken) {
         throw new Error("No authentication token found. Please log in.");
     }
-
     await Promise.all(
         invoice_ids.map(async (invoice_id) => {
             await api.delete("invoices/" + invoice_id, {
@@ -171,7 +176,7 @@ export const deleteClients = async (client_ids: string[]) => {
     );
 };
 
-export const updateInvoice = async (invoice: Invoice) => {
+export const updateInvoice = async (invoice: PutInvoice) => {
     const accessToken = sessionStorage.getItem("accessToken");
     const tokenType = sessionStorage.getItem("tokenType") || "Bearer";
 
@@ -179,7 +184,7 @@ export const updateInvoice = async (invoice: Invoice) => {
         throw new Error("No authentication token found. Please log in.");
     }
 
-    const response = await api.put("invoices/" + invoice.invoice_id, invoice, {
+    const response = await api.put("invoices/" + invoice.id, invoice.invoice, {
         headers: {
             "Content-Type": "application/json",
             Authorization: `${tokenType} ${accessToken}`,

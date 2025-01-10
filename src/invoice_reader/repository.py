@@ -23,9 +23,9 @@ class InvoiceRepository:
         s3_path: str,
     ) -> str:
         existing_invoice = self.session.exec(
-            sqlmodel.select(InvoiceModel).where(
-                InvoiceModel.invoice_number == invoice_data.invoice_number
-            )
+            sqlmodel.select(InvoiceModel)
+            .where(InvoiceModel.invoice_number == invoice_data.invoice_number)
+            .where(InvoiceModel.user_id == user_id)
         ).first()
         if existing_invoice:
             raise EXISTING_INVOICE_EXCEPTION

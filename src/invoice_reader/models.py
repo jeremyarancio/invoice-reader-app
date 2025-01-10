@@ -35,7 +35,7 @@ class S3:
     def delete(self, suffix: str) -> None:
         s3_client = boto3.client("s3")
         try:
-            s3_client.delete_object(self.bucket, suffix)
+            s3_client.delete_object(Bucket=self.bucket, Key=suffix)
         except ClientError:
             raise
 

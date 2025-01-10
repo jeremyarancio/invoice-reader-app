@@ -29,7 +29,7 @@ def test_submit_invoice(
 ):
     data = new_invoice_create.model_dump_json()
     response = api_client.post(
-        url="/api/v1/invoices/submit",
+        url="/api/v1/invoices/submit/",
         data={"data": data},
         files=upload_files,
         headers={"Authorization": f"{auth_token.token_type} {auth_token.access_token}"},
@@ -55,7 +55,7 @@ def test_submit_exisiting_invoice(
 ):
     data = existing_invoice_create.model_dump_json()
     response = api_client.post(
-        url="/api/v1/invoices/submit",
+        url="/api/v1/invoices/submit/",
         data={"data": data},
         files=upload_files,
         headers={"Authorization": f"{auth_token.token_type} {auth_token.access_token}"},
@@ -80,7 +80,7 @@ def test_submit_invoice_with_wrong_format(
     test_existing_user: UserModel,
 ):
     response = api_client.post(
-        url="/api/v1/invoices/submit",
+        url="/api/v1/invoices/submit/",
         files=wrong_files,
         headers={"Authorization": f"{auth_token.token_type} {auth_token.access_token}"},
     )
@@ -136,7 +136,7 @@ def test_submit_invoice_unauthorized(
 ):
     data = new_invoice_create.model_dump_json()
     response = api_client.post(
-        url="/api/v1/invoices/submit",
+        url="/api/v1/invoices/submit/",
         data={"data": data},
         files=upload_files,
         headers={"Authorization": "Bearer invalid_token"},
