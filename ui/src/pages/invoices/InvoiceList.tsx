@@ -1,21 +1,12 @@
 import { Alert } from "react-bootstrap";
-import {
-    fetchInvoices,
-    updateInvoice,
-    deleteInvoices,
-    queryClient,
-} from "../../services/api";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { fetchInvoices } from "../../services/api";
+import { useQuery } from "@tanstack/react-query";
 import { Invoice } from "./types";
-import { useNavigate } from "react-router-dom";
 import TableRender from "../../common/components/TableRender";
-import {
-    mapInvoicePayloadToInvoice,
-    mapInvoiceToPutInvoice,
-} from "../../utils/mappers";
+import { mapInvoicePayloadToInvoice } from "./mappers";
+import { onUpdateInvoice, onDeleteInvoices, onAddInvoice } from "./hooks";
 
 const InvoiceList = () => {
-    const navigate = useNavigate();
     const pageNumber = 1;
     const perPage = 10;
 
@@ -25,47 +16,8 @@ const InvoiceList = () => {
         enabled: !!sessionStorage.getItem("accessToken"),
     });
 
-    const updateMutation = useMutation({
-        mutationFn: updateInvoice,
-        onSuccess: () => {
-            window.alert("Successfully updated.");
-            queryClient.invalidateQueries({ queryKey: ["invoices"] });
-        },
-        onError: (err) => {
-            const errorMessage =
-                err instanceof Error
-                    ? err.message
-                    : "An unexpected error occurred";
-            window.alert("Error: " + errorMessage);
-        },
-    });
-
-    const deleteMutation = useMutation({
-        mutationFn: deleteInvoices,
-        onSuccess: () => {
-            window.alert("Successfully deleted");
-            queryClient.invalidateQueries({ queryKey: ["invoices"] });
-        },
-        onError: (error: Error) => {
-            window.alert("Failed to delete: " + error.message);
-        },
-    });
-
     const invoices =
         data?.data.map((invoice) => mapInvoicePayloadToInvoice(invoice)) || [];
-
-    const onAddInvoice = () => {
-        navigate("/upload");
-    };
-
-    const onUpdateInvoice = (invoice: Invoice) => {
-        updateMutation.mutate(mapInvoiceToPutInvoice(invoice));
-    };
-
-    const onDeleteInvoices = (invoices: Invoice[]) => {
-        const invoiceIds = invoices.map((invoice) => invoice.id);
-        deleteMutation.mutate(invoiceIds);
-    };
 
     const tableColumns = [
         {

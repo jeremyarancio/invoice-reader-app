@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Form, Button } from "react-bootstrap";
+import { Form, Button, Alert } from "react-bootstrap";
 import InvoiceForm from "./InvoiceForm";
 
 const UploadInvoice = () => {
@@ -29,7 +29,8 @@ const UploadInvoice = () => {
     }
 
     return (
-        <div>
+        <>
+            {error} && <Alert variant="warning">{error}</Alert>
             <h2>Upload Invoice</h2>
             <Form onSubmit={handleSubmit}>
                 <Form.Group controlId="formFile" className="mb-3">
@@ -44,7 +45,7 @@ const UploadInvoice = () => {
                     Next
                 </Button>
             </Form>
-        </div>
+        </>
     );
 };
 
