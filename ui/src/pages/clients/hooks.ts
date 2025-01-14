@@ -11,7 +11,7 @@ export const useAddClient = () => {
 };
 
 export const useFetchClients = () => {
-    return (pageNumber: number, perPage: number) =>
+    return (pageNumber: number = 1, perPage: number = 10) =>
         useQuery({
             queryKey: ["clients", pageNumber, perPage],
             queryFn: () => fetchClients(pageNumber, perPage),

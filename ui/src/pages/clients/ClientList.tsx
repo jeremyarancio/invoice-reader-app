@@ -25,7 +25,7 @@ const ClientList = () => {
         return <Alert variant="danger">You need to log in...</Alert>;
 
     const tableColumns = [
-        { header: "Client", key: "clientName" },
+        { header: "Client", key: "name" },
         { header: "Total", key: "", render: () => `$${1000}` },
     ];
 

@@ -4,14 +4,35 @@ import {
     deleteInvoices,
     updateInvoice,
     fetchInvoices,
+    submitInvoice,
 } from "../../services/api";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { queryClient } from "../../services/api";
-import { Invoice } from "./types";
+import { CreateInvoicePayload, Invoice } from "./types";
 
 export const useAddInvoice = () => {
     const navigate = useNavigate();
     return () => navigate("/upload");
+};
+
+export const useSubmitInvoice = () => {
+    const addInvoiceMutation = useMutation({
+        mutationFn: ({
+            file,
+            data,
+        }: {
+            file: File;
+            data: CreateInvoicePayload;
+        }) => submitInvoice(file, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["invoices"] });
+        },
+        onError: (error: Error) => {
+            console.error(error);
+        },
+    });
+    return (file: File, data: CreateInvoicePayload) =>
+        addInvoiceMutation.mutate({ file, data });
 };
 
 export const useFetchInvoices = () => {
@@ -56,5 +77,5 @@ export const useDeleteInvoices = () => {
     return (invoices: Invoice[]) => {
         const invoiceIds = invoices.map((invoice) => invoice.id);
         return () => deleteMutation.mutate(invoiceIds);
-    }
+    };
 };

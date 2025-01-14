@@ -36,7 +36,7 @@ const InvoiceList = () => {
         {
             header: "Amount",
             key: "amount",
-            render: (item: Invoice) => `$${item.amountExcludingTax.toFixed(2)}`,
+            render: (item: Invoice) => `${item.currency}${item.amountExcludingTax.toFixed(2)}`,
         },
         {
             header: "Status",

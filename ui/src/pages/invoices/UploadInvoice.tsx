@@ -30,7 +30,7 @@ const UploadInvoice = () => {
 
     return (
         <>
-            {error} && <Alert variant="warning">{error}</Alert>
+            {error && <Alert variant="warning">{error}</Alert>}
             <h2>Upload Invoice</h2>
             <Form onSubmit={handleSubmit}>
                 <Form.Group controlId="formFile" className="mb-3">

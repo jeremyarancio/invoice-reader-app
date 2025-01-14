@@ -1,192 +1,85 @@
-import React, { useState } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { Form, Button, Alert } from "react-bootstrap";
-import { submitInvoice, fetchClients, queryClient } from "../../services/api";
-import { GetClientsResponse } from "../../types";
-import { CreateInvoice, CreateInvoicePayload } from "./types";
-import { useNavigate } from "react-router-dom";
+import { Invoice } from "./types";
+import { useFetchClients } from "../clients/hooks";
+import { useSubmitInvoice } from "./hooks";
+import SubmissionForm from "../../common/components/SubmitionForm";
+import { mapGetClientToClient } from "../clients/mapper";
+import { mapInvoicetoCreateInvoice } from "./mappers";
+
+type InvoiceFormData = Omit<Invoice, "id">;
 
 interface FormProperties {
     file: File;
 }
 
-const initialInvoice: CreateInvoice = {
-    amount_excluding_tax: 0,
+const initialInvoice: InvoiceFormData = {
+    amountExcludingTax: 0,
     vat: 0,
     currency: "€",
-    invoiced_date: new Date(),
-    invoice_number: "",
+    invoicedDate: new Date(),
+    invoiceNumber: "",
+    clientId: "",
 };
 
 function InvoiceForm({ file }: FormProperties) {
-    const [clientId, setClientId] = useState<string>("");
-    const [invoice, setInvoice] = useState<CreateInvoice>(initialInvoice);
-    const [error, setError] = useState<string | null>(null);
-    const [isComplete, setIsComplete] = useState<boolean>(false);
-    const navigate = useNavigate();
+    const fetchClients = useFetchClients();
+    const submitInvoice = useSubmitInvoice();
 
-    const { data: pagedClients, isError } = useQuery<GetClientsResponse, Error>(
+    const { data: pagedClients, error, isLoading } = fetchClients();
+    const clients = pagedClients?.data.map(mapGetClientToClient) || [];
+
+    const formGroups = [
         {
-            queryKey: ["clients"],
-            queryFn: () => fetchClients({ pageNumber: 1, perPage: 100 }),
-        }
-    );
-
-    const invoiceDataMutation = useMutation({
-        mutationFn: ({
-            file,
-            data,
-        }: {
-            file?: File;
-            data: CreateInvoicePayload;
-        }) => {
-            if (!file) {
-                throw new Error("No valid file provided");
-            }
-            return submitInvoice(file, data);
+            header: "Invoice number",
+            key: "invoiceNumber",
+            formType: "text" as const, //Literal (lol typescript)
+            required: true,
         },
-        onSuccess: () => {
-            setClientId("");
-            setInvoice(initialInvoice);
-            setError(null);
-            setIsComplete(true);
-            queryClient.invalidateQueries({ queryKey: ["invoices"] });
+        {
+            header: "Amount Excuding Tax",
+            key: "amountExcludingTax",
+            formType: "number" as const,
+            required: true,
         },
-        onError: (error: Error) => {
-            setError(error.message || "Failed to submit invoice data");
-            console.error(error);
+        {
+            header: "Currency",
+            key: "currency",
+            formType: "text" as const,
+            required: true,
+            render: () => String("€"), //TODO
         },
-    });
-
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-
-        const processedValue = ["amount_excluding_tax", "vat"].includes(name)
-            ? Number(value)
-            : value;
-
-        setInvoice((prev) => ({
-            ...prev,
-            [name]: processedValue,
-        }));
-    };
-
-    const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const { value } = e.target;
-        setClientId(value);
-    };
-
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-
-        if (!file) {
-            setError("Please upload an invoice file");
-            return;
-        }
-
-        try {
-            invoiceDataMutation.mutate({
-                file,
-                data: { invoice: invoice, client_id: clientId },
-            });
-        } catch (err) {
-            setError(
-                err instanceof Error
-                    ? err.message
-                    : "An unexpected error occurred"
-            );
-        }
-    };
+        {
+            header: "VAT",
+            key: "vat",
+            formType: "number" as const,
+            required: true,
+        },
+        {
+            header: "invoiced_date",
+            key: "invoicedDate",
+            formType: "date" as const,
+            required: true,
+            render: (invoice: InvoiceFormData) =>
+                new Date(invoice.invoicedDate).toLocaleDateString(),
+        },
+        {
+            header: "Client",
+            key: "clientId",
+            formType: "select" as const,
+            required: true,
+        },
+    ];
 
     return (
         <>
-            {error && (
-                <Alert
-                    variant="danger"
-                    onClose={() => setError(null)} // Allow dismissing the error
-                    dismissible
-                    className="mb-4"
-                >
-                    {error}
-                </Alert>
-            )}
-            {isComplete && (
-                <Alert
-                    variant="success"
-                    dismissible
-                    onClose={() => navigate("/")}
-                    className="mb-4"
-                >
-                    Invoice successfully added
-                </Alert>
-            )}
-
-            <Form onSubmit={handleSubmit}>
-                <h3>Invoice details</h3>
-                <Form.Group className="mb-3">
-                    <Form.Label>Invoice number</Form.Label>
-                    <Form.Control
-                        type="text"
-                        name="invoice_number"
-                        onChange={handleInputChange}
-                        required
-                    />
-                </Form.Group>
-                <Form.Group className="mb-3">
-                    <Form.Label>Revenue without tax (€)</Form.Label>
-                    <Form.Control
-                        type="number"
-                        name="amount_excluding_tax"
-                        onChange={handleInputChange}
-                        required
-                    />
-                </Form.Group>
-                <Form.Group className="mb-3">
-                    <Form.Label>VAT (%)</Form.Label>
-                    <Form.Control
-                        type="number"
-                        name="vat"
-                        onChange={handleInputChange}
-                        required
-                    />
-                </Form.Group>
-                <Form.Group className="mb-3">
-                    <Form.Label>Invoice date</Form.Label>
-                    <Form.Control
-                        type="date"
-                        name="invoiced_date"
-                        onChange={handleInputChange}
-                        required
-                    />
-                </Form.Group>
-                <Form.Group>
-                    <Form.Select
-                        aria-label="Select a client"
-                        name="client_name"
-                        onChange={handleSelectChange}
-                        required
-                    >
-                        <option value="">Select a client</option>
-                        {isError && (
-                            <option disabled>Error loading clients</option>
-                        )}
-                        {pagedClients?.data.map((client) => (
-                            <option
-                                key={client.client_id}
-                                value={client.client_id}
-                            >
-                                {client.client_name}
-                            </option>
-                        ))}
-                    </Form.Select>
-                </Form.Group>
-
-                <div className="text-center mt-3">
-                    <Button variant="primary" type="submit">
-                        Submit
-                    </Button>
-                </div>
-            </Form>
+            <SubmissionForm<InvoiceFormData>
+                name="Invoice"
+                submitItem={(data: InvoiceFormData) =>
+                    submitInvoice(file, mapInvoicetoCreateInvoice(data))
+                }
+                formGroups={formGroups}
+                initialData={initialInvoice}
+                additionalItems={clients}
+            />
         </>
     );
 }

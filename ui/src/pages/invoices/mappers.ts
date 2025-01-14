@@ -1,4 +1,9 @@
-import { GetInvoice, Invoice, UpdateInvoice } from "./types";
+import {
+    CreateInvoicePayload,
+    GetInvoice,
+    Invoice,
+    UpdateInvoice,
+} from "./types";
 
 export function mapGetInvoiceToInvoice(getInvoice: GetInvoice): Invoice {
     return {
@@ -21,5 +26,20 @@ export function mapInvoiceToPutInvoice(invoice: Invoice): UpdateInvoice {
             invoiced_date: invoice.invoicedDate,
             vat: invoice.vat,
         },
+    };
+}
+
+export function mapInvoicetoCreateInvoice(
+    invoice: Omit<Invoice, "id">
+): CreateInvoicePayload {
+    return {
+        invoice: {
+            amount_excluding_tax: invoice.amountExcludingTax,
+            currency: invoice.currency,
+            invoice_number: invoice.invoiceNumber,
+            invoiced_date: invoice.invoicedDate,
+            vat: invoice.vat,
+        },
+        client_id: invoice.clientId,
     };
 }

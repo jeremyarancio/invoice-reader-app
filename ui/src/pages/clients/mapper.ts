@@ -4,7 +4,7 @@ export function mapGetClientToClient(getClient: GetClient): Client {
     return {
         id: getClient.client_id,
         city: getClient.city,
-        clientName: getClient.client_name,
+        name: getClient.client_name,
         country: getClient.country,
         streetAddress: getClient.street_address,
         streetNumber: getClient.street_number,
@@ -14,7 +14,7 @@ export function mapGetClientToClient(getClient: GetClient): Client {
 
 export function mapClientToCreateClient(client: Client): CreateClient {
     return {
-        client_name: client.clientName,
+        client_name: client.name,
         city: client.city,
         country: client.country,
         street_address: client.streetAddress,
