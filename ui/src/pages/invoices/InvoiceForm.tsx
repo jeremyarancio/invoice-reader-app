@@ -3,14 +3,14 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { Form, Button, Alert } from "react-bootstrap";
 import { submitInvoice, fetchClients, queryClient } from "../../services/api";
 import { GetClientsResponse } from "../../types";
-import { PostInvoice, PostInvoicePayload } from "./types";
+import { CreateInvoice, CreateInvoicePayload } from "./types";
 import { useNavigate } from "react-router-dom";
 
 interface FormProperties {
     file: File;
 }
 
-const initialInvoice: PostInvoice = {
+const initialInvoice: CreateInvoice = {
     amount_excluding_tax: 0,
     vat: 0,
     currency: "€",
@@ -20,7 +20,7 @@ const initialInvoice: PostInvoice = {
 
 function InvoiceForm({ file }: FormProperties) {
     const [clientId, setClientId] = useState<string>("");
-    const [invoice, setInvoice] = useState<PostInvoice>(initialInvoice);
+    const [invoice, setInvoice] = useState<CreateInvoice>(initialInvoice);
     const [error, setError] = useState<string | null>(null);
     const [isComplete, setIsComplete] = useState<boolean>(false);
     const navigate = useNavigate();
@@ -38,7 +38,7 @@ function InvoiceForm({ file }: FormProperties) {
             data,
         }: {
             file?: File;
-            data: PostInvoicePayload;
+            data: CreateInvoicePayload;
         }) => {
             if (!file) {
                 throw new Error("No valid file provided");

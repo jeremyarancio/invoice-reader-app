@@ -8,6 +8,7 @@ import Login from "./pages/login/Login";
 import RegisterUser from "./pages/login/Register";
 import { queryClient } from "./services/api";
 import { QueryClientProvider } from "@tanstack/react-query";
+import ClientForm from "./pages/clients/ClientForm";
 
 function App() {
     return (
@@ -19,6 +20,7 @@ function App() {
                         <Route path="/" element={<InvoiceList />} />
                         <Route path="/clients" element={<ClientList />} />
                         <Route path="/upload" element={<UploadInvoice />} />
+                        <Route path="/clientform" element={<ClientForm />} />
                         <Route path="/profile" element={<Profile />} />
                         <Route path="/login" element={<Login />} />
                         <Route path="/register" element={<RegisterUser />} />

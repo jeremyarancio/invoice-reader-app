@@ -1,16 +1,29 @@
 import { useNavigate } from "react-router-dom";
 import { mapInvoiceToPutInvoice } from "./mappers";
-import { deleteInvoices, updateInvoice } from "../../services/api";
-import { useMutation } from "@tanstack/react-query";
+import {
+    deleteInvoices,
+    updateInvoice,
+    fetchInvoices,
+} from "../../services/api";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { queryClient } from "../../services/api";
 import { Invoice } from "./types";
 
-export const onAddInvoice = () => {
+export const useAddInvoice = () => {
     const navigate = useNavigate();
-    navigate("/upload");
+    return () => navigate("/upload");
 };
 
-export const onUpdateInvoice = (invoice: Invoice) => {
+export const useFetchInvoices = () => {
+    return (pageNumber: number, perPage: number) =>
+        useQuery({
+            queryKey: ["invoices", pageNumber, perPage],
+            queryFn: () => fetchInvoices(pageNumber, perPage),
+            enabled: !!sessionStorage.getItem("accessToken"),
+        });
+};
+
+export const useUpdateInvoice = () => {
     const updateMutation = useMutation({
         mutationFn: updateInvoice,
         onSuccess: () => {
@@ -25,10 +38,11 @@ export const onUpdateInvoice = (invoice: Invoice) => {
             window.alert("Error: " + errorMessage);
         },
     });
-    updateMutation.mutate(mapInvoiceToPutInvoice(invoice));
+    return (invoice: Invoice) =>
+        updateMutation.mutate(mapInvoiceToPutInvoice(invoice));
 };
 
-export const onDeleteInvoices = (invoices: Invoice[]) => {
+export const useDeleteInvoices = () => {
     const deleteMutation = useMutation({
         mutationFn: deleteInvoices,
         onSuccess: () => {
@@ -39,7 +53,8 @@ export const onDeleteInvoices = (invoices: Invoice[]) => {
             window.alert("Failed to delete: " + error.message);
         },
     });
-
-    const invoiceIds = invoices.map((invoice) => invoice.id);
-    deleteMutation.mutate(invoiceIds);
+    return (invoices: Invoice[]) => {
+        const invoiceIds = invoices.map((invoice) => invoice.id);
+        return () => deleteMutation.mutate(invoiceIds);
+    }
 };

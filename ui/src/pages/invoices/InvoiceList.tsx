@@ -1,23 +1,26 @@
 import { Alert } from "react-bootstrap";
-import { fetchInvoices } from "../../services/api";
-import { useQuery } from "@tanstack/react-query";
 import { Invoice } from "./types";
 import TableRender from "../../common/components/TableRender";
-import { mapInvoicePayloadToInvoice } from "./mappers";
-import { onUpdateInvoice, onDeleteInvoices, onAddInvoice } from "./hooks";
+import { mapGetInvoiceToInvoice } from "./mappers";
+import {
+    useAddInvoice,
+    useDeleteInvoices,
+    useFetchInvoices,
+    useUpdateInvoice,
+} from "./hooks";
 
 const InvoiceList = () => {
     const pageNumber = 1;
     const perPage = 10;
+    const addInvoice = useAddInvoice();
+    const updateInvoice = useUpdateInvoice();
+    const fetchInvoices = useFetchInvoices();
+    const deleteInvoices = useDeleteInvoices();
 
-    const { data, isLoading, error } = useQuery({
-        queryKey: ["invoices", pageNumber, perPage],
-        queryFn: () => fetchInvoices({ pageNumber, perPage }),
-        enabled: !!sessionStorage.getItem("accessToken"),
-    });
+    const { data, isLoading, error } = fetchInvoices(pageNumber, perPage);
 
     const invoices =
-        data?.data.map((invoice) => mapInvoicePayloadToInvoice(invoice)) || [];
+        data?.data.map((invoice) => mapGetInvoiceToInvoice(invoice)) || [];
 
     const tableColumns = [
         {
@@ -77,10 +80,10 @@ const InvoiceList = () => {
                 columns={tableColumns}
                 items={invoices}
                 editFields={editFields}
-                disabled={disabledFields}
-                onAddItem={onAddInvoice}
-                onUpdateItem={onUpdateInvoice}
-                onDeleteItems={onDeleteInvoices}
+                disabledFields={disabledFields}
+                onAddItem={addInvoice}
+                onUpdateItem={updateInvoice}
+                onDeleteItems={deleteInvoices}
             />
         </>
     );

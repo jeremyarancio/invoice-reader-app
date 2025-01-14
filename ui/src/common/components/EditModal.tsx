@@ -13,7 +13,7 @@ interface EditField<T> {
 
 interface EditModalProps<T extends BaseItem> {
     item: T;
-    disabled: string[];
+    disabledFields?: string[];
     editFields: EditField<T>[];
     onClose: () => void;
     onUpdateItem: (item: T) => void;
@@ -22,7 +22,7 @@ interface EditModalProps<T extends BaseItem> {
 
 function EditModal<T extends BaseItem>({
     item,
-    disabled,
+    disabledFields,
     editFields,
     onClose,
     onUpdateItem,
@@ -77,7 +77,10 @@ function EditModal<T extends BaseItem>({
                                 }
                                 disabled={
                                     !isEditToSubmit ||
-                                    disabled.includes(String(field.key))
+                                    disabledFields?.includes(
+                                        String(field.key)
+                                    ) ||
+                                    false
                                 }
                             />
                         </Form.Group>

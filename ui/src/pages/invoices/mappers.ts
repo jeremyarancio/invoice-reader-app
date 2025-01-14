@@ -1,17 +1,17 @@
-import { GetInvoice, Invoice, PutInvoice } from "../pages/invoices/types";
+import { GetInvoice, Invoice, UpdateInvoice } from "./types";
 
-export function mapInvoicePayloadToInvoice(payload: GetInvoice): Invoice {
+export function mapGetInvoiceToInvoice(getInvoice: GetInvoice): Invoice {
     return {
-        id: payload.invoice_id,
-        amountExcludingTax: payload.data.amount_excluding_tax,
+        id: getInvoice.invoice_id,
+        amountExcludingTax: getInvoice.data.amount_excluding_tax,
         currency: "$", //TODO
-        vat: payload.data.vat,
-        invoiceNumber: payload.data.invoice_number,
-        invoicedDate: payload.data.invoiced_date,
+        vat: getInvoice.data.vat,
+        invoiceNumber: getInvoice.data.invoice_number,
+        invoicedDate: getInvoice.data.invoiced_date,
     };
 }
 
-export function mapInvoiceToPutInvoice(invoice: Invoice): PutInvoice {
+export function mapInvoiceToPutInvoice(invoice: Invoice): UpdateInvoice {
     return {
         id: invoice.id,
         invoice: {
