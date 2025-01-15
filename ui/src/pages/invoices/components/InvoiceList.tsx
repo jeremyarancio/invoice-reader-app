@@ -77,7 +77,7 @@ const InvoiceList = () => {
         <>
             {error && <Alert variant="warning">Error: {error.message}</Alert>}
             <TableRender<Invoice>
-                name="Invoice"
+                name="Invoices"
                 columns={tableColumns}
                 items={invoices}
                 editFields={editFields}

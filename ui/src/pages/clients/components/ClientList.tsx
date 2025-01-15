@@ -35,7 +35,7 @@ const ClientList = () => {
         <>
             {error && <Alert variant="danger">Error:{error.message}</Alert>}
             <TableRender<Client>
-                name="Client"
+                name="Clients"
                 columns={tableColumns}
                 items={clients}
                 editFields={editFields}
