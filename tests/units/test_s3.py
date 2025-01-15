@@ -25,13 +25,11 @@ def test_get_s3_suffix_from_data(s3_suffix: str, file_data: FileData):
 
 
 def test_no_file_format(
-    file: BinaryIO,
     test_existing_user: UserModel,
 ):
     with pytest.raises(ValueError):
         FileData(
             user_id=test_existing_user.user_id,
-            file=file,
             filename="filename",  # missing file format
         )
 
@@ -44,4 +42,4 @@ def test_get_suffix_from_s3_path(s3_path: str, s3_suffix: str):
 def test_delete_s3_object(bucket: str, s3_suffix: str, s3_mocker: Mock):
     s3 = S3.init(bucket=bucket)
     s3.delete(suffix=s3_suffix)
-    s3_mocker.delete_object.assert_called_once(bucket, s3_suffix)
+    s3_mocker.delete_object.assert_called_once()

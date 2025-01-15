@@ -14,3 +14,5 @@ lint:
 
 fix: lint format
 
+test:
+	uv run pytest -vv

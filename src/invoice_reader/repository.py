@@ -59,6 +59,7 @@ class InvoiceRepository:
         invoice_data = Invoice.model_validate(invoice_model.model_dump())
         invoice_response = InvoiceGetResponse(
             invoice_id=file_id,
+            client_id=invoice_model.client_id,
             s3_path=invoice_model.s3_path,
             data=invoice_data,
         )
@@ -84,6 +85,7 @@ class InvoiceRepository:
             invoice_responses.append(
                 InvoiceGetResponse(
                     invoice_id=invoice_model.file_id,
+                    client_id=invoice_model.client_id,
                     s3_path=invoice_model.s3_path,
                     data=invoice_data,
                 )
@@ -152,7 +154,6 @@ class UserRepository:
         users = [User(**user_model.model_dump()) for user_model in users_model]
         LOGGER("List of users returned from database: %s", users)
         return users
-    
 
     def get_user_by_email(self, email: str) -> User | None:
         user_model = self.session.exec(

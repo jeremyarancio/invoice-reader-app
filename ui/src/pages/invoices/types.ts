@@ -8,6 +8,7 @@ export interface GetPagedInvoices {
 export interface GetInvoice {
     data: GetInvoiceItem;
     invoice_id: string;
+    client_id: string;
     s3_path: string;
 }
 

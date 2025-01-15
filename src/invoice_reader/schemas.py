@@ -53,6 +53,7 @@ class InvoiceCreate(BaseModel):
 
 class InvoiceGetResponse(BaseModel):
     invoice_id: uuid.UUID
+    client_id: uuid.UUID
     s3_path: str
     data: Invoice
 
