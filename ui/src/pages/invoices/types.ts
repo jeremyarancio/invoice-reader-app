@@ -20,7 +20,7 @@ export interface GetInvoiceItem {
 
 export interface Invoice {
     id: string;
-    clientId?: string;
+    clientId: string;
     amountExcludingTax: number;
     vat: number;
     currency: string;

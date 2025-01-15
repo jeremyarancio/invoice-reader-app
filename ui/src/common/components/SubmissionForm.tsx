@@ -18,15 +18,15 @@ interface FormGroup<T> {
 interface Props<T> {
     name: string;
     formGroups: FormGroup<T>[];
-    submitItem: (item: T) => void;
-    additionalItems?: BaseItem[];
+    submit: (item: T) => void;
+    additionalItems?: BaseItem[]; // It can take more attributes
     initialData: T;
 }
 
 function SubmissionForm<T>({
     name,
     formGroups,
-    submitItem,
+    submit,
     additionalItems,
     initialData,
 }: Props<T>) {
@@ -45,7 +45,7 @@ function SubmissionForm<T>({
             setError("Please fill in all required fields");
             return;
         }
-        submitItem(formData as T);
+        submit(formData as T);
         navigate("/");
     };
 
@@ -65,10 +65,8 @@ function SubmissionForm<T>({
         if (formGroup.render) {
             return formGroup.render(item);
         }
-        const value = item[formGroup.key as keyof T];
-        return String(value ?? "");
+        return String(item[formGroup.key as keyof T] ?? "");
     };
-
 
     return (
         <>

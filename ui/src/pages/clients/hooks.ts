@@ -1,7 +1,12 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { deleteClients, fetchClients, queryClient } from "../../services/api";
+import {
+    addClient,
+    deleteClients,
+    fetchClients,
+    queryClient,
+} from "../../services/api";
 import { useNavigate } from "react-router-dom";
-import { Client } from "./types";
+import { Client, CreateClient } from "./types";
 
 export const useAddClient = () => {
     const navigate = useNavigate();
@@ -27,13 +32,27 @@ export const useDeleteClients = () => {
             queryClient.invalidateQueries({ queryKey: ["clients"] });
         },
         onError: (error) => {
-            alert("Failed to delete invoices: " + error.message);
+            window.alert("Failed to delete invoices: " + error.message);
         },
     });
     return (clients: Client[]) => {
         const clientIds = clients.map((client) => client.id);
         deleteMutation.mutate(clientIds);
     };
+};
+
+export const useSubmitClient = () => {
+    const submitMutation = useMutation({
+        mutationFn: addClient,
+        onSuccess: () => {
+            window.alert("Client successfully added.");
+            queryClient.invalidateQueries({ queryKey: ["clients"] });
+        },
+        onError: (error) => {
+            window.alert("Failed to add client: " + error.message);
+        },
+    });
+    return (client: CreateClient) => submitMutation.mutate(client);
 };
 
 export const useUpdateClient = () => {

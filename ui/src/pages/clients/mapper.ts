@@ -12,7 +12,9 @@ export function mapGetClientToClient(getClient: GetClient): Client {
     };
 }
 
-export function mapClientToCreateClient(client: Client): CreateClient {
+export function mapClientToCreateClient(
+    client: Omit<Client, "id">
+): CreateClient {
     return {
         client_name: client.name,
         city: client.city,

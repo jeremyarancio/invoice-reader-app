@@ -1,9 +1,10 @@
 import { Invoice } from "./types";
 import { useFetchClients } from "../clients/hooks";
 import { useSubmitInvoice } from "./hooks";
-import SubmissionForm from "../../common/components/SubmitionForm";
+import SubmissionForm from "../../common/components/SubmissionForm";
 import { mapGetClientToClient } from "../clients/mapper";
 import { mapInvoicetoCreateInvoice } from "./mappers";
+import { Alert } from "react-bootstrap";
 
 type InvoiceFormData = Omit<Invoice, "id">;
 
@@ -24,7 +25,7 @@ function InvoiceForm({ file }: FormProperties) {
     const fetchClients = useFetchClients();
     const submitInvoice = useSubmitInvoice();
 
-    const { data: pagedClients, error, isLoading } = fetchClients();
+    const { data: pagedClients, error } = fetchClients();
     const clients = pagedClients?.data.map(mapGetClientToClient) || [];
 
     const formGroups = [
@@ -45,21 +46,18 @@ function InvoiceForm({ file }: FormProperties) {
             key: "currency",
             formType: "text" as const,
             required: true,
-            render: () => String("€"), //TODO
         },
         {
-            header: "VAT",
+            header: "VAT (%)",
             key: "vat",
             formType: "number" as const,
             required: true,
         },
         {
-            header: "invoiced_date",
+            header: "invoicedDate",
             key: "invoicedDate",
             formType: "date" as const,
             required: true,
-            render: (invoice: InvoiceFormData) =>
-                new Date(invoice.invoicedDate).toLocaleDateString(),
         },
         {
             header: "Client",
@@ -71,9 +69,10 @@ function InvoiceForm({ file }: FormProperties) {
 
     return (
         <>
+            {error && <Alert variant="warning">Error: {error.message}</Alert>}
             <SubmissionForm<InvoiceFormData>
                 name="Invoice"
-                submitItem={(data: InvoiceFormData) =>
+                submit={(data: InvoiceFormData) =>
                     submitInvoice(file, mapInvoicetoCreateInvoice(data))
                 }
                 formGroups={formGroups}

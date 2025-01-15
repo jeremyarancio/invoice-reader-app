@@ -13,6 +13,7 @@ export function mapGetInvoiceToInvoice(getInvoice: GetInvoice): Invoice {
         vat: getInvoice.data.vat,
         invoiceNumber: getInvoice.data.invoice_number,
         invoicedDate: getInvoice.data.invoiced_date,
+        clientId: "" //TODO: change return data from server
     };
 }
 

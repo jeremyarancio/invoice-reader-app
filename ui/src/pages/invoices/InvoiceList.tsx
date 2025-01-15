@@ -70,7 +70,7 @@ const InvoiceList = () => {
         );
 
     // Fields that should be disabled in the Edition mode
-    const disabledFields = ["invoiceNumber", "invoicedDate"];
+    const disabledFields = ["invoiceNumber"];
 
     return (
         <>
