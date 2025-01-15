@@ -1,13 +1,13 @@
 import { Alert } from "react-bootstrap";
-import { Client } from "./types";
-import TableRender from "../../common/components/TableRender";
+import { Client } from "../types";
+import TableRender from "../../../common/components/TableRender";
 import {
     useAddClient,
     useDeleteClients,
     useFetchClients,
     useUpdateClient,
-} from "./hooks";
-import { mapGetClientToClient } from "./mapper";
+} from "../hooks";
+import { mapGetClientToClient } from "../mapper";
 
 const ClientList = () => {
     const pageNumber = 1;

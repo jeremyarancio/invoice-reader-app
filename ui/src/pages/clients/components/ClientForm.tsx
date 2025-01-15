@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Alert } from "react-bootstrap";
-import SubmissionForm from "../../common/components/SubmissionForm";
-import { Client } from "./types";
-import { useSubmitClient } from "./hooks";
-import { mapClientToCreateClient } from "./mapper";
+import SubmissionForm from "../../../common/components/SubmissionForm";
+import { Client } from "../types";
+import { useSubmitClient } from "../hooks";
+import { mapClientToCreateClient } from "../mapper";
 
 type formClient = Omit<Client, "id">;
 

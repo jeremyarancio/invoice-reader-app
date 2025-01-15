@@ -1,13 +1,13 @@
 import { Alert } from "react-bootstrap";
-import { Invoice } from "./types";
-import TableRender from "../../common/components/TableRender";
-import { mapGetInvoiceToInvoice } from "./mappers";
+import { Invoice } from "../types";
+import TableRender from "../../../common/components/TableRender";
+import { mapGetInvoiceToInvoice } from "../mappers";
 import {
     useAddInvoice,
     useDeleteInvoices,
     useFetchInvoices,
     useUpdateInvoice,
-} from "./hooks";
+} from "../hooks";
 
 const InvoiceList = () => {
     const pageNumber = 1;
@@ -36,7 +36,8 @@ const InvoiceList = () => {
         {
             header: "Amount",
             key: "amount",
-            render: (item: Invoice) => `${item.currency}${item.amountExcludingTax.toFixed(2)}`,
+            render: (item: Invoice) =>
+                `${item.currency}${item.amountExcludingTax.toFixed(2)}`,
         },
         {
             header: "Status",
