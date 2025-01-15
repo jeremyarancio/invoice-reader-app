@@ -6,12 +6,12 @@ export interface GetPagedInvoices {
 }
 
 export interface GetInvoice {
-    data: GetInvoiceItems;
+    data: GetInvoiceItem;
     invoice_id: string;
     s3_path: string;
 }
 
-export interface GetInvoiceItems {
+export interface GetInvoiceItem {
     amount_excluding_tax: number;
     invoice_number: string;
     invoiced_date: Date;
@@ -20,7 +20,7 @@ export interface GetInvoiceItems {
 
 export interface Invoice {
     id: string;
-    // clientId: string;
+    clientId: string;
     amountExcludingTax: number;
     vat: number;
     currency: string;
@@ -28,7 +28,7 @@ export interface Invoice {
     invoiceNumber: string;
 }
 
-export interface PostInvoice {
+export interface CreateInvoice {
     amount_excluding_tax: number;
     vat: number;
     currency: string;
@@ -36,13 +36,13 @@ export interface PostInvoice {
     invoice_number: string;
 }
 
-export interface PostInvoicePayload {
-    invoice: PostInvoice;
+export interface CreateInvoicePayload {
+    invoice: CreateInvoice;
     client_id: string;
 }
 
-export interface PutInvoice {
-    id: string,
+export interface UpdateInvoice {
+    id: string;
     invoice: {
         amount_excluding_tax: number;
         vat: number;

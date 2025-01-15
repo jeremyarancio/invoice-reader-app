@@ -2,17 +2,16 @@ import axios from "axios";
 import {
     UserRegistrationData,
     UserLoginData,
-    InvoiceListGetProps,
-    ClientListGetProps,
     CreateClient,
     GetInvoiceResponse,
 } from "../types";
 import { QueryClient } from "@tanstack/react-query";
 import {
     GetPagedInvoices,
-    PostInvoicePayload,
-    PutInvoice,
+    CreateInvoicePayload,
+    UpdateInvoice,
 } from "../pages/invoices/types";
+import { GetPagedClients } from "../pages/clients/types";
 
 const baseURL = "http://localhost:8000/api/v1/";
 
@@ -46,7 +45,7 @@ export const loginUser = async (loginData: UserLoginData) => {
     return response.data;
 };
 
-export const submitInvoice = async (file: File, data: PostInvoicePayload) => {
+export const submitInvoice = async (file: File, data: CreateInvoicePayload) => {
     const invoiceData = JSON.stringify(data);
 
     const formData = new FormData();
@@ -84,15 +83,16 @@ export const fetchInvoice = async (id: string): Promise<GetInvoiceResponse> => {
 };
 
 export const fetchInvoices = async (
-    props: InvoiceListGetProps
+    pageNumber: number,
+    perPage: number
 ): Promise<GetPagedInvoices> => {
     const accessToken = sessionStorage.getItem("accessToken");
     const tokenType = sessionStorage.getItem("tokenType") || "Bearer";
 
     const response = await api.get("invoices/", {
         params: {
-            page: props.pageNumber,
-            per_page: props.perPage,
+            page: pageNumber,
+            per_page: perPage,
         },
         headers: {
             "Content-Type": "application/json",
@@ -102,14 +102,17 @@ export const fetchInvoices = async (
     return response.data;
 };
 
-export const fetchClients = async (props: ClientListGetProps) => {
+export const fetchClients = async (
+    pageNumber: number,
+    perPage: number
+): Promise<GetPagedClients> => {
     const accessToken = sessionStorage.getItem("accessToken");
     const tokenType = sessionStorage.getItem("tokenType") || "Bearer";
 
     const response = await api.get("clients/", {
         params: {
-            page: props.pageNumber,
-            per_page: props.perPage,
+            page: pageNumber,
+            per_page: perPage,
         },
         headers: {
             "Content-Type": "application/json",
@@ -176,7 +179,7 @@ export const deleteClients = async (client_ids: string[]) => {
     );
 };
 
-export const updateInvoice = async (invoice: PutInvoice) => {
+export const updateInvoice = async (invoice: UpdateInvoice) => {
     const accessToken = sessionStorage.getItem("accessToken");
     const tokenType = sessionStorage.getItem("tokenType") || "Bearer";
 

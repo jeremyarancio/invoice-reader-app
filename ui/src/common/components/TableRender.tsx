@@ -23,7 +23,7 @@ interface TableRenderProps<T extends BaseItem> {
     items: T[];
     columns: ColumnConfig<T>[];
     editFields: EditField<T>[];
-    disabled: string[];
+    disabledFields?: string[];
     onAddItem: () => void;
     onUpdateItem: (item: T) => void;
     onDeleteItems: (items: T[]) => void;
@@ -34,7 +34,7 @@ function TableRender<T extends BaseItem>({
     items,
     columns,
     editFields,
-    disabled,
+    disabledFields: disabled,
     onAddItem,
     onUpdateItem,
     onDeleteItems,
@@ -79,7 +79,7 @@ function TableRender<T extends BaseItem>({
                 <EditModal<T>
                     item={showedItem}
                     editFields={editFields}
-                    disabled={disabled}
+                    disabledFields={disabled}
                     onClose={() => setShowedItem(null)}
                     onUpdateItem={onUpdateItem}
                     onDeleteItem={handleDeleteItem}
