@@ -59,7 +59,7 @@ def get_user_by_email(email: str, session: sqlmodel.Session) -> User | None:
 
 def add_user(user: User, session: sqlmodel.Session) -> None:
     user_repository = UserRepository(session=session)
-    user = user_repository.add(user=user)
+    user_repository.add(user=user)
 
 
 def get_invoice(

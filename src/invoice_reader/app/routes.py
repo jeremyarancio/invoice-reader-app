@@ -147,7 +147,7 @@ def delete_invoice(
     file_id: uuid.UUID,
     session: Annotated[sqlmodel.Session, Depends(db.get_session)],
     user: Annotated[User, Depends(auth.get_current_user)],
-) -> Response:
+) -> None:
     try:
         presenter.delete_invoice(file_id=file_id, user_id=user.user_id, session=session)
     except Exception as e:
@@ -186,7 +186,7 @@ def login(
 def delete_user(
     session: Annotated[sqlmodel.Session, Depends(db.get_session)],
     user: Annotated[User, Depends(auth.get_current_user)],
-) -> Response:
+) -> None:
     try:
         presenter.delete_user(user_id=user.user_id, session=session)
     except Exception as e:
