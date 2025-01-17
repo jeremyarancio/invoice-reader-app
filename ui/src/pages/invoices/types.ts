@@ -53,5 +53,6 @@ export interface UpdateInvoice {
         currency: string;
         invoiced_date: Date;
         invoice_number: string;
+        is_paid: boolean;
     };
 }
