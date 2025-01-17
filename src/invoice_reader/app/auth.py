@@ -68,4 +68,3 @@ def register_user(user: UserCreate, session: sqlmodel.Session) -> None:
     hashed_password = get_password_hash(user.password)
     user = User(hashed_password=hashed_password, **user.model_dump())
     presenter.add_user(user=user, session=session)
-    

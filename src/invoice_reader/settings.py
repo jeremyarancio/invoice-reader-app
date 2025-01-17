@@ -22,6 +22,3 @@ PER_PAGE = 10
 
 # Front-End
 FRONT_END_URL = os.getenv("FRONT_END_URL", "http://localhost:5173")
-
-# ORM
-ECHO = bool(int(os.getenv("ECHO", "0")))
