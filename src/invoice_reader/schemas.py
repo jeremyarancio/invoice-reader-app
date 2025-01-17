@@ -1,7 +1,7 @@
 import os
 import uuid
 from datetime import date
-from typing import Annotated
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, EmailStr, Field
 
@@ -28,12 +28,10 @@ class UserCreate(BaseModel):
 class Invoice(BaseModel):
     amount_excluding_tax: float
     vat: Annotated[float, "In percentage: 20, 21, ..."]
-    # currency: str = "€" #TODO: Forgotten in Models
+    is_paid: bool
+    currency: Literal["€", "$"]
     invoiced_date: date
     invoice_number: str
-
-    def is_complete(self) -> bool:
-        return bool(all(self.model_dump().values()))
 
 
 class Client(BaseModel):

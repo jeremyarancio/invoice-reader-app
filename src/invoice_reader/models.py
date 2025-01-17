@@ -62,6 +62,8 @@ class InvoiceModel(SQLModel, table=True):
     invoice_number: str
     amount_excluding_tax: float
     vat: float
+    currency: str
+    is_paid: bool
     invoiced_date: datetime.date
     uploaded_date: datetime.date | None = Field(default_factory=datetime.datetime.now)
     last_updated_date: datetime.date | None = Field(
