@@ -19,6 +19,7 @@ const initialInvoice: InvoiceFormData = {
     invoicedDate: new Date(),
     invoiceNumber: "",
     clientId: "",
+    isPaid: false,
 };
 
 function InvoiceForm({ file }: FormProperties) {
