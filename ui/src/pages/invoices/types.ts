@@ -17,6 +17,8 @@ export interface GetInvoiceItem {
     invoice_number: string;
     invoiced_date: Date;
     vat: number;
+    is_paid: boolean;
+    currency: string;
 }
 
 export interface Invoice {
@@ -25,6 +27,7 @@ export interface Invoice {
     amountExcludingTax: number;
     vat: number;
     currency: string;
+    isPaid: boolean;
     invoicedDate: Date;
     invoiceNumber: string;
 }

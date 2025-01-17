@@ -22,48 +22,6 @@ const InvoiceList = () => {
     const invoices =
         data?.data.map((invoice) => mapGetInvoiceToInvoice(invoice)) || [];
 
-    const tableColumns = [
-        {
-            header: "Invoice Number",
-            key: "invoiceNumber",
-        },
-        {
-            header: "Date",
-            key: "invoicedDate",
-            render: (item: Invoice) =>
-                new Date(item.invoicedDate).toLocaleDateString(),
-        },
-        {
-            header: "Amount",
-            key: "amount",
-            render: (item: Invoice) =>
-                `${item.currency}${item.amountExcludingTax.toFixed(2)}`,
-        },
-        {
-            header: "Status",
-            key: "paid_status", // Not implemented yet
-        },
-    ];
-
-    const editFields = [
-        {
-            header: "Invoice number",
-            key: "invoiceNumber",
-        },
-        {
-            header: "Amount excluding tax",
-            key: "amountExcludingTax",
-        },
-        {
-            header: "VAT",
-            key: "vat",
-        },
-        {
-            header: "Invoiced date",
-            key: "invoicedDate",
-        },
-    ];
-
     if (isLoading) return <div>Loading invoices...</div>;
     if (!sessionStorage.getItem("accessToken"))
         return (
@@ -78,9 +36,54 @@ const InvoiceList = () => {
             {error && <Alert variant="warning">Error: {error.message}</Alert>}
             <TableRender<Invoice>
                 name="Invoices"
-                columns={tableColumns}
                 items={invoices}
-                editFields={editFields}
+                columns={[
+                    {
+                        header: "Invoice Number",
+                        key: "invoiceNumber",
+                    },
+                    {
+                        header: "Date",
+                        key: "invoicedDate",
+                        render: (item: Invoice) =>
+                            new Date(item.invoicedDate).toLocaleDateString(),
+                    },
+                    {
+                        header: "Amount",
+                        key: "amount",
+                        render: (item: Invoice) =>
+                            `${item.currency}${item.amountExcludingTax.toFixed(
+                                2
+                            )}`,
+                    },
+                    {
+                        header: "Paid?",
+                        key: "isPaid",
+                        render: (item: Invoice) => (item.isPaid ? "Yes" : "No"),
+                    },
+                ]}
+                editFields={[
+                    {
+                        header: "Invoice number",
+                        key: "invoiceNumber",
+                    },
+                    {
+                        header: "Amount excluding tax",
+                        key: "amountExcludingTax",
+                    },
+                    {
+                        header: "VAT",
+                        key: "vat",
+                    },
+                    {
+                        header: "Invoiced date",
+                        key: "invoicedDate",
+                    },
+                    {
+                        header: "Paid?",
+                        key: "isPaid",
+                    }
+                ]}
                 disabledFields={disabledFields}
                 onAddItem={addInvoice}
                 onUpdateItem={updateInvoice}
