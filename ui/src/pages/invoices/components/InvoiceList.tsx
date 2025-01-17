@@ -82,7 +82,7 @@ const InvoiceList = () => {
                     {
                         header: "Paid?",
                         key: "isPaid",
-                    }
+                    },
                 ]}
                 disabledFields={disabledFields}
                 onAddItem={addInvoice}
