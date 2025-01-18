@@ -76,6 +76,6 @@ export const useDeleteInvoices = () => {
     });
     return (invoices: Invoice[]) => {
         const invoiceIds = invoices.map((invoice) => invoice.id);
-        return () => deleteMutation.mutate(invoiceIds);
+        deleteMutation.mutate(invoiceIds);
     };
 };
