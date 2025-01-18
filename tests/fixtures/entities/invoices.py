@@ -14,7 +14,8 @@ def new_invoice():
         invoice_number="14SQ456",
         amount_excluding_tax=10000,
         currency="€",
-        vat="20",
+        vat=20,
+        is_paid=True,
     )
 
 
@@ -25,7 +26,8 @@ def existing_invoice() -> Invoice:
         invoice_number="14SQ456",
         amount_excluding_tax=10000,
         currency="€",
-        vat="20",
+        vat=20,
+        is_paid=False,
     )
 
 
@@ -37,7 +39,8 @@ def existing_invoices() -> list[Invoice]:
             invoice_number=f"number-{i}",
             amount_excluding_tax=10000,
             currency="€",
-            vat="20",
+            vat=20,
+            is_paid=True
         )
         for i in range(TOTAL_N)
     ]

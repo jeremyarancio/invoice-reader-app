@@ -9,7 +9,8 @@ export function mapGetInvoiceToInvoice(getInvoice: GetInvoice): Invoice {
     return {
         id: getInvoice.invoice_id,
         amountExcludingTax: getInvoice.data.amount_excluding_tax,
-        currency: "$", //TODO
+        currency: getInvoice.data.currency,
+        isPaid: getInvoice.data.is_paid,
         vat: getInvoice.data.vat,
         invoiceNumber: getInvoice.data.invoice_number,
         invoicedDate: getInvoice.data.invoiced_date,
@@ -26,6 +27,7 @@ export function mapInvoiceToPutInvoice(invoice: Invoice): UpdateInvoice {
             invoice_number: invoice.invoiceNumber,
             invoiced_date: invoice.invoicedDate,
             vat: invoice.vat,
+            is_paid: invoice.isPaid,
         },
     };
 }

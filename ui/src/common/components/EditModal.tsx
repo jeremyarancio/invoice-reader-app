@@ -8,7 +8,7 @@ interface BaseItem {
 interface EditField<T> {
     header: string;
     key: keyof T | string;
-    render?: () => React.ReactNode;
+    render?: (item: T) => React.ReactNode;
 }
 
 interface EditModalProps<T extends BaseItem> {
@@ -36,8 +36,8 @@ function EditModal<T extends BaseItem>({
         onClose();
     };
 
-    const handleChange = (name: string, value: any) => {
-        setFormData((prev) => ({ ...prev, [name]: value }));
+    const handleChange = (key: string, value: any) => {
+        setFormData((prev) => ({ ...prev, [key]: value }));
     };
 
     const handleEditSubmit = (e: React.FormEvent) => {
@@ -51,6 +51,7 @@ function EditModal<T extends BaseItem>({
         }
     };
 
+    console.log(formData);
     return (
         <Modal show onHide={handleClose}>
             <Modal.Header closeButton>
@@ -62,27 +63,55 @@ function EditModal<T extends BaseItem>({
                     {editFields.map((field) => (
                         <Form.Group className="mb-3" key={String(field.key)}>
                             <Form.Label>{field.header}</Form.Label>
-                            <Form.Control
-                                type="text"
-                                name={field.header}
-                                placeholder={String(
-                                    formData[field.key as keyof T]
-                                )}
-                                value={formData[field.key as keyof T] as string}
-                                onChange={(e) =>
-                                    handleChange(
-                                        String(field.key),
-                                        e.target.value
-                                    )
-                                }
-                                disabled={
-                                    !isEditToSubmit ||
-                                    disabledFields?.includes(
-                                        String(field.key)
-                                    ) ||
-                                    false
-                                }
-                            />
+                            {typeof formData[field.key as keyof T] ===
+                            "boolean" ? (
+                                <Form.Check
+                                    type="checkbox"
+                                    name={field.header}
+                                    onChange={(e) =>
+                                        handleChange(
+                                            String(field.key),
+                                            e.target.checked
+                                        )
+                                    }
+                                    checked={
+                                        formData[
+                                            field.key as keyof T
+                                        ] as boolean
+                                    }
+                                    disabled={
+                                        !isEditToSubmit ||
+                                        disabledFields?.includes(
+                                            String(field.key)
+                                        ) ||
+                                        false
+                                    }
+                                />
+                            ) : (
+                                <Form.Control
+                                    type="text"
+                                    name={field.header}
+                                    placeholder={String(
+                                        formData[field.key as keyof T]
+                                    )}
+                                    value={
+                                        formData[field.key as keyof T] as string
+                                    }
+                                    onChange={(e) =>
+                                        handleChange(
+                                            String(field.key),
+                                            e.target.value
+                                        )
+                                    }
+                                    disabled={
+                                        !isEditToSubmit ||
+                                        disabledFields?.includes(
+                                            String(field.key)
+                                        ) ||
+                                        false
+                                    }
+                                />
+                            )}
                         </Form.Group>
                     ))}
                 </Form>

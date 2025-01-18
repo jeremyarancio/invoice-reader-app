@@ -9,7 +9,7 @@ interface BaseItem {
 interface EditField<T> {
     header: string;
     key: keyof T | string;
-    render?: () => React.ReactNode;
+    render?: (item: T) => React.ReactNode;
 }
 
 interface ColumnConfig<T> {
