@@ -10,7 +10,7 @@ interface BaseItem {
 interface FormGroup<T> {
     header: string;
     key: keyof T | string;
-    formType: "text" | "number" | "select" | "email" | "date";
+    formType: "text" | "number" | "select" | "email" | "date" | "checkbox";
     required?: boolean;
     render?: (item: T) => string;
 }
@@ -49,15 +49,10 @@ function SubmissionForm<T>({
         navigate("/");
     };
 
-    const handleInputChange = (
-        e: React.ChangeEvent<
-            HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-        >
-    ) => {
-        const { name, value } = e.target;
+    const handleInputChange = (key: string, value: any) => {
         setFormData((prev) => ({
             ...prev,
-            [name]: value,
+            [key]: value,
         }));
     };
 
@@ -94,8 +89,12 @@ function SubmissionForm<T>({
 
                         {formGroup.formType === "select" ? (
                             <Form.Select
-                                name={String(formGroup.key)}
-                                onChange={handleInputChange}
+                                onChange={(e) =>
+                                    handleInputChange(
+                                        String(formGroup.key),
+                                        e.target.value
+                                    )
+                                }
                                 required={formGroup.required}
                                 value={String(
                                     formData[formGroup.key as keyof T] || ""
@@ -108,11 +107,27 @@ function SubmissionForm<T>({
                                     </option>
                                 ))}
                             </Form.Select>
+                        ) : formGroup.formType === "checkbox" ? (
+                            <Form.Check
+                                type="checkbox"
+                                onChange={(e) =>
+                                    handleInputChange(
+                                        String(formGroup.key),
+                                        e.target.checked
+                                    )
+                                }
+                                name={String(formGroup.key)}
+                            />
                         ) : (
                             <Form.Control
                                 type={formGroup.formType}
                                 name={String(formGroup.key)}
-                                onChange={handleInputChange}
+                                onChange={(e) =>
+                                    handleInputChange(
+                                        String(formGroup.key),
+                                        e.target.value
+                                    )
+                                }
                                 required={formGroup.required}
                                 value={renderCell(formData, formGroup)}
                             />

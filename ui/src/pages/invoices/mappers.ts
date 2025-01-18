@@ -42,6 +42,7 @@ export function mapInvoicetoCreateInvoice(
             invoice_number: invoice.invoiceNumber,
             invoiced_date: invoice.invoicedDate,
             vat: invoice.vat,
+            is_paid: invoice.isPaid,
         },
         client_id: invoice.clientId,
     };
