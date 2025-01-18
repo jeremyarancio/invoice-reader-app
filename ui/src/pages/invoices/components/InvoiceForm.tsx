@@ -4,7 +4,8 @@ import { useSubmitInvoice } from "../hooks";
 import SubmissionForm from "../../../common/components/SubmissionForm";
 import { mapGetClientToClient } from "../../clients/mapper";
 import { mapInvoicetoCreateInvoice } from "../mappers";
-import { Alert } from "react-bootstrap";
+import { Alert, Container } from "react-bootstrap";
+import PdfPreview from "../../../common/components/PdfPreview";
 
 type InvoiceFormData = Omit<Invoice, "id">;
 
@@ -69,18 +70,21 @@ function InvoiceForm({ file }: FormProperties) {
     ];
 
     return (
-        <>
+        <Container fluid className="px-4 py-3">
             {error && <Alert variant="warning">Error: {error.message}</Alert>}
-            <SubmissionForm<InvoiceFormData>
-                name="Invoice"
-                submit={(data: InvoiceFormData) =>
-                    submitInvoice(file, mapInvoicetoCreateInvoice(data))
-                }
-                formGroups={formGroups}
-                initialData={initialInvoice}
-                additionalItems={clients}
-            />
-        </>
+            <div className="d-flex justify-content-center align-items-center gap-3 mt-3">
+                <PdfPreview file={file}/>
+                <SubmissionForm<InvoiceFormData>
+                    name="Invoice"
+                    submit={(data: InvoiceFormData) =>
+                        submitInvoice(file, mapInvoicetoCreateInvoice(data))
+                    }
+                    formGroups={formGroups}
+                    initialData={initialInvoice}
+                    additionalItems={clients}
+                />
+            </div>
+        </Container>
     );
 }
 
