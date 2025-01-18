@@ -46,6 +46,12 @@ const ClientForm = () => {
             required: true,
         },
         {
+            header: "City",
+            key: "city",
+            formType: "text" as const,
+            required: true,
+        },
+        {
             header: "Country",
             key: "country",
             formType: "text" as const,
