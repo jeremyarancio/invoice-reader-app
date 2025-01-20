@@ -1,10 +1,11 @@
 import { Invoice } from "../types";
-import { useFetchClients } from "../../clients/hooks";
+import { useFetchClients } from "@/pages/clients/hooks";
 import { useSubmitInvoice } from "../hooks";
-import SubmissionForm from "../../../common/components/SubmissionForm";
-import { mapGetClientToClient } from "../../clients/mapper";
+import SubmissionForm from "@/common/components/SubmissionForm";
+import { mapGetClientToClient } from "@/pages/clients/mapper";
 import { mapInvoicetoCreateInvoice } from "../mappers";
-import { Alert } from "react-bootstrap";
+import { Alert, Col, Container, Row } from "react-bootstrap";
+import PdfPreview from "@/common/components/PdfPreview";
 
 type InvoiceFormData = Omit<Invoice, "id">;
 
@@ -66,21 +67,34 @@ function InvoiceForm({ file }: FormProperties) {
             formType: "select" as const,
             required: true,
         },
+        {
+            header: "Paid?",
+            key: "isPaid",
+            formType: "checkbox" as const,
+            required: true,
+        },
     ];
 
     return (
-        <>
+        <Container fluid>
             {error && <Alert variant="warning">Error: {error.message}</Alert>}
-            <SubmissionForm<InvoiceFormData>
-                name="Invoice"
-                submit={(data: InvoiceFormData) =>
-                    submitInvoice(file, mapInvoicetoCreateInvoice(data))
-                }
-                formGroups={formGroups}
-                initialData={initialInvoice}
-                additionalItems={clients}
-            />
-        </>
+            <Row>
+                <Col>
+                    <PdfPreview file={file} />
+                </Col>
+                <Col>
+                    <SubmissionForm<InvoiceFormData>
+                        name="Invoice"
+                        submit={(data: InvoiceFormData) =>
+                            submitInvoice(file, mapInvoicetoCreateInvoice(data))
+                        }
+                        formGroups={formGroups}
+                        initialData={initialInvoice}
+                        additionalItems={clients}
+                    />
+                </Col>
+            </Row>
+        </Container>
     );
 }
 

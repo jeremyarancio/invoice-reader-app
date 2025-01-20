@@ -4,7 +4,7 @@ import {
     deleteClients,
     fetchClients,
     queryClient,
-} from "../../services/api";
+} from "@/services/api";
 import { useNavigate } from "react-router-dom";
 import { Client, CreateClient } from "./types";
 

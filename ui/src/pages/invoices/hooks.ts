@@ -5,9 +5,9 @@ import {
     updateInvoice,
     fetchInvoices,
     submitInvoice,
-} from "../../services/api";
+} from "@/services/api";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { queryClient } from "../../services/api";
+import { queryClient } from "@/services/api";
 import { CreateInvoicePayload, Invoice } from "./types";
 
 export const useAddInvoice = () => {

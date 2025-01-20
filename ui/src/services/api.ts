@@ -10,8 +10,8 @@ import {
     GetPagedInvoices,
     CreateInvoicePayload,
     UpdateInvoice,
-} from "../pages/invoices/types";
-import { GetPagedClients } from "../pages/clients/types";
+} from "@/pages/invoices/types";
+import { GetPagedClients } from "@/pages/clients/types";
 
 const baseURL = "http://localhost:8000/api/v1/";
 

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Alert } from "react-bootstrap";
-import SubmissionForm from "../../../common/components/SubmissionForm";
+import SubmissionForm from "@/common/components/SubmissionForm";
 import { Client } from "../types";
 import { useSubmitClient } from "../hooks";
 import { mapClientToCreateClient } from "../mapper";
@@ -43,6 +43,12 @@ const ClientForm = () => {
             header: "Zipcode",
             key: "zipcode",
             formType: "number" as const,
+            required: true,
+        },
+        {
+            header: "City",
+            key: "city",
+            formType: "text" as const,
             required: true,
         },
         {

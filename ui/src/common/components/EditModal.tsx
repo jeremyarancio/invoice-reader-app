@@ -51,7 +51,6 @@ function EditModal<T extends BaseItem>({
         }
     };
 
-    console.log(formData);
     return (
         <Modal show onHide={handleClose}>
             <Modal.Header closeButton>
