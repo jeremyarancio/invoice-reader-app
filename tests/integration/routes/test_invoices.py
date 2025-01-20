@@ -193,3 +193,18 @@ def test_update_invoice(
 
 
 # Add exception no change update
+
+def test_get_invoice_url(
+    api_client: TestClient,
+    test_existing_user: UserModel,
+    auth_token: AuthToken,
+    test_existing_invoice: InvoiceModel,
+    s3_mocker: Mock,
+):
+    s3_mocker.generate_presigned_url.return_value = "http://presigned/url"
+    response = api_client.get(
+        url=f"/api/v1/invoices/{test_existing_invoice.file_id}/url/",
+        headers={"Authorization": f"Bearer {auth_token.access_token}"},
+    )
+    assert response.status_code == 200
+    s3_mocker.generate_presigned_url.assert_called_once()

@@ -1,35 +1,55 @@
-import { Alert } from "react-bootstrap";
 import { Invoice } from "../types";
 import TableRender from "@/common/components/TableRender";
 import { mapGetInvoiceToInvoice } from "../mappers";
-import {
-    useAddInvoice,
-    useDeleteInvoices,
-    useFetchInvoices,
-    useUpdateInvoice,
-} from "../hooks";
+import { useAddInvoice, useDeleteInvoices, useUpdateInvoice } from "../hooks";
+import { useQuery } from "@tanstack/react-query";
+import { fetchInvoices, fetchInvoiceUrl } from "@/services/api";
+import { Alert } from "react-bootstrap";
 
 const InvoiceList = () => {
     const pageNumber = 1;
     const perPage = 10;
     const addInvoice = useAddInvoice();
     const updateInvoice = useUpdateInvoice();
-    const fetchInvoices = useFetchInvoices();
     const deleteInvoices = useDeleteInvoices();
 
-    const { data, isLoading, error } = fetchInvoices(pageNumber, perPage);
+    // Fetch invoices
+    const {
+        data: invoiceData,
+        isLoading,
+        error,
+    } = useQuery({
+        queryKey: ["invoices", pageNumber, perPage],
+        queryFn: () => fetchInvoices(pageNumber, perPage),
+        enabled: !!sessionStorage.getItem("accessToken"),
+    });
 
     const invoices =
-        data?.data.map((invoice) => mapGetInvoiceToInvoice(invoice)) || [];
+        invoiceData?.data.map((invoice) => mapGetInvoiceToInvoice(invoice)) ||
+        [];
+
+    // Fetch invoice URLs
+    const { data: invoiceURLs } = useQuery({
+        queryKey: ["invoiceUrls", invoices.map((invoice) => invoice.id)],
+        queryFn: async () => {
+            const urls = await Promise.all(
+                invoices.map((invoice: Invoice) => fetchInvoiceUrl(invoice.id))
+            );
+            return urls;
+        },
+        enabled: !!sessionStorage.getItem("accessToken") && invoices.length > 0,
+    });
+
+    const invoicePreviews = invoices.map((invoice, index) => ({
+        id: invoice.id,
+        file: invoiceURLs?.[index] ?? null,
+    }));
 
     if (isLoading) return <div>Loading invoices...</div>;
     if (!sessionStorage.getItem("accessToken"))
         return (
             <Alert variant="danger">Log in to visualize your invoices...</Alert>
         );
-
-    // Fields that should be disabled in the Edition mode
-    const disabledFields = ["invoiceNumber"];
 
     return (
         <>
@@ -84,10 +104,11 @@ const InvoiceList = () => {
                         key: "isPaid",
                     },
                 ]}
-                disabledFields={disabledFields}
+                disabledFields={["invoiceNumber"]} // Fields that should be disabled in the Edition mode
                 onAddItem={addInvoice}
                 onUpdateItem={updateInvoice}
                 onDeleteItems={deleteInvoices}
+                filePreviews={invoicePreviews}
             />
         </>
     );

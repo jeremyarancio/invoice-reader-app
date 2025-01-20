@@ -24,6 +24,7 @@ interface TableRenderProps<T extends BaseItem> {
     columns: ColumnConfig<T>[];
     editFields: EditField<T>[];
     disabledFields?: string[];
+    filePreviews?: { id: string; file?: File | string | null }[];
     onAddItem: () => void;
     onUpdateItem: (item: T) => void;
     onDeleteItems: (items: T[]) => void;
@@ -34,7 +35,8 @@ function TableRender<T extends BaseItem>({
     items,
     columns,
     editFields,
-    disabledFields: disabled,
+    disabledFields,
+    filePreviews,
     onAddItem,
     onUpdateItem,
     onDeleteItems,
@@ -73,16 +75,26 @@ function TableRender<T extends BaseItem>({
 
     const handleDeleteItem = (item: T) => onDeleteItems([item]);
 
+    const getFilePreview = () => {
+        const filePreview =
+            showedItem &&
+            filePreviews?.find(
+                (filePreview) => filePreview.id === showedItem.id
+            );
+        return filePreview?.file;
+    };
+
     return (
         <>
             {showedItem && (
                 <EditModal<T>
                     item={showedItem}
                     editFields={editFields}
-                    disabledFields={disabled}
+                    disabledFields={disabledFields}
                     onClose={() => setShowedItem(null)}
                     onUpdateItem={onUpdateItem}
                     onDeleteItem={handleDeleteItem}
+                    filePreview={getFilePreview()}
                 />
             )}
             <h2>{name}</h2>

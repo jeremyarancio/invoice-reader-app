@@ -49,7 +49,7 @@ def submit(
 def register_user(user: User, session: sqlmodel.Session) -> None:
     user_repository = UserRepository(session=session)
     user_repository.add(user)
-    
+
 
 def get_user_by_email(email: str, session: sqlmodel.Session) -> User | None:
     user_repository = UserRepository(session=session)
@@ -138,3 +138,16 @@ def update_invoice(
 ) -> None:
     invoice_repository = InvoiceRepository(session=session)
     invoice_repository.update(invoice_id=invoice_id, invoice=invoice)
+
+
+def get_invoice_url(
+    invoice_id: uuid.UUID, user_id: uuid.UUID, session: sqlmodel.Session
+) -> str:
+    s3 = S3.init(bucket=settings.S3_BUCKET)
+    invoice_repository = InvoiceRepository(session=session)
+    invoice = invoice_repository.get(
+        file_id=invoice_id, user_id=user_id
+    )  # TODO: horrible! Refactor this s*** with proper mappers & schemas
+    suffix = s3_utils.get_suffix_from_s3_path(s3_path=invoice.s3_path)
+    url = s3.create_presigned_url(suffix=suffix)
+    return url

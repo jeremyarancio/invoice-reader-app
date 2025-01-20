@@ -1,12 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { mapInvoiceToPutInvoice } from "./mappers";
-import {
-    deleteInvoices,
-    updateInvoice,
-    fetchInvoices,
-    submitInvoice,
-} from "@/services/api";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { deleteInvoices, updateInvoice, submitInvoice } from "@/services/api";
+import { useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/services/api";
 import { CreateInvoicePayload, Invoice } from "./types";
 
@@ -33,15 +28,6 @@ export const useSubmitInvoice = () => {
     });
     return (file: File, data: CreateInvoicePayload) =>
         addInvoiceMutation.mutate({ file, data });
-};
-
-export const useFetchInvoices = () => {
-    return (pageNumber: number, perPage: number) =>
-        useQuery({
-            queryKey: ["invoices", pageNumber, perPage],
-            queryFn: () => fetchInvoices(pageNumber, perPage),
-            enabled: !!sessionStorage.getItem("accessToken"),
-        });
 };
 
 export const useUpdateInvoice = () => {

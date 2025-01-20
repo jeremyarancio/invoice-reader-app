@@ -8,6 +8,7 @@ from botocore.exceptions import ClientError
 from pydantic import EmailStr
 from sqlmodel import Field, SQLModel
 
+from invoice_reader import settings
 from invoice_reader.utils.logger import get_logger
 
 LOGGER = get_logger()
@@ -22,7 +23,6 @@ class S3:
     def init(cls, bucket: str) -> "S3":
         return cls(
             bucket=bucket,
-            # suffix=f"user-{file_data.user_id}/file-{file_data.file_id}{file_data.file_format}",
         )
 
     def store(self, file: BinaryIO, suffix: str) -> None:
@@ -36,6 +36,20 @@ class S3:
         s3_client = boto3.client("s3")
         try:
             s3_client.delete_object(Bucket=self.bucket, Key=suffix)
+        except ClientError:
+            raise
+
+    def create_presigned_url(
+        self, suffix: str, expiration: int = settings.PRESIGNED_URL_EXPIRATION
+    ) -> str:
+        s3_client = boto3.client("s3")
+        try:
+            response: str = s3_client.generate_presigned_url(
+                "get_object",
+                Params={"Bucket": self.bucket, "Key": suffix},
+                ExpiresIn=expiration,
+            )
+            return response
         except ClientError:
             raise
 

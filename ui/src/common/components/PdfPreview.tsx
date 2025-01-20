@@ -5,14 +5,14 @@ import { Button } from "react-bootstrap";
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 interface PdfPreviewProps {
-    file: File;
+    file: File | string;
 }
 
 function PdfPreview({ file }: PdfPreviewProps) {
     const [pageNumber, setPageNumber] = useState<number>(1);
     const [numPages, setNumPages] = useState<number>();
 
-    const onDocumentLoadSucces = ({ numPages }: any) => {
+    const onDocumentLoadSuccess = ({ numPages }: any) => {
         setNumPages(numPages);
     };
 
@@ -27,7 +27,7 @@ function PdfPreview({ file }: PdfPreviewProps) {
     return (
         <div>
             <div className="d-flex justify-content-center align-items-center gap-3 mt-3">
-                <Document file={file} onLoadSuccess={onDocumentLoadSucces}>
+                <Document file={file} onLoadSuccess={onDocumentLoadSuccess}>
                     <Page
                         pageNumber={pageNumber}
                         renderTextLayer={false}

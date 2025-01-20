@@ -7,7 +7,6 @@ load_dotenv()
 
 
 REPO_DIR = Path(__file__).parent.parent.parent
-S3_BUCKET = os.getenv("S3_BUCKET")
 DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{REPO_DIR / "data/database.db"}")
 
 # Security
@@ -22,3 +21,7 @@ PER_PAGE = 10
 
 # Front-End
 FRONT_END_URL = os.getenv("FRONT_END_URL", "http://localhost:5173")
+
+# S3
+PRESIGNED_URL_EXPIRATION = int(os.getenv("PRESIGNED_URL_EXPIRATION", 3600))
+S3_BUCKET = os.getenv("S3_BUCKET")
