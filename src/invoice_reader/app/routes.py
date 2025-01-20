@@ -245,7 +245,7 @@ def delete_client(
     client_id: uuid.UUID,
     session: Annotated[sqlmodel.Session, Depends(db.get_session)],
     user: Annotated[User, Depends(auth.get_current_user)],
-) -> Response:
+) -> None:
     try:
         presenter.delete_client(
             client_id=client_id, user_id=user.user_id, session=session
@@ -260,10 +260,27 @@ def update_invoice(
     invoice: Invoice,
     session: Annotated[sqlmodel.Session, Depends(db.get_session)],
     user: Annotated[User, Depends(auth.get_current_user)],
-) -> Response:
+) -> None:
     try:
         presenter.update_invoice(
             invoice_id=invoice_id, invoice=invoice, session=session
         )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=e) from e
+
+
+@app.get("/api/v1/invoices/{invoice_id}/url/")
+def get_invoice_url(
+    invoice_id: uuid.UUID,
+    session: Annotated[sqlmodel.Session, Depends(db.get_session)],
+    user: Annotated[User, Depends(auth.get_current_user)],
+) -> str:
+    try:
+        url = presenter.get_invoice_url(
+            invoice_id=invoice_id,
+            user_id=user.user_id,
+            session=session,
+        )
+        return url 
     except Exception as e:
         raise HTTPException(status_code=500, detail=e) from e
