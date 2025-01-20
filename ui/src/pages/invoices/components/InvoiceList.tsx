@@ -1,6 +1,6 @@
 import { Alert } from "react-bootstrap";
 import { Invoice } from "../types";
-import TableRender from "../../../common/components/TableRender";
+import TableRender from "@/common/components/TableRender";
 import { mapGetInvoiceToInvoice } from "../mappers";
 import {
     useAddInvoice,

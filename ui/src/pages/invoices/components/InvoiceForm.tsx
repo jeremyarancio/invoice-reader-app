@@ -1,11 +1,11 @@
 import { Invoice } from "../types";
-import { useFetchClients } from "../../clients/hooks";
+import { useFetchClients } from "@/pages/clients/hooks";
 import { useSubmitInvoice } from "../hooks";
-import SubmissionForm from "../../../common/components/SubmissionForm";
-import { mapGetClientToClient } from "../../clients/mapper";
+import SubmissionForm from "@/common/components/SubmissionForm";
+import { mapGetClientToClient } from "@/pages/clients/mapper";
 import { mapInvoicetoCreateInvoice } from "../mappers";
 import { Alert, Col, Container, Row } from "react-bootstrap";
-import PdfPreview from "../../../common/components/PdfPreview";
+import PdfPreview from "@/common/components/PdfPreview";
 
 type InvoiceFormData = Omit<Invoice, "id">;
 

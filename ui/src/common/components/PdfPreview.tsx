@@ -1,6 +1,5 @@
-import { Document, Page } from "react-pdf";
+import { Document, Page, pdfjs } from "react-pdf";
 import { useState } from "react";
-import { pdfjs } from "react-pdf";
 import { Button } from "react-bootstrap";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
