@@ -71,7 +71,6 @@ function InvoiceForm({ file }: FormProperties) {
             header: "Paid?",
             key: "isPaid",
             formType: "checkbox" as const,
-            required: true,
         },
     ];
 

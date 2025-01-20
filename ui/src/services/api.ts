@@ -196,3 +196,21 @@ export const updateInvoice = async (invoice: UpdateInvoice) => {
 
     return response.data;
 };
+
+export const fetchInvoiceUrl = async (id: string): Promise<string> => {
+    const accessToken = sessionStorage.getItem("accessToken");
+    const tokenType = sessionStorage.getItem("tokenType") || "Bearer";
+
+    if (!accessToken) {
+        throw new Error("No authentication token found. Please log in.");
+    }
+
+    const response = await api.get("invoices/" + id + "/url", {
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `${tokenType} ${accessToken}`,
+        },
+    });
+
+    return response.data;
+};
