@@ -4,15 +4,15 @@ dev-ui:
 	cd ui/ && npm run dev
 
 dev-server:
-	uv run --directory src/ fastapi dev invoice_reader/app/routes.py
+	cd server/ && uv run --directory src/ fastapi dev invoice_reader/app/routes.py
 
 format:
-	uv tool run ruff format .
+	cd server && uv tool run ruff format .
 
 lint:
-	uv tool run ruff check --fix
+	cd server && uv tool run ruff check --fix
 
 fix: lint format
 
 test:
-	uv run pytest -vv
+	cd server && uv run pytest -vv
