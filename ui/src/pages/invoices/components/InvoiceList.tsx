@@ -5,10 +5,13 @@ import { useAddInvoice, useDeleteInvoices, useUpdateInvoice } from "../hooks";
 import { useQuery } from "@tanstack/react-query";
 import { fetchInvoices, fetchInvoiceUrl } from "@/services/api";
 import { Alert } from "react-bootstrap";
+import { useState } from "react";
+import AlertError from "@/common/components/AlertError";
 
 const InvoiceList = () => {
     const pageNumber = 1;
     const perPage = 10;
+    const [error, setError] = useState<Error | null>(null);
     const addInvoice = useAddInvoice();
     const updateInvoice = useUpdateInvoice();
     const deleteInvoices = useDeleteInvoices();
@@ -17,7 +20,7 @@ const InvoiceList = () => {
     const {
         data: invoiceData,
         isLoading,
-        error,
+        error: fetchError,
     } = useQuery({
         queryKey: ["invoices", pageNumber, perPage],
         queryFn: () => fetchInvoices(pageNumber, perPage),
@@ -46,6 +49,7 @@ const InvoiceList = () => {
     }));
 
     if (isLoading) return <div>Loading invoices...</div>;
+    fetchError && setError(fetchError);
     if (!localStorage.getItem("accessToken"))
         return (
             <Alert variant="danger">Log in to visualize your invoices...</Alert>
@@ -53,7 +57,9 @@ const InvoiceList = () => {
 
     return (
         <>
-            {error && <Alert variant="warning">Error: {error.message}</Alert>}
+            {error && (
+                <AlertError error={error} onClose={() => setError(null)} />
+            )}
             <TableRender<Invoice>
                 name="Invoices"
                 items={invoices}

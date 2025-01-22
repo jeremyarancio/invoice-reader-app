@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Alert } from "react-bootstrap";
+import AlertError from "@/common/components/AlertError";
 import SubmissionForm from "@/common/components/SubmissionForm";
 import { Client } from "../types";
 import { useSubmitClient } from "../hooks";
@@ -17,7 +17,7 @@ const initialClient: formClient = {
 };
 
 const ClientForm = () => {
-    const [error, setError] = useState<string | null>(null);
+    const [error, setError] = useState<Error | null>(null);
     const submitClient = useSubmitClient();
 
     const formGroups = [
@@ -62,15 +62,9 @@ const ClientForm = () => {
     return (
         <>
             {error && (
-                <Alert
-                    variant="danger"
-                    onClose={() => setError(null)} // Allow dismissing the error
-                    dismissible
-                    className="mb-4"
-                >
-                    {error}
-                </Alert>
+                <AlertError error={error} onClose={() => setError(null)} />
             )}
+
             <SubmissionForm
                 name="Client"
                 initialData={initialClient}

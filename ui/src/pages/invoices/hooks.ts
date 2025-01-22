@@ -4,6 +4,7 @@ import { deleteInvoices, updateInvoice, submitInvoice } from "@/services/api";
 import { useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/services/api";
 import { CreateInvoicePayload, Invoice } from "./types";
+import { AxiosError } from "axios";
 
 export const useAddInvoice = () => {
     const navigate = useNavigate();
@@ -22,8 +23,10 @@ export const useSubmitInvoice = () => {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["invoices"] });
         },
-        onError: (error: Error) => {
-            console.error(error);
+        onError: (error: AxiosError) => {
+            error.status === 409
+                ? window.alert("Error: Invoice already exists. Submission aborted.")
+                : window.alert("Error: " + error.message);
         },
     });
     return (file: File, data: CreateInvoicePayload) =>
@@ -37,12 +40,8 @@ export const useUpdateInvoice = () => {
             window.alert("Successfully updated.");
             queryClient.invalidateQueries({ queryKey: ["invoices"] });
         },
-        onError: (err) => {
-            const errorMessage =
-                err instanceof Error
-                    ? err.message
-                    : "An unexpected error occurred";
-            window.alert("Error: " + errorMessage);
+        onError: (error: AxiosError) => {
+            window.alert("Error: " + error.message);
         },
     });
     return (invoice: Invoice) =>

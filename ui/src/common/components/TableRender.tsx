@@ -43,7 +43,7 @@ function TableRender<T extends BaseItem>({
 }: TableRenderProps<T>) {
     const [showedItem, setShowedItem] = useState<T | null>(null);
     const [selectedItems, setSelectedItems] = useState<T[]>([]);
-
+    
     const handleSelect = (item: T) => {
         setSelectedItems((prev) => {
             if (prev.includes(item)) {

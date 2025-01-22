@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { Form, Button, Alert } from "react-bootstrap";
+import { Form, Button } from "react-bootstrap";
 import InvoiceForm from "./InvoiceForm";
+import AlertError from "@/common/components/AlertError";
 
 const UploadInvoice = () => {
     const [file, setFile] = useState<File | null>(null);
-    const [error, setError] = useState<string | null>(null);
+    const [error, setError] = useState<Error | null>(null);
     const [showForm, setShowForm] = useState(false);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -17,7 +18,7 @@ const UploadInvoice = () => {
         e.preventDefault();
 
         if (!file) {
-            setError("File is missing.");
+            setError(new Error("File is missing."));
             return;
         }
 
@@ -30,7 +31,9 @@ const UploadInvoice = () => {
 
     return (
         <>
-            {error && <Alert variant="warning">{error}</Alert>}
+            {error && (
+                <AlertError error={error} onClose={() => setError(null)} />
+            )}
             <h2>Upload Invoice</h2>
             <Form onSubmit={handleSubmit}>
                 <Form.Group controlId="formFile" className="mb-3">

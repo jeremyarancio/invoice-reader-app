@@ -8,19 +8,27 @@ import {
     useUpdateClient,
 } from "../hooks";
 import { mapGetClientToClient } from "../mapper";
+import { useState } from "react";
+import AlertError from "@/common/components/AlertError";
 
 const ClientList = () => {
     const pageNumber = 1;
     const perPage = 10;
+    const [error, setError] = useState<Error | null>(null);
     const addClient = useAddClient();
     const updateClient = useUpdateClient();
     const fetchClients = useFetchClients();
     const deleteClients = useDeleteClients();
 
-    const { data, isLoading, error } = fetchClients(pageNumber, perPage);
+    const {
+        data,
+        isLoading,
+        error: fetchError,
+    } = fetchClients(pageNumber, perPage);
     const clients = data?.data.map(mapGetClientToClient) || [];
 
     if (isLoading) return <div>Loading clients...</div>;
+    fetchError && setError(fetchError);
     if (!localStorage.getItem("accessToken"))
         return <Alert variant="danger">You need to log in...</Alert>;
 
@@ -40,7 +48,9 @@ const ClientList = () => {
 
     return (
         <>
-            {error && <Alert variant="danger">Error:{error.message}</Alert>}
+            {error && (
+                <AlertError error={error} onClose={() => setError(null)} />
+            )}
             <TableRender<Client>
                 name="Clients"
                 columns={tableColumns}

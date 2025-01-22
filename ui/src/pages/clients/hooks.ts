@@ -7,6 +7,7 @@ import {
 } from "@/services/api";
 import { useNavigate } from "react-router-dom";
 import { Client, CreateClient } from "./types";
+import { AxiosError } from "axios";
 
 export const useAddClient = () => {
     const navigate = useNavigate();
@@ -31,8 +32,12 @@ export const useDeleteClients = () => {
             window.alert("Successfully deleted");
             queryClient.invalidateQueries({ queryKey: ["clients"] });
         },
-        onError: (error) => {
-            window.alert("Failed to delete invoices: " + error.message);
+        onError: (error: AxiosError) => {
+            error.status === 409
+                ? window.alert(
+                      "Error: Client already exists. Process cancelled."
+                  )
+                : window.alert("Error: " + error.message);
         },
     });
     return (clients: Client[]) => {
@@ -48,7 +53,7 @@ export const useSubmitClient = () => {
             window.alert("Client successfully added.");
             queryClient.invalidateQueries({ queryKey: ["clients"] });
         },
-        onError: (error) => {
+        onError: (error: AxiosError) => {
             window.alert("Failed to add client: " + error.message);
         },
     });

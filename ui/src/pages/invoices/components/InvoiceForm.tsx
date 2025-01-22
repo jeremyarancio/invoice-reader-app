@@ -4,8 +4,10 @@ import { useSubmitInvoice } from "../hooks";
 import SubmissionForm from "@/common/components/SubmissionForm";
 import { mapGetClientToClient } from "@/pages/clients/mapper";
 import { mapInvoicetoCreateInvoice } from "../mappers";
-import { Alert, Col, Container, Row } from "react-bootstrap";
+import { Col, Container, Row } from "react-bootstrap";
 import PdfPreview from "@/common/components/PdfPreview";
+import { useState } from "react";
+import AlertError from "@/common/components/AlertError";
 
 type InvoiceFormData = Omit<Invoice, "id">;
 
@@ -24,10 +26,11 @@ const initialInvoice: InvoiceFormData = {
 };
 
 function InvoiceForm({ file }: FormProperties) {
+    const [error, setError] = useState<Error | null>(null);
     const fetchClients = useFetchClients();
     const submitInvoice = useSubmitInvoice();
 
-    const { data: pagedClients, error } = fetchClients();
+    const { data: pagedClients, error: fetchError } = fetchClients();
     const clients = pagedClients?.data.map(mapGetClientToClient) || [];
 
     const formGroups = [
@@ -74,25 +77,33 @@ function InvoiceForm({ file }: FormProperties) {
         },
     ];
 
+    fetchError && setError(fetchError);
     return (
         <Container fluid>
-            {error && <Alert variant="warning">Error: {error.message}</Alert>}
-            <Row>
-                <Col>
-                    <PdfPreview file={file} />
-                </Col>
-                <Col>
-                    <SubmissionForm<InvoiceFormData>
-                        name="Invoice"
-                        submit={(data: InvoiceFormData) =>
-                            submitInvoice(file, mapInvoicetoCreateInvoice(data))
-                        }
-                        formGroups={formGroups}
-                        initialData={initialInvoice}
-                        additionalItems={clients}
-                    />
-                </Col>
-            </Row>
+            <>
+                {error && (
+                    <AlertError error={error} onClose={() => setError(null)} />
+                )}
+                <Row>
+                    <Col>
+                        <PdfPreview file={file} />
+                    </Col>
+                    <Col>
+                        <SubmissionForm<InvoiceFormData>
+                            name="Invoice"
+                            submit={(data: InvoiceFormData) =>
+                                submitInvoice(
+                                    file,
+                                    mapInvoicetoCreateInvoice(data)
+                                )
+                            }
+                            formGroups={formGroups}
+                            initialData={initialInvoice}
+                            additionalItems={clients}
+                        />
+                    </Col>
+                </Row>
+            </>
         </Container>
     );
 }
