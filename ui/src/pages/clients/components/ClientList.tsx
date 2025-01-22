@@ -21,15 +21,22 @@ const ClientList = () => {
     const clients = data?.data.map(mapGetClientToClient) || [];
 
     if (isLoading) return <div>Loading clients...</div>;
-    if (!sessionStorage.getItem("accessToken"))
+    if (!localStorage.getItem("accessToken"))
         return <Alert variant="danger">You need to log in...</Alert>;
 
     const tableColumns = [
         { header: "Client", key: "name" },
-        { header: "Total", key: "", render: () => `$${1000}` },
+        { header: "Total", key: "", render: () => `$${"..."}` },
     ];
 
-    const editFields = [{ header: "Client name", key: "clientName" }];
+    const editFields = [
+        { header: "Client Name", key: "name" },
+        { header: "Street Number", key: "streetNumber" },
+        { header: "Street Address", key: "streetAddress" },
+        { header: "Zipcode", key: "zipcode" },
+        { header: "City", key: "city" },
+        { header: "Country", key: "country" },
+    ];
 
     return (
         <>

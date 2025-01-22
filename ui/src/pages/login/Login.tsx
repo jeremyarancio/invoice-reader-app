@@ -15,8 +15,8 @@ const Login = () => {
         mutationFn: loginUser,
         onSuccess: (data) => {
             // localStorage.setItem("accessToken", data.accessToken);
-            sessionStorage.setItem("accessToken", data.access_token);
-            sessionStorage.setItem("tokenType", data.token_type);
+            localStorage.setItem("accessToken", data.access_token);
+            localStorage.setItem("tokenType", data.token_type);
             setEmail("");
             setPassword("");
             setError(null);

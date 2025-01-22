@@ -21,7 +21,7 @@ const InvoiceList = () => {
     } = useQuery({
         queryKey: ["invoices", pageNumber, perPage],
         queryFn: () => fetchInvoices(pageNumber, perPage),
-        enabled: !!sessionStorage.getItem("accessToken"),
+        enabled: !!localStorage.getItem("accessToken"),
     });
 
     const invoices =
@@ -37,7 +37,7 @@ const InvoiceList = () => {
             );
             return urls;
         },
-        enabled: !!sessionStorage.getItem("accessToken") && invoices.length > 0,
+        enabled: !!localStorage.getItem("accessToken") && invoices.length > 0,
     });
 
     const invoicePreviews = invoices.map((invoice, index) => ({
@@ -46,7 +46,7 @@ const InvoiceList = () => {
     }));
 
     if (isLoading) return <div>Loading invoices...</div>;
-    if (!sessionStorage.getItem("accessToken"))
+    if (!localStorage.getItem("accessToken"))
         return (
             <Alert variant="danger">Log in to visualize your invoices...</Alert>
         );

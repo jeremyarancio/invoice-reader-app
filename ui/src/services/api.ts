@@ -52,8 +52,8 @@ export const submitInvoice = async (file: File, data: CreateInvoicePayload) => {
     formData.append("upload_file", file);
     formData.append("data", invoiceData);
 
-    const accessToken = sessionStorage.getItem("accessToken");
-    const tokenType = sessionStorage.getItem("tokenType") || "Bearer";
+    const accessToken = localStorage.getItem("accessToken");
+    const tokenType = localStorage.getItem("tokenType") || "Bearer";
 
     if (!accessToken) {
         throw new Error("No authentication token found. Please log in.");
@@ -70,8 +70,8 @@ export const submitInvoice = async (file: File, data: CreateInvoicePayload) => {
 };
 
 export const fetchInvoice = async (id: string): Promise<GetInvoiceResponse> => {
-    const accessToken = sessionStorage.getItem("accessToken");
-    const tokenType = sessionStorage.getItem("tokenType") || "Bearer";
+    const accessToken = localStorage.getItem("accessToken");
+    const tokenType = localStorage.getItem("tokenType") || "Bearer";
 
     const response = await api.get("invoices/" + id, {
         headers: {
@@ -86,8 +86,8 @@ export const fetchInvoices = async (
     pageNumber: number,
     perPage: number
 ): Promise<GetPagedInvoices> => {
-    const accessToken = sessionStorage.getItem("accessToken");
-    const tokenType = sessionStorage.getItem("tokenType") || "Bearer";
+    const accessToken = localStorage.getItem("accessToken");
+    const tokenType = localStorage.getItem("tokenType") || "Bearer";
 
     const response = await api.get("invoices/", {
         params: {
@@ -106,8 +106,8 @@ export const fetchClients = async (
     pageNumber: number,
     perPage: number
 ): Promise<GetPagedClients> => {
-    const accessToken = sessionStorage.getItem("accessToken");
-    const tokenType = sessionStorage.getItem("tokenType") || "Bearer";
+    const accessToken = localStorage.getItem("accessToken");
+    const tokenType = localStorage.getItem("tokenType") || "Bearer";
 
     const response = await api.get("clients/", {
         params: {
@@ -123,8 +123,8 @@ export const fetchClients = async (
 };
 
 export const addClient = async (client: CreateClient) => {
-    const accessToken = sessionStorage.getItem("accessToken");
-    const tokenType = sessionStorage.getItem("tokenType") || "Bearer";
+    const accessToken = localStorage.getItem("accessToken");
+    const tokenType = localStorage.getItem("tokenType") || "Bearer";
 
     if (!accessToken) {
         throw new Error("No authentication token found. Please log in.");
@@ -141,8 +141,8 @@ export const addClient = async (client: CreateClient) => {
 };
 
 export const deleteInvoices = async (invoice_ids: string[]) => {
-    const accessToken = sessionStorage.getItem("accessToken");
-    const tokenType = sessionStorage.getItem("tokenType") || "Bearer";
+    const accessToken = localStorage.getItem("accessToken");
+    const tokenType = localStorage.getItem("tokenType") || "Bearer";
 
     if (!accessToken) {
         throw new Error("No authentication token found. Please log in.");
@@ -160,8 +160,8 @@ export const deleteInvoices = async (invoice_ids: string[]) => {
 };
 
 export const deleteClients = async (client_ids: string[]) => {
-    const accessToken = sessionStorage.getItem("accessToken");
-    const tokenType = sessionStorage.getItem("tokenType") || "Bearer";
+    const accessToken = localStorage.getItem("accessToken");
+    const tokenType = localStorage.getItem("tokenType") || "Bearer";
 
     if (!accessToken) {
         throw new Error("No authentication token found. Please log in.");
@@ -180,8 +180,8 @@ export const deleteClients = async (client_ids: string[]) => {
 };
 
 export const updateInvoice = async (invoice: UpdateInvoice) => {
-    const accessToken = sessionStorage.getItem("accessToken");
-    const tokenType = sessionStorage.getItem("tokenType") || "Bearer";
+    const accessToken = localStorage.getItem("accessToken");
+    const tokenType = localStorage.getItem("tokenType") || "Bearer";
 
     if (!accessToken) {
         throw new Error("No authentication token found. Please log in.");
@@ -198,8 +198,8 @@ export const updateInvoice = async (invoice: UpdateInvoice) => {
 };
 
 export const fetchInvoiceUrl = async (id: string): Promise<string> => {
-    const accessToken = sessionStorage.getItem("accessToken");
-    const tokenType = sessionStorage.getItem("tokenType") || "Bearer";
+    const accessToken = localStorage.getItem("accessToken");
+    const tokenType = localStorage.getItem("tokenType") || "Bearer";
 
     if (!accessToken) {
         throw new Error("No authentication token found. Please log in.");
