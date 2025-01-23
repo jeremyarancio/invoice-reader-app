@@ -1,7 +1,6 @@
 import axios from "axios";
 import {
     UserRegistrationData,
-    UserLoginData,
     CreateClient,
     GetInvoiceResponse,
 } from "../types";
@@ -12,6 +11,7 @@ import {
     UpdateInvoice,
 } from "@/pages/invoices/types";
 import { GetPagedClients } from "@/pages/clients/types";
+import { PostUser } from "@/pages/auth/types";
 
 const baseURL = "http://localhost:8000/api/v1/";
 
@@ -37,7 +37,7 @@ export const registerUser = async (userData: UserRegistrationData) => {
     return response.data;
 };
 
-export const loginUser = async (loginData: UserLoginData) => {
+export const loginUser = async (loginData: PostUser) => {
     const formData = new FormData();
     formData.append("username", loginData.email);
     formData.append("password", loginData.password);

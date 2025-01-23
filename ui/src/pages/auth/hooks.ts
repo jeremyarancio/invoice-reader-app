@@ -1,0 +1,46 @@
+import { loginUser, registerUser } from "@/services/api";
+import { PostUser } from "./types";
+import { useMutation } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
+import { AxiosError } from "axios";
+
+export const useSignIn = () => {
+    const navigate = useNavigate();
+    const signInMutation = useMutation({
+        mutationFn: loginUser,
+        onSuccess: (data) => {
+            localStorage.setItem("accessToken", data.access_token);
+            localStorage.setItem("tokenType", data.token_type);
+            navigate("/");
+        },
+        onError: (error: AxiosError) => {
+            error.status === 401
+                ? window.alert("Invalid credentials")
+                : window.alert(error.message);
+        },
+    });
+
+    return (postUser: PostUser) => {
+        signInMutation.mutate(postUser);
+    };
+};
+
+export const useSignUp = () => {
+    const navigate = useNavigate();
+    const SignUpMutation = useMutation({
+        mutationFn: registerUser,
+        onSuccess: () => {
+            window.alert("User registered successfully. You can sign in!");
+            navigate("/signin");
+        },
+        onError: (error: AxiosError) => {
+            error.status === 409
+                ? window.alert("User already registered.")
+                : window.alert(error.message);
+        },
+    });
+
+    return (postUser: PostUser) => {
+        SignUpMutation.mutate(postUser);
+    };
+};

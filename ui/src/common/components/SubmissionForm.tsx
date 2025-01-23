@@ -1,22 +1,15 @@
 import React, { useState } from "react";
 import { Alert, Form, Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
+import { FormGroup } from "@/common/types";
 
 interface BaseItem {
     id: string;
     name: string;
 }
 
-interface FormGroup<T> {
-    header: string;
-    key: keyof T | string;
-    formType: "text" | "number" | "select" | "email" | "date" | "checkbox";
-    required?: boolean;
-    render?: (item: T) => string;
-}
-
 interface Props<T> {
-    name: string;
+    name?: string;
     formGroups: FormGroup<T>[];
     submit: (item: T) => void;
     additionalItems?: BaseItem[]; // It can take more attributes
@@ -77,7 +70,7 @@ function SubmissionForm<T>({
             )}
 
             <Form onSubmit={handleSubmit}>
-                <h3 className="mb-4">{name}</h3>
+                {name && <h3 className="mb-4">{name}</h3>}
                 {formGroups.map((formGroup) => (
                     <Form.Group className="mb-3" key={String(formGroup.key)}>
                         <Form.Label>
