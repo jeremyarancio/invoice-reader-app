@@ -1,0 +1,48 @@
+x-server-env: &server-env
+
+  POSTGRES_USER: ${POSTGRES_USER:-postgres}
+  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+  POSTGRES_DB: ${POSTGRES_DB:-postgres}
+  AWS_ACCESS_KEY_ID:
+  AWS_SECRET_ACCESS_KEY:
+  AWS_DEFAULT_REGION:
+
+x-db-env: &db-env
+  POSTGRES_USER: ${POSTGRES_USER:-postgres}
+  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+  POSTGRES_DB: ${POSTGRES_DB:-postgres}
+
+services:
+  postgres:
+    restart: always
+    image: postgres:17.2-alpine
+    environment: *db-env
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  server:
+    container_name: invoice-server
+    build: ./server
+    ports:
+      - "8000:8000"
+    environment: *server-env
+    depends_on:
+      - postgres
+    secrets:
+      - 
+
+  ui:
+    container_name: invoice-ui
+    restart: always
+    build: ./ui
+    ports:
+      - "5173:5173"
+    depends_on:
+      - server
+    volumes:
+    - ./ui:/app
+
+volumes:
+  postgres_data:

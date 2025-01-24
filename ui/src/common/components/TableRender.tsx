@@ -1,7 +1,7 @@
 import { Dropdown, Table, Button, Form } from "react-bootstrap";
 import { useState } from "react";
 import EditModal from "./EditModal";
-
+import trashIcon from "@/assets/trash.svg";
 interface BaseItem {
     id: string;
 }
@@ -112,7 +112,7 @@ function TableRender<T extends BaseItem>({
                                 href="#/delete"
                                 onClick={() => onDeleteItems(selectedItems)}
                             >
-                                <img src="src/assets/trash.svg"></img> Delete
+                                <img src={trashIcon}></img> Delete
                             </Dropdown.Item>
                         </Dropdown.Menu>
                     </Dropdown>

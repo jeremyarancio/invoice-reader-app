@@ -120,7 +120,7 @@ def get_invoice(
         LOGGER.error(e)
         raise e
     except Exception as e:
-        raise HTTPException(status_code=500, detail=e) from e
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @app.get("/api/v1/invoices/")
@@ -139,7 +139,7 @@ def get_invoices(
         LOGGER.error(e)
         raise e
     except Exception as e:
-        raise HTTPException(status_code=400, detail=e) from e
+        raise HTTPException(status_code=400, detail=str(e)) from e
 
 
 @app.delete("/api/v1/invoices/{file_id}")
@@ -151,7 +151,7 @@ def delete_invoice(
     try:
         presenter.delete_invoice(file_id=file_id, user_id=user.user_id, session=session)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=e) from e
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @app.post("/api/v1/users/register/")
@@ -167,6 +167,7 @@ def login(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     session: Annotated[sqlmodel.Session, Depends(db.get_session)],
 ) -> AuthToken:
+    LOGGER.info(f"User {form_data.username} / Password {form_data.password}.")
     try:
         user = auth.authenticate_user(
             email=form_data.username, password=form_data.password, session=session
@@ -190,7 +191,7 @@ def delete_user(
     try:
         presenter.delete_user(user_id=user.user_id, session=session)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=e) from e
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @app.get("/api/v1/clients/")
@@ -215,7 +216,7 @@ def get_clients(
         LOGGER.error(e)
         raise HTTPException(
             status_code=400,
-            detail=e,
+            detail=str(e),
         ) from e
 
 
@@ -237,7 +238,7 @@ def add_client(
         raise e
     except Exception as e:
         LOGGER.error(e)
-        raise HTTPException(status_code=400, detail=e) from e
+        raise HTTPException(status_code=400, detail=str(e)) from e
 
 
 @app.delete("/api/v1/clients/{client_id}")
@@ -251,7 +252,7 @@ def delete_client(
             client_id=client_id, user_id=user.user_id, session=session
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=e) from e
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @app.put("/api/v1/invoices/{invoice_id}")
@@ -266,7 +267,7 @@ def update_invoice(
             invoice_id=invoice_id, invoice=invoice, session=session
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=e) from e
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @app.get("/api/v1/invoices/{invoice_id}/url/")
@@ -283,4 +284,4 @@ def get_invoice_url(
         )
         return url 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=e) from e
+        raise HTTPException(status_code=500, detail=str(e)) from e
