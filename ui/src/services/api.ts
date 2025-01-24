@@ -1,17 +1,13 @@
 import axios from "axios";
-import {
-    UserRegistrationData,
-    CreateClient,
-    GetInvoiceResponse,
-} from "../types";
 import { QueryClient } from "@tanstack/react-query";
 import {
     GetPagedInvoices,
     CreateInvoicePayload,
     UpdateInvoice,
+    GetInvoice,
 } from "@/pages/invoices/types";
-import { GetPagedClients } from "@/pages/clients/types";
-import { PostUser } from "@/pages/auth/types";
+import { CreateClient, GetPagedClients } from "@/pages/clients/types";
+import { CreateUser, PostUser } from "@/pages/auth/types";
 
 const baseURL = "http://localhost:8000/api/v1/";
 
@@ -32,7 +28,7 @@ const api = axios.create({
     baseURL: baseURL,
 });
 
-export const registerUser = async (userData: UserRegistrationData) => {
+export const registerUser = async (userData: CreateUser) => {
     const response = await api.post("users/register/", userData);
     return response.data;
 };
@@ -69,7 +65,7 @@ export const submitInvoice = async (file: File, data: CreateInvoicePayload) => {
     return response.data;
 };
 
-export const fetchInvoice = async (id: string): Promise<GetInvoiceResponse> => {
+export const fetchInvoice = async (id: string): Promise<GetInvoice> => {
     const accessToken = localStorage.getItem("accessToken");
     const tokenType = localStorage.getItem("tokenType") || "Bearer";
 

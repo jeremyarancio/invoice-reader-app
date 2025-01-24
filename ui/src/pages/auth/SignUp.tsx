@@ -14,7 +14,6 @@ function SignUp() {
                 <Card.Body>
                     <h2 className="text-center mb-4">Sign Up</h2>
                     <AuthForm<FormSignUp>
-                        type="signUp"
                         formGroups={[
                             {
                                 header: "Email",

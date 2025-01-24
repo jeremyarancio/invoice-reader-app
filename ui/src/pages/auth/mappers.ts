@@ -1,17 +1,17 @@
-import { formSignIn, formSignUp, CreateUser, PostUser } from "./types";
+import { FormSignIn, FormSignUp, CreateUser, PostUser } from "./types";
 
 export const mapFormSignInToCreateUser = (
-    formSignIn: formSignIn
+    FormSignIn: FormSignIn
 ): CreateUser => {
     return {
-        email: formSignIn.email,
-        password: formSignIn.password,
+        email: FormSignIn.email,
+        password: FormSignIn.password,
     };
 };
 
-export const mapFormSignUpToPostUser = (formSignUp: formSignUp): PostUser => {
+export const mapFormSignUpToPostUser = (FormSignUp: FormSignUp): PostUser => {
     return {
-        email: formSignUp.email,
-        password: formSignUp.password,
+        email: FormSignUp.email,
+        password: FormSignUp.password,
     };
 };
