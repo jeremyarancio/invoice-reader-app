@@ -16,3 +16,9 @@ fix: lint format
 
 test:
 	cd server && uv run pytest -vv
+
+dev:
+	docker-compose --env-file ./server/.env up -d
+
+build:
+	docker-compose --env-file ./server/.env up --build -d
