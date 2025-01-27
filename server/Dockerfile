@@ -1,5 +1,5 @@
 # Use a Python image with uv pre-installed
-FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim
+FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim AS base
 
 # Install the project into `/app`
 WORKDIR /app
@@ -29,5 +29,14 @@ ENV PATH="/app/.venv/bin:$PATH"
 RUN chmod +x docker/entrypoint.sh
 ENTRYPOINT ["/app/docker/entrypoint.sh"]
 
-# Run the FastAPI application
+# Production stage
+FROM base AS prod
 CMD ["fastapi", "run", "--host", "0.0.0.0", "--port", "8000", "src/invoice_reader/app/routes.py"]
+
+# Development stage
+FROM base AS dev
+# Install development dependencies
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --dev
+# Use a development server with hot-reloading
+CMD ["fastapi", "run", "dev", "--host", "0.0.0.0", "--port", "8000", "src/invoice_reader/app/routes.py"]

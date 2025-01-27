@@ -167,7 +167,6 @@ def login(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     session: Annotated[sqlmodel.Session, Depends(db.get_session)],
 ) -> AuthToken:
-    LOGGER.info(f"User {form_data.username} / Password {form_data.password}.")
     try:
         user = auth.authenticate_user(
             email=form_data.username, password=form_data.password, session=session
@@ -282,6 +281,6 @@ def get_invoice_url(
             user_id=user.user_id,
             session=session,
         )
-        return url 
+        return url
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e

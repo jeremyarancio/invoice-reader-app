@@ -18,7 +18,13 @@ test:
 	cd server && uv run pytest -vv
 
 dev:
-	docker-compose --env-file ./server/.env up -d
+	docker-compose --env-file ./server/.env --profile dev up -d
 
 build:
 	docker-compose --env-file ./server/.env up --build -d
+
+logs:
+	docker compose --profile dev logs -f
+
+down:
+	docker compose --profile dev down

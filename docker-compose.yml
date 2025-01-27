@@ -12,7 +12,7 @@ x-server-env: &server-env
   JWT_SECRET_KEY:
   JWT_ALGORITHM:
   ACCESS_TOKEN_EXPIRE_MINUTES:
-  
+
 services:
   postgres:
     restart: unless-stopped
@@ -25,8 +25,10 @@ services:
     networks:
       - app-network
 
-  server:
-    build: ./server
+  server-prod:
+    build:
+      context: ./server
+      target: prod
     ports:
       - 8000:8000
     environment: *server-env
@@ -34,16 +36,48 @@ services:
       - postgres
     networks:
       - app-network
+    profiles:
+      - prod
 
-  ui:
+  server-dev:
+    build:
+      context: ./server
+      target: dev
+    ports:
+      - 8000:8000
+    environment: *server-env
+    volumes:
+      - ./server:/app
+    depends_on:
+      - postgres
+    networks:
+      - app-network
+    profiles:
+      - dev
+
+  ui-prod:
     restart: always
     build: ./ui
     ports:
       - 5173:5173
     depends_on:
-      - server
+      - server-prod
     networks:
       - app-network
+    profiles:
+      - prod
+
+  ui-dev:
+    restart: always
+    build: ./ui
+    ports:
+      - 5173:5173
+    depends_on:
+      - server-dev
+    networks:
+      - app-network
+    profiles:
+      - dev
 
 volumes:
   postgres_data:
