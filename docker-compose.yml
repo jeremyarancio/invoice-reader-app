@@ -39,7 +39,7 @@ services:
     networks:
       - app-network
 
-  ui-prod:
+  ui:
     restart: always
     build: ./ui
     ports:
