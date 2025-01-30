@@ -39,4 +39,4 @@ FROM base AS dev
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --dev
 # Use a development server with hot-reloading
-CMD ["fastapi", "run", "dev", "--host", "0.0.0.0", "--port", "8000", "src/invoice_reader/app/routes.py"]
+CMD ["fastapi", "dev", "--host", "0.0.0.0", "--port", "8000", "src/invoice_reader/app/routes.py"]
