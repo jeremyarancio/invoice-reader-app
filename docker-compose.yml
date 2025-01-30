@@ -4,6 +4,7 @@ x-db-env: &db-env
   POSTGRES_DB: ${POSTGRES_DB:-postgres}
 
 x-server-env: &server-env
+  POSTGRES_SERVER: ${POSTGRES_SERVER:-postgres}
   POSTGRES_USER: ${POSTGRES_USER:-postgres}
   POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
   POSTGRES_DB: ${POSTGRES_DB:-postgres}
@@ -12,6 +13,9 @@ x-server-env: &server-env
   JWT_SECRET_KEY:
   JWT_ALGORITHM:
   ACCESS_TOKEN_EXPIRE_MINUTES:
+
+x-ui-env: &ui-env
+  VITE_SERVER_API_URL: ${VITE_SERVER_API_URL:-http://localhost:8000}
 
 services:
   postgres:
@@ -33,7 +37,8 @@ services:
       - 8000:8000
     environment: *server-env
     volumes:
-      - ./server:/app
+      - ./server:/app # For local dev
+      - ./server/.aws:/root/.aws # Mount AWS User credentialsq to Docker Compose
     depends_on:
       - postgres
     networks:
@@ -48,6 +53,7 @@ services:
       - server
     networks:
       - app-network
+    environment: *ui-env
 
 volumes:
   postgres_data:
