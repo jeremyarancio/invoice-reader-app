@@ -9,7 +9,8 @@ import {
 import { CreateClient, GetPagedClients } from "@/pages/clients/types";
 import { CreateUser, PostUser } from "@/pages/auth/types";
 
-const baseURL = "http://localhost:8000/api/v1/";
+const VITE_SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL;
+const baseURL = VITE_SERVER_API_URL + "api/v1/";
 
 export const queryClient = new QueryClient({
     defaultOptions: {
