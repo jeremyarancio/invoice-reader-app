@@ -13,9 +13,10 @@ x-server-env: &server-env
   JWT_SECRET_KEY:
   JWT_ALGORITHM:
   ACCESS_TOKEN_EXPIRE_MINUTES:
+  FRONT_END_URL:
 
 x-ui-env: &ui-env
-  VITE_SERVER_API_URL: ${VITE_SERVER_API_URL:-http://localhost:8000}
+  VITE_SERVER_API_URL: ${VITE_SERVER_API_URL:-http://localhost:8000/}
 
 services:
   postgres:
