@@ -60,3 +60,10 @@ push-ui:
 
 push-pg:
 	docker push 265890761777.dkr.ecr.eu-central-1.amazonaws.com/invoice-postgres
+
+# Terraform
+apply:
+	terraform -chdir=infra apply
+
+destroy:
+	terraform -chdir=infra destroy
