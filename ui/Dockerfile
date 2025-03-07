@@ -1,4 +1,4 @@
-FROM node:22-alpine AS runner
+FROM node:22-alpine AS base
 
 # Export ENV to entrypoint.sh
 ENV PORT=5173
@@ -11,6 +11,13 @@ COPY . .
 
 # Install dependencies
 RUN npm install
+
+FROM base AS dev
+
+# We add --host to notify Vite to listen to the external changes
+ENTRYPOINT [ "npm", "run", "dev", "--", "--host", "0.0.0.0"] 
+
+FROM base AS prod
 
 # We use entrypoint.sh to import into the front-end any env variable at runtime
 COPY docker/entrypoint.sh .

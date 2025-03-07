@@ -47,7 +47,9 @@ services:
 
   ui:
     restart: always
-    build: ./ui
+    build:
+      context: ./ui
+      target: dev
     ports:
       - 5173:5173
     depends_on:
@@ -55,6 +57,8 @@ services:
     networks:
       - app-network
     environment: *ui-env
+    volumes:
+      - ./ui:/app
 
 volumes:
   postgres_data:
