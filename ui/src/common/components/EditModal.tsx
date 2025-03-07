@@ -46,6 +46,7 @@ function EditModal<T extends BaseItem>({
     const handleEditSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         onUpdateItem(formData);
+        setIsEditToSubmit(false)
     };
 
     const handleDelete = () => {
