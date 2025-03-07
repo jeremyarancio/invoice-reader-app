@@ -38,8 +38,8 @@ services:
       - 8000:8000
     environment: *server-env
     volumes:
-      - ./server:/app # For local dev
-      - ./server/.aws:/root/.aws # Mount AWS User credentialsq to Docker Compose
+      - ./server/src:/app/src
+      - ./server/.aws:/root/.aws # Mount AWS User credentials to Docker Compose
     depends_on:
       - postgres
     networks:
