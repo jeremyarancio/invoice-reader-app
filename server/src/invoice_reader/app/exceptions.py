@@ -4,6 +4,10 @@ EXISTING_CLIENT_EXCEPTION = HTTPException(
     status_code=status.HTTP_409_CONFLICT, detail="Client already exisiting. "
 )
 
+USER_NOT_FOUND_EXCEPTION = HTTPException(
+    status_code=status.HTTP_404_NOT_FOUND, detail="User not found."
+)
+
 CREDENTIALS_EXCEPTION = HTTPException(
     status_code=status.HTTP_401_UNAUTHORIZED,
     detail="Could not validate credentials",
@@ -16,4 +20,14 @@ EXISTING_USER_EXCEPTION = HTTPException(
 
 EXISTING_INVOICE_EXCEPTION = HTTPException(
     status_code=status.HTTP_409_CONFLICT, detail="Invoice already exisiting."
+)
+
+UNPROCESSABLE_FILE = HTTPException(
+    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+    detail="The uploaded file is unprocessable.",
+)
+
+MISSING_ENVIRONMENT_VARIABLE_EXCEPTION = HTTPException(
+    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+    detail="Missing required environment variable",
 )

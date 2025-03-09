@@ -4,7 +4,11 @@ from typing import BinaryIO
 import sqlmodel
 
 from invoice_reader import settings
-from invoice_reader.app.exceptions import EXISTING_CLIENT_EXCEPTION
+from invoice_reader.app.exceptions import (
+    EXISTING_CLIENT_EXCEPTION,
+    MISSING_ENVIRONMENT_VARIABLE_EXCEPTION,
+    UNPROCESSABLE_FILE,
+)
 from invoice_reader.core import storage
 from invoice_reader.models import S3
 from invoice_reader.repository import (
@@ -27,15 +31,19 @@ from invoice_reader.utils import logger, s3_utils
 LOGGER = logger.get_logger()
 
 
-def submit(
+def submit_invoice(
     user_id: uuid.UUID,
     file: BinaryIO,
-    filename: str,
+    filename: str | None,
     invoice_data: InvoiceCreate,
     session: sqlmodel.Session,
 ) -> None:
+    if not filename:
+        raise UNPROCESSABLE_FILE
+    if not settings.S3_BUCKET_NAME:
+        raise MISSING_ENVIRONMENT_VARIABLE_EXCEPTION
     file_data = FileData(user_id=user_id, filename=filename)
-    s3_model = S3.init(bucket=settings.S3_BUCKET)
+    s3_model = S3.init(bucket=settings.S3_BUCKET_NAME)
     invoice_repository = InvoiceRepository(session=session)
     storage.store(
         file=file,
@@ -112,11 +120,13 @@ def get_paged_clients(
 def delete_invoice(
     file_id: uuid.UUID, user_id: uuid.UUID, session: sqlmodel.Session
 ) -> None:
+    if not settings.S3_BUCKET_NAME:
+        raise MISSING_ENVIRONMENT_VARIABLE_EXCEPTION
     invoice_repository = InvoiceRepository(session=session)
     invoice = invoice_repository.get(file_id=file_id, user_id=user_id)
 
     invoice_repository.delete(file_id=file_id, user_id=user_id)
-    s3 = S3.init(bucket=settings.S3_BUCKET)
+    s3 = S3.init(bucket=settings.S3_BUCKET_NAME)
     suffix = s3_utils.get_suffix_from_s3_path(invoice.s3_path)
     s3.delete(suffix=suffix)
 
@@ -143,7 +153,9 @@ def update_invoice(
 def get_invoice_url(
     invoice_id: uuid.UUID, user_id: uuid.UUID, session: sqlmodel.Session
 ) -> str:
-    s3 = S3.init(bucket=settings.S3_BUCKET)
+    if not settings.S3_BUCKET_NAME:
+        raise MISSING_ENVIRONMENT_VARIABLE_EXCEPTION
+    s3 = S3.init(bucket=settings.S3_BUCKET_NAME)
     invoice_repository = InvoiceRepository(session=session)
     invoice = invoice_repository.get(
         file_id=invoice_id, user_id=user_id

@@ -4,12 +4,18 @@ from typing import Annotated
 import jwt
 import sqlmodel
 from fastapi import Depends
+from fastapi.exceptions import HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from jwt.exceptions import InvalidTokenError
 from passlib.context import CryptContext
 
 from invoice_reader import db, presenter, settings
-from invoice_reader.app.exceptions import CREDENTIALS_EXCEPTION, EXISTING_USER_EXCEPTION
+from invoice_reader.app.exceptions import (
+    CREDENTIALS_EXCEPTION,
+    EXISTING_USER_EXCEPTION,
+    MISSING_ENVIRONMENT_VARIABLE_EXCEPTION,
+    USER_NOT_FOUND_EXCEPTION,
+)
 from invoice_reader.schemas import User, UserCreate
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
@@ -29,29 +35,36 @@ def get_current_user(
     session: Annotated[sqlmodel.Session, Depends(db.get_session)],
 ) -> User:
     try:
-        payload: dict = jwt.decode(
+        if not settings.JWT_ALGORITHM:
+            raise MISSING_ENVIRONMENT_VARIABLE_EXCEPTION
+        payload = jwt.decode(
             token, key=settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM]
         )
         email: str = payload.get("sub")
         if email is None:
             raise CREDENTIALS_EXCEPTION
-    except InvalidTokenError:
-        raise CREDENTIALS_EXCEPTION from None
+        user = presenter.get_user_by_email(email=email, session=session)
+        if not user:
+            raise CREDENTIALS_EXCEPTION
+    except InvalidTokenError as e:
+        raise CREDENTIALS_EXCEPTION from e
+    except HTTPException:
+        raise
+    return user
+
+
+def authenticate_user(email: str, password: str, session: sqlmodel.Session) -> User:
     user = presenter.get_user_by_email(email=email, session=session)
     if not user:
+        raise USER_NOT_FOUND_EXCEPTION
+    if not verify_password(password, user.hashed_password):
         raise CREDENTIALS_EXCEPTION
     return user
 
 
-def authenticate_user(
-    email: str, password: str, session: sqlmodel.Session
-) -> User | None:
-    user = presenter.get_user_by_email(email=email, session=session)
-    if verify_password(password, user.hashed_password):
-        return user
-
-
 def create_access_token(email: str) -> str:
+    if not settings.JWT_SECRET_KEY or not settings.JWT_ALGORITHM:
+        raise MISSING_ENVIRONMENT_VARIABLE_EXCEPTION
     to_encode = {"sub": email}
     expire = datetime.now() + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
@@ -66,5 +79,7 @@ def register_user(user: UserCreate, session: sqlmodel.Session) -> None:
     if existing_user:
         raise EXISTING_USER_EXCEPTION
     hashed_password = get_password_hash(user.password)
-    user = User(hashed_password=hashed_password, **user.model_dump())
-    presenter.add_user(user=user, session=session)
+    new_user = User(
+        hashed_password=hashed_password, email=user.email, is_disabled=False
+    )
+    presenter.add_user(user=new_user, session=session)

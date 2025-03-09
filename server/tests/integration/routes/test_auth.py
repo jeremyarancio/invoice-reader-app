@@ -12,7 +12,7 @@ def test_register_user(
     user_repository: UserRepository,
 ):
     response = api_client.post(
-        url="/api/v1/users/register/",
+        url="/api/v1/users/signup/",
         data=new_user_create.model_dump_json(),
     )
 
@@ -32,7 +32,7 @@ def test_register_existing_user(
     test_existing_user: UserModel,
 ):
     response = api_client.post(
-        url="/api/v1/users/register/",
+        url="/api/v1/users/signup/",
         data=existing_user_create.model_dump_json(),
     )
     assert response.status_code == 409
@@ -44,7 +44,7 @@ def test_user_login(
     test_existing_user: UserModel,
 ):
     response = api_client.post(
-        url="/api/v1/users/login/",
+        url="/api/v1/users/signin/",
         data={
             "username": test_existing_user.email,
             "password": existing_user_create.password,
@@ -53,3 +53,17 @@ def test_user_login(
     payload: dict = response.json()
     assert response.status_code == 200
     assert payload.get("access_token")
+
+
+def test_user_login_wrong_password(
+    api_client: TestClient,
+    existing_user_create: UserCreate
+):
+    response = api_client.post(
+        url="/api/v1/users/signin/",
+        data={
+            "username": existing_user_create.email,
+            "password": "wrong_password"
+        }
+    )
+    assert response.status_code == 401

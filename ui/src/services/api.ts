@@ -30,7 +30,7 @@ const api = axios.create({
 });
 
 export const registerUser = async (userData: CreateUser) => {
-    const response = await api.post("users/register/", userData);
+    const response = await api.post("users/signup/", userData);
     return response.data;
 };
 
@@ -38,7 +38,7 @@ export const loginUser = async (loginData: PostUser) => {
     const formData = new FormData();
     formData.append("username", loginData.email);
     formData.append("password", loginData.password);
-    const response = await api.post("users/login/", formData);
+    const response = await api.post("users/signin/", formData);
     return response.data;
 };
 
@@ -56,7 +56,7 @@ export const submitInvoice = async (file: File, data: CreateInvoicePayload) => {
         throw new Error("No authentication token found. Please log in.");
     }
 
-    const response = await api.post("invoices/submit/", formData, {
+    const response = await api.post("invoices/", formData, {
         headers: {
             "Content-Type": "multipart/form-data",
             Authorization: `${tokenType} ${accessToken}`,

@@ -44,13 +44,14 @@ app.add_middleware(
 class Checker:
     """When POST File & Payload, HTTP sends a Form request.
     However, HTTP protocole doesn't allow file & body.
-    Therefore, we send data as Form as `{"data": json_dumps(invoice_data)} along with the file.
+    Therefore, we send data as Form as `{"data": json_dumps(invoice_data)} 
+    along with the file.
 
     More information here:
     https://shorturl.at/Beaur
     """
 
-    def __init__(self, model: BaseModel):
+    def __init__(self, model: "BaseModel"):
         self.model = model
 
     def __call__(self, data: str = Form(None)):
@@ -69,21 +70,21 @@ async def root():
     return {"message": "Welcome to the Invoice Reader API!"}
 
 
-@app.post("/api/v1/invoices/submit/")
-def submit(
+@app.post("/api/v1/invoices/")
+def add_invoice(
     upload_file: Annotated[UploadFile, File()],
-    data: Annotated[Invoice | None, Depends(Checker(InvoiceCreate))],
+    data: Annotated[InvoiceCreate | None, Depends(Checker(InvoiceCreate))],
     session: Annotated[sqlmodel.Session, Depends(db.get_session)],
     user: Annotated[User, Depends(auth.get_current_user)],
 ):
     if upload_file.content_type != "application/pdf":
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Only PDF files are allowed.",
+            detail="Only PDF files are allowed for now.",
         )
     try:
         if data:
-            presenter.submit(
+            presenter.submit_invoice(
                 user_id=user.user_id,
                 file=upload_file.file,
                 filename=upload_file.filename,
@@ -94,11 +95,11 @@ def submit(
                 content="The file and its information were successfully stored.",
                 status_code=201,
             )
-        extracted_metadata = presenter.extract(file=upload_file.file)
-        return Response(
-            content={"data": extracted_metadata},
-            status_code=201,
-        )
+        # extracted_metadata = presenter.extract(file=upload_file.file)
+        # return Response(
+        #     content={"data": extracted_metadata},
+        #     status_code=201,
+        # )
     except HTTPException as e:
         LOGGER.error(e)
         raise e
@@ -116,11 +117,12 @@ def get_invoice(
     try:
         invoice = presenter.get_invoice(user=user, file_id=file_id, session=session)
         return invoice
-    except HTTPException as e:
-        LOGGER.error(e)
-        raise e
+    except HTTPException:
+        raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)) from e
+        raise HTTPException(
+            status_code=500, detail=f"Uncaught exception {str(e)}"
+        ) from e
 
 
 @app.get("/api/v1/invoices/")
@@ -154,16 +156,16 @@ def delete_invoice(
         raise HTTPException(status_code=500, detail=str(e)) from e
 
 
-@app.post("/api/v1/users/register/")
-def register(
+@app.post("/api/v1/users/signup/")
+def signup(
     user: UserCreate, session: Annotated[sqlmodel.Session, Depends(db.get_session)]
 ):
     auth.register_user(user=user, session=session)
     return Response(content="User has been added to the database.", status_code=201)
 
 
-@app.post("/api/v1/users/login/")
-def login(
+@app.post("/api/v1/users/signin/")
+def signin(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     session: Annotated[sqlmodel.Session, Depends(db.get_session)],
 ) -> AuthToken:
@@ -173,7 +175,6 @@ def login(
         )
         access_token = auth.create_access_token(email=user.email)
     except Exception as e:
-        LOGGER.error(e)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid authentication credentials",

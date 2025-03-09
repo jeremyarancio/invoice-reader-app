@@ -432,24 +432,24 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "alembic", specifier = ">=1.14.0" },
-    { name = "boto3", specifier = ">=1.35.56" },
-    { name = "fastapi", extras = ["standard"], specifier = ">=0.115.4" },
-    { name = "mypy", specifier = ">=1.14.1" },
-    { name = "passlib", extras = ["bcrypt"], specifier = ">=1.7.4" },
-    { name = "psycopg2-binary", specifier = ">=2.9.10" },
-    { name = "pydantic", specifier = ">=2.9.2" },
-    { name = "pyjwt", specifier = ">=2.10.0" },
-    { name = "python-multipart", specifier = ">=0.0.17" },
-    { name = "sqlmodel", specifier = ">=0.0.22" },
+    { name = "alembic", specifier = "~=1.14.0" },
+    { name = "boto3", specifier = "~=1.35.56" },
+    { name = "fastapi", extras = ["standard"], specifier = "~=0.115.4" },
+    { name = "mypy", specifier = "~=1.14.1" },
+    { name = "passlib", extras = ["bcrypt"], specifier = "~=1.7.4" },
+    { name = "psycopg2-binary", specifier = "~=2.9.10" },
+    { name = "pydantic", specifier = "~=2.9.2" },
+    { name = "pyjwt", specifier = "~=2.10.0" },
+    { name = "python-multipart", specifier = "~=0.0.17" },
+    { name = "sqlmodel", specifier = "~=0.0.22" },
 ]
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "ipykernel", specifier = ">=6.29.5" },
-    { name = "pytest", specifier = ">=8.3.3" },
-    { name = "pytest-mock", specifier = ">=3.14.0" },
-    { name = "python-dotenv", specifier = ">=1.0.1" },
+    { name = "ipykernel", specifier = "~=6.29.5" },
+    { name = "pytest", specifier = "~=8.3.3" },
+    { name = "pytest-mock", specifier = "~=3.14.0" },
+    { name = "python-dotenv", specifier = "~=1.0.1" },
 ]
 
 [[package]]
