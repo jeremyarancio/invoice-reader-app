@@ -44,7 +44,7 @@ app.add_middleware(
 class Checker:
     """When POST File & Payload, HTTP sends a Form request.
     However, HTTP protocole doesn't allow file & body.
-    Therefore, we send data as Form as `{"data": json_dumps(invoice_data)} 
+    Therefore, we send data as Form as `{"data": json_dumps(invoice_data)}
     along with the file.
 
     More information here:
@@ -101,11 +101,9 @@ def add_invoice(
         #     status_code=201,
         # )
     except HTTPException as e:
-        LOGGER.error(e)
         raise e
     except Exception as e:
-        LOGGER.error(e)
-        raise HTTPException(status_code=400, detail=str(e)) from e
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @app.get("/api/v1/invoices/{file_id}")
@@ -138,10 +136,9 @@ def get_invoices(
         )
         return paged_invoices
     except HTTPException as e:
-        LOGGER.error(e)
         raise e
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e)) from e
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @app.delete("/api/v1/invoices/{file_id}")
@@ -152,6 +149,8 @@ def delete_invoice(
 ) -> None:
     try:
         presenter.delete_invoice(file_id=file_id, user_id=user.user_id, session=session)
+    except HTTPException as e:
+        raise e
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
 
@@ -174,12 +173,10 @@ def signin(
             email=form_data.username, password=form_data.password, session=session
         )
         access_token = auth.create_access_token(email=user.email)
+    except HTTPException:
+        raise
     except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid authentication credentials",
-            headers={"WWW-Authenticate": "Bearer"},
-        ) from e
+        raise HTTPException(status_code=500, detail=str(e)) from e
     return AuthToken(access_token=access_token, token_type="bearer")
 
 
@@ -190,6 +187,8 @@ def delete_user(
 ) -> None:
     try:
         presenter.delete_user(user_id=user.user_id, session=session)
+    except HTTPException as e:
+        raise e
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
 
@@ -210,12 +209,10 @@ def get_clients(
         )
         return paged_client_response
     except HTTPException as e:
-        LOGGER.error(e)
         raise e
     except Exception as e:
-        LOGGER.error(e)
         raise HTTPException(
-            status_code=400,
+            status_code=500,
             detail=str(e),
         ) from e
 
@@ -234,11 +231,9 @@ def add_client(
             status_code=201,
         )
     except HTTPException as e:
-        LOGGER.error(e)
         raise e
     except Exception as e:
-        LOGGER.error(e)
-        raise HTTPException(status_code=400, detail=str(e)) from e
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @app.delete("/api/v1/clients/{client_id}")
@@ -251,6 +246,8 @@ def delete_client(
         presenter.delete_client(
             client_id=client_id, user_id=user.user_id, session=session
         )
+    except HTTPException as e:
+        raise e
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
 
@@ -266,6 +263,8 @@ def update_invoice(
         presenter.update_invoice(
             invoice_id=invoice_id, invoice=invoice, session=session
         )
+    except HTTPException as e:
+        raise e
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
 
@@ -283,5 +282,7 @@ def get_invoice_url(
             session=session,
         )
         return url
+    except HTTPException as e:
+        raise e
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e

@@ -56,14 +56,10 @@ def test_user_login(
 
 
 def test_user_login_wrong_password(
-    api_client: TestClient,
-    existing_user_create: UserCreate
+    api_client: TestClient, test_existing_user: UserModel
 ):
     response = api_client.post(
         url="/api/v1/users/signin/",
-        data={
-            "username": existing_user_create.email,
-            "password": "wrong_password"
-        }
+        data={"username": test_existing_user.email, "password": "wrong_password"},
     )
     assert response.status_code == 401

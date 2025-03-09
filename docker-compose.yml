@@ -3,21 +3,6 @@ x-db-env: &db-env
   POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
   POSTGRES_DB: ${POSTGRES_DB:-postgres}
 
-x-server-env: &server-env
-  POSTGRES_SERVER: ${POSTGRES_SERVER:-postgres}
-  POSTGRES_USER: ${POSTGRES_USER:-postgres}
-  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-  POSTGRES_DB: ${POSTGRES_DB:-postgres}
-  S3_BUCKET:
-  PRESIGNED_URL_EXPIRATION:
-  JWT_SECRET_KEY:
-  JWT_ALGORITHM:
-  ACCESS_TOKEN_EXPIRE_MINUTES:
-  FRONT_END_URL:
-
-x-ui-env: &ui-env
-  VITE_SERVER_API_URL: ${VITE_SERVER_API_URL:-http://localhost:8000/}
-
 services:
   postgres:
     restart: unless-stopped
@@ -36,7 +21,8 @@ services:
       target: dev # Use the dev build stage
     ports:
       - 8000:8000
-    environment: *server-env
+    env_file:
+      - "./server/.env"
     volumes:
       - ./server/src:/app/src
       - ./server/.aws:/root/.aws # Mount AWS User credentials to Docker Compose
@@ -52,6 +38,8 @@ services:
       target: dev
     ports:
       - 5173:5173
+    env_file:
+      - "./ui/.env"
     depends_on:
       - server
     networks:
