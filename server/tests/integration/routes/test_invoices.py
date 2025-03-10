@@ -194,6 +194,7 @@ def test_update_invoice(
 
 # Add exception no change update
 
+
 def test_get_invoice_url(
     api_client: TestClient,
     test_existing_user: UserModel,

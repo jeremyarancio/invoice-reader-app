@@ -2,65 +2,25 @@ import uuid
 from typing import Annotated
 
 import sqlmodel
-from fastapi import (
-    Depends,
-    FastAPI,
-    File,
-    Form,
-    Query,
-    Request,
-    Response,
-    UploadFile,
-    status,
-)
+from fastapi import APIRouter, Depends, File, Form, Query, Response, UploadFile, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel, ValidationError
 
 from invoice_reader import db, presenter, settings
 from invoice_reader.app import auth
 from invoice_reader.schemas import (
-    AuthToken,
-    Client,
     Invoice,
     InvoiceCreate,
     InvoiceGetResponse,
-    PagedClientGetResponse,
     PagedInvoiceGetResponse,
     User,
-    UserCreate,
-)
-from invoice_reader.utils import logger
-
-LOGGER = logger.get_logger(__name__)
-
-
-app = FastAPI()
-
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[
-        settings.FRONT_END_URL,
-    ],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
 )
 
-
-@app.exception_handler(HTTPException)
-async def http_exception_handler(request: Request, exc: HTTPException):
-    # Log the status code and error message
-    LOGGER.error(f"HTTP Error: {exc.status_code} - {exc.detail}")
-    # Return the default HTTPException response
-    return JSONResponse(
-        status_code=exc.status_code,
-        content={"detail": exc.detail},
-    )
+router = APIRouter(
+    prefix="/api/v1/invoices",
+    tags=["Invoices"],
+)
 
 
 class Checker:
@@ -87,12 +47,7 @@ class Checker:
                 ) from e
 
 
-@app.get("/")
-async def root():
-    return {"message": "Welcome to the Invoice Reader API!"}
-
-
-@app.post("/api/v1/invoices/")
+@router.post("/")
 def add_invoice(
     upload_file: Annotated[UploadFile, File()],
     data: Annotated[InvoiceCreate | None, Depends(Checker(InvoiceCreate))],
@@ -128,7 +83,7 @@ def add_invoice(
         raise HTTPException(status_code=500, detail=str(e)) from e
 
 
-@app.get("/api/v1/invoices/{file_id}")
+@router.get("/{file_id}")
 def get_invoice(
     file_id: uuid.UUID,
     session: Annotated[sqlmodel.Session, Depends(db.get_session)],
@@ -145,7 +100,7 @@ def get_invoice(
         ) from e
 
 
-@app.get("/api/v1/invoices/")
+@router.get("/")
 def get_invoices(
     session: Annotated[sqlmodel.Session, Depends(db.get_session)],
     user: Annotated[User, Depends(auth.get_current_user)],
@@ -163,7 +118,7 @@ def get_invoices(
         raise HTTPException(status_code=500, detail=str(e)) from e
 
 
-@app.delete("/api/v1/invoices/{file_id}")
+@router.delete("/{file_id}")
 def delete_invoice(
     file_id: uuid.UUID,
     session: Annotated[sqlmodel.Session, Depends(db.get_session)],
@@ -177,104 +132,7 @@ def delete_invoice(
         raise HTTPException(status_code=500, detail=str(e)) from e
 
 
-@app.post("/api/v1/users/signup/")
-def signup(
-    user: UserCreate, session: Annotated[sqlmodel.Session, Depends(db.get_session)]
-):
-    auth.register_user(user=user, session=session)
-    return Response(content="User has been added to the database.", status_code=201)
-
-
-@app.post("/api/v1/users/signin/")
-def signin(
-    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
-    session: Annotated[sqlmodel.Session, Depends(db.get_session)],
-) -> AuthToken:
-    try:
-        user = auth.authenticate_user(
-            email=form_data.username, password=form_data.password, session=session
-        )
-        access_token = auth.create_access_token(email=user.email)
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)) from e
-    return AuthToken(access_token=access_token, token_type="bearer")
-
-
-@app.delete("/api/v1/users/")
-def delete_user(
-    session: Annotated[sqlmodel.Session, Depends(db.get_session)],
-    user: Annotated[User, Depends(auth.get_current_user)],
-) -> None:
-    try:
-        presenter.delete_user(user_id=user.user_id, session=session)
-    except HTTPException as e:
-        raise e
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)) from e
-
-
-@app.get("/api/v1/clients/")
-def get_clients(
-    session: Annotated[sqlmodel.Session, Depends(db.get_session)],
-    user: Annotated[User, Depends(auth.get_current_user)],
-    page: int = Query(1, ge=1),
-    per_page: int = Query(settings.PER_PAGE, ge=1),
-) -> PagedClientGetResponse:
-    try:
-        paged_client_response = presenter.get_paged_clients(
-            user=user,
-            session=session,
-            page=page,
-            per_page=per_page,
-        )
-        return paged_client_response
-    except HTTPException as e:
-        raise e
-    except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=str(e),
-        ) from e
-
-
-@app.post("/api/v1/clients/add/")
-def add_client(
-    client: Client,
-    session: Annotated[sqlmodel.Session, Depends(db.get_session)],
-    user: Annotated[User, Depends(auth.get_current_user)],
-) -> Response:
-    try:
-        LOGGER.info(f"Adding client for user: {user.email}")
-        presenter.add_client(user=user, client=client, session=session)
-        return Response(
-            content="New client added to the database.",
-            status_code=201,
-        )
-    except HTTPException as e:
-        raise e
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)) from e
-
-
-@app.delete("/api/v1/clients/{client_id}")
-def delete_client(
-    client_id: uuid.UUID,
-    session: Annotated[sqlmodel.Session, Depends(db.get_session)],
-    user: Annotated[User, Depends(auth.get_current_user)],
-) -> None:
-    try:
-        presenter.delete_client(
-            client_id=client_id, user_id=user.user_id, session=session
-        )
-    except HTTPException as e:
-        raise e
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)) from e
-
-
-@app.put("/api/v1/invoices/{invoice_id}")
+@router.put("/{invoice_id}")
 def update_invoice(
     invoice_id: uuid.UUID,
     invoice: Invoice,
@@ -291,7 +149,7 @@ def update_invoice(
         raise HTTPException(status_code=500, detail=str(e)) from e
 
 
-@app.get("/api/v1/invoices/{invoice_id}/url/")
+@router.get("/{invoice_id}/url/")
 def get_invoice_url(
     invoice_id: uuid.UUID,
     session: Annotated[sqlmodel.Session, Depends(db.get_session)],

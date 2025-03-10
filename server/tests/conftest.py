@@ -7,7 +7,8 @@ from fastapi.testclient import TestClient
 from sqlmodel import Session
 
 from invoice_reader import db
-from invoice_reader.app import auth, routes
+from invoice_reader.app import auth
+from invoice_reader.app.main import app
 from invoice_reader.schemas import (
     AuthToken,
     FileData,
@@ -27,10 +28,10 @@ def api_client(session: Session):
     def get_session_override():
         return session
 
-    routes.app.dependency_overrides[db.get_session] = get_session_override
-    client = TestClient(routes.app)
+    app.dependency_overrides[db.get_session] = get_session_override
+    client = TestClient(app)
     yield client
-    routes.app.dependency_overrides.clear()
+    app.dependency_overrides.clear()
 
 
 @pytest.fixture

@@ -127,7 +127,7 @@ export const addClient = async (client: CreateClient) => {
         throw new Error("No authentication token found. Please log in.");
     }
 
-    const response = await api.post("/clients/add/", client, {
+    const response = await api.post("/clients/", client, {
         headers: {
             "Content-Type": "application/json",
             Authorization: `${tokenType} ${accessToken}`,

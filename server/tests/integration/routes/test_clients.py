@@ -13,7 +13,7 @@ def test_add_client(
     test_existing_user: UserModel,
 ):
     response = api_client.post(
-        url="/api/v1/clients/add/",
+        url="/api/v1/clients/",
         data=new_client.model_dump_json(),
         headers={"Authorization": f"{auth_token.token_type} {auth_token.access_token}"},
     )
@@ -35,7 +35,7 @@ def test_add_existing_client(
     test_existing_client: ClientModel,
 ):
     response = api_client.post(
-        url="/api/v1/clients/add/",
+        url="/api/v1/clients/",
         data=test_existing_client.model_dump_json(),
         headers={"Authorization": f"{auth_token.token_type} {auth_token.access_token}"},
     )

@@ -31,7 +31,7 @@ ENTRYPOINT ["/app/docker/entrypoint.sh"]
 
 # Production stage
 FROM base AS prod
-CMD ["fastapi", "run", "--host", "0.0.0.0", "--port", "8000", "src/invoice_reader/app/routes.py"]
+CMD ["fastapi", "run", "--host", "0.0.0.0", "--port", "8000", "src/invoice_reader/app/main.py"]
 
 # Development stage
 FROM base AS dev
@@ -39,4 +39,4 @@ FROM base AS dev
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --dev
 # Use a development server with hot-reloading
-CMD ["fastapi", "dev", "--host", "0.0.0.0", "--port", "8000", "src/invoice_reader/app/routes.py"]
+CMD ["fastapi", "dev", "--host", "0.0.0.0", "--port", "8000", "src/invoice_reader/app/main.py"]
