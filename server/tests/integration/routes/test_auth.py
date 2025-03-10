@@ -3,12 +3,12 @@ from fastapi.testclient import TestClient
 from invoice_reader.app import auth
 from invoice_reader.models import UserModel
 from invoice_reader.repository import UserRepository
-from invoice_reader.schemas import UserCreate
+from invoice_reader.schemas import user_schema
 
 
 def test_register_user(
     api_client: TestClient,
-    new_user_create: UserCreate,
+    new_user_create: user_schema.UserCreate,
     user_repository: UserRepository,
 ):
     response = api_client.post(
@@ -28,7 +28,7 @@ def test_register_user(
 
 def test_register_existing_user(
     api_client: TestClient,
-    existing_user_create: UserCreate,
+    existing_user_create: user_schema.UserCreate,
     test_existing_user: UserModel,
 ):
     response = api_client.post(
@@ -40,7 +40,7 @@ def test_register_existing_user(
 
 def test_user_login(
     api_client: TestClient,
-    existing_user_create: UserCreate,  # Need the non hashed pwd
+    existing_user_create: user_schema.UserCreate,  # Need the non hashed pwd
     test_existing_user: UserModel,
 ):
     response = api_client.post(

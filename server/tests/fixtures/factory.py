@@ -16,13 +16,7 @@ from invoice_reader.repository import (
     InvoiceRepository,
     UserRepository,
 )
-from invoice_reader.schemas import (
-    Client,
-    FileData,
-    Invoice,
-    User,
-    UserCreate,
-)
+from invoice_reader.schemas import FileData, client_schema, invoice_schema, user_schema
 
 
 def add_and_commit(session: Session, *models: SQLModel) -> None:
@@ -45,7 +39,7 @@ def session_fixture() -> Session:  # type: ignore
 
 @pytest.fixture
 def existing_user_model(
-    existing_user: User, existing_user_create: UserCreate
+    existing_user: user_schema.User, existing_user_create: user_schema.UserCreate
 ) -> UserModel:
     return UserModel(
         user_id=existing_user.user_id,
@@ -57,34 +51,34 @@ def existing_user_model(
 
 @pytest.fixture
 def existing_invoice_model(
-    existing_user: User,
-    existing_client: Client,
+    test_existing_user: UserModel,
+    test_existing_client: ClientModel,
     s3_suffix: str,
-    existing_invoice: Invoice,
+    existing_invoice: invoice_schema.Invoice,
     file_data: FileData,
 ) -> InvoiceModel:
     return InvoiceModel(
         file_id=file_data.file_id,
         s3_path=s3_suffix,
-        user_id=existing_user.user_id,
-        client_id=existing_client.client_id,
+        user_id=test_existing_user.user_id,
+        client_id=test_existing_client.client_id,
         **existing_invoice.model_dump(),
     )
 
 
 @pytest.fixture
 def existing_invoice_models(
-    existing_user: User,
-    existing_client: Client,
+    test_existing_user: UserModel,
+    test_existing_client: ClientModel,
     s3_suffix: str,
-    existing_invoices: list[Invoice],
+    existing_invoices: list[invoice_schema.Invoice],
 ) -> list[InvoiceModel]:
     return [
         InvoiceModel(
             file_id=uuid.uuid4(),
             s3_path=s3_suffix,
-            user_id=existing_user.user_id,
-            client_id=existing_client.client_id,
+            user_id=test_existing_user.user_id,
+            client_id=test_existing_client.client_id,
             **invoice.model_dump(),
         )
         for invoice in existing_invoices
@@ -93,23 +87,23 @@ def existing_invoice_models(
 
 @pytest.fixture
 def existing_client_model(
-    existing_user: User,
-    existing_client: Client,
+    test_existing_user: user_schema.User,
+    existing_client: client_schema.Client,
 ) -> ClientModel:
     return ClientModel(
-        user_id=existing_user.user_id,
+        user_id=test_existing_user.user_id,
         **existing_client.model_dump(),
     )
 
 
 @pytest.fixture
 def existing_client_models(
-    existing_user: User,
-    existing_clients: list[Client],
+    test_existing_user: user_schema.User,
+    existing_clients: list[client_schema.Client],
 ) -> list[ClientModel]:
     return [
         ClientModel(
-            user_id=existing_user.user_id,
+            user_id=test_existing_user.user_id,
             **client.model_dump(),
         )
         for client in existing_clients

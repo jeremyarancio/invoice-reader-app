@@ -9,13 +9,7 @@ from pydantic import BaseModel, ValidationError
 
 from invoice_reader import db, presenter, settings
 from invoice_reader.app import auth
-from invoice_reader.schemas import (
-    Invoice,
-    InvoiceCreate,
-    InvoiceGetResponse,
-    PagedInvoiceGetResponse,
-    User,
-)
+from invoice_reader.schemas import invoice_schema, user_schema
 
 router = APIRouter(
     prefix="/api/v1/invoices",
@@ -50,9 +44,12 @@ class Checker:
 @router.post("/")
 def add_invoice(
     upload_file: Annotated[UploadFile, File()],
-    data: Annotated[InvoiceCreate | None, Depends(Checker(InvoiceCreate))],
+    data: Annotated[
+        invoice_schema.InvoiceCreate | None,
+        Depends(Checker(invoice_schema.InvoiceCreate)),
+    ],
     session: Annotated[sqlmodel.Session, Depends(db.get_session)],
-    user: Annotated[User, Depends(auth.get_current_user)],
+    user: Annotated[user_schema.User, Depends(auth.get_current_user)],
 ):
     if upload_file.content_type != "application/pdf":
         raise HTTPException(
@@ -87,8 +84,8 @@ def add_invoice(
 def get_invoice(
     file_id: uuid.UUID,
     session: Annotated[sqlmodel.Session, Depends(db.get_session)],
-    user: Annotated[User, Depends(auth.get_current_user)],
-) -> InvoiceGetResponse:
+    user: Annotated[user_schema.User, Depends(auth.get_current_user)],
+) -> invoice_schema.InvoiceGetResponse:
     try:
         invoice = presenter.get_invoice(user=user, file_id=file_id, session=session)
         return invoice
@@ -103,10 +100,10 @@ def get_invoice(
 @router.get("/")
 def get_invoices(
     session: Annotated[sqlmodel.Session, Depends(db.get_session)],
-    user: Annotated[User, Depends(auth.get_current_user)],
+    user: Annotated[user_schema.User, Depends(auth.get_current_user)],
     page: int = Query(1, ge=1),
     per_page: int = Query(settings.PER_PAGE, ge=1),
-) -> PagedInvoiceGetResponse:
+) -> invoice_schema.PagedInvoiceGetResponse:
     try:
         paged_invoices = presenter.get_paged_invoices(
             user=user, session=session, page=page, per_page=per_page
@@ -122,7 +119,7 @@ def get_invoices(
 def delete_invoice(
     file_id: uuid.UUID,
     session: Annotated[sqlmodel.Session, Depends(db.get_session)],
-    user: Annotated[User, Depends(auth.get_current_user)],
+    user: Annotated[user_schema.User, Depends(auth.get_current_user)],
 ) -> None:
     try:
         presenter.delete_invoice(file_id=file_id, user_id=user.user_id, session=session)
@@ -135,9 +132,9 @@ def delete_invoice(
 @router.put("/{invoice_id}")
 def update_invoice(
     invoice_id: uuid.UUID,
-    invoice: Invoice,
+    invoice: invoice_schema.Invoice,
     session: Annotated[sqlmodel.Session, Depends(db.get_session)],
-    user: Annotated[User, Depends(auth.get_current_user)],
+    user: Annotated[user_schema.User, Depends(auth.get_current_user)],
 ) -> None:
     try:
         presenter.update_invoice(
@@ -153,7 +150,7 @@ def update_invoice(
 def get_invoice_url(
     invoice_id: uuid.UUID,
     session: Annotated[sqlmodel.Session, Depends(db.get_session)],
-    user: Annotated[User, Depends(auth.get_current_user)],
+    user: Annotated[user_schema.User, Depends(auth.get_current_user)],
 ) -> str:
     try:
         url = presenter.get_invoice_url(

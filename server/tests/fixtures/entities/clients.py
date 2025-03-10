@@ -1,18 +1,15 @@
-import uuid
-
 import pytest
 
-from invoice_reader.schemas import Client
+from invoice_reader.schemas import client_schema
 
 TOTAL_NUMBER = 3
 
 
 @pytest.fixture
 def new_client():
-    return Client(
-        client_id=uuid.uuid4(),
+    return client_schema.Client(
         client_name="Sacha&Cie",
-        street_number="19",
+        street_number=19,
         street_address="road of coal",
         city="Carcassone",
         country="France",
@@ -22,10 +19,9 @@ def new_client():
 
 @pytest.fixture
 def existing_client():
-    return Client(
-        client_id=uuid.uuid4(),
+    return client_schema.Client(
         client_name="Steren",
-        street_number="19",
+        street_number=19,
         street_address="road of coal",
         city="Carcassone",
         country="France",
@@ -34,12 +30,11 @@ def existing_client():
 
 
 @pytest.fixture
-def existing_clients() -> list[Client]:
+def existing_clients() -> list[client_schema.Client]:
     return [
-        Client(
-            client_id=uuid.uuid4(),
+        client_schema.Client(
             client_name=f"client-{i}",
-            street_number="19",
+            street_number=19,
             street_address="road of coal",
             city="Carcassone",
             country="France",

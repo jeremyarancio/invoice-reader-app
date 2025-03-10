@@ -7,7 +7,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 
 from invoice_reader import db, presenter
 from invoice_reader.app import auth
-from invoice_reader.schemas import AuthToken, User, UserCreate
+from invoice_reader.schemas import AuthToken, user_schema
 
 router = APIRouter(
     prefix="/api/v1/users",
@@ -17,7 +17,8 @@ router = APIRouter(
 
 @router.post("/signup/")
 def signup(
-    user: UserCreate, session: Annotated[sqlmodel.Session, Depends(db.get_session)]
+    user: user_schema.UserCreate,
+    session: Annotated[sqlmodel.Session, Depends(db.get_session)],
 ):
     auth.register_user(user=user, session=session)
     return Response(content="User has been added to the database.", status_code=201)
@@ -43,7 +44,7 @@ def signin(
 @router.delete("/")
 def delete_user(
     session: Annotated[sqlmodel.Session, Depends(db.get_session)],
-    user: Annotated[User, Depends(auth.get_current_user)],
+    user: Annotated[user_schema.User, Depends(auth.get_current_user)],
 ) -> None:
     try:
         presenter.delete_user(user_id=user.user_id, session=session)

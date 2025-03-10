@@ -12,7 +12,7 @@ from invoice_reader.app.main import app
 from invoice_reader.schemas import (
     AuthToken,
     FileData,
-    User,
+    user_schema,
 )
 
 pytest_plugins = [
@@ -47,7 +47,7 @@ def upload_files(filepath):
 
 
 @pytest.fixture
-def file_data(existing_user: User, filepath: Path) -> FileData:
+def file_data(existing_user: user_schema.User, filepath: Path) -> FileData:
     return FileData(user_id=existing_user.user_id, filename=filepath.name)
 
 
@@ -84,7 +84,7 @@ def bucket() -> str:
 
 
 @pytest.fixture
-def auth_token(existing_user: User) -> AuthToken:
+def auth_token(existing_user: user_schema.User) -> AuthToken:
     access_token = auth.create_access_token(email=existing_user.email)
     return AuthToken(access_token=access_token, token_type="bearer")
 

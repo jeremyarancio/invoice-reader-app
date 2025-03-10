@@ -16,7 +16,7 @@ from invoice_reader.app.exceptions import (
     MISSING_ENVIRONMENT_VARIABLE_EXCEPTION,
     USER_NOT_FOUND_EXCEPTION,
 )
-from invoice_reader.schemas import User, UserCreate
+from invoice_reader.schemas import user_schema
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -33,14 +33,14 @@ def get_password_hash(password: str) -> str:
 def get_current_user(
     token: Annotated[str, Depends(oauth2_scheme)],
     session: Annotated[sqlmodel.Session, Depends(db.get_session)],
-) -> User:
+) -> user_schema.User:
     try:
         if not settings.JWT_ALGORITHM:
             raise MISSING_ENVIRONMENT_VARIABLE_EXCEPTION
         payload = jwt.decode(
             token, key=settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM]
         )
-        email: str = payload.get("sub")
+        email = payload.get("sub")
         if email is None:
             raise CREDENTIALS_EXCEPTION
         user = presenter.get_user_by_email(email=email, session=session)
@@ -53,7 +53,9 @@ def get_current_user(
     return user
 
 
-def authenticate_user(email: str, password: str, session: sqlmodel.Session) -> User:
+def authenticate_user(
+    email: str, password: str, session: sqlmodel.Session
+) -> user_schema.User:
     user = presenter.get_user_by_email(email=email, session=session)
     if not user:
         raise USER_NOT_FOUND_EXCEPTION
@@ -74,12 +76,12 @@ def create_access_token(email: str) -> str:
     return encoded_jwt
 
 
-def register_user(user: UserCreate, session: sqlmodel.Session) -> None:
+def register_user(user: user_schema.UserCreate, session: sqlmodel.Session) -> None:
     existing_user = presenter.get_user_by_email(user.email, session=session)
     if existing_user:
         raise EXISTING_USER_EXCEPTION
     hashed_password = get_password_hash(user.password)
-    new_user = User(
+    new_user = user_schema.User(
         hashed_password=hashed_password, email=user.email, is_disabled=False
     )
     presenter.add_user(user=new_user, session=session)
