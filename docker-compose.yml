@@ -44,7 +44,6 @@ services:
       - server
     networks:
       - app-network
-    environment: *ui-env
     volumes:
       - ./ui:/app
 
