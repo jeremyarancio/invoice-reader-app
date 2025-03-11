@@ -1,3 +1,4 @@
+import uuid
 from typing import Sequence
 
 from invoice_reader.core.stats import compute_total_revenu_per_client
@@ -11,14 +12,8 @@ class ClientMapper:
         client_model: ClientModel,
     ) -> client_schema.ClientPresenter:
         return client_schema.ClientPresenter(
-            client_id=client_model.client_id,
-            country=client_model.country,
-            city=client_model.city,
-            client_name=client_model.client_name,
-            street_address=client_model.street_address,
-            street_number=client_model.street_number,
-            zipcode=client_model.zipcode,
             total_revenu=compute_total_revenu_per_client(client_model),
+            **client_model.model_dump(),
         )
 
     @classmethod
@@ -35,7 +30,7 @@ class ClientMapper:
     def map_client_to_response(
         client: client_schema.ClientPresenter,
     ) -> client_schema.ClientResponse:
-        return client_schema.ClientResponse(**client.model_dump())
+        return client_schema.ClientResponse.model_validate(client.model_dump())
 
     @classmethod
     def map_clients_to_responses(
@@ -43,3 +38,15 @@ class ClientMapper:
         clients: list[client_schema.ClientPresenter],
     ) -> list[client_schema.ClientResponse]:
         return [cls.map_client_to_response(client) for client in clients]
+
+    @staticmethod
+    def map_client_to_model(
+        client: client_schema.ClientPresenter, user_id: uuid.UUID
+    ) -> ClientModel:
+        return ClientModel(user_id=user_id, **client.model_dump())
+
+    @staticmethod
+    def map_client_create_to_client(
+        client_create: client_schema.ClientCreate,
+    ) -> client_schema.ClientPresenter:
+        return client_schema.ClientPresenter.model_validate(client_create.model_dump())

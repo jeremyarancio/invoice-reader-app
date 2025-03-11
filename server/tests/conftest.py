@@ -9,12 +9,12 @@ from sqlmodel import Session
 from invoice_reader import db
 from invoice_reader.app import auth
 from invoice_reader.app.main import app
+from invoice_reader.models import UserModel
 from invoice_reader.schemas import (
     AuthToken,
     FileData,
     user_schema,
 )
-from invoice_reader.models import UserModel
 
 pytest_plugins = [
     "tests.fixtures.factory",

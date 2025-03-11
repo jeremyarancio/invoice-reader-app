@@ -14,7 +14,7 @@ def test_add_client(
 ):
     response = api_client.post(
         url="/api/v1/clients/",
-        data=new_client.model_dump_json(),
+        json=new_client.model_dump(),
         headers={"Authorization": f"{auth_token.token_type} {auth_token.access_token}"},
     )
 

@@ -9,7 +9,7 @@ from pydantic import BaseModel, ValidationError
 
 from invoice_reader import db, presenter, settings
 from invoice_reader.app import auth
-from invoice_reader.schemas import invoice_schema, user_schema
+from invoice_reader.schemas import invoice_schema
 
 router = APIRouter(
     prefix="/api/v1/invoices",
@@ -49,7 +49,7 @@ def add_invoice(
         Depends(Checker(invoice_schema.InvoiceCreate)),
     ],
     session: Annotated[sqlmodel.Session, Depends(db.get_session)],
-    user: Annotated[user_schema.User, Depends(auth.get_current_user)],
+    user_id: Annotated[uuid.UUID, Depends(auth.get_current_user_id)],
 ):
     if upload_file.content_type != "application/pdf":
         raise HTTPException(
@@ -58,11 +58,11 @@ def add_invoice(
         )
     try:
         if data:
-            presenter.submit_invoice(
-                user_id=user.user_id,
+            presenter.add_invoice(
+                user_id=user_id,
                 file=upload_file.file,
                 filename=upload_file.filename,
-                invoice_data=data,
+                invoice_create=data,
                 session=session,
             )
             return Response(
@@ -84,10 +84,12 @@ def add_invoice(
 def get_invoice(
     file_id: uuid.UUID,
     session: Annotated[sqlmodel.Session, Depends(db.get_session)],
-    user: Annotated[user_schema.User, Depends(auth.get_current_user)],
-) -> invoice_schema.InvoiceGetResponse:
+    user_id: Annotated[uuid.UUID, Depends(auth.get_current_user_id)],
+) -> invoice_schema.InvoiceResponse:
     try:
-        invoice = presenter.get_invoice(user=user, file_id=file_id, session=session)
+        invoice = presenter.get_invoice(
+            user_id=user_id, file_id=file_id, session=session
+        )
         return invoice
     except HTTPException:
         raise
@@ -100,13 +102,13 @@ def get_invoice(
 @router.get("/")
 def get_invoices(
     session: Annotated[sqlmodel.Session, Depends(db.get_session)],
-    user: Annotated[user_schema.User, Depends(auth.get_current_user)],
+    user_id: Annotated[uuid.UUID, Depends(auth.get_current_user_id)],
     page: int = Query(1, ge=1),
     per_page: int = Query(settings.PER_PAGE, ge=1),
-) -> invoice_schema.PagedInvoiceGetResponse:
+) -> invoice_schema.PagedInvoiceResponse:
     try:
         paged_invoices = presenter.get_paged_invoices(
-            user=user, session=session, page=page, per_page=per_page
+            user_id=user_id, session=session, page=page, per_page=per_page
         )
         return paged_invoices
     except HTTPException as e:
@@ -119,10 +121,10 @@ def get_invoices(
 def delete_invoice(
     file_id: uuid.UUID,
     session: Annotated[sqlmodel.Session, Depends(db.get_session)],
-    user: Annotated[user_schema.User, Depends(auth.get_current_user)],
+    user_id: Annotated[uuid.UUID, Depends(auth.get_current_user_id)],
 ) -> Response:
     try:
-        presenter.delete_invoice(file_id=file_id, user_id=user.user_id, session=session)
+        presenter.delete_invoice(file_id=file_id, user_id=user_id, session=session)
     except HTTPException as e:
         raise e
     except Exception as e:
@@ -132,15 +134,12 @@ def delete_invoice(
 
 @router.put("/{invoice_id}")
 def update_invoice(
-    invoice_id: uuid.UUID,
-    invoice: invoice_schema.Invoice,
+    invoice_update: invoice_schema.InvoiceUpdate,
     session: Annotated[sqlmodel.Session, Depends(db.get_session)],
-    user: Annotated[user_schema.User, Depends(auth.get_current_user)],
+    user_id: Annotated[uuid.UUID, Depends(auth.get_current_user_id)],
 ) -> None:
     try:
-        presenter.update_invoice(
-            invoice_id=invoice_id, invoice=invoice, session=session
-        )
+        presenter.update_invoice(invoice_update=invoice_update, session=session)
     except HTTPException as e:
         raise e
     except Exception as e:
@@ -151,12 +150,12 @@ def update_invoice(
 def get_invoice_url(
     invoice_id: uuid.UUID,
     session: Annotated[sqlmodel.Session, Depends(db.get_session)],
-    user: Annotated[user_schema.User, Depends(auth.get_current_user)],
+    user_id: Annotated[uuid.UUID, Depends(auth.get_current_user_id)],
 ) -> str:
     try:
         url = presenter.get_invoice_url(
             invoice_id=invoice_id,
-            user_id=user.user_id,
+            user_id=user_id,
             session=session,
         )
         return url

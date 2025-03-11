@@ -7,7 +7,7 @@ from fastapi.exceptions import HTTPException
 
 from invoice_reader import db, presenter, settings
 from invoice_reader.app import auth
-from invoice_reader.schemas import client_schema, user_schema
+from invoice_reader.schemas import client_schema
 from invoice_reader.utils.logger import get_logger
 
 LOGGER = get_logger()
@@ -21,13 +21,13 @@ router = APIRouter(
 @router.get("/")
 def get_clients(
     session: Annotated[sqlmodel.Session, Depends(db.get_session)],
-    user: Annotated[user_schema.User, Depends(auth.get_current_user)],
+    user_id: Annotated[uuid.UUID, Depends(auth.get_current_user_id)],
     page: int = Query(1, ge=1),
     per_page: int = Query(settings.PER_PAGE, ge=1),
 ) -> client_schema.PagedClientResponse:
     try:
         paged_client_response = presenter.get_paged_clients(
-            user=user,
+            user_id=user_id,
             session=session,
             page=page,
             per_page=per_page,
@@ -46,10 +46,12 @@ def get_clients(
 def get_client(
     client_id: uuid.UUID,
     session: Annotated[sqlmodel.Session, Depends(db.get_session)],
-    user: Annotated[user_schema.User, Depends(auth.get_current_user)],
+    user_id: Annotated[uuid.UUID, Depends(auth.get_current_user_id)],
 ) -> client_schema.ClientResponse:
     try:
-        client = presenter.get_client(user=user, client_id=client_id, session=session)
+        client = presenter.get_client(
+            user_id=user_id, client_id=client_id, session=session
+        )
         return client
     except HTTPException:
         raise
@@ -61,13 +63,14 @@ def get_client(
 
 @router.post("/")
 def add_client(
-    client: client_schema.Client,
+    client_create: client_schema.ClientCreate,
     session: Annotated[sqlmodel.Session, Depends(db.get_session)],
-    user: Annotated[user_schema.User, Depends(auth.get_current_user)],
+    user_id: Annotated[uuid.UUID, Depends(auth.get_current_user_id)],
 ) -> Response:
     try:
-        LOGGER.info(f"Adding client for user: {user.email}")
-        presenter.add_client(user=user, client=client, session=session)
+        presenter.add_client(
+            user_id=user_id, client_create=client_create, session=session
+        )
         return Response(
             content="New client added to the database.",
             status_code=201,
@@ -82,12 +85,10 @@ def add_client(
 def delete_client(
     client_id: uuid.UUID,
     session: Annotated[sqlmodel.Session, Depends(db.get_session)],
-    user: Annotated[user_schema.User, Depends(auth.get_current_user)],
+    user_id: Annotated[uuid.UUID, Depends(auth.get_current_user_id)],
 ) -> Response:
     try:
-        presenter.delete_client(
-            client_id=client_id, user_id=user.user_id, session=session
-        )
+        presenter.delete_client(client_id=client_id, user_id=user_id, session=session)
     except HTTPException as e:
         raise e
     except Exception as e:

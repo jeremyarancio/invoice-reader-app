@@ -17,8 +17,8 @@ class ClientCreate(Client):
 
 
 class ClientPresenter(Client):
-    client_id: uuid.UUID | None
-    total_revenu: float | None
+    client_id: uuid.UUID | None = None
+    total_revenu: float | None = None
 
 
 class ClientResponse(Client):

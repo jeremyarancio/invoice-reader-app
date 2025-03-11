@@ -92,7 +92,7 @@ def test_get_invoice(
         url=f"/api/v1/invoices/{file_data.file_id}",
         headers={"Authorization": f"{auth_token.token_type} {auth_token.access_token}"},
     )
-    payload = invoice_schema.InvoiceGetResponse.model_validate(response.json())
+    payload = invoice_schema.InvoiceResponse.model_validate(response.json())
     assert response.status_code == 200
     assert payload.invoice_id == test_existing_invoice.file_id
     assert payload.s3_path == test_existing_invoice.s3_path
@@ -110,9 +110,7 @@ def test_get_invoices(
         headers={"Authorization": f"Bearer {auth_token.access_token}"},
         params={"page": PAGE, "per_page": PER_PAGE},
     )
-    paged_invoices = invoice_schema.PagedInvoiceGetResponse.model_validate(
-        response.json()
-    )
+    paged_invoices = invoice_schema.PagedInvoiceResponse.model_validate(response.json())
 
     assert response.status_code == 200
     assert len(paged_invoices.data) == PER_PAGE
@@ -165,7 +163,7 @@ def test_update_invoice(
     auth_token: AuthToken,
     invoice_repository: InvoiceRepository,
 ):
-    updated_invoice = invoice_schema.Invoice.model_validate(
+    updated_invoice = invoice_schema.InvoiceUpdate.model_validate(
         test_existing_invoice.model_dump()
     )
     updated_invoice.invoice_number = "number1234"
@@ -177,14 +175,13 @@ def test_update_invoice(
         headers={"Authorization": f"Bearer {auth_token.access_token}"},
     )
 
-    invoice = invoice_repository.get(
+    invoice_model = invoice_repository.get(
         file_id=test_existing_invoice.file_id, user_id=test_existing_user.user_id
     )
-
-    assert invoice
+    assert invoice_model
     assert response.status_code == 200
-    assert invoice.data.invoice_number == updated_invoice.invoice_number
-    assert invoice.data.amount_excluding_tax == 1234
+    assert invoice_model.invoice_number == updated_invoice.invoice_number
+    assert invoice_model.amount_excluding_tax == 1234
 
 
 # Add exception no change update
@@ -192,7 +189,6 @@ def test_update_invoice(
 
 def test_get_invoice_url(
     api_client: TestClient,
-    test_existing_user: UserModel,
     auth_token: AuthToken,
     test_existing_invoice: InvoiceModel,
     s3_mocker: Mock,

@@ -14,20 +14,29 @@ class Invoice(BaseModel):
     invoice_number: str
 
 
+class InvoicePresenter(Invoice):
+    s3_path: str | None = None
+    file_id: uuid.UUID | None = None
+
+
 class InvoiceCreate(BaseModel):
     invoice: Invoice
     client_id: uuid.UUID
 
 
-class InvoiceGetResponse(BaseModel):
+class InvoiceResponse(BaseModel):
     invoice_id: uuid.UUID
     client_id: uuid.UUID
     s3_path: str
     data: Invoice
 
 
-class PagedInvoiceGetResponse(BaseModel):
+class PagedInvoiceResponse(BaseModel):
     page: int
     per_page: int
     total: int
-    data: list[InvoiceGetResponse]
+    data: list[InvoiceResponse]
+
+
+class InvoiceUpdate(Invoice):
+    """Let's see how it can be improved later on."""

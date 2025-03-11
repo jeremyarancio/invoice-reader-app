@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime, timedelta
 from typing import Annotated
 
@@ -16,6 +17,7 @@ from invoice_reader.app.exceptions import (
     MISSING_ENVIRONMENT_VARIABLE_EXCEPTION,
     USER_NOT_FOUND_EXCEPTION,
 )
+from invoice_reader.mappers import UserMapper
 from invoice_reader.schemas import user_schema
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
@@ -30,10 +32,10 @@ def get_password_hash(password: str) -> str:
     return pwd_context.hash(password)
 
 
-def get_current_user(
+def get_current_user_id(
     token: Annotated[str, Depends(oauth2_scheme)],
     session: Annotated[sqlmodel.Session, Depends(db.get_session)],
-) -> user_schema.User:
+) -> uuid.UUID:
     try:
         if not settings.JWT_ALGORITHM:
             raise MISSING_ENVIRONMENT_VARIABLE_EXCEPTION
@@ -45,12 +47,12 @@ def get_current_user(
             raise CREDENTIALS_EXCEPTION
         user = presenter.get_user_by_email(email=email, session=session)
         if not user:
-            raise CREDENTIALS_EXCEPTION
+            raise USER_NOT_FOUND_EXCEPTION
     except InvalidTokenError as e:
         raise CREDENTIALS_EXCEPTION from e
-    except HTTPException:
-        raise
-    return user
+    if not user.user_id:
+        raise HTTPException(detail="User id not found.", status_code=500)
+    return user.user_id
 
 
 def authenticate_user(
@@ -76,12 +78,17 @@ def create_access_token(email: str) -> str:
     return encoded_jwt
 
 
-def register_user(user: user_schema.UserCreate, session: sqlmodel.Session) -> None:
-    existing_user = presenter.get_user_by_email(user.email, session=session)
+def register_user(
+    user_create: user_schema.UserCreate, session: sqlmodel.Session
+) -> None:
+    """Move auth to presenter layer"""
+    existing_user = presenter.get_user_by_email(user_create.email, session=session)
     if existing_user:
         raise EXISTING_USER_EXCEPTION
-    hashed_password = get_password_hash(user.password)
-    new_user = user_schema.User(
-        hashed_password=hashed_password, email=user.email, is_disabled=False
+    hashed_password = get_password_hash(user_create.password)
+    user = UserMapper.map_user_create_to_user(
+        user_create=user_create,
+        hashed_password=hashed_password,
+        is_disable=False,
     )
-    presenter.add_user(user=new_user, session=session)
+    presenter.add_user(user=user, session=session)
