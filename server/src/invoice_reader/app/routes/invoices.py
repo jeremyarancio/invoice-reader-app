@@ -134,12 +134,17 @@ def delete_invoice(
 
 @router.put("/{invoice_id}")
 def update_invoice(
+    invoice_id: uuid.UUID,
     invoice_update: invoice_schema.InvoiceUpdate,
     session: Annotated[sqlmodel.Session, Depends(db.get_session)],
     user_id: Annotated[uuid.UUID, Depends(auth.get_current_user_id)],
 ) -> None:
     try:
-        presenter.update_invoice(invoice_update=invoice_update, session=session)
+        presenter.update_invoice(
+            invoice_update=invoice_update,
+            invoice_id=invoice_id,
+            session=session,
+        )
     except HTTPException as e:
         raise e
     except Exception as e:

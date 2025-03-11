@@ -170,14 +170,12 @@ def delete_user(user_id: uuid.UUID, session: sqlmodel.Session) -> None:
 
 
 def update_invoice(
+    invoice_id: uuid.UUID,
     invoice_update: invoice_schema.InvoiceUpdate,
     session: sqlmodel.Session,
 ) -> None:
     invoice_repository = InvoiceRepository(session=session)
-    invoice_model = InvoiceMapper.map_invoice_to_model(
-        InvoiceMapper.map_invoice_update_to_invoice(invoice_update=invoice_update)
-    )
-    invoice_repository.update(updated_invoice_model=invoice_model)
+    invoice_repository.update(invoice_id=invoice_id, invoice_update=invoice_update)
 
 
 def get_invoice_url(

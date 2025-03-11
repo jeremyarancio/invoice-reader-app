@@ -54,7 +54,7 @@ def existing_invoice_model(
     test_existing_user: UserModel,
     test_existing_client: ClientModel,
     s3_suffix: str,
-    existing_invoice: invoice_schema.Invoice,
+    existing_invoice: invoice_schema.InvoiceBase,
     file_data: FileData,
 ) -> InvoiceModel:
     return InvoiceModel(

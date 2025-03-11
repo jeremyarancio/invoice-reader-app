@@ -12,7 +12,7 @@ LOGGER = logger.get_logger()
 def store(
     file: BinaryIO,
     file_data: FileData,
-    invoice: invoice_schema.InvoicePresenter,
+    invoice: invoice_schema.Invoice,
     invoice_repository: InvoiceRepository,
     s3_model: S3,
 ) -> None:
@@ -40,7 +40,7 @@ def store_file(file: BinaryIO, s3_suffix: str, s3_model: S3) -> None:
 
 def store_invoice_data(
     file_data: FileData,
-    invoice: invoice_schema.InvoicePresenter,
+    invoice: invoice_schema.Invoice,
     invoice_repository: InvoiceRepository,
 ) -> None:
     invoice_model = InvoiceMapper.map_invoice_to_model(

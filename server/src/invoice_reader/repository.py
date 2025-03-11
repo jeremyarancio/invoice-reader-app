@@ -11,6 +11,8 @@ from invoice_reader.app.exceptions import (
 )
 from invoice_reader.models import ClientModel, InvoiceModel, UserModel
 from invoice_reader.utils.logger import get_logger
+from invoice_reader.schemas import invoice_schema
+
 
 LOGGER = get_logger(__name__)
 
@@ -35,15 +37,15 @@ class InvoiceRepository:
         self.session.commit()
         self.session.refresh(invoice_model)
 
-    def update(self, updated_invoice_model: InvoiceModel) -> None:
+    def update(
+        self, invoice_id: uuid.UUID, invoice_update: invoice_schema.InvoiceUpdate
+    ) -> None:
         invoice_model = self.session.exec(
-            sqlmodel.select(InvoiceModel).where(
-                InvoiceModel.file_id == updated_invoice_model.file_id
-            )
+            sqlmodel.select(InvoiceModel).where(InvoiceModel.file_id == invoice_id)
         ).one_or_none()
         if not invoice_model:
             raise INVOICE_NOT_FOUND
-        invoice_model.sqlmodel_update(updated_invoice_model)
+        invoice_model.sqlmodel_update(invoice_update)
         self.session.add(invoice_model)
         self.session.commit()
         self.session.refresh(invoice_model)
