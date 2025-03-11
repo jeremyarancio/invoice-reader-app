@@ -34,7 +34,6 @@ from invoice_reader.schemas.invoices import (
 )
 from invoice_reader.schemas.users import (
     User,
-    UserPresenter,
 )
 from invoice_reader.utils import logger, s3_utils
 
@@ -72,7 +71,7 @@ def get_user_by_email(email: str, session: sqlmodel.Session) -> User | None:
     return UserMapper.map_user_model_to_user(user_model) if user_model else None
 
 
-def add_user(user: UserPresenter, session: sqlmodel.Session) -> None:
+def add_user(user: User, session: sqlmodel.Session) -> None:
     user_repository = UserRepository(session=session)
     user_model = UserMapper.map_user_to_model(user=user)
     user_repository.add(user_model=user_model)

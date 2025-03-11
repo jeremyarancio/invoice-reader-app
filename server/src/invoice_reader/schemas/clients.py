@@ -3,7 +3,7 @@ import uuid
 from pydantic import BaseModel
 
 
-class Client(BaseModel):
+class ClientBase(BaseModel):
     client_name: str
     street_number: int
     street_address: str
@@ -12,18 +12,17 @@ class Client(BaseModel):
     country: str
 
 
-class ClientCreate(Client):
-    pass
-
-
-class ClientPresenter(Client):
+class Client(ClientBase):
     client_id: uuid.UUID | None = None
     total_revenu: float | None = None
 
 
+class ClientCreate(Client):
+    pass
+
+
 class ClientResponse(Client):
-    client_id: uuid.UUID
-    total_revenu: float
+    pass
 
 
 class PagedClientResponse(BaseModel):

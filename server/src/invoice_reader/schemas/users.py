@@ -17,10 +17,6 @@ class UserCreate(BaseModel):
     email: EmailStr
 
 
-class UserPresenter(User):
-    pass
-
-
 class UserResponse(BaseModel):
     user_id: uuid.UUID
     email: EmailStr
