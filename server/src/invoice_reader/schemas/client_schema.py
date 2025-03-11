@@ -26,7 +26,7 @@ class ClientResponse(Client):
     total_revenu: float
 
 
-class PagedClientResponse(Client):
+class PagedClientResponse(BaseModel):
     page: int
     per_page: int
     total: int

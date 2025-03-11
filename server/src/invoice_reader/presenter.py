@@ -11,10 +11,7 @@ from invoice_reader.app.exceptions import (
     UNPROCESSABLE_FILE,
 )
 from invoice_reader.core import storage
-from invoice_reader.mappers.clients import (
-    map_client_model_to_client,
-    map_client_models_to_clients,
-)
+from invoice_reader.mappers.clients import ClientMapper
 from invoice_reader.models import S3
 from invoice_reader.repository import (
     ClientRepository,
@@ -104,13 +101,14 @@ def add_client(
 
 def get_client(
     user: user_schema.User, session: sqlmodel.Session, client_id: uuid.UUID
-) -> client_schema.Client:
+) -> client_schema.ClientResponse:
     client_repository = ClientRepository(session=session)
     client_model = client_repository.get(user_id=user.user_id, client_id=client_id)
     if not client_model:
         raise CLIENT_NOT_FOUND
-    client = map_client_model_to_client(client_model=client_model)
-    return client
+    client = ClientMapper.map_client_model_to_client(client_model=client_model)
+    client_response = ClientMapper.map_client_to_response(client)
+    return client_response
 
 
 def get_paged_clients(
@@ -120,11 +118,12 @@ def get_paged_clients(
     per_page: int,
 ) -> client_schema.PagedClientResponse:
     client_repository = ClientRepository(session=session)
-    clients = map_client_models_to_clients(
+    clients = ClientMapper.map_client_models_to_clients(
         client_repository.get_all(user_id=user.user_id, limit=per_page)
     )
+    client_responses = ClientMapper.map_clients_to_responses(clients=clients)
     return client_schema.PagedClientResponse(
-        page=page, per_page=per_page, total=len(clients), data=clients
+        page=page, per_page=per_page, total=len(clients), data=client_responses
     )
 
 

@@ -14,6 +14,7 @@ from invoice_reader.schemas import (
     FileData,
     user_schema,
 )
+from invoice_reader.models import UserModel
 
 pytest_plugins = [
     "tests.fixtures.factory",
@@ -84,8 +85,8 @@ def bucket() -> str:
 
 
 @pytest.fixture
-def auth_token(existing_user: user_schema.User) -> AuthToken:
-    access_token = auth.create_access_token(email=existing_user.email)
+def auth_token(test_existing_user: UserModel) -> AuthToken:
+    access_token = auth.create_access_token(email=test_existing_user.email)
     return AuthToken(access_token=access_token, token_type="bearer")
 
 

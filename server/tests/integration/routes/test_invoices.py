@@ -21,7 +21,6 @@ def test_submit_invoice(
     s3_mocker: Mock,
     new_invoice_create: invoice_schema.InvoiceCreate,
     auth_token: AuthToken,
-    test_existing_user: UserModel,
     invoice_repository: InvoiceRepository,
 ):
     data = new_invoice_create.model_dump_json()
@@ -47,7 +46,6 @@ def test_submit_exisiting_invoice(
     s3_mocker: Mock,
     existing_invoice_create: invoice_schema.InvoiceCreate,
     auth_token: AuthToken,
-    test_existing_user: UserModel,
     test_existing_invoice: InvoiceModel,
 ):
     data = existing_invoice_create.model_dump_json()
@@ -74,7 +72,6 @@ def test_submit_invoice_with_wrong_format(
     api_client: TestClient,
     s3_mocker: Mock,
     auth_token: AuthToken,
-    test_existing_user: UserModel,
 ):
     response = api_client.post(
         url="/api/v1/invoices/",
@@ -90,7 +87,6 @@ def test_get_invoice(
     api_client: TestClient,
     auth_token: AuthToken,
     test_existing_invoice: InvoiceModel,
-    test_existing_user: UserModel,
 ):
     response = api_client.get(
         url=f"/api/v1/invoices/{file_data.file_id}",
@@ -114,7 +110,9 @@ def test_get_invoices(
         headers={"Authorization": f"Bearer {auth_token.access_token}"},
         params={"page": PAGE, "per_page": PER_PAGE},
     )
-    paged_invoices = invoice_schema.PagedInvoiceGetResponse.model_validate(response.json())
+    paged_invoices = invoice_schema.PagedInvoiceGetResponse.model_validate(
+        response.json()
+    )
 
     assert response.status_code == 200
     assert len(paged_invoices.data) == PER_PAGE
@@ -129,7 +127,6 @@ def test_submit_invoice_unauthorized(
     upload_files,
     api_client: TestClient,
     new_invoice_create: invoice_schema.InvoiceCreate,
-    test_existing_user: UserModel,
 ):
     data = new_invoice_create.model_dump_json()
     response = api_client.post(
@@ -144,7 +141,6 @@ def test_submit_invoice_unauthorized(
 
 def test_delete_invoice(
     api_client: TestClient,
-    test_existing_user: UserModel,
     test_existing_invoice: InvoiceModel,
     auth_token: AuthToken,
     invoice_repository: InvoiceRepository,
@@ -157,7 +153,7 @@ def test_delete_invoice(
     invoice = invoice_repository.get_by_invoice_number(
         invoice_number=test_existing_invoice.invoice_number
     )
-    assert response.status_code == 200
+    assert response.status_code == 204
     assert not invoice
     s3_mocker.delete_object.assert_called_once()
 
@@ -169,7 +165,9 @@ def test_update_invoice(
     auth_token: AuthToken,
     invoice_repository: InvoiceRepository,
 ):
-    updated_invoice = invoice_schema.Invoice.model_validate(test_existing_invoice.model_dump())
+    updated_invoice = invoice_schema.Invoice.model_validate(
+        test_existing_invoice.model_dump()
+    )
     updated_invoice.invoice_number = "number1234"
     updated_invoice.amount_excluding_tax = 1234
 

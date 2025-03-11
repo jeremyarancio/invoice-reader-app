@@ -53,7 +53,7 @@ def test_get_client(
         url=f"/api/v1/clients/{test_existing_client.client_id}",
         headers={"Authorization": f"{auth_token.token_type} {auth_token.access_token}"},
     )
-    client = client_schema.Client.model_validate(response.json())
+    client = client_schema.ClientResponse.model_validate(response.json())
     assert response.status_code == 200
     assert test_existing_client.client_name == client.client_name
     assert client.total_revenu == sum(
@@ -65,8 +65,6 @@ def test_get_clients(
     auth_token: AuthToken,
     api_client: TestClient,
     test_existing_clients: list[ClientModel],
-    test_existing_invoices: list[InvoiceModel],
-    test_existing_user: UserModel,
 ):
     response = api_client.get(
         url="/api/v1/clients/",
@@ -92,5 +90,5 @@ def test_delete_client(
     client = client_repository.get_by_name(
         client_name=test_existing_client.client_name, user_id=test_existing_user.user_id
     )
-    assert response.status_code == 200
+    assert response.status_code == 204
     assert not client

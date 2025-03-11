@@ -47,7 +47,7 @@ def get_client(
     client_id: uuid.UUID,
     session: Annotated[sqlmodel.Session, Depends(db.get_session)],
     user: Annotated[user_schema.User, Depends(auth.get_current_user)],
-) -> client_schema.Client:
+) -> client_schema.ClientResponse:
     try:
         client = presenter.get_client(user=user, client_id=client_id, session=session)
         return client
@@ -83,7 +83,7 @@ def delete_client(
     client_id: uuid.UUID,
     session: Annotated[sqlmodel.Session, Depends(db.get_session)],
     user: Annotated[user_schema.User, Depends(auth.get_current_user)],
-) -> None:
+) -> Response:
     try:
         presenter.delete_client(
             client_id=client_id, user_id=user.user_id, session=session
@@ -92,3 +92,4 @@ def delete_client(
         raise e
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
+    return Response(content="Client successfully deleted.", status_code=204)

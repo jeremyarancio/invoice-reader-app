@@ -120,13 +120,14 @@ def delete_invoice(
     file_id: uuid.UUID,
     session: Annotated[sqlmodel.Session, Depends(db.get_session)],
     user: Annotated[user_schema.User, Depends(auth.get_current_user)],
-) -> None:
+) -> Response:
     try:
         presenter.delete_invoice(file_id=file_id, user_id=user.user_id, session=session)
     except HTTPException as e:
         raise e
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
+    return Response(content="Invoice successfully deleted.", status_code=204)
 
 
 @router.put("/{invoice_id}")

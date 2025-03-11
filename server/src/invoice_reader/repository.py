@@ -195,7 +195,6 @@ class ClientRepository:
             .where(ClientModel.user_id == user_id)
             .limit(limit)
         ).all()
-
         return client_models
 
     def delete(self, client_id: uuid.UUID, user_id: uuid.UUID):
