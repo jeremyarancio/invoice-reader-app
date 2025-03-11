@@ -5,10 +5,12 @@ from fastapi.testclient import TestClient
 
 from invoice_reader.models import InvoiceModel, UserModel
 from invoice_reader.repository import InvoiceRepository
-from invoice_reader.schemas import (
-    AuthToken,
-    FileData,
-    invoice_schema,
+from invoice_reader.schemas import AuthToken, FileData
+from invoice_reader.schemas.invoices import (
+    InvoiceCreate,
+    InvoiceResponse,
+    InvoiceUpdate,
+    PagedInvoiceResponse,
 )
 
 PAGE = 1
@@ -19,7 +21,7 @@ def test_submit_invoice(
     upload_files,
     api_client: TestClient,
     s3_mocker: Mock,
-    new_invoice_create: invoice_schema.InvoiceCreate,
+    new_invoice_create: InvoiceCreate,
     auth_token: AuthToken,
     invoice_repository: InvoiceRepository,
 ):
@@ -31,20 +33,20 @@ def test_submit_invoice(
         headers={"Authorization": f"{auth_token.token_type} {auth_token.access_token}"},
     )
 
-    invoice = invoice_repository.get_by_invoice_number(
+    invoice_model = invoice_repository.get_by_invoice_number(
         new_invoice_create.invoice.invoice_number
     )
 
     assert response.status_code == 201
     s3_mocker.upload_fileobj.assert_called_once()
-    assert invoice.invoice_number == new_invoice_create.invoice.invoice_number
+    assert invoice_model.invoice_number == new_invoice_create.invoice.invoice_number
 
 
 def test_submit_exisiting_invoice(
     upload_files,
     api_client: TestClient,
     s3_mocker: Mock,
-    existing_invoice_create: invoice_schema.InvoiceCreate,
+    existing_invoice_create: InvoiceCreate,
     auth_token: AuthToken,
     test_existing_invoice: InvoiceModel,
 ):
@@ -92,7 +94,7 @@ def test_get_invoice(
         url=f"/api/v1/invoices/{file_data.file_id}",
         headers={"Authorization": f"{auth_token.token_type} {auth_token.access_token}"},
     )
-    payload = invoice_schema.InvoiceResponse.model_validate(response.json())
+    payload = InvoiceResponse.model_validate(response.json())
     assert response.status_code == 200
     assert payload.invoice_id == test_existing_invoice.file_id
     assert payload.s3_path == test_existing_invoice.s3_path
@@ -110,7 +112,7 @@ def test_get_invoices(
         headers={"Authorization": f"Bearer {auth_token.access_token}"},
         params={"page": PAGE, "per_page": PER_PAGE},
     )
-    paged_invoices = invoice_schema.PagedInvoiceResponse.model_validate(response.json())
+    paged_invoices = PagedInvoiceResponse.model_validate(response.json())
 
     assert response.status_code == 200
     assert len(paged_invoices.data) == PER_PAGE
@@ -124,7 +126,7 @@ def test_get_invoices(
 def test_submit_invoice_unauthorized(
     upload_files,
     api_client: TestClient,
-    new_invoice_create: invoice_schema.InvoiceCreate,
+    new_invoice_create: InvoiceCreate,
 ):
     data = new_invoice_create.model_dump_json()
     response = api_client.post(
@@ -163,9 +165,7 @@ def test_update_invoice(
     auth_token: AuthToken,
     invoice_repository: InvoiceRepository,
 ):
-    updated_invoice = invoice_schema.InvoiceUpdate.model_validate(
-        test_existing_invoice.model_dump()
-    )
+    updated_invoice = InvoiceUpdate.model_validate(test_existing_invoice.model_dump())
     updated_invoice.invoice_number = "number1234"
     updated_invoice.amount_excluding_tax = 1234
 

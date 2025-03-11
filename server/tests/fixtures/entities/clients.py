@@ -1,13 +1,13 @@
 import pytest
 
-from invoice_reader.schemas import client_schema
+from invoice_reader.schemas.clients import Client
 
 TOTAL_NUMBER = 3
 
 
 @pytest.fixture
 def new_client():
-    return client_schema.Client(
+    return Client(
         client_name="Sacha&Cie",
         street_number=19,
         street_address="road of coal",
@@ -19,7 +19,7 @@ def new_client():
 
 @pytest.fixture
 def existing_client():
-    return client_schema.Client(
+    return Client(
         client_name="Steren",
         street_number=19,
         street_address="road of coal",
@@ -30,9 +30,9 @@ def existing_client():
 
 
 @pytest.fixture
-def existing_clients() -> list[client_schema.Client]:
+def existing_clients() -> list[Client]:
     return [
-        client_schema.Client(
+        Client(
             client_name=f"client-{i}",
             street_number=19,
             street_address="road of coal",

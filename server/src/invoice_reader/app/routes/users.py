@@ -8,7 +8,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 
 from invoice_reader import db, presenter
 from invoice_reader.app import auth
-from invoice_reader.schemas import AuthToken, user_schema
+from invoice_reader.schemas import AuthToken, UserCreate
 
 router = APIRouter(
     prefix="/api/v1/users",
@@ -18,7 +18,7 @@ router = APIRouter(
 
 @router.post("/signup/")
 def signup(
-    user_create: user_schema.UserCreate,
+    user_create: UserCreate,
     session: Annotated[sqlmodel.Session, Depends(db.get_session)],
 ):
     auth.register_user(user_create=user_create, session=session)

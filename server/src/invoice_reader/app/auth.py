@@ -18,7 +18,7 @@ from invoice_reader.app.exceptions import (
     USER_NOT_FOUND_EXCEPTION,
 )
 from invoice_reader.mappers import UserMapper
-from invoice_reader.schemas import user_schema
+from invoice_reader.schemas import User, UserCreate
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -55,9 +55,7 @@ def get_current_user_id(
     return user.user_id
 
 
-def authenticate_user(
-    email: str, password: str, session: sqlmodel.Session
-) -> user_schema.User:
+def authenticate_user(email: str, password: str, session: sqlmodel.Session) -> User:
     user = presenter.get_user_by_email(email=email, session=session)
     if not user:
         raise USER_NOT_FOUND_EXCEPTION
@@ -78,9 +76,7 @@ def create_access_token(email: str) -> str:
     return encoded_jwt
 
 
-def register_user(
-    user_create: user_schema.UserCreate, session: sqlmodel.Session
-) -> None:
+def register_user(user_create: UserCreate, session: sqlmodel.Session) -> None:
     """Move auth to presenter layer"""
     existing_user = presenter.get_user_by_email(user_create.email, session=session)
     if existing_user:

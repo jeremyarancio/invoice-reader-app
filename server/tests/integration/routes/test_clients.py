@@ -2,12 +2,17 @@ from fastapi.testclient import TestClient
 
 from invoice_reader.models import ClientModel, InvoiceModel, UserModel
 from invoice_reader.repository import ClientRepository
-from invoice_reader.schemas import AuthToken, client_schema
+from invoice_reader.schemas import AuthToken
+from invoice_reader.schemas.clients import (
+    ClientCreate,
+    ClientResponse,
+    PagedClientResponse,
+)
 
 
 def test_add_client(
     api_client: TestClient,
-    new_client: client_schema.ClientCreate,
+    new_client: ClientCreate,
     auth_token: AuthToken,
     client_repository: ClientRepository,
     test_existing_user: UserModel,
@@ -53,7 +58,7 @@ def test_get_client(
         url=f"/api/v1/clients/{test_existing_client.client_id}",
         headers={"Authorization": f"{auth_token.token_type} {auth_token.access_token}"},
     )
-    client = client_schema.ClientResponse.model_validate(response.json())
+    client = ClientResponse.model_validate(response.json())
     assert response.status_code == 200
     assert test_existing_client.client_name == client.client_name
     assert client.total_revenu == sum(
@@ -70,7 +75,7 @@ def test_get_clients(
         url="/api/v1/clients/",
         headers={"Authorization": f"{auth_token.token_type} {auth_token.access_token}"},
     )
-    paged_clients = client_schema.PagedClientResponse.model_validate(response.json())
+    paged_clients = PagedClientResponse.model_validate(response.json())
     assert response.status_code == 200
     assert paged_clients.total == len(test_existing_clients)
     assert paged_clients.data[0].client_name == test_existing_clients[0].client_name

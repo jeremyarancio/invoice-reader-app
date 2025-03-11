@@ -3,15 +3,15 @@ from typing import Sequence
 
 from invoice_reader.core.stats import compute_total_revenu_per_client
 from invoice_reader.models import ClientModel
-from invoice_reader.schemas import client_schema
+from invoice_reader.schemas.clients import ClientCreate, ClientPresenter, ClientResponse
 
 
 class ClientMapper:
     @staticmethod
     def map_client_model_to_client(
         client_model: ClientModel,
-    ) -> client_schema.ClientPresenter:
-        return client_schema.ClientPresenter(
+    ) -> ClientPresenter:
+        return ClientPresenter(
             total_revenu=compute_total_revenu_per_client(client_model),
             **client_model.model_dump(),
         )
@@ -20,7 +20,7 @@ class ClientMapper:
     def map_client_models_to_clients(
         cls,
         client_models: Sequence[ClientModel],
-    ) -> list[client_schema.ClientPresenter]:
+    ) -> list[ClientPresenter]:
         return [
             cls.map_client_model_to_client(client_model=client_model)
             for client_model in client_models
@@ -28,25 +28,23 @@ class ClientMapper:
 
     @staticmethod
     def map_client_to_response(
-        client: client_schema.ClientPresenter,
-    ) -> client_schema.ClientResponse:
-        return client_schema.ClientResponse.model_validate(client.model_dump())
+        client: ClientPresenter,
+    ) -> ClientResponse:
+        return ClientResponse.model_validate(client.model_dump())
 
     @classmethod
     def map_clients_to_responses(
         cls,
-        clients: list[client_schema.ClientPresenter],
-    ) -> list[client_schema.ClientResponse]:
+        clients: list[ClientPresenter],
+    ) -> list[ClientResponse]:
         return [cls.map_client_to_response(client) for client in clients]
 
     @staticmethod
-    def map_client_to_model(
-        client: client_schema.ClientPresenter, user_id: uuid.UUID
-    ) -> ClientModel:
+    def map_client_to_model(client: ClientPresenter, user_id: uuid.UUID) -> ClientModel:
         return ClientModel(user_id=user_id, **client.model_dump())
 
     @staticmethod
     def map_client_create_to_client(
-        client_create: client_schema.ClientCreate,
-    ) -> client_schema.ClientPresenter:
-        return client_schema.ClientPresenter.model_validate(client_create.model_dump())
+        client_create: ClientCreate,
+    ) -> ClientPresenter:
+        return ClientPresenter.model_validate(client_create.model_dump())

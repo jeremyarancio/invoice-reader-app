@@ -7,7 +7,11 @@ from fastapi.exceptions import HTTPException
 
 from invoice_reader import db, presenter, settings
 from invoice_reader.app import auth
-from invoice_reader.schemas import client_schema
+from invoice_reader.schemas.clients import (
+    ClientCreate,
+    ClientResponse,
+    PagedClientResponse,
+)
 from invoice_reader.utils.logger import get_logger
 
 LOGGER = get_logger()
@@ -24,7 +28,7 @@ def get_clients(
     user_id: Annotated[uuid.UUID, Depends(auth.get_current_user_id)],
     page: int = Query(1, ge=1),
     per_page: int = Query(settings.PER_PAGE, ge=1),
-) -> client_schema.PagedClientResponse:
+) -> PagedClientResponse:
     try:
         paged_client_response = presenter.get_paged_clients(
             user_id=user_id,
@@ -47,7 +51,7 @@ def get_client(
     client_id: uuid.UUID,
     session: Annotated[sqlmodel.Session, Depends(db.get_session)],
     user_id: Annotated[uuid.UUID, Depends(auth.get_current_user_id)],
-) -> client_schema.ClientResponse:
+) -> ClientResponse:
     try:
         client = presenter.get_client(
             user_id=user_id, client_id=client_id, session=session
@@ -63,7 +67,7 @@ def get_client(
 
 @router.post("/")
 def add_client(
-    client_create: client_schema.ClientCreate,
+    client_create: ClientCreate,
     session: Annotated[sqlmodel.Session, Depends(db.get_session)],
     user_id: Annotated[uuid.UUID, Depends(auth.get_current_user_id)],
 ) -> Response:

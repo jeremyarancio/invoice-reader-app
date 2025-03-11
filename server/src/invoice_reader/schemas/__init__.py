@@ -3,9 +3,9 @@ import uuid
 
 from pydantic import BaseModel, Field
 
-from . import client_schema, invoice_schema, user_schema
-
-__all__ = ["client_schema", "user_schema", "invoice_schema"]
+from .clients import *
+from .invoices import *
+from .users import *
 
 
 class AuthToken(BaseModel):

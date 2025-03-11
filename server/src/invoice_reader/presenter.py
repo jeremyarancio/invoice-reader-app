@@ -20,7 +20,22 @@ from invoice_reader.repository import (
     InvoiceRepository,
     UserRepository,
 )
-from invoice_reader.schemas import FileData, client_schema, invoice_schema, user_schema
+from invoice_reader.schemas import FileData
+from invoice_reader.schemas.clients import (
+    ClientCreate,
+    ClientResponse,
+    PagedClientResponse,
+)
+from invoice_reader.schemas.invoices import (
+    InvoiceCreate,
+    InvoiceResponse,
+    InvoiceUpdate,
+    PagedInvoiceResponse,
+)
+from invoice_reader.schemas.users import (
+    User,
+    UserPresenter,
+)
 from invoice_reader.utils import logger, s3_utils
 
 LOGGER = logger.get_logger()
@@ -30,7 +45,7 @@ def add_invoice(
     user_id: uuid.UUID,
     file: BinaryIO,
     filename: str | None,
-    invoice_create: invoice_schema.InvoiceCreate,
+    invoice_create: InvoiceCreate,
     session: sqlmodel.Session,
 ) -> None:
     if not filename:
@@ -51,13 +66,13 @@ def add_invoice(
     )
 
 
-def get_user_by_email(email: str, session: sqlmodel.Session) -> user_schema.User | None:
+def get_user_by_email(email: str, session: sqlmodel.Session) -> User | None:
     user_repository = UserRepository(session=session)
     user_model = user_repository.get_user_by_email(email=email)
     return UserMapper.map_user_model_to_user(user_model) if user_model else None
 
 
-def add_user(user: user_schema.UserPresenter, session: sqlmodel.Session) -> None:
+def add_user(user: UserPresenter, session: sqlmodel.Session) -> None:
     user_repository = UserRepository(session=session)
     user_model = UserMapper.map_user_to_model(user=user)
     user_repository.add(user_model=user_model)
@@ -65,7 +80,7 @@ def add_user(user: user_schema.UserPresenter, session: sqlmodel.Session) -> None
 
 def get_invoice(
     user_id: uuid.UUID, file_id: uuid.UUID, session: sqlmodel.Session
-) -> invoice_schema.InvoiceResponse:
+) -> InvoiceResponse:
     invoice_repository = InvoiceRepository(session=session)
     invoice_model = invoice_repository.get(user_id=user_id, file_id=file_id)
     if invoice_model:
@@ -78,7 +93,7 @@ def get_invoice(
 
 def get_paged_invoices(
     user_id: uuid.UUID, session: sqlmodel.Session, page: int, per_page: int
-) -> invoice_schema.PagedInvoiceResponse:
+) -> PagedInvoiceResponse:
     invoice_repository = InvoiceRepository(session=session)
     invoice_models = invoice_repository.get_all(user_id=user_id)
     start = (page - 1) * per_page
@@ -86,7 +101,7 @@ def get_paged_invoices(
     invoices = InvoiceMapper.map_invoice_models_to_invoices(
         invoice_models=invoice_models
     )
-    return invoice_schema.PagedInvoiceResponse(
+    return PagedInvoiceResponse(
         page=page,
         per_page=per_page,
         total=len(invoice_models),
@@ -97,7 +112,7 @@ def get_paged_invoices(
 def add_client(
     user_id: uuid.UUID,
     session: sqlmodel.Session,
-    client_create: client_schema.ClientCreate,
+    client_create: ClientCreate,
 ) -> None:
     client_repository = ClientRepository(session=session)
     existing_client = client_repository.get_by_name(
@@ -112,7 +127,7 @@ def add_client(
 
 def get_client(
     user_id: uuid.UUID, session: sqlmodel.Session, client_id: uuid.UUID
-) -> client_schema.ClientResponse:
+) -> ClientResponse:
     client_repository = ClientRepository(session=session)
     client_model = client_repository.get(user_id=user_id, client_id=client_id)
     if not client_model:
@@ -127,12 +142,12 @@ def get_paged_clients(
     session: sqlmodel.Session,
     page: int,
     per_page: int,
-) -> client_schema.PagedClientResponse:
+) -> PagedClientResponse:
     client_repository = ClientRepository(session=session)
     client_models = client_repository.get_all(user_id=user_id, limit=per_page)
     clients = ClientMapper.map_client_models_to_clients(client_models=client_models)
     client_responses = ClientMapper.map_clients_to_responses(clients=clients)
-    return client_schema.PagedClientResponse(
+    return PagedClientResponse(
         page=page, per_page=per_page, total=len(clients), data=client_responses
     )
 
@@ -171,7 +186,7 @@ def delete_user(user_id: uuid.UUID, session: sqlmodel.Session) -> None:
 
 def update_invoice(
     invoice_id: uuid.UUID,
-    invoice_update: invoice_schema.InvoiceUpdate,
+    invoice_update: InvoiceUpdate,
     session: sqlmodel.Session,
 ) -> None:
     invoice_repository = InvoiceRepository(session=session)

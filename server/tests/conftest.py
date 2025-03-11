@@ -13,8 +13,8 @@ from invoice_reader.models import UserModel
 from invoice_reader.schemas import (
     AuthToken,
     FileData,
-    user_schema,
 )
+from invoice_reader.schemas.users import User
 
 pytest_plugins = [
     "tests.fixtures.factory",
@@ -48,7 +48,7 @@ def upload_files(filepath):
 
 
 @pytest.fixture
-def file_data(existing_user: user_schema.User, filepath: Path) -> FileData:
+def file_data(existing_user: User, filepath: Path) -> FileData:
     return FileData(user_id=existing_user.user_id, filename=filepath.name)
 
 

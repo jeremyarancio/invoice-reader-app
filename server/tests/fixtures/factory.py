@@ -16,7 +16,10 @@ from invoice_reader.repository import (
     InvoiceRepository,
     UserRepository,
 )
-from invoice_reader.schemas import FileData, client_schema, invoice_schema, user_schema
+from invoice_reader.schemas import FileData
+from invoice_reader.schemas.clients import Client
+from invoice_reader.schemas.invoices import Invoice, InvoiceBase
+from invoice_reader.schemas.users import User, UserCreate
 
 
 def add_and_commit(session: Session, *models: SQLModel) -> None:
@@ -39,7 +42,7 @@ def session_fixture() -> Session:  # type: ignore
 
 @pytest.fixture
 def existing_user_model(
-    existing_user: user_schema.User, existing_user_create: user_schema.UserCreate
+    existing_user: User, existing_user_create: UserCreate
 ) -> UserModel:
     return UserModel(
         user_id=existing_user.user_id,
@@ -54,7 +57,7 @@ def existing_invoice_model(
     test_existing_user: UserModel,
     test_existing_client: ClientModel,
     s3_suffix: str,
-    existing_invoice: invoice_schema.InvoiceBase,
+    existing_invoice: InvoiceBase,
     file_data: FileData,
 ) -> InvoiceModel:
     return InvoiceModel(
@@ -71,7 +74,7 @@ def existing_invoice_models(
     test_existing_user: UserModel,
     test_existing_client: ClientModel,
     s3_suffix: str,
-    existing_invoices: list[invoice_schema.Invoice],
+    existing_invoices: list[Invoice],
 ) -> list[InvoiceModel]:
     return [
         InvoiceModel(
@@ -87,8 +90,8 @@ def existing_invoice_models(
 
 @pytest.fixture
 def existing_client_model(
-    test_existing_user: user_schema.User,
-    existing_client: client_schema.Client,
+    test_existing_user: User,
+    existing_client: Client,
 ) -> ClientModel:
     return ClientModel(
         user_id=test_existing_user.user_id,
@@ -98,8 +101,8 @@ def existing_client_model(
 
 @pytest.fixture
 def existing_client_models(
-    test_existing_user: user_schema.User,
-    existing_clients: list[client_schema.Client],
+    test_existing_user: User,
+    existing_clients: list[Client],
 ) -> list[ClientModel]:
     return [
         ClientModel(
