@@ -9,11 +9,12 @@ from sqlmodel import Session
 from invoice_reader import db
 from invoice_reader.app import auth
 from invoice_reader.app.main import app
+from invoice_reader.models import UserModel
 from invoice_reader.schemas import (
     AuthToken,
     FileData,
-    User,
 )
+from invoice_reader.schemas.users import User
 
 pytest_plugins = [
     "tests.fixtures.factory",
@@ -84,8 +85,8 @@ def bucket() -> str:
 
 
 @pytest.fixture
-def auth_token(existing_user: User) -> AuthToken:
-    access_token = auth.create_access_token(email=existing_user.email)
+def auth_token(test_existing_user: UserModel) -> AuthToken:
+    access_token = auth.create_access_token(email=test_existing_user.email)
     return AuthToken(access_token=access_token, token_type="bearer")
 
 

@@ -3,7 +3,7 @@ import uuid
 import pytest
 
 from invoice_reader.app import auth
-from invoice_reader.schemas import User, UserCreate
+from invoice_reader.schemas.users import User, UserCreate
 
 
 @pytest.fixture

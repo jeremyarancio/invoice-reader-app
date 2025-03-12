@@ -6,7 +6,7 @@ from typing import BinaryIO
 import boto3
 from botocore.exceptions import ClientError
 from pydantic import EmailStr
-from sqlmodel import Field, SQLModel
+from sqlmodel import Field, Relationship, SQLModel
 
 from invoice_reader import settings
 from invoice_reader.utils.logger import get_logger
@@ -84,6 +84,8 @@ class InvoiceModel(SQLModel, table=True):
         default_factory=datetime.datetime.now
     )
 
+    client: "ClientModel" = Relationship()
+
 
 class ClientModel(SQLModel, table=True):
     __tablename__ = "client"
@@ -96,3 +98,5 @@ class ClientModel(SQLModel, table=True):
     zipcode: int
     city: str
     country: str
+
+    invoices: list["InvoiceModel"] = Relationship(back_populates="client")

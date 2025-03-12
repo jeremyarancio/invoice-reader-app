@@ -31,3 +31,16 @@ MISSING_ENVIRONMENT_VARIABLE_EXCEPTION = HTTPException(
     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
     detail="Missing required environment variable",
 )
+
+CLIENT_NOT_FOUND = HTTPException(
+    status_code=status.HTTP_404_NOT_FOUND, detail="Client was not found."
+)
+
+INVOICE_NOT_FOUND = HTTPException(
+    status_code=status.HTTP_404_NOT_FOUND, detail="Invoice was not found."
+)
+
+ROLLBACK = HTTPException(
+    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+    detail="Something went wrong with ",
+)

@@ -4,7 +4,7 @@ dev-ui:
 	cd ui/ && npm run dev
 
 dev-server:
-	cd server/ && uv run --directory src/ fastapi dev invoice_reader/app/routes.py
+	cd server/ && uv run --directory src/ fastapi dev invoice_reader/app/main.py
 
 format:
 	cd server && uv tool run ruff format .

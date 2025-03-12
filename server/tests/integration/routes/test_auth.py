@@ -3,7 +3,7 @@ from fastapi.testclient import TestClient
 from invoice_reader.app import auth
 from invoice_reader.models import UserModel
 from invoice_reader.repository import UserRepository
-from invoice_reader.schemas import UserCreate
+from invoice_reader.schemas.users import UserCreate
 
 
 def test_register_user(

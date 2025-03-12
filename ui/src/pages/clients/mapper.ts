@@ -9,6 +9,7 @@ export function mapGetClientToClient(getClient: GetClient): Client {
         streetAddress: getClient.street_address,
         streetNumber: getClient.street_number,
         zipcode: getClient.zipcode,
+        totalRevenu: getClient.total_revenu,
     };
 }
 

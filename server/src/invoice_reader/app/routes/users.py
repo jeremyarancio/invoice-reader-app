@@ -1,3 +1,4 @@
+import uuid
 from typing import Annotated
 
 import sqlmodel
@@ -7,7 +8,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 
 from invoice_reader import db, presenter
 from invoice_reader.app import auth
-from invoice_reader.schemas import AuthToken, User, UserCreate
+from invoice_reader.schemas import AuthToken, UserCreate
 
 router = APIRouter(
     prefix="/api/v1/users",
@@ -17,9 +18,10 @@ router = APIRouter(
 
 @router.post("/signup/")
 def signup(
-    user: UserCreate, session: Annotated[sqlmodel.Session, Depends(db.get_session)]
+    user_create: UserCreate,
+    session: Annotated[sqlmodel.Session, Depends(db.get_session)],
 ):
-    auth.register_user(user=user, session=session)
+    auth.register_user(user_create=user_create, session=session)
     return Response(content="User has been added to the database.", status_code=201)
 
 
@@ -43,11 +45,12 @@ def signin(
 @router.delete("/")
 def delete_user(
     session: Annotated[sqlmodel.Session, Depends(db.get_session)],
-    user: Annotated[User, Depends(auth.get_current_user)],
-) -> None:
+    user_id: Annotated[uuid.UUID, Depends(auth.get_current_user_id)],
+) -> Response:
     try:
-        presenter.delete_user(user_id=user.user_id, session=session)
+        presenter.delete_user(user_id=user_id, session=session)
     except HTTPException as e:
         raise e
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
+    return Response(content="User successfully deleted.", status_code=204)
