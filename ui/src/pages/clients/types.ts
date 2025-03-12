@@ -6,6 +6,7 @@ export interface Client {
     zipcode: number;
     city: string;
     country: string;
+    totalRevenu: number;
 }
 
 export interface CreateClient {
@@ -31,4 +32,5 @@ export interface GetClient {
     zipcode: number;
     city: string;
     country: string;
+    total_revenu: number;
 }

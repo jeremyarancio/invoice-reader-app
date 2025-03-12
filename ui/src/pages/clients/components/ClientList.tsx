@@ -25,6 +25,7 @@ const ClientList = () => {
         isLoading,
         error: fetchError,
     } = fetchClients(pageNumber, perPage);
+
     const clients = data?.data.map(mapGetClientToClient) || [];
 
     if (isLoading) return <div>Loading clients...</div>;
@@ -34,7 +35,11 @@ const ClientList = () => {
 
     const tableColumns = [
         { header: "Client", key: "name" },
-        { header: "Total", key: "", render: () => `$${"..."}` },
+        {
+            header: "Total",
+            key: "totalRevenu",
+            render: (item: Client) => `$${item.totalRevenu}`,
+        },
     ];
 
     const editFields = [
