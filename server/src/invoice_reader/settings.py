@@ -9,7 +9,7 @@ load_dotenv()
 REPO_DIR = Path(__file__).parent.parent.parent
 
 # DB
-POSTGRES_HOST = os.getenv("POSTGRES_SERVER", "postgres")
+POSTGRES_HOST = os.getenv("POSTGRES_HOST", "postgres")
 POSTGRES_USER = os.getenv("POSTGRES_USER", "postgres")
 POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "postgres")
 POSTGRES_DB = os.getenv("POSTGRES_DB", "postgres")
