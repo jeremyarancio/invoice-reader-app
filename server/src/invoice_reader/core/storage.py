@@ -1,7 +1,7 @@
 from typing import BinaryIO
 
+from invoice_reader.infrastructure.storage import S3
 from invoice_reader.mappers import InvoiceMapper
-from invoice_reader.models import S3
 from invoice_reader.repository import InvoiceRepository
 from invoice_reader.schemas import FileData
 from invoice_reader.schemas.invoices import Invoice

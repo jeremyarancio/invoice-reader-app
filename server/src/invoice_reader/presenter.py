@@ -13,8 +13,8 @@ from invoice_reader.app.exceptions import (
     UNPROCESSABLE_FILE,
 )
 from invoice_reader.core import storage
+from invoice_reader.infrastructure.storage import S3
 from invoice_reader.mappers import ClientMapper, InvoiceMapper, UserMapper
-from invoice_reader.models import S3
 from invoice_reader.repository import (
     ClientRepository,
     InvoiceRepository,

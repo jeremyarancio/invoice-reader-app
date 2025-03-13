@@ -4,7 +4,8 @@ from unittest.mock import Mock
 import pytest
 
 from invoice_reader.core import storage
-from invoice_reader.models import S3, UserModel
+from invoice_reader.infrastructure.storage import S3
+from invoice_reader.models import UserModel
 from invoice_reader.schemas import FileData
 from invoice_reader.utils import s3_utils
 
