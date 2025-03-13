@@ -35,6 +35,7 @@ class InvoiceMapper:
             invoice_id=invoice.file_id,
             client_id=invoice.client_id,
             s3_path=invoice.s3_path,
+            currency_id=invoice.currency_id,
             data=InvoiceBase.model_validate(invoice.model_dump()),
         )
 
@@ -50,7 +51,9 @@ class InvoiceMapper:
         invoice_create: InvoiceCreate,
     ) -> Invoice:
         return Invoice(
-            client_id=invoice_create.client_id, **invoice_create.invoice.model_dump()
+            client_id=invoice_create.client_id,
+            currency_id=invoice_create.currency_id,
+            **invoice_create.invoice.model_dump(),
         )
 
     @staticmethod

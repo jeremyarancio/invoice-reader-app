@@ -2,19 +2,18 @@ from datetime import date
 
 import pytest
 
-from invoice_reader.models import ClientModel
-from invoice_reader.schemas.invoices import Invoice, InvoiceBase, InvoiceCreate
+from invoice_reader.models import ClientModel, CurrencyModel
+from invoice_reader.schemas.invoices import InvoiceBase, InvoiceCreate
 
 TOTAL_N = 3
 
 
 @pytest.fixture
 def new_invoice():
-    return Invoice(
+    return InvoiceBase(
         invoiced_date=date(2024, 11, 18),
         invoice_number="14SQ456",
         amount_excluding_tax=10000,
-        currency="€",
         vat=20,
         is_paid=True,
     )
@@ -26,7 +25,6 @@ def existing_invoice() -> InvoiceBase:
         invoiced_date=date(2024, 12, 20),
         invoice_number="14SQ456",
         amount_excluding_tax=10000,
-        currency="€",
         vat=20,
         is_paid=False,
     )
@@ -39,7 +37,6 @@ def existing_invoices() -> list[InvoiceBase]:
             invoiced_date=date(2024, 11, 18),
             invoice_number=f"number-{i}",
             amount_excluding_tax=10000,
-            currency="€",
             vat=20,
             is_paid=True,
         )
@@ -49,17 +46,25 @@ def existing_invoices() -> list[InvoiceBase]:
 
 @pytest.fixture
 def new_invoice_create(
-    test_existing_client: ClientModel, new_invoice: InvoiceBase
+    test_existing_client: ClientModel,
+    new_invoice: InvoiceBase,
+    test_existing_currency: CurrencyModel,
 ) -> InvoiceCreate:
     return InvoiceCreate(
-        client_id=test_existing_client.client_id, invoice=new_invoice
+        client_id=test_existing_client.client_id,
+        currency_id=test_existing_currency.id,
+        invoice=new_invoice,
     )
 
 
 @pytest.fixture
 def existing_invoice_create(
-    test_existing_client: ClientModel, existing_invoice: InvoiceBase
+    test_existing_client: ClientModel,
+    existing_invoice: InvoiceBase,
+    test_existing_currency: CurrencyModel,
 ) -> InvoiceCreate:
     return InvoiceCreate(
-        client_id=test_existing_client.client_id, invoice=existing_invoice
+        client_id=test_existing_client.client_id,
+        currency_id=test_existing_currency.id,
+        invoice=existing_invoice,
     )
