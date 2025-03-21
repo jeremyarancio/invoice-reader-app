@@ -8,9 +8,9 @@ Create Date: 2025-03-13 15:57:45.285540
 
 from typing import Sequence, Union
 
-from alembic import op
 import sqlalchemy as sa
 import sqlmodel
+from alembic import op
 
 from invoice_reader.models import CurrencyModel, InvoiceModel
 
