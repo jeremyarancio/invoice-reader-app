@@ -31,7 +31,7 @@ class InvoiceModel(SQLModel, table=True):
     invoice_number: str
     amount_excluding_tax: float
     vat: float
-    currency: str
+    currency_id: uuid.UUID = Field(foreign_key="currency.id")
     is_paid: bool
     invoiced_date: datetime.date
     uploaded_date: datetime.date | None = Field(default_factory=datetime.datetime.now)
@@ -40,7 +40,7 @@ class InvoiceModel(SQLModel, table=True):
     )
 
     client: "ClientModel" = Relationship()
-
+    currency: "CurrencyModel" = Relationship()
 
 class ClientModel(SQLModel, table=True):
     __tablename__ = "client"
@@ -55,3 +55,12 @@ class ClientModel(SQLModel, table=True):
     country: str
 
     invoices: list["InvoiceModel"] = Relationship(back_populates="client")
+
+
+class CurrencyModel(SQLModel, table=True):
+    __tablename__ = "currency"
+
+    id: uuid.UUID | None = Field(primary_key=True, default_factory=uuid.uuid4)
+    currency: str
+
+    invoices: list["InvoiceModel"] = Relationship(back_populates="currency")

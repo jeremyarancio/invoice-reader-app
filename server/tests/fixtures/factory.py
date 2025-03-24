@@ -8,6 +8,7 @@ from sqlmodel import Session, SQLModel, StaticPool, create_engine
 from invoice_reader.app import auth
 from invoice_reader.models import (
     ClientModel,
+    CurrencyModel,
     InvoiceModel,
     UserModel,
 )
@@ -59,12 +60,14 @@ def existing_invoice_model(
     s3_suffix: str,
     existing_invoice: InvoiceBase,
     file_data: FileData,
+    test_existing_currency: CurrencyModel,
 ) -> InvoiceModel:
     return InvoiceModel(
         file_id=file_data.file_id,
         s3_path=s3_suffix,
         user_id=test_existing_user.user_id,
         client_id=test_existing_client.client_id,
+        currency_id=test_existing_currency.id,
         **existing_invoice.model_dump(),
     )
 
@@ -73,6 +76,7 @@ def existing_invoice_model(
 def existing_invoice_models(
     test_existing_user: UserModel,
     test_existing_client: ClientModel,
+    test_existing_currency: CurrencyModel,
     s3_suffix: str,
     existing_invoices: list[Invoice],
 ) -> list[InvoiceModel]:
@@ -82,6 +86,7 @@ def existing_invoice_models(
             s3_path=s3_suffix,
             user_id=test_existing_user.user_id,
             client_id=test_existing_client.client_id,
+            currency_id=test_existing_currency.id,
             **invoice.model_dump(),
         )
         for invoice in existing_invoices
@@ -152,6 +157,14 @@ def test_existing_client(
 ) -> ClientModel:  # type: ignore
     add_and_commit(session, existing_client_model)
     yield existing_client_model
+
+
+@pytest.fixture
+def test_existing_currency(
+    session: Session, existing_currency: CurrencyModel
+) -> CurrencyModel:
+    add_and_commit(session, existing_currency)
+    yield existing_currency
 
 
 @pytest.fixture

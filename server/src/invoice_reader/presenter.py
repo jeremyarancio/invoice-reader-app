@@ -14,9 +14,15 @@ from invoice_reader.app.exceptions import (
 )
 from invoice_reader.core import storage
 from invoice_reader.infrastructure.storage import S3
-from invoice_reader.mappers import ClientMapper, InvoiceMapper, UserMapper
+from invoice_reader.mappers import (
+    ClientMapper,
+    CurrencyMapper,
+    InvoiceMapper,
+    UserMapper,
+)
 from invoice_reader.repository import (
     ClientRepository,
+    CurrencyRepository,
     InvoiceRepository,
     UserRepository,
 )
@@ -208,3 +214,10 @@ def get_invoice_url(
     suffix = s3_utils.get_suffix_from_s3_path(s3_path=invoice.s3_path)
     url = s3.create_presigned_url(suffix=suffix)
     return url
+
+
+def get_currencies(session: sqlmodel.Session):
+    currency_repository = CurrencyRepository(session=session)
+    currency_models = currency_repository.get_all()
+    currencies = CurrencyMapper.map_currency_models_to_currencies(currency_models)
+    return currencies

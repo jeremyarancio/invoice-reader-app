@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from invoice_reader import settings
-from invoice_reader.app.routes import clients, invoices, users
+from invoice_reader.app.routes import clients, invoices, others, users
 from invoice_reader.utils import logger
 
 LOGGER = logger.get_logger(__name__)
@@ -17,6 +17,7 @@ app = FastAPI()
 app.include_router(users.router)
 app.include_router(invoices.router)
 app.include_router(clients.router)
+app.include_router(others.router)
 
 
 app.add_middleware(

@@ -3,7 +3,7 @@ from unittest.mock import Mock
 import pytest
 from fastapi.testclient import TestClient
 
-from invoice_reader.models import InvoiceModel, UserModel
+from invoice_reader.models import CurrencyModel, InvoiceModel, UserModel
 from invoice_reader.repository import InvoiceRepository
 from invoice_reader.schemas import AuthToken, FileData
 from invoice_reader.schemas.invoices import (
@@ -89,6 +89,7 @@ def test_get_invoice(
     api_client: TestClient,
     auth_token: AuthToken,
     test_existing_invoice: InvoiceModel,
+    test_existing_currency: CurrencyModel,
 ):
     response = api_client.get(
         url=f"/api/v1/invoices/{file_data.file_id}",
@@ -99,6 +100,7 @@ def test_get_invoice(
     assert payload.invoice_id == test_existing_invoice.file_id
     assert payload.s3_path == test_existing_invoice.s3_path
     assert payload.data.invoice_number == test_existing_invoice.invoice_number
+    assert payload.currency_id == test_existing_currency.id
 
 
 def test_get_invoices(

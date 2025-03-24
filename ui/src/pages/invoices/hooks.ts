@@ -1,8 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { mapInvoiceToPutInvoice } from "./mappers";
 import { deleteInvoices, updateInvoice, submitInvoice } from "@/services/api";
-import { useMutation } from "@tanstack/react-query";
-import { queryClient } from "@/services/api";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { queryClient, fetchCurrencies } from "@/services/api";
 import { CreateInvoicePayload, Invoice } from "./types";
 import { AxiosError } from "axios";
 
@@ -25,7 +25,9 @@ export const useSubmitInvoice = () => {
         },
         onError: (error: AxiosError) => {
             error.status === 409
-                ? window.alert("Error: Invoice already exists. Submission aborted.")
+                ? window.alert(
+                      "Error: Invoice already exists. Submission aborted."
+                  )
                 : window.alert("Error: " + error.message);
         },
     });
@@ -63,4 +65,13 @@ export const useDeleteInvoices = () => {
         const invoiceIds = invoices.map((invoice) => invoice.id);
         deleteMutation.mutate(invoiceIds);
     };
+};
+
+export const useFetchCurrencies = () => {
+    return () => 
+        useQuery({
+            queryKey: ["currencies"],
+            queryFn: () => fetchCurrencies(),
+            enabled: !!localStorage.getItem("accessToken"),
+        });
 };

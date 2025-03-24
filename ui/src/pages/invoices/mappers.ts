@@ -1,5 +1,7 @@
 import {
     CreateInvoicePayload,
+    Currency,
+    GetCurrency,
     GetInvoice,
     Invoice,
     UpdateInvoice,
@@ -9,7 +11,7 @@ export function mapGetInvoiceToInvoice(getInvoice: GetInvoice): Invoice {
     return {
         id: getInvoice.invoice_id,
         amountExcludingTax: getInvoice.data.amount_excluding_tax,
-        currency: getInvoice.data.currency,
+        currencyId: getInvoice.currency_id,
         isPaid: getInvoice.data.is_paid,
         vat: getInvoice.data.vat,
         invoiceNumber: getInvoice.data.invoice_number,
@@ -23,7 +25,6 @@ export function mapInvoiceToPutInvoice(invoice: Invoice): UpdateInvoice {
         id: invoice.id,
         invoice: {
             amount_excluding_tax: invoice.amountExcludingTax,
-            currency: invoice.currency,
             invoice_number: invoice.invoiceNumber,
             invoiced_date: invoice.invoicedDate,
             vat: invoice.vat,
@@ -38,12 +39,19 @@ export function mapInvoicetoCreateInvoice(
     return {
         invoice: {
             amount_excluding_tax: invoice.amountExcludingTax,
-            currency: invoice.currency,
             invoice_number: invoice.invoiceNumber,
             invoiced_date: invoice.invoicedDate,
             vat: invoice.vat,
             is_paid: invoice.isPaid,
         },
         client_id: invoice.clientId,
+        currency_id: invoice.currencyId,
+    };
+}
+
+export function mapGetCurrencyToCurrency(currency: GetCurrency): Currency {
+    return {
+        id: currency.currency_id,
+        name: currency.currency,
     };
 }

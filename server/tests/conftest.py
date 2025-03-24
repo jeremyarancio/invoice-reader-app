@@ -21,6 +21,7 @@ pytest_plugins = [
     "tests.fixtures.entities.invoices",
     "tests.fixtures.entities.users",
     "tests.fixtures.entities.clients",
+    "tests.fixtures.entities.currencies",
 ]
 
 

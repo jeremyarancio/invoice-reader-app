@@ -21,3 +21,8 @@ class FileData(BaseModel):
     @property
     def file_format(self):
         return os.path.splitext(self.filename)[-1]
+
+
+class Currency(BaseModel):
+    currency_id: uuid.UUID
+    currency: str

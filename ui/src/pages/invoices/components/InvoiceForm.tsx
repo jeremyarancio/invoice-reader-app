@@ -1,9 +1,12 @@
 import { Invoice } from "../types";
 import { useFetchClients } from "@/pages/clients/hooks";
-import { useSubmitInvoice } from "../hooks";
+import { useFetchCurrencies, useSubmitInvoice } from "../hooks";
 import SubmissionForm from "@/common/components/SubmissionForm";
 import { mapGetClientToClient } from "@/pages/clients/mapper";
-import { mapInvoicetoCreateInvoice } from "../mappers";
+import {
+    mapGetCurrencyToCurrency,
+    mapInvoicetoCreateInvoice,
+} from "../mappers";
 import { Col, Container, Row } from "react-bootstrap";
 import PdfPreview from "@/common/components/PdfPreview";
 import { useState } from "react";
@@ -18,20 +21,25 @@ interface FormProperties {
 const initialInvoice: InvoiceFormData = {
     amountExcludingTax: 0,
     vat: 0,
-    currency: "€",
     invoicedDate: new Date(),
     invoiceNumber: "",
     clientId: "",
     isPaid: false,
+    currencyId: "000000",
 };
 
 function InvoiceForm({ file }: FormProperties) {
     const [error, setError] = useState<Error | null>(null);
     const fetchClients = useFetchClients();
     const submitInvoice = useSubmitInvoice();
+    const fetchCurrencies = useFetchCurrencies();
 
-    const { data: pagedClients, error: fetchError } = fetchClients();
+    const { data: pagedClients, error: fetchClientsError } = fetchClients();
     const clients = pagedClients?.data.map(mapGetClientToClient) || [];
+
+    const { data: getCurrencies, error: fetchCurrenciesError } =
+        fetchCurrencies();
+    const currencies = getCurrencies?.map(mapGetCurrencyToCurrency) || [];
 
     const formGroups = [
         {
@@ -48,9 +56,10 @@ function InvoiceForm({ file }: FormProperties) {
         },
         {
             header: "Currency",
-            key: "currency",
-            formType: "text" as const,
+            key: "currencyId",
+            formType: "select" as const,
             required: true,
+            fetchedItems: currencies,
         },
         {
             header: "VAT (%)",
@@ -69,6 +78,7 @@ function InvoiceForm({ file }: FormProperties) {
             key: "clientId",
             formType: "select" as const,
             required: true,
+            fetchedItems: clients,
         },
         {
             header: "Paid?",
@@ -77,7 +87,9 @@ function InvoiceForm({ file }: FormProperties) {
         },
     ];
 
-    fetchError && setError(fetchError);
+    fetchClientsError && setError(fetchClientsError);
+    fetchCurrenciesError && setError(fetchCurrenciesError);
+
     return (
         <Container fluid>
             <>
@@ -99,7 +111,6 @@ function InvoiceForm({ file }: FormProperties) {
                             }
                             formGroups={formGroups}
                             initialData={initialInvoice}
-                            additionalItems={clients}
                         />
                     </Col>
                 </Row>
