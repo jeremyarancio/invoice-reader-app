@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: invoice-ui-deployment
+  namespace: invoice
+  labels:
+    app: invoice-ui
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: invoice-ui
+  template:
+    metadata:
+      labels:
+        app: invoice-ui
+    spec:
+      containers:
+      - name: invoice-ui
+        image: invoice-reader-app-ui
+        ports:
+        - containerPort: 5173
+
+---
+
+apiVersion: apps/v1
+kind: Service
+metadata:
+  name: invoice-ui-service
+spec:
+  selector:
+    app: invoice-ui
+  ports:
+    - protocol: HTTP
+      port: 5173
+      targetPort: 5173

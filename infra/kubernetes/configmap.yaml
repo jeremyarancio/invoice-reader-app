@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: invoice-configmap
+  namespace: invoice
+data:
+  POSTGRES_DB: postgres
+  POSTGRES_USER: postgres
