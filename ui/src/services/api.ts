@@ -5,6 +5,7 @@ import {
     CreateInvoicePayload,
     UpdateInvoice,
     GetInvoice,
+    GetCurrency,
 } from "@/pages/invoices/types";
 import { CreateClient, GetPagedClients } from "@/pages/clients/types";
 import { CreateUser, PostUser } from "@/pages/auth/types";
@@ -202,12 +203,17 @@ export const fetchInvoiceUrl = async (id: string): Promise<string> => {
         throw new Error("No authentication token found. Please log in.");
     }
 
-    const response = await api.get("invoices/" + id + "/url", {
+    const response = await api.get("invoices/" + id + "/url/", {
         headers: {
             "Content-Type": "application/json",
             Authorization: `${tokenType} ${accessToken}`,
         },
     });
 
+    return response.data;
+};
+
+export const fetchCurrencies = async (): Promise<GetCurrency[]> => {
+    const response = await api.get("currencies/", {});
     return response.data;
 };

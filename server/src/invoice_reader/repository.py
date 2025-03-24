@@ -9,7 +9,7 @@ from invoice_reader.app.exceptions import (
     INVOICE_NOT_FOUND,
     USER_NOT_FOUND_EXCEPTION,
 )
-from invoice_reader.models import ClientModel, InvoiceModel, UserModel
+from invoice_reader.models import ClientModel, CurrencyModel, InvoiceModel, UserModel
 from invoice_reader.schemas.invoices import InvoiceUpdate
 from invoice_reader.utils.logger import get_logger
 
@@ -162,3 +162,11 @@ class ClientRepository:
             )
         ).one_or_none()
         return client_model
+
+
+class CurrencyRepository:
+    def __init__(self, session: sqlmodel.Session) -> None:
+        self.session = session
+
+    def get_all(self) -> Sequence[CurrencyModel]:
+        return self.session.exec(sqlmodel.select(CurrencyModel)).all()

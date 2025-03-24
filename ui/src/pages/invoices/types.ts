@@ -9,6 +9,7 @@ export interface GetInvoice {
     data: GetInvoiceItem;
     invoice_id: string;
     client_id: string;
+    currency_id: string;
     s3_path: string;
 }
 
@@ -18,7 +19,6 @@ export interface GetInvoiceItem {
     invoiced_date: Date;
     vat: number;
     is_paid: boolean;
-    currency: string;
 }
 
 export interface Invoice {
@@ -26,16 +26,15 @@ export interface Invoice {
     clientId: string;
     amountExcludingTax: number;
     vat: number;
-    currency: string;
     isPaid: boolean;
     invoicedDate: Date;
     invoiceNumber: string;
+    currencyId: string;
 }
 
 export interface CreateInvoice {
     amount_excluding_tax: number;
     vat: number;
-    currency: string;
     invoiced_date: Date;
     invoice_number: string;
     is_paid: boolean;
@@ -44,6 +43,7 @@ export interface CreateInvoice {
 export interface CreateInvoicePayload {
     invoice: CreateInvoice;
     client_id: string;
+    currency_id: string;
 }
 
 export interface UpdateInvoice {
@@ -51,9 +51,18 @@ export interface UpdateInvoice {
     invoice: {
         amount_excluding_tax: number;
         vat: number;
-        currency: string;
         invoiced_date: Date;
         invoice_number: string;
         is_paid: boolean;
     };
+}
+
+export interface GetCurrency {
+    currency_id: string;
+    currency: string;
+}
+
+export interface Currency {
+    id: string;
+    name: string;
 }

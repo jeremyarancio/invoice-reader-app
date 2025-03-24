@@ -1,9 +1,18 @@
-import { Invoice } from "../types";
+import { Currency, GetCurrency, Invoice } from "../types";
 import TableRender from "@/common/components/TableRender";
-import { mapGetInvoiceToInvoice } from "../mappers";
-import { useAddInvoice, useDeleteInvoices, useUpdateInvoice } from "../hooks";
+import { mapGetCurrencyToCurrency, mapGetInvoiceToInvoice } from "../mappers";
+import {
+    useAddInvoice,
+    useDeleteInvoices,
+    useFetchCurrencies,
+    useUpdateInvoice,
+} from "../hooks";
 import { useQuery } from "@tanstack/react-query";
-import { fetchInvoices, fetchInvoiceUrl } from "@/services/api";
+import {
+    fetchCurrencies,
+    fetchInvoices,
+    fetchInvoiceUrl,
+} from "@/services/api";
 import { Alert } from "react-bootstrap";
 import { useState } from "react";
 import AlertError from "@/common/components/AlertError";
@@ -15,6 +24,7 @@ const InvoiceList = () => {
     const addInvoice = useAddInvoice();
     const updateInvoice = useUpdateInvoice();
     const deleteInvoices = useDeleteInvoices();
+    const fetchCurrencies = useFetchCurrencies();
 
     // Fetch invoices
     const {
@@ -43,10 +53,24 @@ const InvoiceList = () => {
         enabled: !!localStorage.getItem("accessToken") && invoices.length > 0,
     });
 
+    const { data: getCurrencies } = fetchCurrencies();
+    const currencies = getCurrencies?.map(mapGetCurrencyToCurrency);
+
     const invoicePreviews = invoices.map((invoice, index) => ({
         id: invoice.id,
         file: invoiceURLs?.[index] ?? null,
     }));
+
+    const convertIdToCurrency = (
+        currencyId: string,
+        currencies: Currency[]
+    ): string => {
+        const currency = currencies.find((c) => c.id === currencyId);
+        if (!currency) {
+            throw new Error(`Currency with id ${currencyId} not found.`);
+        }
+        return currency.name;
+    };
 
     if (isLoading) return <div>Loading invoices...</div>;
     fetchError && setError(fetchError);
@@ -78,9 +102,14 @@ const InvoiceList = () => {
                         header: "Amount",
                         key: "amount",
                         render: (item: Invoice) =>
-                            `${item.currency}${item.amountExcludingTax.toFixed(
-                                2
-                            )}`,
+                            `${
+                                currencies
+                                    ? convertIdToCurrency(
+                                          item.currencyId,
+                                          currencies
+                                      )
+                                    : ""
+                            }${item.amountExcludingTax.toFixed(2)}`,
                     },
                     {
                         header: "Paid?",

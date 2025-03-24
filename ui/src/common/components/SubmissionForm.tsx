@@ -3,16 +3,10 @@ import { Alert, Form, Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { FormGroup } from "@/common/types";
 
-interface BaseItem {
-    id: string;
-    name: string;
-}
-
 interface Props<T> {
     name?: string;
     formGroups: FormGroup<T>[];
     submit: (item: T) => void;
-    additionalItems?: BaseItem[]; // It can take more attributes
     initialData: T;
 }
 
@@ -20,7 +14,6 @@ function SubmissionForm<T>({
     name,
     formGroups,
     submit,
-    additionalItems,
     initialData,
 }: Props<T>) {
     const [error, setError] = useState<string | null>(null);
@@ -94,7 +87,7 @@ function SubmissionForm<T>({
                                 )}
                             >
                                 <option value="">Select an item</option>
-                                {additionalItems?.map((item) => (
+                                {formGroup.fetchedItems?.map((item) => (
                                     <option key={item.id} value={item.id}>
                                         {item.name}
                                     </option>
