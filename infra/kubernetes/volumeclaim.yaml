@@ -2,7 +2,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   namespace: invoice
-  name: invoice-volumeclaim
+  name: invoice-pvc
 spec:
   accessModes:
     - ReadWriteOnce

@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: invoice-ui-deployment
+  name: invoice-ui
   namespace: invoice
   labels:
     app: invoice-ui
@@ -17,20 +17,28 @@ spec:
     spec:
       containers:
       - name: invoice-ui
-        image: invoice-reader-app-ui
+        image: invoice-ui
+        imagePullPolicy: Never # Force Kube to pull image locally
         ports:
         - containerPort: 5173
+        env:
+          - name: VITE_SERVER_API_URL
+            valueFrom:
+              configMapKeyRef:
+                name: invoice-configmap
+                key: VITE_SERVER_API_URL
 
 ---
 
-apiVersion: apps/v1
+apiVersion: v1
 kind: Service
 metadata:
   name: invoice-ui-service
+  namespace: invoice
 spec:
   selector:
     app: invoice-ui
   ports:
-    - protocol: HTTP
+    - protocol: TCP
       port: 5173
       targetPort: 5173

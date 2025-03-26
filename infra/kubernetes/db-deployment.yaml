@@ -17,16 +17,16 @@ spec:
       - name: invoice-postgres
         image: postgres:17.2-alpine
         env:
-        - name: POSTGRES_USER
-          valueFrom:
-            configMapKeyRef:
-              name: invoice-configmap
-              key: POSTGRES_USER
         - name: POSTGRES_DB
           valueFrom:
             configMapKeyRef:
               name: invoice-configmap
               key: POSTGRES_DB
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: invoice-secrets
+              key: POSTGRES_USER
         - name: POSTGRES_PASSWORD
           valueFrom:
             secretKeyRef:
@@ -40,18 +40,19 @@ spec:
       volumes:
       - name: postgres-data
         persistentVolumeClaim:
-          claimName: postgres-pvc
+          claimName: invoice-pvc
 
 ---
 
 apiVersion: v1
 kind: Service
 metadata:
-  name: invoice-postgres
+  name: invoice-postgres-service
   namespace: invoice
 spec:
   selector:
-    app: postgres
+    app: invoice-postgres
   ports:
     - port: 5432
       targetPort: 5432
+      protocol: TCP

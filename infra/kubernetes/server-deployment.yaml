@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   namespace: invoice
-  name: invoice-server-deployment
+  name: invoice-server
   labels:
     app: invoice-server
 spec:
@@ -17,20 +17,50 @@ spec:
     spec:
       containers:
       - name: invoice-server
-        image: invoice-reader-app-server
+        image: invoice-server # local image
+        imagePullPolicy: Never # Force Kube to pull image locally
         ports:
         - containerPort: 8000
+        env:
+        - name: ACCESS_TOKEN_EXPIRE_MINUTES
+          valueFrom:
+            configMapKeyRef:
+              name: invoice-configmap
+              key: ACCESS_TOKEN_EXPIRE_MINUTES
+        - name: POSTGRES_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: invoice-configmap
+              key: POSTGRES_HOST
+        - name: JWT_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: invoice-secrets
+              key: JWT_SECRET_KEY
+        - name: JWT_ALGORITHM
+          valueFrom:
+            secretKeyRef:
+              name: invoice-secrets
+              key: JWT_ALGORITHM
+        - name: S3_BUCKET_NAME
+          valueFrom:
+            secretKeyRef:
+              name: invoice-secrets
+              key: S3_BUCKET_NAME
+
+
 
 ---
 
-apiVersion: apps/v1
+apiVersion: v1
 kind: Service
 metadata:
   name: invoice-server-service
+  namespace: invoice
 spec:
   selector:
     app: invoice-server
   ports:
-    - protocol: HTTP
+    - protocol: TCP
       port: 8000
       targetPort: 8000

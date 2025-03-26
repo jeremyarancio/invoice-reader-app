@@ -4,5 +4,10 @@ metadata:
   name: invoice-configmap
   namespace: invoice
 data:
+  # DB
   POSTGRES_DB: postgres
-  POSTGRES_USER: postgres
+  POSTGRES_HOST: invoice-postgres-service
+  # SERVER
+  ACCESS_TOKEN_EXPIRE_MINUTES: "60"
+  # UI
+  VITE_SERVER_API_URL: /api/v1/ # use ingress
