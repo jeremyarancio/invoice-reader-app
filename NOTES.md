@@ -1,5 +1,12 @@
 # Notes
 
+## 26/03/2025
+* Minikube can be quite buggy: `minikube delete --all --purge`
+* Enable minikube to access local images: `eval $(minikube docker-env)`. Now all docker command will run inside minikube (build docker images)
+* Silent failure from the UI due to Typescript errors during build
+* Also, missed set -e in the entrypoint
+* VITE can cache, leading to weird behaviours. Force fresh start: `npm run dev -- --force`
+
 ## 05/02/2025: ECS & VPC
 
 * Struggled for days to make the PG DB available. For PG, we need to remove the HTTP protocole in task definition!
