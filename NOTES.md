@@ -1,5 +1,9 @@
 # Notes
 
+## 28/03/2025
+* When deploying on GKE, every step needs more time for the deployment. Be patient.
+* Pushing to the ghcr.io is private by default.
+
 ## 26/03/2025
 * Minikube can be quite buggy: `minikube delete --all --purge`
 * Enable minikube to access local images: `eval $(minikube docker-env)`. Now all docker command will run inside minikube (build docker images)
