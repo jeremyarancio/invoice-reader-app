@@ -1,4 +1,4 @@
-import { Currency, GetCurrency, Invoice } from "../types";
+import { Currency, Invoice } from "../types";
 import TableRender from "@/common/components/TableRender";
 import { mapGetCurrencyToCurrency, mapGetInvoiceToInvoice } from "../mappers";
 import {
@@ -8,11 +8,7 @@ import {
     useUpdateInvoice,
 } from "../hooks";
 import { useQuery } from "@tanstack/react-query";
-import {
-    fetchCurrencies,
-    fetchInvoices,
-    fetchInvoiceUrl,
-} from "@/services/api";
+import { fetchInvoices, fetchInvoiceUrl } from "@/services/api";
 import { Alert } from "react-bootstrap";
 import { useState } from "react";
 import AlertError from "@/common/components/AlertError";

@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: invoice
+  name: invoice-postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: invoice-postgres
+  template:
+    metadata:
+      labels:
+        app: invoice-postgres
+    spec:
+      containers:
+      - name: invoice-postgres
+        image: postgres:17.2-alpine
+        env:
+        - name: POSTGRES_DB
+          valueFrom:
+            configMapKeyRef:
+              name: invoice-configmap
+              key: POSTGRES_DB
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: invoice-secrets
+              key: POSTGRES_USER
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: invoice-secrets
+              key: POSTGRES_PASSWORD
+        ports:
+        - containerPort: 5432
+        volumeMounts:
+        - name: postgres-data
+          mountPath: /var/lib/postgresql/data
+      volumes:
+      - name: postgres-data
+        persistentVolumeClaim:
+          claimName: invoice-pvc
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: invoice-postgres-service
+  namespace: invoice
+spec:
+  selector:
+    app: invoice-postgres
+  ports:
+    - port: 5432
+      targetPort: 5432
+      protocol: TCP

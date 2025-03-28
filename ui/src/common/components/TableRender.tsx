@@ -1,7 +1,9 @@
 import { Dropdown, Table, Button, Form } from "react-bootstrap";
 import { useState } from "react";
 import EditModal from "./EditModal";
-import trashIcon from "@/assets/trash.svg";
+import trashIcon from "@/images/trash.svg";
+import viewIcon from "@/images/eye-fill.svg";
+
 interface BaseItem {
     id: string;
 }
@@ -43,7 +45,7 @@ function TableRender<T extends BaseItem>({
 }: TableRenderProps<T>) {
     const [showedItem, setShowedItem] = useState<T | null>(null);
     const [selectedItems, setSelectedItems] = useState<T[]>([]);
-    
+
     const handleSelect = (item: T) => {
         setSelectedItems((prev) => {
             if (prev.includes(item)) {
@@ -151,7 +153,7 @@ function TableRender<T extends BaseItem>({
                             ))}
                             <td>
                                 <img
-                                    src="src/assets/eye-fill.svg"
+                                    src={viewIcon}
                                     alt="view"
                                     onClick={() => setShowedItem(item)}
                                     style={{ cursor: "pointer" }}

@@ -33,6 +33,13 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id"),
     )
 
+    currencies = [
+        CurrencyModel(currency="$"),
+        CurrencyModel(currency="€"),
+    ]
+    session.add_all(currencies)
+    session.commit()
+    
     currency_dollar_id = session.exec(
         sqlmodel.select(CurrencyModel).where(CurrencyModel.currency == "$")
     ).one()
@@ -46,12 +53,6 @@ def upgrade() -> None:
     op.drop_column("invoice", "currency")
     op.create_foreign_key(None, "invoice", "currency", ["currency_id"], ["id"])
 
-    currencies = [
-        CurrencyModel(currency="$"),
-        CurrencyModel(currency="€"),
-    ]
-    session.add_all(currencies)
-    session.commit()
     # ### end Alembic commands ###
 
 

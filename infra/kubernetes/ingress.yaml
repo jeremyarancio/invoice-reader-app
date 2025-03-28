@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: invoice-ingress
+  namespace: invoice
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: invoice-ui-service
+            port:
+              number: 5173
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: invoice-server-service
+            port:
+              number: 8000

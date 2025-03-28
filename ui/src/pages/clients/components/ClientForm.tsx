@@ -14,6 +14,7 @@ const initialClient: formClient = {
     zipcode: 0,
     city: "",
     country: "",
+    totalRevenu: 0
 };
 
 const ClientForm = () => {
