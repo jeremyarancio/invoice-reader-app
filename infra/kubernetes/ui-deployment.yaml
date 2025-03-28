@@ -17,8 +17,9 @@ spec:
     spec:
       containers:
       - name: invoice-ui
-        image: invoice-ui
-        imagePullPolicy: Never # Force Kube to pull image locally
+        image: ghcr.io/jeremyarancio/invoice-ui:latest
+        # image: invoice-ui
+        # imagePullPolicy: Never # Force Kube to pull image locally
         ports:
         - containerPort: 5173
         env:

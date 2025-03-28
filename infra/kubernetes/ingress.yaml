@@ -4,7 +4,6 @@ metadata:
   name: invoice-ingress
   namespace: invoice
 spec:
-  ingressClassName: nginx
   rules:
   - http:
       paths:

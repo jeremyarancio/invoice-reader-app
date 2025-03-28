@@ -17,8 +17,9 @@ spec:
     spec:
       containers:
       - name: invoice-server
-        image: invoice-server # local image
-        imagePullPolicy: Never # Force Kube to pull image locally
+        image: ghcr.io/jeremyarancio/invoice-server:latest
+        # image: invoice-server # local image
+        # imagePullPolicy: Never # Force Kube to pull image locally
         ports:
         - containerPort: 8000
         env:
