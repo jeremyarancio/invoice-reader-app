@@ -1,25 +1,30 @@
 .PHONY: *
 
+#----Local dev without Docker----
 dev-ui:
 	cd ui/ && npm run dev
 
 dev-server:
 	cd server/ && uv run --directory src/ fastapi dev invoice_reader/app/main.py
 
+#----Formating----
+fix: lint format
 format:
 	cd server && uv tool run ruff format .
 
 lint:
 	cd server && uv tool run ruff check --fix
 
-fix: lint format
 
 test:
 	cd server && uv run pytest -vv
 
-# Docker
-dev:
-	docker-compose --env-file ./server/.env up -d
+#----Docker----
+compose-up:
+	docker compose up -d
+
+compose-build:
+	docker compose up -d --build
 
 logs:
 	docker compose logs -f
@@ -38,32 +43,3 @@ build-ui:
 
 build-pg:
 	docker build -t postgres:17.2-alpine
-
-tag: tag-server tag-ui tag-pg
-
-tag-server:
-	docker tag invoice-server:latest 265890761777.dkr.ecr.eu-central-1.amazonaws.com/invoice-server
-
-tag-ui:
-	docker tag invoice-ui:latest 265890761777.dkr.ecr.eu-central-1.amazonaws.com/invoice-ui
-
-tag-pg:
-	docker tag postgres:17.2-alpine 265890761777.dkr.ecr.eu-central-1.amazonaws.com/invoice-postgres
-
-push: push-server push-ui push-pg
-
-push-server:
-	docker push 265890761777.dkr.ecr.eu-central-1.amazonaws.com/invoice-server
-
-push-ui:
-	docker push 265890761777.dkr.ecr.eu-central-1.amazonaws.com/invoice-ui
-
-push-pg:
-	docker push 265890761777.dkr.ecr.eu-central-1.amazonaws.com/invoice-postgres
-
-# Terraform
-apply:
-	terraform -chdir=infra apply
-
-destroy:
-	terraform -chdir=infra destroy
