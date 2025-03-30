@@ -7,13 +7,14 @@ import sqlmodel
 from fastapi import Depends
 from fastapi.exceptions import HTTPException
 from fastapi.security import OAuth2PasswordBearer
-from jwt.exceptions import InvalidTokenError
+from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
 from passlib.context import CryptContext
 
 from invoice_reader import db, presenter, settings
 from invoice_reader.app.exceptions import (
     CREDENTIALS_EXCEPTION,
     EXISTING_USER_EXCEPTION,
+    EXPIRED_TOKEN_EXCEPTION,
     MISSING_ENVIRONMENT_VARIABLE_EXCEPTION,
     USER_NOT_FOUND_EXCEPTION,
 )
@@ -88,3 +89,13 @@ def register_user(user_create: UserCreate, session: sqlmodel.Session) -> None:
         is_disable=False,
     )
     presenter.add_user(user=user, session=session)
+
+
+def validate_token(token: str) -> None:
+    try:
+        payload = jwt.decode(
+            token, key=settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM]
+        )
+        return payload
+    except ExpiredSignatureError as e:
+        raise EXPIRED_TOKEN_EXCEPTION from e

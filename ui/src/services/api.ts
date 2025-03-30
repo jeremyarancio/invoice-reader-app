@@ -216,3 +216,12 @@ export const fetchCurrencies = async (): Promise<GetCurrency[]> => {
     const response = await api.get("currencies/", {});
     return response.data;
 };
+
+export const validateToken = async (token: string): Promise<boolean> => {
+    try {
+        const response = await api.post("validate_token/" + token);
+        return response.status === 200;
+    } catch (error) {
+        return false;
+    }
+};
