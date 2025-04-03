@@ -1,54 +1,57 @@
 x-db-env: &db-env
-  POSTGRES_USER: ${POSTGRES_USER:-postgres}
-  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-  POSTGRES_DB: ${POSTGRES_DB:-postgres}
+    POSTGRES_USER: ${POSTGRES_USER:-postgres}
+    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    POSTGRES_DB: ${POSTGRES_DB:-postgres}
+
+name: invoice
 
 services:
-  postgres:
-    restart: unless-stopped
-    image: postgres:17.2-alpine
-    environment: *db-env
-    ports:
-      - 5432:5432
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    networks:
-      - app-network
+    postgres:
+        container_name: invoice-postgres
+        restart: unless-stopped
+        image: postgres:17.2-alpine
+        environment: *db-env
+        ports:
+            - 5432:5432
+        volumes:
+            - postgres_data:/var/lib/postgresql/data
+        networks:
+            - app-network
 
-  server:
-    build:
-      context: ./server
-      target: dev # Use the dev build stage
-    ports:
-      - 8000:8000
-    env_file:
-      - "./server/.env"
-    volumes:
-      - ./server/src:/app/src
-      - ./server/.aws:/root/.aws # Mount AWS User credentials to Docker Compose
-    depends_on:
-      - postgres
-    networks:
-      - app-network
+    server:
+        container_name: invoice-server
+        build:
+            context: ./server
+            target: dev # Use the dev build stage
+        ports:
+            - 8000:8000
+        env_file:
+            - "./server/.env"
+        volumes:
+            - ./server/src:/app/src
+            - ./server/.aws:/root/.aws # Mount AWS User credentials to Docker Compose
+        depends_on:
+            - postgres
+        networks:
+            - app-network
 
-  ui:
-    restart: always
-    build:
-      context: ./ui
-    ports:
-      - 5173:5173
-    env_file:
-      - "./ui/.env"
-    depends_on:
-      - server
-    networks:
-      - app-network
-    volumes:
-      - ./ui:/app
+    # ui:
+    #   build:
+    #     context: ./ui
+    #   ports:
+    #     - 5173:5173
+    #   env_file:
+    #     - "./ui/.env"
+    #   depends_on:
+    #     - server
+    #   networks:
+    #     - app-network
+    #   volumes:
+    #     - ./ui:/app
 
 volumes:
-  postgres_data:
+    postgres_data:
 
 networks:
-  app-network:
-    driver: bridge
+    app-network:
+        driver: bridge

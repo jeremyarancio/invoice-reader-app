@@ -7,13 +7,14 @@ import sqlmodel
 from fastapi import Depends
 from fastapi.exceptions import HTTPException
 from fastapi.security import OAuth2PasswordBearer
-from jwt.exceptions import InvalidTokenError
+from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
 from passlib.context import CryptContext
 
 from invoice_reader import db, presenter, settings
 from invoice_reader.app.exceptions import (
     CREDENTIALS_EXCEPTION,
     EXISTING_USER_EXCEPTION,
+    EXPIRED_TOKEN_EXCEPTION,
     MISSING_ENVIRONMENT_VARIABLE_EXCEPTION,
     USER_NOT_FOUND_EXCEPTION,
 )
@@ -48,6 +49,8 @@ def get_current_user_id(
         user = presenter.get_user_by_email(email=email, session=session)
         if not user:
             raise USER_NOT_FOUND_EXCEPTION
+    except ExpiredSignatureError as e:
+        raise EXPIRED_TOKEN_EXCEPTION from e
     except InvalidTokenError as e:
         raise CREDENTIALS_EXCEPTION from e
     if not user.user_id:

@@ -3,14 +3,16 @@ import { PostUser } from "./types";
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { AxiosError } from "axios";
+import { useAuth } from "@/common/components/AuthProvider";
 
 export const useSignIn = () => {
+    const { setToken } = useAuth();
     const navigate = useNavigate();
+
     const signInMutation = useMutation({
         mutationFn: loginUser,
         onSuccess: (data) => {
-            localStorage.setItem("accessToken", data.access_token);
-            localStorage.setItem("tokenType", data.token_type);
+            setToken(data.access_token);
             navigate("/");
         },
         onError: (error: AxiosError) => {

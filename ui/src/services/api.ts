@@ -25,7 +25,7 @@ export const queryClient = new QueryClient({
     },
 });
 
-const api = axios.create({
+export const api = axios.create({
     baseURL: baseURL,
 });
 
@@ -49,17 +49,9 @@ export const submitInvoice = async (file: File, data: CreateInvoicePayload) => {
     formData.append("upload_file", file);
     formData.append("data", invoiceData);
 
-    const accessToken = localStorage.getItem("accessToken");
-    const tokenType = localStorage.getItem("tokenType") || "Bearer";
-
-    if (!accessToken) {
-        throw new Error("No authentication token found. Please log in.");
-    }
-
     const response = await api.post("invoices/", formData, {
         headers: {
             "Content-Type": "multipart/form-data",
-            Authorization: `${tokenType} ${accessToken}`,
         },
     });
 
@@ -67,13 +59,9 @@ export const submitInvoice = async (file: File, data: CreateInvoicePayload) => {
 };
 
 export const fetchInvoice = async (id: string): Promise<GetInvoice> => {
-    const accessToken = localStorage.getItem("accessToken");
-    const tokenType = localStorage.getItem("tokenType") || "Bearer";
-
     const response = await api.get("invoices/" + id, {
         headers: {
             "Content-Type": "multipart/form-data",
-            Authorization: `${tokenType} ${accessToken}`,
         },
     });
     return response.data;
@@ -83,9 +71,6 @@ export const fetchInvoices = async (
     pageNumber: number,
     perPage: number
 ): Promise<GetPagedInvoices> => {
-    const accessToken = localStorage.getItem("accessToken");
-    const tokenType = localStorage.getItem("tokenType") || "Bearer";
-
     const response = await api.get("invoices/", {
         params: {
             page: pageNumber,
@@ -93,7 +78,6 @@ export const fetchInvoices = async (
         },
         headers: {
             "Content-Type": "application/json",
-            Authorization: `${tokenType} ${accessToken}`,
         },
     });
     return response.data;
@@ -103,9 +87,6 @@ export const fetchClients = async (
     pageNumber: number,
     perPage: number
 ): Promise<GetPagedClients> => {
-    const accessToken = localStorage.getItem("accessToken");
-    const tokenType = localStorage.getItem("tokenType") || "Bearer";
-
     const response = await api.get("clients/", {
         params: {
             page: pageNumber,
@@ -113,24 +94,15 @@ export const fetchClients = async (
         },
         headers: {
             "Content-Type": "application/json",
-            Authorization: `${tokenType} ${accessToken}`,
         },
     });
     return response.data;
 };
 
 export const addClient = async (client: CreateClient) => {
-    const accessToken = localStorage.getItem("accessToken");
-    const tokenType = localStorage.getItem("tokenType") || "Bearer";
-
-    if (!accessToken) {
-        throw new Error("No authentication token found. Please log in.");
-    }
-
     const response = await api.post("/clients/", client, {
         headers: {
             "Content-Type": "application/json",
-            Authorization: `${tokenType} ${accessToken}`,
         },
     });
 
@@ -138,18 +110,11 @@ export const addClient = async (client: CreateClient) => {
 };
 
 export const deleteInvoices = async (invoice_ids: string[]) => {
-    const accessToken = localStorage.getItem("accessToken");
-    const tokenType = localStorage.getItem("tokenType") || "Bearer";
-
-    if (!accessToken) {
-        throw new Error("No authentication token found. Please log in.");
-    }
     await Promise.all(
         invoice_ids.map(async (invoice_id) => {
             await api.delete("invoices/" + invoice_id, {
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: `${tokenType} ${accessToken}`,
                 },
             });
         })
@@ -157,19 +122,11 @@ export const deleteInvoices = async (invoice_ids: string[]) => {
 };
 
 export const deleteClients = async (client_ids: string[]) => {
-    const accessToken = localStorage.getItem("accessToken");
-    const tokenType = localStorage.getItem("tokenType") || "Bearer";
-
-    if (!accessToken) {
-        throw new Error("No authentication token found. Please log in.");
-    }
-
     await Promise.all(
         client_ids.map(async (client_id) => {
             await api.delete("clients/" + client_id, {
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: `${tokenType} ${accessToken}`,
                 },
             });
         })
@@ -177,17 +134,9 @@ export const deleteClients = async (client_ids: string[]) => {
 };
 
 export const updateInvoice = async (invoice: UpdateInvoice) => {
-    const accessToken = localStorage.getItem("accessToken");
-    const tokenType = localStorage.getItem("tokenType") || "Bearer";
-
-    if (!accessToken) {
-        throw new Error("No authentication token found. Please log in.");
-    }
-
     const response = await api.put("invoices/" + invoice.id, invoice.invoice, {
         headers: {
             "Content-Type": "application/json",
-            Authorization: `${tokenType} ${accessToken}`,
         },
     });
 
@@ -195,17 +144,9 @@ export const updateInvoice = async (invoice: UpdateInvoice) => {
 };
 
 export const fetchInvoiceUrl = async (id: string): Promise<string> => {
-    const accessToken = localStorage.getItem("accessToken");
-    const tokenType = localStorage.getItem("tokenType") || "Bearer";
-
-    if (!accessToken) {
-        throw new Error("No authentication token found. Please log in.");
-    }
-
     const response = await api.get("invoices/" + id + "/url/", {
         headers: {
             "Content-Type": "application/json",
-            Authorization: `${tokenType} ${accessToken}`,
         },
     });
 
@@ -215,4 +156,13 @@ export const fetchInvoiceUrl = async (id: string): Promise<string> => {
 export const fetchCurrencies = async (): Promise<GetCurrency[]> => {
     const response = await api.get("currencies/", {});
     return response.data;
+};
+
+export const validateToken = async (token: string): Promise<boolean> => {
+    try {
+        const response = await api.post("validate_token/" + token);
+        return response.status === 200;
+    } catch (error) {
+        return false;
+    }
 };

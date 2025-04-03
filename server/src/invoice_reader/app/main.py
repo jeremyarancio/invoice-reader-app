@@ -32,9 +32,9 @@ app.add_middleware(
 
 
 @app.exception_handler(HTTPException)
-async def http_exception_handler(request: Request, exc: HTTPException):
+def http_exception_handler(request: Request, exc: HTTPException):
     # Log the status code and error message
-    LOGGER.error(f"HTTP Error: {exc.status_code} - {exc.detail}")
+    LOGGER.error("HTTP Error: %s - %s", exc.status_code, exc.detail)
     # Return the default HTTPException response
     return JSONResponse(
         status_code=exc.status_code,

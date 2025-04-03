@@ -10,7 +10,7 @@ USER_NOT_FOUND_EXCEPTION = HTTPException(
 
 CREDENTIALS_EXCEPTION = HTTPException(
     status_code=status.HTTP_401_UNAUTHORIZED,
-    detail="Could not validate credentials",
+    detail="Credentials are not valid.",
     headers={"WWW-Authenticate": "Bearer"},
 )
 
@@ -43,4 +43,9 @@ INVOICE_NOT_FOUND = HTTPException(
 ROLLBACK = HTTPException(
     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
     detail="Something went wrong with ",
+)
+
+EXPIRED_TOKEN_EXCEPTION = HTTPException(
+    status_code=status.HTTP_403_FORBIDDEN,
+    detail="The JWT is expired. Generate a new one.",
 )

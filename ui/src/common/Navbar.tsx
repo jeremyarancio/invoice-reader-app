@@ -1,9 +1,9 @@
-import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import {
     Navbar as BootstrapNavbar,
     Nav,
-    Container,
     Button,
+    Container,
 } from "react-bootstrap";
 import { useSignOut } from "./hooks";
 
@@ -13,13 +13,13 @@ const Navbar = () => {
     return (
         <BootstrapNavbar bg="dark" variant="dark" expand="lg">
             <Container>
-                <BootstrapNavbar.Brand as={Link} to="/">
+                <BootstrapNavbar.Brand as={NavLink} to="/">
                     Invoice Manager
                 </BootstrapNavbar.Brand>
                 <BootstrapNavbar.Toggle aria-controls="basic-navbar-nav" />
                 <BootstrapNavbar.Collapse id="basic-navbar-nav">
                     <Nav className="me-auto">
-                        <Nav.Link as={Link} to="/clients">
+                        <Nav.Link as={NavLink} to="/clients">
                             Clients
                         </Nav.Link>
                     </Nav>
