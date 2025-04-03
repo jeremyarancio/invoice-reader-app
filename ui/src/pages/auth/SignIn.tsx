@@ -1,5 +1,5 @@
 import { Button, Container, Card, Row, Col } from "react-bootstrap";
-import AuthForm from "./AuthForm";
+import AuthForm from "@/pages/auth/AuthForm";
 import { useSignIn } from "./hooks";
 import { FormSignIn } from "./types";
 import { useNavigate } from "react-router-dom";

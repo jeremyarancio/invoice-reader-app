@@ -1,10 +1,8 @@
-import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/common/components/AuthProvider";
 
 export const useSignOut = () => {
-    const navigate = useNavigate();
+    const { setToken } = useAuth();
     return () => {
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("tokenType");
-        navigate("/signin");
+        setToken(undefined); // undefined = Log out
     };
 };
