@@ -49,6 +49,8 @@ def get_current_user_id(
         user = presenter.get_user_by_email(email=email, session=session)
         if not user:
             raise USER_NOT_FOUND_EXCEPTION
+    except ExpiredSignatureError as e:
+        raise EXPIRED_TOKEN_EXCEPTION from e
     except InvalidTokenError as e:
         raise CREDENTIALS_EXCEPTION from e
     if not user.user_id:
@@ -89,13 +91,3 @@ def register_user(user_create: UserCreate, session: sqlmodel.Session) -> None:
         is_disable=False,
     )
     presenter.add_user(user=user, session=session)
-
-
-def validate_token(token: str) -> None:
-    try:
-        payload = jwt.decode(
-            token, key=settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM]
-        )
-        return payload
-    except ExpiredSignatureError as e:
-        raise EXPIRED_TOKEN_EXCEPTION from e

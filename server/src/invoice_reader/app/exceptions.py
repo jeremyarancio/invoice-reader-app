@@ -46,6 +46,6 @@ ROLLBACK = HTTPException(
 )
 
 EXPIRED_TOKEN_EXCEPTION = HTTPException(
-    status_code=status.HTTP_401_UNAUTHORIZED,
+    status_code=status.HTTP_403_FORBIDDEN,
     detail="The JWT is expired. Generate a new one.",
 )

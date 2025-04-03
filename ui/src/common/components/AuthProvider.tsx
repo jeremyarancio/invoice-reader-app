@@ -27,10 +27,8 @@ export const useAuth = () => {
 };
 
 const AuthProvider = ({ children }: { children: ReactNode }) => {
+    // Token undefined if not logged, null if permission denied
     const [token, setToken] = useState<TokenType>();
-
-    console.log("AuthProvider");
-    console.log("AUTH token:", token);
 
     useLayoutEffect(() => {
         const authInterceptor = api.interceptors.request.use((config) => {
@@ -49,19 +47,21 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
         const refreshInterceptor = api.interceptors.response.use(
             (response) => response,
             async (error) => {
-                error.response.status === 403 && setToken(null);
+                if (error.response?.status === 403) {
+                    console.log("403 Forbidden detected, clearing token");
+                    setToken(null); // Permission denied
+                }
+                return Promise.reject(error); // Important: re-throw the error
             }
         );
-        return api.interceptors.response.eject(refreshInterceptor);
-    });
+
+        return () => {
+            api.interceptors.response.eject(refreshInterceptor);
+        };
+    }, []);
 
     return (
-        <AuthContext.Provider
-            value={{
-                token,
-                setToken,
-            }}
-        >
+        <AuthContext.Provider value={{ token, setToken }}>
             {children}
         </AuthContext.Provider>
     );

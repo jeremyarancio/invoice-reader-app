@@ -12,7 +12,6 @@ export const useSignIn = () => {
     const signInMutation = useMutation({
         mutationFn: loginUser,
         onSuccess: (data) => {
-            console.log(data.access_token);
             setToken(data.access_token);
             navigate("/");
         },
