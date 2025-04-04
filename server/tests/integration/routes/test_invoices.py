@@ -107,7 +107,6 @@ def test_get_invoices(
     api_client: TestClient,
     auth_token: AuthToken,
     test_existing_invoices: list[InvoiceModel],
-    test_existing_user: UserModel,
 ):
     response = api_client.get(
         url="/api/v1/invoices/",

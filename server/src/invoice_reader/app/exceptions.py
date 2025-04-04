@@ -18,8 +18,21 @@ EXISTING_USER_EXCEPTION = HTTPException(
     status_code=status.HTTP_409_CONFLICT, detail="Email already used."
 )
 
-EXISTING_INVOICE_EXCEPTION = HTTPException(
+
+class ExistingInvoiceException(HTTPException):
+    "Custom exception to not rollback if Invoice already existing."
+
+    pass
+
+
+EXISTING_INVOICE_EXCEPTION = ExistingInvoiceException(
     status_code=status.HTTP_409_CONFLICT, detail="Invoice already exisiting."
+)
+
+
+ROLLBACK = HTTPException(
+    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+    detail="Something went wrong with storing a new invoice.",
 )
 
 UNPROCESSABLE_FILE = HTTPException(
@@ -40,10 +53,6 @@ INVOICE_NOT_FOUND = HTTPException(
     status_code=status.HTTP_404_NOT_FOUND, detail="Invoice was not found."
 )
 
-ROLLBACK = HTTPException(
-    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-    detail="Something went wrong with ",
-)
 
 EXPIRED_TOKEN_EXCEPTION = HTTPException(
     status_code=status.HTTP_403_FORBIDDEN,

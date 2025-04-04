@@ -28,7 +28,9 @@ export const useSubmitInvoice = () => {
                 ? window.alert(
                       "Error: Invoice already exists. Submission aborted."
                   )
-                : window.alert("Error: " + error.message);
+                : window.alert(
+                      "Error: " + (error.response?.data as any)?.message
+                  );
         },
     });
     return (file: File, data: CreateInvoicePayload) =>
@@ -68,7 +70,7 @@ export const useDeleteInvoices = () => {
 };
 
 export const useFetchCurrencies = () => {
-    return () => 
+    return () =>
         useQuery({
             queryKey: ["currencies"],
             queryFn: () => fetchCurrencies(),
