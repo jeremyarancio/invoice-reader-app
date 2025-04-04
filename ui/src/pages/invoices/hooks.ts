@@ -22,6 +22,7 @@ export const useSubmitInvoice = () => {
         }) => submitInvoice(file, data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["invoices"] });
+            queryClient.invalidateQueries({ queryKey: ["clients"] });
         },
         onError: (error: AxiosError) => {
             error.status === 409
