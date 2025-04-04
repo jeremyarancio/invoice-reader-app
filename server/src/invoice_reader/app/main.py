@@ -38,7 +38,7 @@ def http_exception_handler(request: Request, exc: HTTPException):
     # Return the default HTTPException response
     return JSONResponse(
         status_code=exc.status_code,
-        content={"detail": exc.detail},
+        content={"message": exc.detail},
     )
 
 

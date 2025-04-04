@@ -79,8 +79,8 @@ def add_invoice(
         #     content={"data": extracted_metadata},
         #     status_code=201,
         # )
-    except HTTPException as e:
-        raise e
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
 
@@ -116,8 +116,8 @@ def get_invoices(
             user_id=user_id, session=session, page=page, per_page=per_page
         )
         return paged_invoices
-    except HTTPException as e:
-        raise e
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
 
@@ -130,8 +130,8 @@ def delete_invoice(
 ) -> Response:
     try:
         presenter.delete_invoice(file_id=file_id, user_id=user_id, session=session)
-    except HTTPException as e:
-        raise e
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
     return Response(content="Invoice successfully deleted.", status_code=204)
@@ -150,8 +150,8 @@ def update_invoice(
             invoice_id=invoice_id,
             session=session,
         )
-    except HTTPException as e:
-        raise e
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
 
@@ -169,7 +169,7 @@ def get_invoice_url(
             session=session,
         )
         return url
-    except HTTPException as e:
-        raise e
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e

@@ -1,5 +1,11 @@
 # Notes
 
+## 04/04/2025
+### Exception handler
+* Error handler: HTTPException returns {"detail": <error message>} by default. But by using exception_handler in fastAPI, we can custom how the HTTPException, or any other exception is returned
+* This can lead to removing all httpexception from all route, making the code lighter
+* On the FE side, Axios stores the custom error message behind: (error) => error.response.data.message. Error.message represents the default status code error.
+
 ## 28/03/2025
 * When deploying on GKE, every step needs more time for the deployment. Be patient.
 * Pushing to the ghcr.io is private by default.
