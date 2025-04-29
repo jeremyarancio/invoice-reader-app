@@ -1,5 +1,9 @@
 # Notes
 
+## Monitoring
+### Prometheus Grafana
+* `rate(http_requests_total{handler!~"/|/metrics|/openapi.json|none"}[1m])` --> Calculate the number of requests per seconds for everything except {} in average in a 1 minute range.
+
 ## 04/04/2025
 ### Exception handler
 * Error handler: HTTPException returns {"detail": <error message>} by default. But by using exception_handler in fastAPI, we can custom how the HTTPException, or any other exception is returned
