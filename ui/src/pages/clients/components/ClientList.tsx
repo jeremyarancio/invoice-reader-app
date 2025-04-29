@@ -1,4 +1,3 @@
-import { Alert } from "react-bootstrap";
 import { Client } from "../types";
 import TableRender from "@/common/components/TableRender";
 import {
@@ -30,8 +29,6 @@ const ClientList = () => {
 
     if (isLoading) return <div>Loading clients...</div>;
     fetchError && setError(fetchError);
-    if (!localStorage.getItem("accessToken"))
-        return <Alert variant="danger">You need to log in...</Alert>;
 
     const tableColumns = [
         { header: "Client", key: "name" },
