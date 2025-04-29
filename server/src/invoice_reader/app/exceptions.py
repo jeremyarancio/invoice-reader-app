@@ -22,8 +22,6 @@ EXISTING_USER_EXCEPTION = HTTPException(
 class ExistingInvoiceException(HTTPException):
     "Custom exception to not rollback if Invoice already existing."
 
-    pass
-
 
 EXISTING_INVOICE_EXCEPTION = ExistingInvoiceException(
     status_code=status.HTTP_409_CONFLICT, detail="Invoice already exisiting."

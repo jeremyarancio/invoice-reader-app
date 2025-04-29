@@ -5,6 +5,7 @@ from fastapi import (
 from fastapi.exceptions import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from prometheus_fastapi_instrumentator import Instrumentator, metrics
 
 from invoice_reader import settings
 from invoice_reader.app.routes import clients, invoices, others, users
@@ -45,3 +46,8 @@ def http_exception_handler(request: Request, exc: HTTPException):
 @app.get("/")
 async def root():
     return {"message": "Welcome to the Invoice Reader API!"}
+
+
+# Monitoring
+instrumentator = Instrumentator().instrument(app)
+instrumentator.expose(app)

@@ -35,22 +35,35 @@ services:
         networks:
             - app-network
 
-    # ui:
-    #   build:
-    #     context: ./ui
-    #   ports:
-    #     - 5173:5173
-    #   env_file:
-    #     - "./ui/.env"
-    #   depends_on:
-    #     - server
-    #   networks:
-    #     - app-network
-    #   volumes:
-    #     - ./ui:/app
+    prometheus:
+        container_name: prometheus
+        image: prom/prometheus
+        ports:
+            - "9090:9090"
+        volumes:
+            - ./server/prometheus.yml:/etc/prometheus/prometheus.yml
+        command:
+            - "--config.file=/etc/prometheus/prometheus.yml"
+        depends_on:
+            - server
+        networks:
+            - app-network
+
+    grafana:
+        container_name: grafana
+        image: grafana/grafana
+        ports:
+            - "3000:3000"
+        volumes:
+            - grafana-storage:/var/lib/grafana
+        depends_on:
+            - prometheus
+        networks:
+            - app-network
 
 volumes:
     postgres_data:
+    grafana-storage:
 
 networks:
     app-network:
