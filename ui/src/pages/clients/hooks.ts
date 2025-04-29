@@ -21,7 +21,6 @@ export const useFetchClients = () => {
         useQuery({
             queryKey: ["clients", pageNumber, perPage],
             queryFn: () => fetchClients(pageNumber, perPage),
-            enabled: !!localStorage.getItem("accessToken"),
         });
 };
 

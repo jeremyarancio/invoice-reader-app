@@ -9,7 +9,6 @@ import {
 } from "../hooks";
 import { useQuery } from "@tanstack/react-query";
 import { fetchInvoices, fetchInvoiceUrl } from "@/services/api";
-import { Alert } from "react-bootstrap";
 import { useState } from "react";
 import AlertError from "@/common/components/AlertError";
 
@@ -30,7 +29,6 @@ const InvoiceList = () => {
     } = useQuery({
         queryKey: ["invoices", pageNumber, perPage],
         queryFn: () => fetchInvoices(pageNumber, perPage),
-        enabled: !!localStorage.getItem("accessToken"),
     });
 
     const invoices =
@@ -46,7 +44,6 @@ const InvoiceList = () => {
             );
             return urls;
         },
-        enabled: !!localStorage.getItem("accessToken") && invoices.length > 0,
     });
 
     const { data: getCurrencies } = fetchCurrencies();
@@ -70,10 +67,6 @@ const InvoiceList = () => {
 
     if (isLoading) return <div>Loading invoices...</div>;
     fetchError && setError(fetchError);
-    if (!localStorage.getItem("accessToken"))
-        return (
-            <Alert variant="danger">Log in to visualize your invoices...</Alert>
-        );
 
     return (
         <>
