@@ -26,9 +26,10 @@ class InvoiceRepository:
         invoice_model: InvoiceModel,
     ) -> None:
         existing_invoice = self.session.exec(
-            sqlmodel.select(InvoiceModel)
-            .where(InvoiceModel.invoice_number == invoice_model.invoice_number)
-            .where(InvoiceModel.user_id == user_id)
+            sqlmodel.select(InvoiceModel).where(
+                InvoiceModel.invoice_number == invoice_model.invoice_number,
+                InvoiceModel.user_id == user_id,
+            )
         ).first()
         if existing_invoice:
             raise EXISTING_INVOICE_EXCEPTION
@@ -146,7 +147,7 @@ class ClientRepository:
     def delete(self, client_id: uuid.UUID, user_id: uuid.UUID):
         client_model = self.session.exec(
             sqlmodel.select(ClientModel).where(
-                ClientModel.client_id == client_id and ClientModel.user_id == user_id
+                ClientModel.client_id == client_id, ClientModel.user_id == user_id
             )
         ).one_or_none()
         if not client_model:
@@ -157,8 +158,7 @@ class ClientRepository:
     def get_by_name(self, user_id: uuid.UUID, client_name: str) -> ClientModel | None:
         client_model = self.session.exec(
             sqlmodel.select(ClientModel).where(
-                ClientModel.client_name == client_name
-                and ClientModel.user_id == user_id
+                ClientModel.client_name == client_name, ClientModel.user_id == user_id
             )
         ).one_or_none()
         return client_model
