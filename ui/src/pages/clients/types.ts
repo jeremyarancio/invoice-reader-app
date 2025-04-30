@@ -34,3 +34,15 @@ export interface GetClient {
     country: string;
     total_revenu: number;
 }
+
+export interface UpdateClient {
+    id: string;
+    client: {
+        client_name: string;
+        street_number: number;
+        street_address: string;
+        zipcode: number;
+        city: string;
+        country: string;
+    };
+}

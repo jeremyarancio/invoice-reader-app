@@ -10,6 +10,7 @@ from invoice_reader.app.exceptions import (
     USER_NOT_FOUND_EXCEPTION,
 )
 from invoice_reader.models import ClientModel, CurrencyModel, InvoiceModel, UserModel
+from invoice_reader.schemas.clients import ClientUpdate
 from invoice_reader.schemas.invoices import InvoiceUpdate
 from invoice_reader.utils.logger import get_logger
 
@@ -127,7 +128,7 @@ class ClientRepository:
     def get(self, user_id: uuid.UUID, client_id: uuid.UUID) -> ClientModel | None:
         client_model = self.session.exec(
             sqlmodel.select(ClientModel).where(
-                ClientModel.client_id == client_id and ClientModel.user_id == user_id
+                ClientModel.client_id == client_id, ClientModel.user_id == user_id
             )
         ).one_or_none()
         return client_model
@@ -162,6 +163,16 @@ class ClientRepository:
             )
         ).one_or_none()
         return client_model
+
+    def update(self, client_id: uuid.UUID, client_update: ClientUpdate) -> None:
+        existing_client = self.session.exec(
+            sqlmodel.select(ClientModel).where(ClientModel.client_id == client_id)
+        ).one_or_none()
+        if not existing_client:
+            raise CLIENT_NOT_FOUND
+        existing_client.sqlmodel_update(client_update)
+        self.session.add(existing_client)
+        self.session.commit()
 
 
 class CurrencyRepository:

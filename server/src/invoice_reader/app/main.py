@@ -5,7 +5,7 @@ from fastapi import (
 from fastapi.exceptions import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from prometheus_fastapi_instrumentator import Instrumentator, metrics
+from prometheus_fastapi_instrumentator import Instrumentator
 
 from invoice_reader import settings
 from invoice_reader.app.routes import clients, invoices, others, users

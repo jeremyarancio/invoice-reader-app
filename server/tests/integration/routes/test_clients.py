@@ -6,6 +6,7 @@ from invoice_reader.schemas import AuthToken
 from invoice_reader.schemas.clients import (
     ClientCreate,
     ClientResponse,
+    ClientUpdate,
     PagedClientResponse,
 )
 
@@ -36,7 +37,6 @@ def test_add_client(
 def test_add_existing_client(
     api_client: TestClient,
     auth_token: AuthToken,
-    test_existing_user: UserModel,
     test_existing_client: ClientModel,
 ):
     response = api_client.post(
@@ -52,7 +52,6 @@ def test_get_client(
     api_client: TestClient,
     test_existing_client: ClientModel,
     test_existing_invoices: list[InvoiceModel],
-    test_existing_user: UserModel,
 ):
     response = api_client.get(
         url=f"/api/v1/clients/{test_existing_client.client_id}",
@@ -97,3 +96,27 @@ def test_delete_client(
     )
     assert response.status_code == 204
     assert not client
+
+
+def test_update_client(
+    api_client: TestClient,
+    test_existing_client: ClientModel,
+    auth_token: AuthToken,
+    client_repository: ClientRepository,
+):
+    updated_client = ClientUpdate.model_validate(test_existing_client.model_dump())
+    updated_client.client_name = "updated_client_name"
+
+    response = api_client.put(
+        url=f"/api/v1/clients/{test_existing_client.client_id}",
+        json=updated_client.model_dump(),
+        headers={"Authorization": f"{auth_token.token_type} {auth_token.access_token}"},
+    )
+
+    client_model = client_repository.get(
+        user_id=test_existing_client.user_id,
+        client_id=test_existing_client.client_id,
+    )
+    assert response.status_code == 204
+    assert client_model
+    assert client_model.client_name == updated_client.client_name

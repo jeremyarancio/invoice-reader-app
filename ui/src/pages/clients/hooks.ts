@@ -4,10 +4,12 @@ import {
     deleteClients,
     fetchClients,
     queryClient,
+    updateClient,
 } from "@/services/api";
 import { useNavigate } from "react-router-dom";
 import { Client, CreateClient } from "./types";
 import { AxiosError } from "axios";
+import { mapClientToUpdateClient } from "./mapper";
 
 export const useAddClient = () => {
     const navigate = useNavigate();
@@ -60,5 +62,16 @@ export const useSubmitClient = () => {
 };
 
 export const useUpdateClient = () => {
-    return () => {};
+    const updateMutation = useMutation({
+        mutationFn: updateClient,
+        onSuccess: () => {
+            window.alert("Client successfully updated.");
+            queryClient.invalidateQueries({ queryKey: ["clients"] });
+        },
+        onError: (error: AxiosError) => {
+            window.alert("Failed to update client: " + error.message);
+        },
+    });
+    return (client: Client) =>
+        updateMutation.mutate(mapClientToUpdateClient(client));
 };

@@ -30,6 +30,7 @@ from invoice_reader.schemas import FileData
 from invoice_reader.schemas.clients import (
     ClientCreate,
     ClientResponse,
+    ClientUpdate,
     PagedClientResponse,
 )
 from invoice_reader.schemas.invoices import (
@@ -221,3 +222,13 @@ def get_currencies(session: sqlmodel.Session):
     currency_models = currency_repository.get_all()
     currencies = CurrencyMapper.map_currency_models_to_currencies(currency_models)
     return currencies
+
+
+def update_client(
+    client_id: uuid.UUID,
+    user_id: uuid.UUID,
+    session: sqlmodel.Session,
+    client_update: ClientUpdate,
+) -> None:
+    client_repository = ClientRepository(session=session)
+    client_repository.update(client_id=client_id, client_update=client_update)

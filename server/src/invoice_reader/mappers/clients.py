@@ -3,7 +3,12 @@ from typing import Sequence
 
 from invoice_reader.core.stats import compute_total_revenu_per_client
 from invoice_reader.models import ClientModel
-from invoice_reader.schemas.clients import Client, ClientCreate, ClientResponse
+from invoice_reader.schemas.clients import (
+    Client,
+    ClientCreate,
+    ClientResponse,
+    ClientUpdate,
+)
 
 
 class ClientMapper:
@@ -48,3 +53,7 @@ class ClientMapper:
         client_create: ClientCreate,
     ) -> Client:
         return Client.model_validate(client_create.model_dump())
+
+    @staticmethod
+    def map_client_update_to_client(client_update: ClientUpdate) -> Client:
+        return Client.model_validate(client_update.model_dump())
