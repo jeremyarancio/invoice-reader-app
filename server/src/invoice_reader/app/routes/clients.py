@@ -10,6 +10,7 @@ from invoice_reader.app import auth
 from invoice_reader.schemas.clients import (
     ClientCreate,
     ClientResponse,
+    ClientUpdate,
     PagedClientResponse,
 )
 from invoice_reader.utils.logger import get_logger
@@ -37,8 +38,8 @@ def get_clients(
             per_page=per_page,
         )
         return paged_client_response
-    except HTTPException as e:
-        raise e
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=500,
@@ -79,8 +80,8 @@ def add_client(
             content="New client added to the database.",
             status_code=201,
         )
-    except HTTPException as e:
-        raise e
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
 
@@ -93,8 +94,29 @@ def delete_client(
 ) -> Response:
     try:
         presenter.delete_client(client_id=client_id, user_id=user_id, session=session)
-    except HTTPException as e:
-        raise e
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
     return Response(content="Client successfully deleted.", status_code=204)
+
+
+@router.put("/{client_id}")
+def update_client(
+    client_id: uuid.UUID,
+    client_update: ClientUpdate,
+    session: Annotated[sqlmodel.Session, Depends(db.get_session)],
+    user_id: Annotated[uuid.UUID, Depends(auth.get_current_user_id)],
+) -> Response:
+    try:
+        presenter.update_client(
+            user_id=user_id,
+            client_id=client_id,
+            client_update=client_update,
+            session=session,
+        )
+        return Response(content="Client successfully updated.", status_code=204)
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e)) from e

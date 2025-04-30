@@ -7,7 +7,11 @@ import {
     GetInvoice,
     GetCurrency,
 } from "@/pages/invoices/types";
-import { CreateClient, GetPagedClients } from "@/pages/clients/types";
+import {
+    CreateClient,
+    GetPagedClients,
+    UpdateClient,
+} from "@/pages/clients/types";
 import { CreateUser, PostUser } from "@/pages/auth/types";
 
 const baseURL = import.meta.env.VITE_SERVER_API_URL;
@@ -131,6 +135,19 @@ export const deleteClients = async (client_ids: string[]) => {
             });
         })
     );
+};
+
+export const updateClient = async (update_client: UpdateClient) => {
+    const response = await api.put(
+        "clients/" + update_client.id,
+        update_client.client,
+        {
+            headers: {
+                "Content-Type": "application/json",
+            },
+        }
+    );
+    return response.data;
 };
 
 export const updateInvoice = async (invoice: UpdateInvoice) => {

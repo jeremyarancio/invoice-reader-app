@@ -143,13 +143,14 @@ def update_invoice(
     invoice_update: InvoiceUpdate,
     session: Annotated[sqlmodel.Session, Depends(db.get_session)],
     user_id: Annotated[uuid.UUID, Depends(auth.get_current_user_id)],
-) -> None:
+) -> Response:
     try:
         presenter.update_invoice(
             invoice_update=invoice_update,
             invoice_id=invoice_id,
             session=session,
         )
+        return Response(content="Invoice successfully updated.", status_code=204)
     except HTTPException:
         raise
     except Exception as e:

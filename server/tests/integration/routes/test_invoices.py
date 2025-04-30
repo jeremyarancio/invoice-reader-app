@@ -180,7 +180,7 @@ def test_update_invoice(
         file_id=test_existing_invoice.file_id, user_id=test_existing_user.user_id
     )
     assert invoice_model
-    assert response.status_code == 200
+    assert response.status_code == 204
     assert invoice_model.invoice_number == updated_invoice.invoice_number
     assert invoice_model.amount_excluding_tax == 1234
 

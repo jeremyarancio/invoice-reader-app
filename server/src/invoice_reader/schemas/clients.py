@@ -25,6 +25,10 @@ class ClientResponse(Client):
     pass
 
 
+class ClientUpdate(ClientBase):
+    pass
+
+
 class PagedClientResponse(BaseModel):
     page: int
     per_page: int

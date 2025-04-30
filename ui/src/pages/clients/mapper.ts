@@ -1,4 +1,4 @@
-import { Client, CreateClient, GetClient } from "./types";
+import { Client, CreateClient, GetClient, UpdateClient } from "./types";
 
 export function mapGetClientToClient(getClient: GetClient): Client {
     return {
@@ -23,5 +23,19 @@ export function mapClientToCreateClient(
         street_address: client.streetAddress,
         street_number: client.streetNumber,
         zipcode: client.zipcode,
+    };
+}
+
+export function mapClientToUpdateClient(client: Client): UpdateClient {
+    return {
+        id: client.id,
+        client: {
+            client_name: client.name,
+            street_number: client.streetNumber,
+            street_address: client.streetAddress,
+            zipcode: client.zipcode,
+            city: client.city,
+            country: client.country,
+        },
     };
 }
