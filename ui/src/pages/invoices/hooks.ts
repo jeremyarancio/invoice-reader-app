@@ -75,6 +75,5 @@ export const useFetchCurrencies = () => {
         useQuery({
             queryKey: ["currencies"],
             queryFn: () => fetchCurrencies(),
-            enabled: !!localStorage.getItem("accessToken"),
         });
 };
