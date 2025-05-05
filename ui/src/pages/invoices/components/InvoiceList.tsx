@@ -130,6 +130,7 @@ const InvoiceList = () => {
                     {
                         header: "Paid?",
                         key: "isPaid",
+                        formType: "checkbox",
                     },
                 ]}
                 disabledFields={["invoiceNumber"]} // Fields that should be disabled in the Edition mode
