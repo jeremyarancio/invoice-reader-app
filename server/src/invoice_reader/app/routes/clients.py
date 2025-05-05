@@ -98,7 +98,7 @@ def delete_client(
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
-    return Response(content="Client successfully deleted.", status_code=204)
+    return Response(status_code=204)
 
 
 @router.put("/{client_id}")
@@ -115,7 +115,7 @@ def update_client(
             client_update=client_update,
             session=session,
         )
-        return Response(content="Client successfully updated.", status_code=204)
+        return Response(status_code=204)
     except HTTPException:
         raise
     except Exception as e:

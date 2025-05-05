@@ -14,7 +14,7 @@ from invoice_reader.schemas.clients import ClientUpdate
 from invoice_reader.schemas.invoices import InvoiceUpdate
 from invoice_reader.utils.logger import get_logger
 
-LOGGER = get_logger(__name__)
+LOGGER = get_logger()
 
 
 class InvoiceRepository:

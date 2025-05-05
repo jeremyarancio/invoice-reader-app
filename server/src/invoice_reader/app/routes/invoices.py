@@ -130,6 +130,7 @@ def delete_invoice(
 ) -> Response:
     try:
         presenter.delete_invoice(file_id=file_id, user_id=user_id, session=session)
+        return Response(status_code=204)
     except HTTPException:
         raise
     except Exception as e:
@@ -150,7 +151,7 @@ def update_invoice(
             invoice_id=invoice_id,
             session=session,
         )
-        return Response(content="Invoice successfully updated.", status_code=204)
+        return Response(status_code=204)
     except HTTPException:
         raise
     except Exception as e:

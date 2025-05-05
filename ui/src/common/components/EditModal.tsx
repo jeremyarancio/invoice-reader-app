@@ -46,7 +46,7 @@ function EditModal<T extends BaseItem>({
     const handleEditSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         onUpdateItem(formData);
-        setIsEditToSubmit(false)
+        setIsEditToSubmit(false);
     };
 
     const handleDelete = () => {
@@ -57,9 +57,7 @@ function EditModal<T extends BaseItem>({
 
     return (
         <Modal show onHide={handleClose} size="xl">
-            <Modal.Header closeButton>
-                <Modal.Title>Form</Modal.Title>
-            </Modal.Header>
+            <Modal.Header closeButton></Modal.Header>
             <Container>
                 <Row>
                     {filePreview && (
