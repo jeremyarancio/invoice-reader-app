@@ -6,10 +6,11 @@ interface BaseItem {
     id: string;
 }
 
-interface EditField<T> {
+export interface EditField<T> {
     header: string;
     key: keyof T | string;
     render?: (item: T) => React.ReactNode;
+    formType: "text" | "number" | "select" | "checkbox" | "date";
 }
 
 interface EditModalProps<T extends BaseItem> {
@@ -22,7 +23,7 @@ interface EditModalProps<T extends BaseItem> {
     onDeleteItem: (id: T) => void;
 }
 
-function EditModal<T extends BaseItem>({
+export function EditModal<T extends BaseItem>({
     item,
     disabledFields,
     editFields,
@@ -74,9 +75,7 @@ function EditModal<T extends BaseItem>({
                                         key={String(field.key)}
                                     >
                                         <Form.Label>{field.header}</Form.Label>
-                                        {typeof formData[
-                                            field.key as keyof T
-                                        ] === "boolean" ? (
+                                        {field.formType === "checkbox" ? (
                                             <Form.Check
                                                 type="checkbox"
                                                 name={field.header}
@@ -101,7 +100,7 @@ function EditModal<T extends BaseItem>({
                                             />
                                         ) : (
                                             <Form.Control
-                                                type="text"
+                                                type={field.formType}
                                                 name={field.header}
                                                 placeholder={String(
                                                     formData[
@@ -162,5 +161,3 @@ function EditModal<T extends BaseItem>({
         </Modal>
     );
 }
-
-export default EditModal;

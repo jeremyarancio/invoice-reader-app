@@ -110,18 +110,22 @@ const InvoiceList = () => {
                     {
                         header: "Invoice number",
                         key: "invoiceNumber",
+                        formType: "text",
                     },
                     {
                         header: "Amount excluding tax",
                         key: "amountExcludingTax",
+                        formType: "number",
                     },
                     {
                         header: "VAT",
                         key: "vat",
+                        formType: "number",
                     },
                     {
                         header: "Invoiced date",
                         key: "invoicedDate",
+                        formType: "date",
                     },
                     {
                         header: "Paid?",

@@ -1,17 +1,11 @@
 import { Dropdown, Table, Button, Form } from "react-bootstrap";
 import { useState } from "react";
-import EditModal from "./EditModal";
+import { EditModal, EditField } from "./EditModal";
 import trashIcon from "@/images/trash.svg";
 import viewIcon from "@/images/eye-fill.svg";
 
 interface BaseItem {
     id: string;
-}
-
-interface EditField<T> {
-    header: string;
-    key: keyof T | string;
-    render?: (item: T) => React.ReactNode;
 }
 
 interface ColumnConfig<T> {
