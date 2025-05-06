@@ -115,6 +115,9 @@ function SubmissionForm<T>({
                                     )
                                 }
                                 required={formGroup.required}
+                                defaultValue={
+                                    formGroup.formType === "number" ? 0 : ""
+                                }
                                 value={renderCell(formData, formGroup)}
                             />
                         )}

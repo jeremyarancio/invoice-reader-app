@@ -115,7 +115,7 @@ function TableRender<T extends BaseItem>({
                 </div>
             )}
 
-            <Table striped hover responsive>
+            <Table striped hover responsive className="align-middle">
                 <thead>
                     <tr>
                         <th>
