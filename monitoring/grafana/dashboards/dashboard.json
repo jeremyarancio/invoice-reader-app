@@ -116,7 +116,7 @@
         "gridPos": {
           "h": 5,
           "w": 4,
-          "x": 4,
+          "x": 5,
           "y": 0
         },
         "id": 4,
@@ -215,8 +215,8 @@
         },
         "gridPos": {
           "h": 8,
-          "w": 13,
-          "x": 8,
+          "w": 12,
+          "x": 9,
           "y": 0
         },
         "id": 1,
@@ -281,7 +281,7 @@
           "overrides": []
         },
         "gridPos": {
-          "h": 4,
+          "h": 8,
           "w": 3,
           "x": 21,
           "y": 0
@@ -293,7 +293,7 @@
             "placement": "bottom",
             "showLegend": true
           },
-          "pieType": "pie",
+          "pieType": "donut",
           "reduceOptions": {
             "calcs": [
               "lastNotNull"
@@ -310,11 +310,15 @@
         "pluginVersion": "11.6.0",
         "targets": [
           {
+            "disableTextWrap": false,
             "editorMode": "code",
-            "expr": "(\r\n  sum(rate(http_requests_total[5m])) by (status)\r\n  /\r\n  sum(rate(http_requests_total[5m]))\r\n) * 100",
+            "expr": "sum by (status) (rate(http_requests_total{handler!~\"/docs|/openapi.json|none|/metrics\"}[5m]))",
+            "fullMetaSearch": false,
+            "includeNullMetadata": true,
             "legendFormat": "__auto",
             "range": true,
-            "refId": "A"
+            "refId": "A",
+            "useBackend": false
           }
         ],
         "title": "2xx Status",
@@ -344,7 +348,7 @@
         },
         "gridPos": {
           "h": 9,
-          "w": 8,
+          "w": 9,
           "x": 0,
           "y": 5
         },
@@ -363,9 +367,7 @@
             "values": false
           },
           "showPercentChange": false,
-          "text": {
-            "titleSize": 15
-          },
+          "text": {},
           "textMode": "auto",
           "wideLayout": true
         },
@@ -396,16 +398,14 @@
             "color": {
               "mode": "continuous-GrYlRd"
             },
+            "fieldMinMax": false,
             "mappings": [],
+            "max": 500,
             "thresholds": {
               "mode": "absolute",
               "steps": [
                 {
                   "color": "green"
-                },
-                {
-                  "color": "red",
-                  "value": 300
                 }
               ]
             },
@@ -414,9 +414,9 @@
           "overrides": []
         },
         "gridPos": {
-          "h": 5,
-          "w": 16,
-          "x": 8,
+          "h": 6,
+          "w": 15,
+          "x": 9,
           "y": 8
         },
         "id": 6,
@@ -448,8 +448,8 @@
         "targets": [
           {
             "disableTextWrap": false,
-            "editorMode": "code",
-            "expr": "(sum by(handler) (rate(http_request_duration_seconds_sum{handler!~\"/docs|/openapi.json|/metrics|none\"}[5m])) / sum by(handler) (rate(http_request_duration_seconds_count[5m]))) * 1000",
+            "editorMode": "builder",
+            "expr": "(sum by(handler) (rate(http_request_duration_seconds_sum{handler!~\"/docs|/openapi.json|/metrics|none|/\"}[5m])) * 1000) / sum by(handler) (rate(http_request_duration_seconds_count{handler!~\"/docs|/openapi.json|/metrics|none\"}[5m]))",
             "fullMetaSearch": false,
             "includeNullMetadata": true,
             "legendFormat": "__auto",
@@ -476,5 +476,5 @@
     "timezone": "browser",
     "title": "Invoice Dashboard",
     "uid": "eek7aweml5jpcc",
-    "version": 18
+    "version": 23
   }
