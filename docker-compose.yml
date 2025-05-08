@@ -14,11 +14,19 @@ services:
             - "--providers.docker=true"
             - "--providers.docker.exposedbydefault=false"
             - "--entrypoints.web.address=:80"
+            - "--entrypoints.websecure.address=:443"
+            - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+            - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
+            - "--certificatesresolvers.myresolver.acme.email=contact@${DOMAIN_NAME:-domain.com}"
+            - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+            - "--entryPoints.web.http.redirections.entrypoint.scheme=https"
         ports:
-            - "80:80"
-            - "8080:8080"
+            - 80:80
+            - 443:443
+            - 8080:8080
         volumes:
             - /var/run/docker.sock:/var/run/docker.sock
+            - letsencrypt:/letsencrypt
         networks:
             - app-network
 
@@ -40,11 +48,12 @@ services:
             context: ./server
             target: dev
         deploy:
+            mode: replicated
             replicas: 1
         labels:
             - "traefik.enable=true"
             - "traefik.http.routers.server.rule=Host(`api.${DOMAIN_NAME:-localhost}`)"
-            - "traefik.http.routers.server.entrypoints=web"
+            - "traefik.http.routers.server.entrypoints=websecure"
             - "traefik.http.services.server.loadbalancer.server.port=8000"
         env_file:
             - "./server/.env"
@@ -74,7 +83,7 @@ services:
         labels:
             - "traefik.enable=true"
             - "traefik.http.routers.grafana.rule=Host(`monitor.${DOMAIN_NAME:-localhost}`)"
-            - "traefik.http.routers.grafana.entrypoints=web"
+            - "traefik.http.routers.grafana.entrypoints=websecure"
         volumes:
             - grafana-storage:/var/lib/grafana
         depends_on:
@@ -85,6 +94,7 @@ services:
 volumes:
     postgres_data:
     grafana-storage:
+    letsencrypt:
 
 networks:
     app-network:
