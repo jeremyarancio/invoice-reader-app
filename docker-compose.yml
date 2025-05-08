@@ -40,10 +40,10 @@ services:
             context: ./server
             target: dev
         deploy:
-            replicas: 3
+            replicas: 1
         labels:
             - "traefik.enable=true"
-            - "traefik.http.routers.server.rule=Host(`api.invoice.localhost`)"
+            - "traefik.http.routers.server.rule=Host(`api.${DOMAIN_NAME:-localhost}`)"
             - "traefik.http.routers.server.entrypoints=web"
             - "traefik.http.services.server.loadbalancer.server.port=8000"
         env_file:
@@ -73,7 +73,7 @@ services:
         image: grafana/grafana
         labels:
             - "traefik.enable=true"
-            - "traefik.http.routers.grafana.rule=Host(`monitor.invoice.localhost`)"
+            - "traefik.http.routers.grafana.rule=Host(`monitor.${DOMAIN_NAME:-localhost}`)"
             - "traefik.http.routers.grafana.entrypoints=web"
         volumes:
             - grafana-storage:/var/lib/grafana
