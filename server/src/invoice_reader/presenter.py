@@ -226,9 +226,19 @@ def get_currencies(session: sqlmodel.Session):
 
 def update_client(
     client_id: uuid.UUID,
-    user_id: uuid.UUID,
     session: sqlmodel.Session,
     client_update: ClientUpdate,
 ) -> None:
     client_repository = ClientRepository(session=session)
     client_repository.update(client_id=client_id, client_update=client_update)
+
+
+def get_refresh_token(
+    user_id: uuid.UUID,
+    session: sqlmodel.Session,
+) -> str | None:
+    user_repository = UserRepository(session=session)
+    user_model = user_repository.get(user_id=user_id)
+    if not user_model:
+        raise CLIENT_NOT_FOUND
+    return user_model.refresh_token.refresh_token

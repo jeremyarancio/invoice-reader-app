@@ -16,6 +16,7 @@ from invoice_reader.app.exceptions import (
     EXISTING_USER_EXCEPTION,
     EXPIRED_TOKEN_EXCEPTION,
     MISSING_ENVIRONMENT_VARIABLE_EXCEPTION,
+    NO_REFRESH_TOKEN_EXCEPTION,
     USER_NOT_FOUND_EXCEPTION,
 )
 from invoice_reader.mappers import UserMapper
@@ -91,3 +92,45 @@ def register_user(user_create: UserCreate, session: sqlmodel.Session) -> None:
         is_disable=False,
     )
     presenter.add_user(user=user, session=session)
+
+
+def refresh_token(email: str, session: sqlmodel.Session) -> str:
+    # TODO: Remove by switching to Pydantic-Config
+    if not settings.JWT_ALGORITHM or not settings.JWT_SECRET_KEY:
+        raise MISSING_ENVIRONMENT_VARIABLE_EXCEPTION
+    user = presenter.get_user_by_email(email=email, session=session)
+    if not user:
+        raise USER_NOT_FOUND_EXCEPTION
+    refresh_token = presenter.get_refresh_token(user_id=user.user_id, session=session)
+    if not refresh_token:
+        raise NO_REFRESH_TOKEN_EXCEPTION
+    try:
+        jwt.decode(
+            refresh_token,
+            key=settings.JWT_SECRET_KEY,
+            algorithms=[settings.JWT_ALGORITHM],
+        )
+    except ExpiredSignatureError as e:
+        raise EXPIRED_TOKEN_EXCEPTION from e
+    # If the refresh token is still valid, we can create a new access token
+    return create_access_token(email=email)
+
+
+def get_email_from_expired_token(
+    token: str,
+) -> str:
+    try:
+        if not settings.JWT_ALGORITHM:
+            raise MISSING_ENVIRONMENT_VARIABLE_EXCEPTION
+        payload: dict = jwt.decode(
+            token,
+            key=settings.JWT_SECRET_KEY,
+            algorithms=[settings.JWT_ALGORITHM],
+            options={"verify_exp": False},
+        )
+        email = payload.get("sub")
+        if email is None:
+            raise CREDENTIALS_EXCEPTION
+        return email
+    except InvalidTokenError as e:
+        raise CREDENTIALS_EXCEPTION from e

@@ -49,8 +49,23 @@ def delete_user(
 ) -> Response:
     try:
         presenter.delete_user(user_id=user_id, session=session)
-    except HTTPException as e:
-        raise e
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
     return Response(content="User successfully deleted.", status_code=204)
+
+
+@router.get("/refresh/")
+def refresh_token(
+    session: Annotated[sqlmodel.Session, Depends(db.get_session)],
+    token: Annotated[str, Depends(auth.oauth2_scheme)],
+) -> AuthToken:
+    try:
+        email = auth.get_email_from_expired_token(token=token)
+        access_token = auth.refresh_token(email=email, session=session)
+        return AuthToken(access_token=access_token, token_type="bearer")
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e)) from e

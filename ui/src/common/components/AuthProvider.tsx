@@ -5,7 +5,7 @@ import React, {
     useState,
     ReactNode,
 } from "react";
-import { api } from "@/services/api";
+import { api, fetchRefreshToken } from "@/services/api";
 
 type TokenType = string | null | undefined;
 
@@ -48,8 +48,10 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
             (response) => response,
             async (error) => {
                 if (error.response?.status === 403) {
-                    console.log("403 Forbidden detected, clearing token");
-                    setToken(null); // Permission denied
+                    const response = await fetchRefreshToken();
+                    response.status === 200 && token
+                        ? setToken(response.data.access_token)
+                        : setToken(null); // Permission denied
                 }
                 return Promise.reject(error); // Important: re-throw the error
             }

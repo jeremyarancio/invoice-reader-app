@@ -9,7 +9,7 @@ from sqlmodel import Session
 from invoice_reader import db
 from invoice_reader.app import auth
 from invoice_reader.app.main import app
-from invoice_reader.models import UserModel
+from invoice_reader.models import RefreshTokenModel, UserModel
 from invoice_reader.schemas import (
     AuthToken,
     FileData,
@@ -88,6 +88,16 @@ def bucket() -> str:
 @pytest.fixture
 def auth_token(test_existing_user: UserModel) -> AuthToken:
     access_token = auth.create_access_token(email=test_existing_user.email)
+    return AuthToken(access_token=access_token, token_type="bearer")
+
+
+@pytest.fixture
+def auth_token_with_refresh_token(
+    existing_user: User,
+    test_existing_refresh_token: RefreshTokenModel,  # This create a refresh token in the db
+) -> AuthToken:
+    """To test refresh token, we need a user and refresh token stored in db"""
+    access_token = auth.create_access_token(email=existing_user.email)
     return AuthToken(access_token=access_token, token_type="bearer")
 
 

@@ -10,11 +10,13 @@ from invoice_reader.models import (
     ClientModel,
     CurrencyModel,
     InvoiceModel,
+    RefreshTokenModel,
     UserModel,
 )
 from invoice_reader.repository import (
     ClientRepository,
     InvoiceRepository,
+    RefreshTokenRepository,
     UserRepository,
 )
 from invoice_reader.schemas import FileData
@@ -180,3 +182,28 @@ def client_repository(session: Session) -> ClientRepository:
 @pytest.fixture
 def user_repository(session: Session) -> UserRepository:
     return UserRepository(session=session)
+
+
+@pytest.fixture
+def refresh_token_repository(session: Session) -> RefreshTokenRepository:
+    return RefreshTokenRepository(session=session)
+
+
+@pytest.fixture
+def existing_refresh_token(existing_user: User) -> str:
+    access_token = auth.create_access_token(email=existing_user.email)
+    return access_token
+
+
+@pytest.fixture
+def test_existing_refresh_token(
+    session: Session,
+    test_existing_user: UserModel,
+    existing_refresh_token: str,
+) -> RefreshTokenModel:  # type: ignore
+    refresh_token_model = RefreshTokenModel(
+        user_id=test_existing_user.user_id,
+        refresh_token=existing_refresh_token,
+    )
+    add_and_commit(session, refresh_token_model)
+    yield refresh_token_model

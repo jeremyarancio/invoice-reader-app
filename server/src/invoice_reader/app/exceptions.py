@@ -56,3 +56,9 @@ EXPIRED_TOKEN_EXCEPTION = HTTPException(
     status_code=status.HTTP_403_FORBIDDEN,
     detail="The JWT is expired. Generate a new one.",
 )
+
+
+NO_REFRESH_TOKEN_EXCEPTION = HTTPException(
+    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+    detail="No refresh token found for the user.",
+)

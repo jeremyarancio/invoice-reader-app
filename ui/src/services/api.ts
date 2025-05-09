@@ -174,3 +174,8 @@ export const fetchCurrencies = async (): Promise<GetCurrency[]> => {
     const response = await api.get("currencies/", {});
     return response.data;
 };
+
+export const fetchRefreshToken = async () => {
+    const response = await api.get("users/refresh/");
+    return response;
+};

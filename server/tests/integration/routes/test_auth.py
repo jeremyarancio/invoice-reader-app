@@ -3,6 +3,7 @@ from fastapi.testclient import TestClient
 from invoice_reader.app import auth
 from invoice_reader.models import UserModel
 from invoice_reader.repository import UserRepository
+from invoice_reader.schemas import AuthToken
 from invoice_reader.schemas.users import UserCreate
 
 
@@ -63,3 +64,18 @@ def test_user_login_wrong_password(
         data={"username": test_existing_user.email, "password": "wrong_password"},
     )
     assert response.status_code == 401
+
+
+def test_refresh_token(
+    api_client: TestClient,
+    auth_token_with_refresh_token: AuthToken,
+):
+    response = api_client.post(
+        url="/api/v1/users/refresh/",
+        headers={
+            "Authorization": f"{auth_token_with_refresh_token.token_type} {auth_token_with_refresh_token.access_token}"
+        },
+    )
+    access_token = response.json().get("access_token")
+    assert response.status_code == 200
+    assert access_token
