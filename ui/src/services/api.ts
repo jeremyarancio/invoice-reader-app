@@ -176,6 +176,11 @@ export const fetchCurrencies = async (): Promise<GetCurrency[]> => {
 };
 
 export const fetchRefreshToken = async () => {
-    const response = await api.get("users/refresh/");
-    return response;
+    // With credentials to send cookies, containing the refresh token
+    const response = await api.get("users/refresh/", { withCredentials: true });
+    return response.data;
+};
+
+export const signOut = async () => {
+    await api.get("users/logout/", { withCredentials: true });
 };

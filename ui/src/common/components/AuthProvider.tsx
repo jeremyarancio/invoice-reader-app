@@ -5,7 +5,7 @@ import React, {
     useState,
     ReactNode,
 } from "react";
-import { api, fetchRefreshToken } from "@/services/api";
+import { api, fetchRefreshToken, signOut } from "@/services/api";
 
 type TokenType = string | null | undefined;
 
@@ -47,16 +47,25 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
         const refreshInterceptor = api.interceptors.response.use(
             (response) => response,
             async (error) => {
-                if (error.response?.status === 403) {
-                    const response = await fetchRefreshToken();
-                    response.status === 200 && token
-                        ? setToken(response.data.access_token)
-                        : setToken(null); // Permission denied
+                const originalRequest = error.config;
+
+                if (error.response?.status === 403 && !originalRequest._retry) {
+                    console.log("Token expired, refreshing...");
+                    originalRequest._retry = true;
+                    try {
+                        const data = await fetchRefreshToken();
+                        console.log("New token received:", data.access_token);
+                        setToken(data.access_token);
+                        originalRequest.headers.Authorization = `Bearer ${data.access_token}`;
+                        return api(originalRequest);
+                    } catch (refreshError) {
+                        await signOut();
+                        return Promise.reject(refreshError);
+                    }
                 }
-                return Promise.reject(error); // Important: re-throw the error
+                return Promise.reject(error);
             }
         );
-
         return () => {
             api.interceptors.response.eject(refreshInterceptor);
         };

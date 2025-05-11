@@ -2,13 +2,15 @@ import uuid
 from typing import Annotated
 
 import sqlmodel
-from fastapi import APIRouter, Depends, Response
+from fastapi import APIRouter, Depends, Response, Request
 from fastapi.exceptions import HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 
 from invoice_reader import db, presenter
 from invoice_reader.app import auth
 from invoice_reader.schemas import AuthToken, UserCreate
+from invoice_reader import settings
+from invoice_reader.app.exceptions import NO_REFRESH_TOKEN_EXCEPTION
 
 router = APIRouter(
     prefix="/api/v1/users",
@@ -29,17 +31,34 @@ def signup(
 def signin(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     session: Annotated[sqlmodel.Session, Depends(db.get_session)],
+    response: Response,
 ) -> AuthToken:
     try:
         user = auth.authenticate_user(
             email=form_data.username, password=form_data.password, session=session
         )
-        access_token = auth.create_access_token(email=user.email)
+        access_token = auth.create_token(
+            email=user.email,
+            expire=settings.ACCESS_TOKEN_EXPIRE_MINUTES,
+            token_type="access",
+        )
+        refresh_token = auth.create_token(
+            email=user.email,
+            expire=settings.REFRESH_TOKEN_EXPIRE_MINUTES,
+            token_type="refresh",
+        )
+        response.set_cookie(
+            key="refresh_token",
+            value=refresh_token,
+            httponly=True,
+            secure=True,
+            samesite="lax",
+        )
+        return AuthToken(access_token=access_token, token_type="bearer")
     except HTTPException:
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
-    return AuthToken(access_token=access_token, token_type="bearer")
 
 
 @router.delete("/")
@@ -56,16 +75,28 @@ def delete_user(
     return Response(content="User successfully deleted.", status_code=204)
 
 
-@router.get("/refresh/")
-def refresh_token(
-    session: Annotated[sqlmodel.Session, Depends(db.get_session)],
-    token: Annotated[str, Depends(auth.oauth2_scheme)],
-) -> AuthToken:
+@router.post("/refresh/")
+def refresh_token(request: Request, response: Response) -> AuthToken:
+    refresh_token = request.cookies.get("refresh_token")
+    if not refresh_token:
+        raise NO_REFRESH_TOKEN_EXCEPTION
     try:
-        email = auth.get_email_from_expired_token(token=token)
-        access_token = auth.refresh_token(email=email, session=session)
+        access_token, refresh_token = auth.refresh_token(refresh_token=refresh_token)
+        response.set_cookie(
+            key="refresh_token",
+            value=refresh_token,
+            httponly=True,
+            secure=True,
+            samesite="lax",
+        )
         return AuthToken(access_token=access_token, token_type="bearer")
     except HTTPException:
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
+
+
+@router.post("/logout/")
+def logout(response: Response) -> Response:
+    response.delete_cookie(key="refresh_token")
+    return Response(content="User successfully logged out.", status_code=200)

@@ -13,7 +13,6 @@ from invoice_reader.models import (
     ClientModel,
     CurrencyModel,
     InvoiceModel,
-    RefreshTokenModel,
     UserModel,
 )
 from invoice_reader.schemas.clients import ClientUpdate
@@ -193,19 +192,3 @@ class CurrencyRepository:
 
     def get_all(self) -> Sequence[CurrencyModel]:
         return self.session.exec(sqlmodel.select(CurrencyModel)).all()
-
-
-class RefreshTokenRepository:
-    def __init__(self, session: sqlmodel.Session) -> None:
-        self.session = session
-
-    def get(self, user_id: uuid.UUID) -> RefreshTokenModel | None:
-        return self.session.exec(
-            sqlmodel.select(RefreshTokenModel).where(
-                RefreshTokenModel.user_id == user_id
-            )
-        ).one_or_none()
-
-    def add(self, refresh_token_model: RefreshTokenModel) -> None:
-        self.session.add(refresh_token_model)
-        self.session.commit()

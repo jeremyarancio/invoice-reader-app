@@ -17,10 +17,6 @@ class UserModel(SQLModel, table=True):
     is_disabled: bool = Field(default=False)
     hashed_password: str
 
-    refresh_token: "RefreshTokenModel" = Relationship(
-        back_populates="user", sa_relationship_kwargs={"cascade": "all, delete-orphan"}
-    )
-
 
 class InvoiceModel(SQLModel, table=True):
     __tablename__ = "invoice"
@@ -69,13 +65,3 @@ class CurrencyModel(SQLModel, table=True):
     currency: str
 
     invoices: list["InvoiceModel"] = Relationship(back_populates="currency")
-
-
-class RefreshTokenModel(SQLModel, table=True):
-    __tablename__ = "refresh_token"
-
-    id: uuid.UUID | None = Field(primary_key=True, default_factory=uuid.uuid4)
-    user_id: uuid.UUID = Field(foreign_key="user.user_id")
-    refresh_token: str
-
-    user: "UserModel" = Relationship(back_populates="refresh_token")
