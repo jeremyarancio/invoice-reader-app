@@ -1,5 +1,14 @@
 # Notes
 
+## Refresh token
+* Cookie is sent to from the Server, but the GET or POST method from the Front-End should include {withCredentials: true}
+
+```
+const response = await api.post("users/signin/", formData, {
+        withCredentials: true,
+    });
+```
+
 ## Monitoring
 ### Prometheus Grafana
 * `rate(http_requests_total{handler!~"/|/metrics|/openapi.json|none"}[1m])` --> Calculate the number of requests per seconds for everything except {} in average in a 1 minute range.

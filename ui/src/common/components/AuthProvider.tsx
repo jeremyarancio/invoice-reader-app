@@ -29,8 +29,10 @@ export const useAuth = () => {
 const AuthProvider = ({ children }: { children: ReactNode }) => {
     // Token undefined if not logged, null if permission denied
     const [token, setToken] = useState<TokenType>();
+    localStorage.setItem("token", token || "");
 
     useLayoutEffect(() => {
+        console.log("Token set to:", token);
         const authInterceptor = api.interceptors.request.use((config) => {
             config.headers.Authorization = token
                 ? `Bearer ${token}`

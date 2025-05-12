@@ -81,7 +81,7 @@ def create_token(email: str, expire: int, token_type: str) -> str:
     if not settings.JWT_SECRET_KEY or not settings.JWT_ALGORITHM:
         raise MISSING_ENVIRONMENT_VARIABLE_EXCEPTION
     to_encode = {"sub": email}
-    expire = datetime.now() + timedelta(minutes=expire)
+    expire = datetime.now() + timedelta(seconds=expire)
     to_encode.update({"exp": expire, "type": token_type})
     encoded_jwt = jwt.encode(
         payload=to_encode, key=settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM
@@ -103,25 +103,25 @@ def register_user(user_create: UserCreate, session: sqlmodel.Session) -> None:
     presenter.add_user(user=user, session=session)
 
 
-def refresh_token(refresh_token: str) -> tuple[str, str]:
+def refresh_token(token: str) -> tuple[str, str]:
     if not settings.JWT_ALGORITHM or not settings.JWT_SECRET_KEY:
         raise MISSING_ENVIRONMENT_VARIABLE_EXCEPTION
     try:
         payload = jwt.decode(
-            refresh_token,
+            token,
             key=settings.JWT_SECRET_KEY,
             algorithms=[settings.JWT_ALGORITHM],
         )
         if email := payload.get("sub"):
             access_token = create_token(
                 email=email,
-                expire=settings.ACCESS_TOKEN_EXPIRE_MINUTES,
+                expire=settings.ACCESS_TOKEN_EXPIRE,
                 token_type="access",
             )
             # We also re-update the refresh token to extend the login session
             refresh_token = create_token(
                 email=email,
-                expire=settings.REFRESH_TOKEN_EXPIRE_MINUTES,
+                expire=settings.REFRESH_TOKEN_EXPIRE,
                 token_type="refresh",
             )
             return access_token, refresh_token

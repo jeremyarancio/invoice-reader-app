@@ -48,6 +48,11 @@ async def root(response: Response):
     return {"message": "Welcome to the Invoice Reader API!"}
 
 
+@app.get("/home")
+def home(response: Response):
+    response.set_cookie(key="foo", value="bar", secure=False, samesite="lax")
+    return {"foo": "bar"}
+
 # Monitoring
 instrumentator = Instrumentator().instrument(app)
 instrumentator.expose(app)
