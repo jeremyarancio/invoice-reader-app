@@ -52,7 +52,8 @@ def signin(
             httponly=True,
             secure=False,
             samesite="lax",
-            domain="localhost"
+            domain="localdev.test",
+            max_age=1800,
         )
         return AuthToken(access_token=access_token, token_type="bearer")
     except HTTPException:
@@ -89,7 +90,9 @@ def refresh(request: Request, response: Response) -> AuthToken:
             httponly=True,
             secure=False,
             samesite="lax",
-            domain="localhost"
+            domain="localhost",
+            expires=1800,
+            max_age=1800,
         )
 
         return AuthToken(access_token=access_token, token_type="bearer")
@@ -100,6 +103,6 @@ def refresh(request: Request, response: Response) -> AuthToken:
 
 
 @router.post("/signout/")
-def signout(response: Response) -> Response:
+def signout(request: Request, response: Response) -> Response:
     response.delete_cookie(key="refresh_token")
     return Response(content="User successfully logged out.", status_code=200)

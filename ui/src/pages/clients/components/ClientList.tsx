@@ -40,12 +40,12 @@ const ClientList = () => {
     ];
 
     const editFields = [
-        { header: "Client Name", key: "name" },
-        { header: "Street Number", key: "streetNumber" },
-        { header: "Street Address", key: "streetAddress" },
-        { header: "Zipcode", key: "zipcode" },
-        { header: "City", key: "city" },
-        { header: "Country", key: "country" },
+        { header: "Client Name", key: "name", formType: "text" as const },
+        { header: "Street Number", key: "streetNumber", formType: "text" as const },
+        { header: "Street Address", key: "streetAddress", formType: "text" as const },
+        { header: "Zipcode", key: "zipcode", formType: "number" as const },
+        { header: "City", key: "city", formType: "text" as const },
+        { header: "Country", key: "country", formType: "text" as const },
     ];
 
     return (

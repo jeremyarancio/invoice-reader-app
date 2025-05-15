@@ -31,7 +31,6 @@ export const queryClient = new QueryClient({
 
 export const api = axios.create({
     baseURL: baseURL,
-    
 });
 
 export const registerUser = async (userData: CreateUser) => {

@@ -1,12 +1,28 @@
 # Notes
 
+## Docker React Vite
+* Super tricky, Vite is not configured to run on Docker natively. The solution: `npm run dev -- --host`
+
 ## Refresh token
 * Cookie is sent to from the Server, but the GET or POST method from the Front-End should include {withCredentials: true}
-
+* Cookie can only be shared under the same domain => put everything under Traefik
 ```
 const response = await api.post("users/signin/", formData, {
         withCredentials: true,
     });
+```
+* Finally, the solution was to use local domain name (for WSL, change `/mnt/c/Windows/System32/drivers/etc/hosts`). Here's the cookie set up in Fastapi:
+
+```python
+response.set_cookie(
+    key="refresh_token",
+    value=refresh_token,
+    httponly=True,
+    secure=False,
+    samesite="lax",
+    domain="localdev.test",
+    max_age=1800,
+)
 ```
 
 ## Monitoring

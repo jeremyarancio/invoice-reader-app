@@ -1,16 +1,35 @@
-FROM node:22-alpine AS base
+FROM node:22 AS builder
 
-# Export ENV to entrypoint.sh
-ENV PORT=5173
-
-# Set working directory
 WORKDIR /app
 
-# Copy the rest of the application code
-COPY . .
+# Copy package files first for better caching
+COPY package*.json ./
 
-# Install dependencies
 RUN npm install
 
-RUN chmod +x docker/entrypoint.sh
-ENTRYPOINT ["/app/docker/entrypoint.sh"]
+COPY . .
+
+RUN npm run build
+
+FROM node:22 AS dev
+
+WORKDIR /app
+
+COPY --from=builder /app .
+
+# This is tricky!
+CMD ["npm", "run", "dev", "--", "--host"]
+
+
+FROM node:22-alpine AS prod
+
+WORKDIR /app
+
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/dist ./dist
+
+RUN npm install -g serve
+
+EXPOSE 5173
+
+CMD ["serve", "-s", "dist", "-l", "5173"]
