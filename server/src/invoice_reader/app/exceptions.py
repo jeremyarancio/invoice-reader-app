@@ -11,7 +11,6 @@ USER_NOT_FOUND_EXCEPTION = HTTPException(
 CREDENTIALS_EXCEPTION = HTTPException(
     status_code=status.HTTP_401_UNAUTHORIZED,
     detail="Credentials are not valid.",
-    headers={"WWW-Authenticate": "Bearer"},
 )
 
 EXISTING_USER_EXCEPTION = HTTPException(
@@ -59,6 +58,6 @@ EXPIRED_TOKEN_EXCEPTION = HTTPException(
 
 
 NO_REFRESH_TOKEN_EXCEPTION = HTTPException(
-    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-    detail="No refresh token found for the user.",
+    status_code=status.HTTP_401_UNAUTHORIZED,
+    detail="No refresh token found in cookie.",
 )

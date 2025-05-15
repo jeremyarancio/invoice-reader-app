@@ -14,12 +14,12 @@ services:
             - "--providers.docker=true"
             - "--providers.docker.exposedbydefault=false"
             - "--entrypoints.web.address=:80"
-            - "--entrypoints.websecure.address=:443"
-            - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
-            - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
-            - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
-            - "--certificatesresolvers.myresolver.acme.email=contact@${DOMAIN_NAME:-localdev.com}"
-            - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+            # - "--entrypoints.websecure.address=:443"
+            # - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+            # - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+            # - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
+            # - "--certificatesresolvers.myresolver.acme.email=contact@${DOMAIN_NAME:-localdev.com}"
+            # - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
         ports:
             - 80:80
             - 443:443
@@ -42,11 +42,28 @@ services:
         networks:
             - app-network
 
+    ui:
+        restart: unless-stopped
+        build:
+            context: ./ui
+            target: ${TARGET:-dev}
+        volumes:
+            - ./ui:/app
+        networks:
+            - app-network
+        labels:
+            - "traefik.enable=true"
+            - "traefik.http.routers.ui.rule=Host(`app.${DOMAIN_NAME:-localhost}`)"
+            - "traefik.http.services.ui.loadbalancer.server.port=5173"
+            # - "traefik.http.routers.ui.entrypoints=websecure"
+            # - "traefik.http.routers.ui.tls=true"
+            # - "traefik.http.routers.ui.tls.certresolver=myresolver"
+
     server:
         restart: unless-stopped
         build:
             context: ./server
-            target: dev
+            target: ${TARGET:-dev}
         deploy:
             mode: replicated
             replicas: 1
@@ -54,9 +71,9 @@ services:
             - "traefik.enable=true"
             - "traefik.http.routers.server.rule=Host(`api.${DOMAIN_NAME:-localhost}`)"
             - "traefik.http.services.server.loadbalancer.server.port=8000"
-            - "traefik.http.routers.server.tls=true"
-            - "traefik.http.routers.server.tls.certresolver=myresolver"
-            - "traefik.http.routers.server.entrypoints=websecure"
+            # - "traefik.http.routers.server.tls=true"
+            # - "traefik.http.routers.server.tls.certresolver=myresolver"
+            # - "traefik.http.routers.server.entrypoints=websecure"
         env_file:
             - "./server/.env"
         volumes:
@@ -85,9 +102,9 @@ services:
         labels:
             - "traefik.enable=true"
             - "traefik.http.routers.grafana.rule=Host(`monitor.${DOMAIN_NAME:-localhost}`)"
-            - "traefik.http.routers.grafana.entrypoints=websecure"
-            - "traefik.http.routers.grafana.tls=true"
-            - "traefik.http.routers.grafana.tls.certresolver=myresolver"
+            # - "traefik.http.routers.grafana.entrypoints=websecure"
+            # - "traefik.http.routers.grafana.tls=true"
+            # - "traefik.http.routers.grafana.tls.certresolver=myresolver"
         volumes:
             - grafana-storage:/var/lib/grafana
         depends_on:
