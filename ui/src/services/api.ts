@@ -33,6 +33,11 @@ export const api = axios.create({
     baseURL: baseURL,
 });
 
+export const privateApi = axios.create({
+    baseURL: baseURL,
+    withCredentials: true,
+});
+
 export const registerUser = async (userData: CreateUser) => {
     const response = await api.post("users/signup/", userData);
     return response.data;
@@ -42,9 +47,7 @@ export const loginUser = async (loginData: PostUser) => {
     const formData = new FormData();
     formData.append("username", loginData.email);
     formData.append("password", loginData.password);
-    const response = await api.post("users/signin/", formData, {
-        withCredentials: true,
-    });
+    const response = await privateApi.post("users/signin/", formData);
     return response.data;
 };
 
@@ -179,16 +182,10 @@ export const fetchCurrencies = async (): Promise<GetCurrency[]> => {
 
 export const fetchRefreshToken = async () => {
     // With credentials to send cookies, containing the refresh token
-    const response = await api.post(
-        "users/refresh/",
-        {},
-        {
-            withCredentials: true,
-        }
-    );
+    const response = await privateApi.post("users/refresh/");
     return response.data;
 };
 
 export const signOut = async () => {
-    await api.post("users/signout/", {}, { withCredentials: true });
+    await privateApi.post("users/signout/");
 };

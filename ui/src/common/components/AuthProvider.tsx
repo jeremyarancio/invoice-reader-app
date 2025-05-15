@@ -12,6 +12,7 @@ type TokenType = string | null | undefined;
 interface AuthContextType {
     token: TokenType;
     setToken: React.Dispatch<TokenType>;
+    isInitializing: boolean;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(
@@ -29,7 +30,24 @@ export const useAuth = () => {
 const AuthProvider = ({ children }: { children: ReactNode }) => {
     // Token undefined if not logged, null if permission denied
     const [token, setToken] = useState<TokenType>();
-    localStorage.setItem("token", token || "");
+    const [isInitializing, setIsInitializing] = useState(true);
+
+    // Attempt to refresh token on initial load
+    useLayoutEffect(() => {
+        const initializeAuth = async () => {
+            try {
+                const data = await fetchRefreshToken();
+                setToken(data.access_token);
+            } catch (error) {
+                console.log("Error fetching refresh token:", error);
+                setToken(null); // Explicitly set to null if no valid refresh token
+            } finally {
+                setIsInitializing(false);
+            }
+        };
+
+        initializeAuth();
+    }, []);
 
     useLayoutEffect(() => {
         console.log("Token set to:", token);
@@ -74,7 +92,7 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
     }, []);
 
     return (
-        <AuthContext.Provider value={{ token, setToken }}>
+        <AuthContext.Provider value={{ token, setToken, isInitializing }}>
             {children}
         </AuthContext.Provider>
     );

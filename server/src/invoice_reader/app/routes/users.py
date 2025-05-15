@@ -53,7 +53,7 @@ def signin(
             secure=False,
             samesite="lax",
             domain="localdev.test",
-            max_age=1800,
+            max_age=settings.REFRESH_TOKEN_EXPIRE,
         )
         return AuthToken(access_token=access_token, token_type="bearer")
     except HTTPException:
@@ -79,7 +79,6 @@ def delete_user(
 @router.post("/refresh/")
 def refresh(request: Request, response: Response) -> AuthToken:
     refresh_token = request.cookies.get("refresh_token")
-    print(f"Cookie: {request.cookies}")
     if not refresh_token:
         raise NO_REFRESH_TOKEN_EXCEPTION
     try:
@@ -90,9 +89,8 @@ def refresh(request: Request, response: Response) -> AuthToken:
             httponly=True,
             secure=False,
             samesite="lax",
-            domain="localhost",
-            expires=1800,
-            max_age=1800,
+            domain="localdev.test",
+            max_age=settings.REFRESH_TOKEN_EXPIRE,
         )
 
         return AuthToken(access_token=access_token, token_type="bearer")
@@ -103,6 +101,9 @@ def refresh(request: Request, response: Response) -> AuthToken:
 
 
 @router.post("/signout/")
-def signout(request: Request, response: Response) -> Response:
-    response.delete_cookie(key="refresh_token")
-    return Response(content="User successfully logged out.", status_code=200)
+def signout(response: Response):
+    response.delete_cookie(
+        key="refresh_token",
+        domain="localdev.test",
+    )
+    return {"message": "User successfully signed out."}

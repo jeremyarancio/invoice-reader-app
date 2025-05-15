@@ -25,6 +25,21 @@ response.set_cookie(
 )
 ```
 
+* Careful: if FastAPi returns Response, theis overwrite the header:
+
+```python
+@router.post("/signout/")
+def signout(request: Request, response: Response) -> Response:
+    response.delete_cookie(
+        key="refresh_token",
+        domain="localdev.test",
+    )
+    # Doesn't set new cookie/delete cookie (it's the same)
+    return Response(content="User successfully logged out.", status_code=200,)
+    # Right way: return {"message": "User successfully signed out."}
+
+```
+
 ## Monitoring
 ### Prometheus Grafana
 * `rate(http_requests_total{handler!~"/|/metrics|/openapi.json|none"}[1m])` --> Calculate the number of requests per seconds for everything except {} in average in a 1 minute range.
