@@ -11,6 +11,15 @@ from invoice_reader.app import auth
 from invoice_reader.app.exceptions import NO_REFRESH_TOKEN_EXCEPTION
 from invoice_reader.schemas import AuthToken, UserCreate
 
+COOKIE_CONFIG = {
+    "key": "refresh_token",
+    "httponly": True,
+    "secure": settings.PROTOCOL == "https",
+    "samesite": "none" if settings.PROTOCOL == "https" else "lax",
+    "domain": settings.DOMAIN_NAME,
+}
+
+
 router = APIRouter(
     prefix="/api/v1/users",
     tags=["Users"],
@@ -47,13 +56,9 @@ def signin(
             token_type="refresh",
         )
         response.set_cookie(
-            key="refresh_token",
             value=refresh_token,
-            httponly=True,
-            secure=False,
-            samesite="lax",
-            domain="localdev.test",
             max_age=settings.REFRESH_TOKEN_EXPIRE,
+            **COOKIE_CONFIG,
         )
         return AuthToken(access_token=access_token, token_type="bearer")
     except HTTPException:
@@ -84,13 +89,9 @@ def refresh(request: Request, response: Response) -> AuthToken:
     try:
         access_token, refresh_token = auth.refresh_token(token=refresh_token)
         response.set_cookie(
-            key="refresh_token",
             value=refresh_token,
-            httponly=True,
-            secure=False,
-            samesite="lax",
-            domain="localdev.test",
             max_age=settings.REFRESH_TOKEN_EXPIRE,
+            **COOKIE_CONFIG,
         )
 
         return AuthToken(access_token=access_token, token_type="bearer")
@@ -103,7 +104,6 @@ def refresh(request: Request, response: Response) -> AuthToken:
 @router.post("/signout/")
 def signout(response: Response):
     response.delete_cookie(
-        key="refresh_token",
-        domain="localdev.test",
+        **COOKIE_CONFIG,
     )
     return {"message": "User successfully signed out."}

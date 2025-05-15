@@ -20,7 +20,6 @@ app.include_router(invoices.router)
 app.include_router(clients.router)
 app.include_router(others.router)
 
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
