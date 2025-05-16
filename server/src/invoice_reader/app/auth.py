@@ -126,7 +126,7 @@ def refresh_token(token: str) -> tuple[str, str]:
             )
             return access_token, refresh_token
         else:
-            raise CREDENTIALS_EXCEPTION
+            raise HTTPException(status_code=401, detail="Email not found in token.")
     except ExpiredSignatureError as e:
         raise EXPIRED_TOKEN_EXCEPTION from e
     except InvalidTokenError as e:

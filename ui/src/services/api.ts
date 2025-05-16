@@ -31,10 +31,6 @@ export const queryClient = new QueryClient({
 
 export const api = axios.create({
     baseURL: baseURL,
-});
-
-export const privateApi = axios.create({
-    baseURL: baseURL,
     withCredentials: true,
 });
 
@@ -47,7 +43,7 @@ export const loginUser = async (loginData: PostUser) => {
     const formData = new FormData();
     formData.append("username", loginData.email);
     formData.append("password", loginData.password);
-    const response = await privateApi.post("users/signin/", formData);
+    const response = await api.post("users/signin/", formData);
     return response.data;
 };
 
@@ -180,12 +176,12 @@ export const fetchCurrencies = async (): Promise<GetCurrency[]> => {
     return response.data;
 };
 
-export const fetchRefreshToken = async () => {
+export const fetchRefreshToken = async (): Promise<string> => {
     // With credentials to send cookies, containing the refresh token
-    const response = await privateApi.post("users/refresh/");
-    return response.data;
+    const response = await api.post("users/refresh/");
+    return response.data.access_token;
 };
 
 export const signOut = async () => {
-    await privateApi.post("users/signout/");
+    await api.post("users/signout/");
 };

@@ -22,9 +22,9 @@ DATABASE_URL = (
 JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
 JWT_ALGORITHM = os.getenv("JWT_ALGORITHM")
 ACCESS_TOKEN_EXPIRE = int(
-    os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 60)
+    os.getenv("ACCESS_TOKEN_EXPIRE", 60)
 )  # .env always store as string
-REFRESH_TOKEN_EXPIRE = int(os.getenv("REFRESH_TOKEN_EXPIRE_MINUTES", 60 * 60 * 24))
+REFRESH_TOKEN_EXPIRE = int(os.getenv("REFRESH_TOKEN_EXPIRE", 60 * 60 * 24))
 
 # Pagination
 PER_PAGE = 10
