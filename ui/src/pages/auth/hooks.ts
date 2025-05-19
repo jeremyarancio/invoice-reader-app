@@ -4,6 +4,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { AxiosError } from "axios";
 import { useAuth } from "@/common/components/AuthProvider";
+import { queryClient, signOut } from "@/services/api";
 
 export const useSignIn = () => {
     const { setToken } = useAuth();
@@ -44,5 +45,14 @@ export const useSignUp = () => {
 
     return (postUser: PostUser) => {
         SignUpMutation.mutate(postUser);
+    };
+};
+
+export const useSignOut = () => {
+    const { setToken } = useAuth();
+    return async () => {
+        queryClient.clear();
+        await signOut();
+        setToken(null);
     };
 };

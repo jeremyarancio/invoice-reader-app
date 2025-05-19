@@ -12,7 +12,6 @@ type TokenType = string | null;
 interface AuthContextType {
     token: TokenType;
     setToken: React.Dispatch<TokenType>;
-    isInitializing: boolean;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(
@@ -86,7 +85,7 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
     }, [token]);
 
     return (
-        <AuthContext.Provider value={{ token, setToken, isInitializing }}>
+        <AuthContext.Provider value={{ token, setToken }}>
             {!isInitializing && children}
         </AuthContext.Provider>
     );

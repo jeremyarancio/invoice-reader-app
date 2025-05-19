@@ -14,7 +14,7 @@ const initialClient: formClient = {
     zipcode: 0,
     city: "",
     country: "",
-    totalRevenu: 0
+    totalRevenu: 0,
 };
 
 const ClientForm = () => {
@@ -65,7 +65,6 @@ const ClientForm = () => {
             {error && (
                 <AlertError error={error} onClose={() => setError(null)} />
             )}
-
             <SubmissionForm
                 name="Client"
                 initialData={initialClient}

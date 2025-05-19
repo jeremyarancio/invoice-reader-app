@@ -74,25 +74,37 @@ function SubmissionForm<T>({
                         </Form.Label>
 
                         {formGroup.formType === "select" ? (
-                            <Form.Select
-                                onChange={(e) =>
-                                    handleInputChange(
-                                        String(formGroup.key),
-                                        e.target.value
-                                    )
-                                }
-                                required={formGroup.required}
-                                value={String(
-                                    formData[formGroup.key as keyof T] || ""
+                            <>
+                                <Form.Select
+                                    onChange={(e) =>
+                                        handleInputChange(
+                                            String(formGroup.key),
+                                            e.target.value
+                                        )
+                                    }
+                                    required={formGroup.required}
+                                    value={String(
+                                        formData[formGroup.key as keyof T] || ""
+                                    )}
+                                >
+                                    <option value="">Select an item</option>
+                                    {formGroup.fetchedItems?.map((item) => (
+                                        <option key={item.id} value={item.id}>
+                                            {item.name}
+                                        </option>
+                                    ))}
+                                </Form.Select>
+                                {formGroup.createItem && (
+                                    <Button
+                                        className="mt-2"
+                                        variant="secondary"
+                                        size="sm"
+                                        onClick={formGroup.createItem}
+                                    >
+                                        Create new client
+                                    </Button>
                                 )}
-                            >
-                                <option value="">Select an item</option>
-                                {formGroup.fetchedItems?.map((item) => (
-                                    <option key={item.id} value={item.id}>
-                                        {item.name}
-                                    </option>
-                                ))}
-                            </Form.Select>
+                            </>
                         ) : formGroup.formType === "checkbox" ? (
                             <Form.Check
                                 type="checkbox"

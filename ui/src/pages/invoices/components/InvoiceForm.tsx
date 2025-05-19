@@ -11,6 +11,7 @@ import { Col, Container, Row } from "react-bootstrap";
 import PdfPreview from "@/common/components/PdfPreview";
 import { useState } from "react";
 import AlertError from "@/common/components/AlertError";
+import { useNavigate } from "react-router-dom";
 
 type InvoiceFormData = Omit<Invoice, "id">;
 
@@ -33,6 +34,7 @@ function InvoiceForm({ file }: FormProperties) {
     const fetchClients = useFetchClients();
     const submitInvoice = useSubmitInvoice();
     const fetchCurrencies = useFetchCurrencies();
+    const navigate = useNavigate();
 
     const { data: pagedClients, error: fetchClientsError } = fetchClients();
     const clients = pagedClients?.data.map(mapGetClientToClient) || [];
@@ -40,6 +42,10 @@ function InvoiceForm({ file }: FormProperties) {
     const { data: getCurrencies, error: fetchCurrenciesError } =
         fetchCurrencies();
     const currencies = getCurrencies?.map(mapGetCurrencyToCurrency) || [];
+
+    const createClient = () => {
+        navigate("/clientform");
+    };
 
     const formGroups = [
         {
@@ -65,7 +71,7 @@ function InvoiceForm({ file }: FormProperties) {
             header: "VAT (%)",
             key: "vat",
             formType: "number" as const,
-            required: true,
+            required: false,
         },
         {
             header: "invoicedDate",
@@ -79,6 +85,7 @@ function InvoiceForm({ file }: FormProperties) {
             formType: "select" as const,
             required: true,
             fetchedItems: clients,
+            createItem: createClient,
         },
         {
             header: "Paid?",

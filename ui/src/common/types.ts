@@ -17,4 +17,5 @@ export interface FormGroup<T> {
     required?: boolean;
     render?: (item: T) => string;
     fetchedItems?: BaseItem[];
+    createItem?: () => void;
 }
