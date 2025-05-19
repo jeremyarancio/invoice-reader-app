@@ -110,7 +110,6 @@ def update_client(
 ) -> Response:
     try:
         presenter.update_client(
-            user_id=user_id,
             client_id=client_id,
             client_update=client_update,
             session=session,

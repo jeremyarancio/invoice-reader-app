@@ -5,7 +5,7 @@ import {
     Button,
     Container,
 } from "react-bootstrap";
-import { useSignOut } from "./hooks";
+import { useSignOut } from "@/pages/auth/hooks";
 
 const Navbar = () => {
     const signOut = useSignOut();

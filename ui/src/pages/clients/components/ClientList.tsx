@@ -41,8 +41,16 @@ const ClientList = () => {
 
     const editFields = [
         { header: "Client Name", key: "name", formType: "text" as const },
-        { header: "Street Number", key: "streetNumber", formType: "text" as const },
-        { header: "Street Address", key: "streetAddress", formType: "text" as const },
+        {
+            header: "Street Number",
+            key: "streetNumber",
+            formType: "text" as const,
+        },
+        {
+            header: "Street Address",
+            key: "streetAddress",
+            formType: "text" as const,
+        },
         { header: "Zipcode", key: "zipcode", formType: "number" as const },
         { header: "City", key: "city", formType: "text" as const },
         { header: "Country", key: "country", formType: "text" as const },
@@ -50,18 +58,25 @@ const ClientList = () => {
 
     return (
         <>
-            {error && (
-                <AlertError error={error} onClose={() => setError(null)} />
-            )}
-            <TableRender<Client>
-                name="Clients"
-                columns={tableColumns}
-                items={clients}
-                editFields={editFields}
-                onAddItem={addClient}
-                onUpdateItem={updateClient}
-                onDeleteItems={deleteClients}
-            />
+            <div className="bg">
+                {error && (
+                    <AlertError error={error} onClose={() => setError(null)} />
+                )}
+
+                <div className="overflow-x-auto">
+                    <div className="inline-block min-w-full align-middle">
+                        <TableRender<Client>
+                            name="Clients"
+                            columns={tableColumns}
+                            items={clients}
+                            editFields={editFields}
+                            onAddItem={addClient}
+                            onUpdateItem={updateClient}
+                            onDeleteItems={deleteClients}
+                        />
+                    </div>
+                </div>
+            </div>
         </>
     );
 };

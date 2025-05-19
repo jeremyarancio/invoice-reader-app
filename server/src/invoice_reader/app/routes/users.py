@@ -57,7 +57,7 @@ def signin(
         )
         response.set_cookie(
             value=refresh_token,
-            max_age=settings.REFRESH_TOKEN_EXPIRE,
+            expires=settings.REFRESH_TOKEN_EXPIRE,
             **COOKIE_CONFIG,
         )
         return AuthToken(access_token=access_token, token_type="bearer")
@@ -90,7 +90,7 @@ def refresh(request: Request, response: Response) -> AuthToken:
         access_token, refresh_token = auth.refresh_token(token=refresh_token)
         response.set_cookie(
             value=refresh_token,
-            max_age=settings.REFRESH_TOKEN_EXPIRE,
+            expires=settings.REFRESH_TOKEN_EXPIRE,
             **COOKIE_CONFIG,
         )
 
