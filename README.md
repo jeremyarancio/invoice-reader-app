@@ -60,9 +60,9 @@
 
 [![Product Name Screen Shot](assets/Animation.gif)](assets/Animation.gif)
 
-Frustrated to not have a tool to manage my own invoices, I decided to create mine!
+Frustrated to not have a tool to manage my invoices, I decided to create my own!
 
-This project was a way for me to learn how to develop from end-to-end a production application. Feel free to reuse the code for your own project
+Feel free to reuse the code for your own project.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -82,7 +82,7 @@ The application is developed as follows:
 * **Alembic** for Database migration
 * **AWS S3** for storing documents
 
-You'll also find in this repository under `./infrastructure` different ways to deploy the application in the cloud, such as AWS ECS or Kubernetes.
+You'll also find in this repository, under `./infrastructure`, different ways to deploy the application in the cloud, such as AWS ECS or Kubernetes.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
