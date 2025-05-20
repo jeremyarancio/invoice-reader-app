@@ -119,6 +119,10 @@ docker compose up -d --build
     * `api.localdev.test` for the server. The server being built with FastAPI, you can check the endpoints at `api.localdev.test/docs`
     * `monitoring.locadev.test` for the monitoring dashboard. (*Notes: you should add the datasource to Grafana* - WIP)
 
+<br>
+
+![Monitoring](assets/monitoring.png)
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
