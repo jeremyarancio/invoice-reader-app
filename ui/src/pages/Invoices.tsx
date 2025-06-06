@@ -9,8 +9,11 @@ import { useNavigate } from "react-router-dom";
 function Invoices() {
     const navigate = useNavigate();
     const [selectedFile, setSelectedFile] = useState(null);
-    const { invoices } = useFetchInvoices();
-    const { currencies } = useFetchCurrencies();
+    const fetchInvoices = useFetchInvoices();
+    const fetchCurrencies = useFetchCurrencies();
+
+    const { invoices } = fetchInvoices();
+    const { currencies } = fetchCurrencies();
 
     const handleUpload = () => {
         selectedFile &&
@@ -35,7 +38,7 @@ function Invoices() {
             <div className="max-w-96 px-4 mb-20 mx-auto mt-5">
                 <Input placeholder="Search"></Input>
             </div>
-            {invoices ?? <NoElementFound type="invoice" />}
+            {invoices.length === 0 && <NoElementFound type="invoice" />}
             <div className="flex flex-col space-y-2 mt-5 mx-auto max-w-4xl px-4 h-full">
                 {invoices?.map((invoice) => (
                     <InvoiceCard

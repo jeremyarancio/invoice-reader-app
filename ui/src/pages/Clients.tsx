@@ -1,10 +1,14 @@
 import ClientCard from "@/components/ClientCard";
+import NoElementFound from "@/components/NoElementFound";
 import { Input } from "@/components/ui/input";
-import { clients } from "@/types/clients";
+import { useFetchClients } from "@/hooks/api/client";
 import { useNavigate } from "react-router-dom";
 
 function Clients() {
     const navigate = useNavigate();
+    const fetchClients = useFetchClients();
+
+    const { clients } = fetchClients();
 
     return (
         <>
@@ -20,16 +24,15 @@ function Clients() {
             <div className="max-w-96 px-4 mb-20 mx-auto mt-5">
                 <Input placeholder="Search"></Input>
             </div>
+            {clients.length === 0 && <NoElementFound type="client" />}
             <div className="flex flex-col space-y-2 mt-5 mx-auto max-w-4xl px-4 h-full">
                 {clients.map((client) => (
                     <ClientCard
                         key={client.clientName}
                         client_name={client.clientName}
-                        totalInvoiceNumber={client.totalInvoiceNumber}
-                        totalInvoiceAmount={client.totalInvoiceAmount}
-                        totalInvoiceAmountCurrency={
-                            client.totalInvoiceAmountCurrency
-                        }
+                        totalInvoiceNumber={0} //Not implemented
+                        totalInvoiceAmount={client.totalRevenu}
+                        totalInvoiceAmountCurrency={"-"} //Not implemented
                     />
                 ))}
             </div>

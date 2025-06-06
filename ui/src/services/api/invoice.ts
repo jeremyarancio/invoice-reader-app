@@ -28,13 +28,12 @@ export const fetchInvoice = async (id: string): Promise<GetInvoice> => {
 };
 
 export const fetchInvoices = async (
-    pageNumber?: number,
-    perPage?: number
+    pageNumber: number,
+    perPage: number
 ): Promise<GetPagedInvoices> => {
-    const params =
-        pageNumber && perPage ? { page: pageNumber, per_page: perPage } : {};
-
-    const response = await api.get("invoices/", { params: params });
+    const response = await api.get("invoices/", {
+        params: { page: pageNumber, per_page: perPage },
+    });
     return response.data;
 };
 
