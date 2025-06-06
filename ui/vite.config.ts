@@ -12,7 +12,6 @@ export default defineConfig({
         },
     },
     server: {
-        host: true,
-        allowedHosts: [".localdev.test"],
+        host: "localdev.test",
     },
 });
