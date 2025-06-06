@@ -12,27 +12,7 @@ import {
     GetPagedClients,
     UpdateClient,
 } from "@/pages/clients/types";
-import { CreateUser, PostUser } from "@/pages/auth/types";
-
-const baseURL = import.meta.env.VITE_SERVER_API_URL;
-
-export const queryClient = new QueryClient({
-    defaultOptions: {
-        queries: {
-            refetchOnWindowFocus: false,
-            retry: false,
-            staleTime: 30000,
-        },
-        mutations: {
-            retry: false,
-        },
-    },
-});
-
-export const api = axios.create({
-    baseURL: baseURL,
-    withCredentials: true,
-});
+import { CreateUser, PostUser } from "@/schemas/user";
 
 export const registerUser = async (userData: CreateUser) => {
     const response = await api.post("users/signup/", userData);
@@ -44,47 +24,6 @@ export const loginUser = async (loginData: PostUser) => {
     formData.append("username", loginData.email);
     formData.append("password", loginData.password);
     const response = await api.post("users/signin/", formData);
-    return response.data;
-};
-
-export const submitInvoice = async (file: File, data: CreateInvoicePayload) => {
-    const invoiceData = JSON.stringify(data);
-
-    const formData = new FormData();
-    formData.append("upload_file", file);
-    formData.append("data", invoiceData);
-
-    const response = await api.post("invoices/", formData, {
-        headers: {
-            "Content-Type": "multipart/form-data",
-        },
-    });
-
-    return response.data;
-};
-
-export const fetchInvoice = async (id: string): Promise<GetInvoice> => {
-    const response = await api.get("invoices/" + id, {
-        headers: {
-            "Content-Type": "multipart/form-data",
-        },
-    });
-    return response.data;
-};
-
-export const fetchInvoices = async (
-    pageNumber: number,
-    perPage: number
-): Promise<GetPagedInvoices> => {
-    const response = await api.get("invoices/", {
-        params: {
-            page: pageNumber,
-            per_page: perPage,
-        },
-        headers: {
-            "Content-Type": "application/json",
-        },
-    });
     return response.data;
 };
 
@@ -171,10 +110,6 @@ export const fetchInvoiceUrl = async (id: string): Promise<string> => {
     return response.data;
 };
 
-export const fetchCurrencies = async (): Promise<GetCurrency[]> => {
-    const response = await api.get("currencies/", {});
-    return response.data;
-};
 
 export const fetchRefreshToken = async (): Promise<string> => {
     // With credentials to send cookies, containing the refresh token

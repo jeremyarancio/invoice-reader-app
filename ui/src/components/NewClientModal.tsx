@@ -5,9 +5,9 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
-import AddCompanyLayout from "./addClient/AddCompanyLayout";
+import AddCompany from "./addClient/AddCompany";
 import { useState } from "react";
-import AddIndividualLayout from "./addClient/AddIndividualLayout";
+import AddIndividual from "./addClient/AddIndividual";
 
 interface NewClientModalProps {
     isOpen: boolean;
@@ -48,8 +48,8 @@ function NewClientModal({ isOpen, onClose }: NewClientModalProps) {
                         An individual
                     </button>
                 </div>
-                {clientType === "company" && <AddCompanyLayout />}
-                {clientType === "individual" && <AddIndividualLayout />}
+                {clientType === "company" && <AddCompany />}
+                {clientType === "individual" && <AddIndividual />}
             </DialogContent>
         </Dialog>
     );

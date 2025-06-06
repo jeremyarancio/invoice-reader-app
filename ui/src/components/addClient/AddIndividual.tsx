@@ -13,16 +13,18 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-function AddCompanyLayout() {
+function AddIndividual() {
     const { setIsSubmitted } = useIsSubmittedAlert();
 
     const formSchema = z.object({
-        name: z.string(),
-        address: z.string(),
-        zipcode: z.string(),
-        city: z.string(),
-        country: z.string(),
-        vatNumber: z.coerce.string(),
+        firstName: z.string(),
+        lastName: z.string(),
+        email: z.string(),
+        phoneNumber: z.coerce.string(),
+        address: z.coerce.string(),
+        zipcode: z.coerce.string(),
+        city: z.coerce.string(),
+        country: z.coerce.string(),
     });
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -43,30 +45,27 @@ function AddCompanyLayout() {
                 >
                     <FormField
                         control={form.control}
-                        name="name"
+                        name="firstName"
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel>
-                                    Company's name
+                                    First Name
                                     <span className="text-red-600">*</span>
                                 </FormLabel>
                                 <FormControl>
                                     <Input {...field} />
                                 </FormControl>
-                                <FormDescription>
-                                    The invoice number should be unique
-                                </FormDescription>
                                 <FormMessage />
                             </FormItem>
                         )}
                     />
                     <FormField
                         control={form.control}
-                        name="address"
+                        name="lastName"
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel>
-                                    Address
+                                    Last Name
                                     <span className="text-red-600">*</span>
                                 </FormLabel>
                                 <FormControl>
@@ -79,13 +78,52 @@ function AddCompanyLayout() {
                     />
                     <FormField
                         control={form.control}
-                        name="zipcode"
+                        name="email"
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel>
-                                    Zipcode
+                                    Email address
                                     <span className="text-red-600">*</span>
                                 </FormLabel>
+                                <FormControl>
+                                    <Input {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="phoneNumber"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Phone Number</FormLabel>
+                                <FormControl>
+                                    <Input {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="address"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Address</FormLabel>
+                                <FormControl>
+                                    <Input {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="zipcode"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Zipcode</FormLabel>
                                 <FormControl>
                                     <Input {...field} />
                                 </FormControl>
@@ -98,10 +136,7 @@ function AddCompanyLayout() {
                         name="city"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>
-                                    City
-                                    <span className="text-red-600">*</span>
-                                </FormLabel>
+                                <FormLabel>City</FormLabel>
                                 <FormControl>
                                     <Input {...field} />
                                 </FormControl>
@@ -109,31 +144,13 @@ function AddCompanyLayout() {
                             </FormItem>
                         )}
                     />
+
                     <FormField
                         control={form.control}
                         name="country"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>
-                                    Country
-                                    <span className="text-red-600">*</span>
-                                </FormLabel>
-                                <FormControl>
-                                    <Input {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="vatNumber"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>VAT</FormLabel>
-                                <FormDescription>
-                                    Company VAT number if exists.
-                                </FormDescription>
+                                <FormLabel>Country</FormLabel>
                                 <FormControl>
                                     <Input {...field} />
                                 </FormControl>
@@ -150,4 +167,4 @@ function AddCompanyLayout() {
     );
 }
 
-export default AddCompanyLayout;
+export default AddIndividual;

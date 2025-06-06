@@ -2,8 +2,8 @@ import { ArrowLeft } from "lucide-react";
 import { useState } from "react";
 import AppAlert from "@/components/AppAlert";
 import { useNavigate } from "react-router-dom";
-import AddCompanyLayout from "@/components/addClient/AddCompanyLayout";
-import AddIndividualLayout from "@/components/addClient/AddIndividualLayout";
+import AddCompany from "@/components/addClient/AddCompany";
+import AddIndividual from "@/components/addClient/AddIndividual";
 import { useIsSubmittedAlert } from "@/hooks/alert-hooks";
 
 function AddClient() {
@@ -49,9 +49,9 @@ function AddClient() {
             </div>
             <div className="max-w-md mx-auto mb-30">
                 {clientType === "company" ? (
-                    <AddCompanyLayout />
+                    <AddCompany />
                 ) : (
-                    <AddIndividualLayout />
+                    <AddIndividual />
                 )}
             </div>
             {isSubmitted && <AppAlert />}

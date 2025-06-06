@@ -13,18 +13,16 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-function AddIndividualLayout() {
+function AddCompany() {
     const { setIsSubmitted } = useIsSubmittedAlert();
 
     const formSchema = z.object({
-        firstName: z.string(),
-        lastName: z.string(),
-        email: z.string(),
-        phoneNumber: z.coerce.string(),
-        address: z.coerce.string(),
-        zipcode: z.coerce.string(),
-        city: z.coerce.string(),
-        country: z.coerce.string(),
+        name: z.string(),
+        address: z.string(),
+        zipcode: z.string(),
+        city: z.string(),
+        country: z.string(),
+        vatNumber: z.coerce.string(),
     });
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -45,27 +43,30 @@ function AddIndividualLayout() {
                 >
                     <FormField
                         control={form.control}
-                        name="firstName"
+                        name="name"
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel>
-                                    First Name
+                                    Company's name
                                     <span className="text-red-600">*</span>
                                 </FormLabel>
                                 <FormControl>
                                     <Input {...field} />
                                 </FormControl>
+                                <FormDescription>
+                                    The invoice number should be unique
+                                </FormDescription>
                                 <FormMessage />
                             </FormItem>
                         )}
                     />
                     <FormField
                         control={form.control}
-                        name="lastName"
+                        name="address"
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel>
-                                    Last Name
+                                    Address
                                     <span className="text-red-600">*</span>
                                 </FormLabel>
                                 <FormControl>
@@ -78,52 +79,13 @@ function AddIndividualLayout() {
                     />
                     <FormField
                         control={form.control}
-                        name="email"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>
-                                    Email address
-                                    <span className="text-red-600">*</span>
-                                </FormLabel>
-                                <FormControl>
-                                    <Input {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="phoneNumber"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Phone Number</FormLabel>
-                                <FormControl>
-                                    <Input {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="address"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Address</FormLabel>
-                                <FormControl>
-                                    <Input {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
                         name="zipcode"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Zipcode</FormLabel>
+                                <FormLabel>
+                                    Zipcode
+                                    <span className="text-red-600">*</span>
+                                </FormLabel>
                                 <FormControl>
                                     <Input {...field} />
                                 </FormControl>
@@ -136,7 +98,10 @@ function AddIndividualLayout() {
                         name="city"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>City</FormLabel>
+                                <FormLabel>
+                                    City
+                                    <span className="text-red-600">*</span>
+                                </FormLabel>
                                 <FormControl>
                                     <Input {...field} />
                                 </FormControl>
@@ -144,13 +109,31 @@ function AddIndividualLayout() {
                             </FormItem>
                         )}
                     />
-
                     <FormField
                         control={form.control}
                         name="country"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Country</FormLabel>
+                                <FormLabel>
+                                    Country
+                                    <span className="text-red-600">*</span>
+                                </FormLabel>
+                                <FormControl>
+                                    <Input {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="vatNumber"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>VAT</FormLabel>
+                                <FormDescription>
+                                    Company VAT number if exists.
+                                </FormDescription>
                                 <FormControl>
                                     <Input {...field} />
                                 </FormControl>
@@ -167,4 +150,4 @@ function AddIndividualLayout() {
     );
 }
 
-export default AddIndividualLayout;
+export default AddCompany;
