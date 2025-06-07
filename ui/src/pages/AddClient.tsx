@@ -48,11 +48,7 @@ function AddClient() {
                 </button>
             </div>
             <div className="max-w-md mx-auto mb-30">
-                {clientType === "company" ? (
-                    <AddCompany />
-                ) : (
-                    <AddIndividual />
-                )}
+                {clientType === "company" ? <AddCompany /> : <AddIndividual />}
             </div>
             {isSubmitted && <AppAlert />}
         </>

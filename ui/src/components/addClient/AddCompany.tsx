@@ -9,17 +9,20 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useIsSubmittedAlert } from "@/hooks/alert-hooks";
+import { useAddClient } from "@/hooks/api/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 function AddCompany() {
     const { setIsSubmitted } = useIsSubmittedAlert();
+    const addClient = useAddClient();
 
     const formSchema = z.object({
-        name: z.string(),
-        address: z.string(),
-        zipcode: z.string(),
+        client_name: z.string(),
+        street_number: z.coerce.number(),
+        street_address: z.string(),
+        zipcode: z.coerce.number(),
         city: z.string(),
         country: z.string(),
         vatNumber: z.coerce.string(),
@@ -31,7 +34,7 @@ function AddCompany() {
 
     function onSubmit(values: z.infer<typeof formSchema>) {
         setIsSubmitted(true);
-        console.log(values);
+        addClient(values);
     }
 
     return (
@@ -43,7 +46,7 @@ function AddCompany() {
                 >
                     <FormField
                         control={form.control}
-                        name="name"
+                        name="client_name"
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel>
@@ -62,7 +65,25 @@ function AddCompany() {
                     />
                     <FormField
                         control={form.control}
-                        name="address"
+                        name="street_number"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>
+                                    Address number
+                                    <span className="text-red-600">*</span>
+                                </FormLabel>
+                                <FormControl>
+                                    <Input {...field} type="number" />
+                                </FormControl>
+                                <FormDescription></FormDescription>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        control={form.control}
+                        name="street_address"
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel>
@@ -87,7 +108,7 @@ function AddCompany() {
                                     <span className="text-red-600">*</span>
                                 </FormLabel>
                                 <FormControl>
-                                    <Input {...field} />
+                                    <Input {...field} type="number"/>
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>

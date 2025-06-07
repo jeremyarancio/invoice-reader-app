@@ -1,3 +1,4 @@
+// AddInvidual requires deeper changes on the be side, such as considering the email and phone number, which are not present for the company.
 import {
     Form,
     FormControl,
@@ -38,6 +39,9 @@ function AddIndividual() {
 
     return (
         <>
+            <p className="text-xs my-8 text-blue-500">
+                Individual not implemented yet.
+            </p>
             <Form {...form}>
                 <form
                     onSubmit={form.handleSubmit(onSubmit)}

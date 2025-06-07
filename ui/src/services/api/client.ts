@@ -1,4 +1,8 @@
-import type { CreateClient, GetPagedClients } from "@/schemas/client";
+import type {
+    CreateClient,
+    GetPagedClients,
+    UpdateClient,
+} from "@/schemas/client";
 import { api } from "./main";
 
 export const fetchClients = async (
@@ -24,5 +28,30 @@ export const addClient = async (client: CreateClient) => {
         },
     });
 
+    return response.data;
+};
+
+export const deleteClients = async (client_ids: string[]) => {
+    await Promise.all(
+        client_ids.map(async (client_id) => {
+            await api.delete("clients/" + client_id, {
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
+        })
+    );
+};
+
+export const updateClient = async (update_client: UpdateClient) => {
+    const response = await api.put(
+        "clients/" + update_client.id,
+        update_client.client,
+        {
+            headers: {
+                "Content-Type": "application/json",
+            },
+        }
+    );
     return response.data;
 };

@@ -1,6 +1,17 @@
-import { mapGetClientToClient } from "@/lib/mappers/client";
-import { fetchClients } from "@/services/api/client";
-import { useQuery } from "@tanstack/react-query";
+import {
+    mapClientToUpdateClient,
+    mapGetClientToClient,
+} from "@/lib/mappers/client";
+import type { Client, CreateClient } from "@/schemas/client";
+import {
+    addClient,
+    deleteClients,
+    fetchClients,
+    updateClient,
+} from "@/services/api/client";
+import { queryClient } from "@/services/api/main";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import type { AxiosError } from "axios";
 
 export const useFetchClients = () => {
     return (pageNumber: number = 1, perPage: number = 10) => {
@@ -12,4 +23,55 @@ export const useFetchClients = () => {
 
         return { clients, isLoading, error };
     };
+};
+
+export const useDeleteClients = () => {
+    const deleteMutation = useMutation({
+        mutationFn: deleteClients,
+        onSuccess: () => {
+            window.alert("Successfully deleted");
+            queryClient.invalidateQueries({ queryKey: ["clients"] });
+        },
+        onError: (error: AxiosError) => {
+            error.status === 409
+                ? window.alert(
+                      "Error: Client already exists. Process cancelled."
+                  )
+                : window.alert("Error: " + error.message);
+        },
+    });
+    return (clients: Client[]) => {
+        const clientIds = clients.map((client) => client.id);
+        deleteMutation.mutate(clientIds);
+    };
+};
+
+export const useAddClient = () => {
+    const submitMutation = useMutation({
+        mutationFn: addClient,
+        onSuccess: () => {
+            window.alert("Client successfully added.");
+            queryClient.invalidateQueries({ queryKey: ["clients"] });
+        },
+        onError: (error: AxiosError) => {
+            window.alert("Failed to add client: " + error.message);
+        },
+    });
+    return (client: CreateClient) =>
+        submitMutation.mutate(client);
+};
+
+export const useUpdateClient = () => {
+    const updateMutation = useMutation({
+        mutationFn: updateClient,
+        onSuccess: () => {
+            window.alert("Client successfully updated.");
+            queryClient.invalidateQueries({ queryKey: ["clients"] });
+        },
+        onError: (error: AxiosError) => {
+            window.alert("Failed to update client: " + error.message);
+        },
+    });
+    return (client: Client) =>
+        updateMutation.mutate(mapClientToUpdateClient(client));
 };
