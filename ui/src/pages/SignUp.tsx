@@ -7,6 +7,7 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useSignUp } from "@/hooks/api/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
@@ -14,6 +15,7 @@ import { z } from "zod";
 
 function SignUp() {
     const navigate = useNavigate();
+    const signUp = useSignUp();
 
     const formSchema = z
         .object({
@@ -35,7 +37,7 @@ function SignUp() {
     });
 
     function onSubmit(values: z.infer<typeof formSchema>) {
-        console.log(values);
+        signUp(values);
     }
 
     return (

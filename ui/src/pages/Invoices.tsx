@@ -12,7 +12,7 @@ function Invoices() {
     const fetchInvoices = useFetchInvoices();
     const fetchCurrencies = useFetchCurrencies();
 
-    const { invoices } = fetchInvoices();
+    const { invoices, isLoading } = fetchInvoices();
     const { currencies } = fetchCurrencies();
 
     const handleUpload = () => {
@@ -38,7 +38,9 @@ function Invoices() {
             <div className="max-w-96 px-4 mb-20 mx-auto mt-5">
                 <Input placeholder="Search"></Input>
             </div>
-            {invoices.length === 0 && <NoElementFound type="invoice" />}
+            {invoices.length === 0 && !isLoading && (
+                <NoElementFound type="invoice" />
+            )}
             <div className="flex flex-col space-y-2 mt-5 mx-auto max-w-4xl px-4 h-full">
                 {invoices?.map((invoice) => (
                     <InvoiceCard

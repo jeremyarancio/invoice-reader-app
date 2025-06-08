@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/sidebar";
 import { user } from "@/types/user";
 import { useNavigate } from "react-router-dom";
+import { useSignOut } from "@/hooks/api/auth";
 
 const useFetchUser = () => {
     return user;
@@ -22,10 +23,7 @@ const useFetchUser = () => {
 function SidebarUser({}) {
     const user = useFetchUser();
     const navigate = useNavigate();
-
-    const signOut = () => {
-        console.log("Signed out");
-    };
+    const signOut = useSignOut();
 
     return (
         <SidebarMenu>

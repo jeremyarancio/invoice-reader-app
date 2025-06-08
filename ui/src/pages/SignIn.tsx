@@ -7,6 +7,7 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useSignIn } from "@/hooks/api/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
@@ -14,6 +15,7 @@ import { z } from "zod";
 
 function SignIn() {
     const navigate = useNavigate();
+    const signIn = useSignIn();
 
     const formSchema = z.object({
         email: z.string().email(),
@@ -26,7 +28,7 @@ function SignIn() {
     });
 
     function onSubmit(values: z.infer<typeof formSchema>) {
-        console.log(values);
+        signIn(values);
     }
 
     return (
