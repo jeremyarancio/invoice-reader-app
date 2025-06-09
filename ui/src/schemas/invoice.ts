@@ -35,7 +35,7 @@ export interface Invoice {
 export interface CreateInvoice {
     amount_excluding_tax: number;
     vat: number;
-    invoiced_date: Date;
+    invoiced_date: string;
     invoice_number: string;
     is_paid: boolean;
 }

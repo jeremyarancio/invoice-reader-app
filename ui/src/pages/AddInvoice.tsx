@@ -28,24 +28,24 @@ import { ArrowLeft } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { cn } from "@/lib/utils";
-import { clients } from "@/types/clients";
+import { cn, toDate } from "@/lib/utils";
 import { useState } from "react";
 import AppAlert from "@/components/AppAlert";
 import { useNavigate, useLocation } from "react-router-dom";
 import PdfPreview from "@/components/PdfPreview";
 import NewClientModal from "@/components/NewClientModal";
 import { useIsSubmittedAlert } from "@/hooks/alert-hooks";
-
-const CURRENCIES = ["$", "€"];
+import { useAddInvoice, useFetchCurrencies } from "@/hooks/api/invoice";
+import { useFetchClients } from "@/hooks/api/client";
 
 function AddInvoice() {
     const [isClientModalOpen, setIsClientModalOpen] = useState(false);
-
     const navigate = useNavigate();
     const file = useLocation().state?.file;
-
     const { isSubmitted, setIsSubmitted } = useIsSubmittedAlert();
+    const addInvoice = useAddInvoice();
+    const fetchClients = useFetchClients();
+    const fetchCurrencies = useFetchCurrencies();
 
     const formSchema = z.object({
         invoiceNumber: z.string().min(1, "Invoice number is required"),
@@ -57,23 +57,35 @@ function AddInvoice() {
             .number()
             .min(0, "Gross amount must be a positive number")
             .max(1000000, "Gross amount must be less than 1,000,000"),
-        currency: z.string(),
+        currency_id: z.string(),
         vat: z.coerce.number().min(0).max(50),
-        client: z.string(),
+        client_id: z.string(),
         invoicedDate: z.date(),
         paidDate: z.date().optional(),
     });
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
-        defaultValues: {
-            invoiceNumber: "",
-        },
     });
 
+    const { clients } = fetchClients();
+
+    const { currencies } = fetchCurrencies();
+
     function onSubmit(values: z.infer<typeof formSchema>) {
-        console.log(values);
+        addInvoice(file, {
+            client_id: values.client_id,
+            currency_id: values.currency_id,
+            invoice: {
+                amount_excluding_tax: values.grossAmount,
+                invoice_number: values.invoiceNumber,
+                invoiced_date: toDate(values.invoicedDate),
+                is_paid: !!values.paidDate,
+                vat: values.vat,
+            },
+        });
         setIsSubmitted(true);
+
         navigate("/invoices"); //Alert can be improved
     }
 
@@ -183,7 +195,7 @@ function AddInvoice() {
                             />
                             <FormField
                                 control={form.control}
-                                name="currency"
+                                name="currency_id"
                                 render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>
@@ -194,7 +206,7 @@ function AddInvoice() {
                                         </FormLabel>
                                         <Select
                                             onValueChange={field.onChange}
-                                            defaultValue={field.value}
+                                            defaultValue={field.name}
                                         >
                                             <FormControl>
                                                 <SelectTrigger>
@@ -202,12 +214,12 @@ function AddInvoice() {
                                                 </SelectTrigger>
                                             </FormControl>
                                             <SelectContent className="bg-stone-50">
-                                                {CURRENCIES.map((currency) => (
+                                                {currencies.map((currency) => (
                                                     <SelectItem
-                                                        key={currency}
-                                                        value={currency}
+                                                        key={currency.id}
+                                                        value={currency.id}
                                                     >
-                                                        {currency}
+                                                        {currency.name}
                                                     </SelectItem>
                                                 ))}
                                             </SelectContent>
@@ -241,7 +253,7 @@ function AddInvoice() {
                             />
                             <FormField
                                 control={form.control}
-                                name="client"
+                                name="client_id"
                                 render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>
@@ -266,9 +278,7 @@ function AddInvoice() {
                                                             key={
                                                                 client.clientName
                                                             }
-                                                            value={
-                                                                client.clientName
-                                                            }
+                                                            value={client.id}
                                                         >
                                                             {client.clientName}
                                                         </SelectItem>

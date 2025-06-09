@@ -7,7 +7,7 @@ import type {
 } from "@/schemas/invoice";
 import { api } from "@/services/api/main";
 
-export const submitInvoice = async (file: File, data: CreateInvoicePayload) => {
+export const addInvoice = async (file: File, data: CreateInvoicePayload) => {
     const invoiceData = JSON.stringify(data);
 
     const formData = new FormData();
