@@ -72,7 +72,7 @@ function AddInvoice() {
 
     const { currencies } = fetchCurrencies();
 
-    function onSubmit(values: z.infer<typeof formSchema>) {
+    const onSubmit = (values: z.infer<typeof formSchema>) => {
         addInvoice(file, {
             client_id: values.client_id,
             currency_id: values.currency_id,
@@ -85,9 +85,8 @@ function AddInvoice() {
             },
         });
         setIsSubmitted(true);
-
         navigate("/invoices"); //Alert can be improved
-    }
+    };
 
     const handleNewClient = () => {
         setIsClientModalOpen(true);
@@ -97,8 +96,10 @@ function AddInvoice() {
         <>
             {isClientModalOpen && (
                 <NewClientModal
-                    isOpen={true}
+                    isOpen={isClientModalOpen}
                     onClose={() => setIsClientModalOpen(false)}
+                    onSuccess={() => setIsClientModalOpen(false)}
+                    onError={() => console.log("Client alert to improve!")}
                 />
             )}
             <div className="mt-10 ml-10">

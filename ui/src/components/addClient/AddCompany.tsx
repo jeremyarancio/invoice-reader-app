@@ -14,9 +14,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-function AddCompany() {
+interface Props {
+    onSuccess?: () => void;
+    onError?: () => void;
+}
+
+function AddCompany({ onSuccess, onError }: Props) {
     const { setIsSubmitted } = useIsSubmittedAlert();
-    const addClient = useAddClient();
+    const addClient = useAddClient({ onSuccess, onError });
 
     const formSchema = z.object({
         client_name: z.string(),
@@ -108,7 +113,7 @@ function AddCompany() {
                                     <span className="text-red-600">*</span>
                                 </FormLabel>
                                 <FormControl>
-                                    <Input {...field} type="number"/>
+                                    <Input {...field} type="number" />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>

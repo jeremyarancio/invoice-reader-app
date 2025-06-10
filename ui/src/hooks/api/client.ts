@@ -46,19 +46,23 @@ export const useDeleteClients = () => {
     };
 };
 
-export const useAddClient = () => {
+export const useAddClient = (config?: {
+    onSuccess?: () => void;
+    onError?: (error: AxiosError) => void;
+}) => {
     const submitMutation = useMutation({
         mutationFn: addClient,
         onSuccess: () => {
             window.alert("Client successfully added.");
             queryClient.invalidateQueries({ queryKey: ["clients"] });
+            config?.onSuccess?.();
         },
         onError: (error: AxiosError) => {
             window.alert("Failed to add client: " + error.message);
+            config?.onError?.(error);
         },
     });
-    return (client: CreateClient) =>
-        submitMutation.mutate(client);
+    return (client: CreateClient) => submitMutation.mutate(client);
 };
 
 export const useUpdateClient = () => {
