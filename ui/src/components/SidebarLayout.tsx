@@ -15,7 +15,7 @@ export default function SidebarLayout() {
             <AppSidebar />
             <SidebarInset>
                 <main>
-                    <SidebarTrigger />
+                    <SidebarTrigger className="sticky" />
                     <Outlet />
                 </main>
             </SidebarInset>
