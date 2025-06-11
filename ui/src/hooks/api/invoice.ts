@@ -2,11 +2,14 @@ import {
     mapGetCurrencyToCurrency,
     mapGetInvoiceToInvoice,
 } from "@/lib/mappers/invoice";
-import type { CreateInvoicePayload } from "@/schemas/invoice";
+import type { CreateInvoicePayload, UpdateInvoice } from "@/schemas/invoice";
 import {
     addInvoice,
     fetchCurrencies,
+    fetchInvoice,
     fetchInvoices,
+    fetchInvoiceUrl,
+    updateInvoice,
 } from "@/services/api/invoice";
 import { queryClient } from "@/services/api/main";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -60,4 +63,42 @@ export const useAddInvoice = () => {
     });
     return (file: File, data: CreateInvoicePayload) =>
         addInvoiceMutation.mutate({ file, data });
+};
+
+export const useFetchInvoice = () => {
+    return (id: string) => {
+        const { data, isLoading, error } = useQuery({
+            queryKey: ["invoice", id],
+            queryFn: () => fetchInvoice(id),
+        });
+        const invoice = data ? mapGetInvoiceToInvoice(data) : null;
+        return { invoice, isLoading, error };
+    };
+};
+
+export const useUpdateInvoice = () => {
+    const updateInvoiceMutation = useMutation({
+        mutationFn: (data: UpdateInvoice) => {
+            return updateInvoice(data);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["invoices"] });
+            queryClient.invalidateQueries({ queryKey: ["invoice"] });
+        },
+        onError: (error: AxiosError) => {
+            window.alert("Error: " + (error.response?.data as any)?.message);
+        },
+    });
+    return (data: UpdateInvoice) => updateInvoiceMutation.mutate(data);
+};
+
+export const useFetchInvoiceUrl = () => {
+    return (invoiceId: string) => {
+        const { data, isLoading, error } = useQuery({
+            queryKey: ["invoices", invoiceId],
+            queryFn: () => fetchInvoiceUrl(invoiceId),
+        });
+        const url = data || null;
+        return { url, isLoading, error };
+    };
 };

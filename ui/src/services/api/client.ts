@@ -1,9 +1,15 @@
 import type {
     CreateClient,
+    GetClient,
     GetPagedClients,
     UpdateClient,
 } from "@/schemas/client";
-import { api } from "./main";
+import { api } from "@/services/api/main";
+
+export const fetchClient = async (id: string): Promise<GetClient> => {
+    const response = await api.get("clients/" + id);
+    return response.data;
+};
 
 export const fetchClients = async (
     pageNumber: number,

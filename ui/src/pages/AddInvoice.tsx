@@ -36,7 +36,7 @@ import NewClientModal from "@/components/NewClientModal";
 import { useIsSubmittedAlert } from "@/hooks/alert-hooks";
 import { useAddInvoice, useFetchCurrencies } from "@/hooks/api/invoice";
 import { useFetchClients } from "@/hooks/api/client";
-import { useNewClientModalStore } from "@/stores/new-client-modal-store";
+import { useState } from "react";
 
 function AddInvoice() {
     const navigate = useNavigate();
@@ -45,8 +45,7 @@ function AddInvoice() {
     const addInvoice = useAddInvoice();
     const fetchClients = useFetchClients();
     const fetchCurrencies = useFetchCurrencies();
-    const { isNewClientModalOpen, openNewClientModal, closeNewClientModal } =
-        useNewClientModalStore();
+    const [isNewClientModalOpen, setIsNewClientModalOpen] = useState(false);
 
     const formSchema = z.object({
         invoiceNumber: z.string().min(1, "Invoice number is required"),
@@ -94,7 +93,7 @@ function AddInvoice() {
             {isNewClientModalOpen && (
                 <NewClientModal
                     isOpen={isNewClientModalOpen}
-                    onClose={() => closeNewClientModal}
+                    onClose={() => setIsNewClientModalOpen(false)}
                 />
             )}
             <div className="mt-10 ml-10">
@@ -284,7 +283,11 @@ function AddInvoice() {
                                             <button
                                                 className="button-secondary"
                                                 type="button"
-                                                onClick={openNewClientModal}
+                                                onClick={() =>
+                                                    setIsNewClientModalOpen(
+                                                        true
+                                                    )
+                                                }
                                             >
                                                 New client
                                             </button>

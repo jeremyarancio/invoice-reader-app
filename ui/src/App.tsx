@@ -13,6 +13,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@/services/api/main";
 import ProtectedRoute from "@/components/ProtectedRoute"; // Import the ProtectedRoute
 import AuthProvider from "./components/AuthProvider";
+import ViewInvoice from "./pages/ViewInvoice";
 
 function App() {
     return (
@@ -34,6 +35,10 @@ function App() {
                                     <Route
                                         path="/invoices/add"
                                         element={<AddInvoice />}
+                                    />
+                                    <Route
+                                        path="/invoices/:invoiceId"
+                                        element={<ViewInvoice />}
                                     />
                                     <Route
                                         path="/clients"

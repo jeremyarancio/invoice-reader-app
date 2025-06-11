@@ -44,7 +44,8 @@ function Invoices() {
             <div className="flex flex-col space-y-2 mt-5 mx-auto max-w-4xl px-4 h-full">
                 {invoices?.map((invoice) => (
                     <InvoiceCard
-                        key={invoice.invoiceNumber}
+                        key={invoice.id}
+                        invoiceId={invoice.id}
                         invoiceDescription={""} // Not implemented
                         grossAmount={invoice.grossAmount}
                         invoiceNumber={invoice.invoiceNumber}

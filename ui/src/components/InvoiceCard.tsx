@@ -1,7 +1,9 @@
 import { AppCard } from "@/components/AppCard";
 import { format } from "date-fns";
+import { useNavigate } from "react-router-dom";
 
 interface InvoiceCardProps {
+    invoiceId: string;
     invoiceDescription: string;
     grossAmount: number;
     invoiceNumber: string;
@@ -11,6 +13,7 @@ interface InvoiceCardProps {
 }
 
 function InvoiceCard({
+    invoiceId,
     invoiceDescription,
     grossAmount,
     invoiceNumber,
@@ -18,9 +21,11 @@ function InvoiceCard({
     status,
     currency,
 }: InvoiceCardProps) {
+    const navigate = useNavigate();
+
     return (
         <>
-            <AppCard>
+            <AppCard onEdit={() => navigate(`/invoices/${invoiceId}`)}>
                 <h3>{invoiceDescription}</h3>
                 <div className="flex justify-between flex-nowrap">
                     <div className="flex w-3/8 space-x-8 justify-start">

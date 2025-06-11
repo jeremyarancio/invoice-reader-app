@@ -8,7 +8,6 @@ import {
 import AddCompany from "./addClient/AddCompany";
 import { useState } from "react";
 import AddIndividual from "./addClient/AddIndividual";
-import { useNewClientModalStore } from "@/stores/new-client-modal-store";
 
 interface Props {
     isOpen: boolean;
@@ -17,7 +16,6 @@ interface Props {
 
 function NewClientModal({ isOpen, onClose }: Props) {
     const [clientType, setClientType] = useState("company");
-    const { closeNewClientModal } = useNewClientModalStore();
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
@@ -50,9 +48,7 @@ function NewClientModal({ isOpen, onClose }: Props) {
                         An individual
                     </button>
                 </div>
-                {clientType === "company" && (
-                    <AddCompany onSuccess={closeNewClientModal} />
-                )}
+                {clientType === "company" && <AddCompany onSuccess={onClose} />}
                 {clientType === "individual" && (
                     <AddIndividual /> //NOt implemented yet
                 )}

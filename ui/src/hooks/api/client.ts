@@ -6,12 +6,24 @@ import type { Client, CreateClient } from "@/schemas/client";
 import {
     addClient,
     deleteClients,
+    fetchClient,
     fetchClients,
     updateClient,
 } from "@/services/api/client";
 import { queryClient } from "@/services/api/main";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
+
+export const useFetchClient = () => {
+    return (clientId: string) => {
+        const { data, isLoading, error } = useQuery({
+            queryKey: ["client", clientId],
+            queryFn: () => fetchClient(clientId),
+        });
+        const client = data ? mapGetClientToClient(data) : null;
+        return { client, isLoading, error };
+    };
+};
 
 export const useFetchClients = () => {
     return (pageNumber: number = 1, perPage: number = 10) => {

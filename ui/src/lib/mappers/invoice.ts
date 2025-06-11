@@ -6,6 +6,7 @@ import type {
     Invoice,
     UpdateInvoice,
 } from "@/schemas/invoice";
+import { toDate } from "@/lib/utils";
 
 export function mapGetInvoiceToInvoice(getInvoice: GetInvoice): Invoice {
     return {
@@ -40,7 +41,7 @@ export function mapInvoicetoCreateInvoice(
         invoice: {
             amount_excluding_tax: invoice.grossAmount,
             invoice_number: invoice.invoiceNumber,
-            invoiced_date: invoice.issuedDate,
+            invoiced_date: toDate(invoice.issuedDate),
             vat: invoice.vat,
             is_paid: invoice.status,
         },
