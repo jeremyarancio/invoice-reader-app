@@ -29,7 +29,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { cn, toDate } from "@/lib/utils";
-import { useState } from "react";
 import AppAlert from "@/components/AppAlert";
 import { useNavigate, useLocation } from "react-router-dom";
 import PdfPreview from "@/components/PdfPreview";
@@ -37,15 +36,17 @@ import NewClientModal from "@/components/NewClientModal";
 import { useIsSubmittedAlert } from "@/hooks/alert-hooks";
 import { useAddInvoice, useFetchCurrencies } from "@/hooks/api/invoice";
 import { useFetchClients } from "@/hooks/api/client";
+import { useNewClientModalStore } from "@/stores/new-client-modal-store";
 
 function AddInvoice() {
-    const [isClientModalOpen, setIsClientModalOpen] = useState(false);
     const navigate = useNavigate();
     const file = useLocation().state?.file;
     const { isSubmitted, setIsSubmitted } = useIsSubmittedAlert();
     const addInvoice = useAddInvoice();
     const fetchClients = useFetchClients();
     const fetchCurrencies = useFetchCurrencies();
+    const { isNewClientModalOpen, openNewClientModal, closeNewClientModal } =
+        useNewClientModalStore();
 
     const formSchema = z.object({
         invoiceNumber: z.string().min(1, "Invoice number is required"),
@@ -88,18 +89,12 @@ function AddInvoice() {
         navigate("/invoices"); //Alert can be improved
     };
 
-    const handleNewClient = () => {
-        setIsClientModalOpen(true);
-    };
-
     return (
         <>
-            {isClientModalOpen && (
+            {isNewClientModalOpen && (
                 <NewClientModal
-                    isOpen={isClientModalOpen}
-                    onClose={() => setIsClientModalOpen(false)}
-                    onSuccess={() => setIsClientModalOpen(false)}
-                    onError={() => console.log("Client alert to improve!")}
+                    isOpen={isNewClientModalOpen}
+                    onClose={() => closeNewClientModal}
                 />
             )}
             <div className="mt-10 ml-10">
@@ -289,7 +284,7 @@ function AddInvoice() {
                                             <button
                                                 className="button-secondary"
                                                 type="button"
-                                                onClick={handleNewClient}
+                                                onClick={openNewClientModal}
                                             >
                                                 New client
                                             </button>

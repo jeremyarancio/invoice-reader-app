@@ -21,7 +21,7 @@ interface Props {
 
 function AddCompany({ onSuccess, onError }: Props) {
     const { setIsSubmitted } = useIsSubmittedAlert();
-    const addClient = useAddClient({ onSuccess, onError });
+    const addClient = useAddClient({ onSuccess: onSuccess, onError: onError });
 
     const formSchema = z.object({
         client_name: z.string(),
