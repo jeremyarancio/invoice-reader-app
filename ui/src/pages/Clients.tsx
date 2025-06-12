@@ -29,7 +29,8 @@ function Clients() {
                 {clients.map((client) => (
                     <ClientCard
                         key={client.clientName}
-                        client_name={client.clientName}
+                        clientId={client.id}
+                        clientName={client.clientName}
                         totalInvoiceNumber={0} //Not implemented
                         totalInvoiceAmount={client.totalRevenu}
                         totalInvoiceAmountCurrency={"-"} //Not implemented

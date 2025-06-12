@@ -14,6 +14,7 @@ import { queryClient } from "@/services/api/main";
 import ProtectedRoute from "@/components/ProtectedRoute"; // Import the ProtectedRoute
 import AuthProvider from "./components/AuthProvider";
 import ViewInvoice from "./pages/ViewInvoice";
+import ViewClient from "./pages/ViewClient";
 
 function App() {
     return (
@@ -47,6 +48,10 @@ function App() {
                                     <Route
                                         path="/clients/add"
                                         element={<AddClient />}
+                                    />
+                                    <Route
+                                        path="/clients/:clientId"
+                                        element={<ViewClient />}
                                     />
                                     <Route
                                         path="/user"

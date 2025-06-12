@@ -1,22 +1,29 @@
+import { useNavigate } from "react-router-dom";
 import { AppCard } from "./AppCard";
 
 interface ClientCardProps {
-    client_name: string;
+    clientId: string;
+    clientName: string;
     totalInvoiceNumber: number;
     totalInvoiceAmount: number;
     totalInvoiceAmountCurrency: string;
 }
 
 function ClientCard({
-    client_name,
+    clientId,
+    clientName,
     totalInvoiceNumber,
     totalInvoiceAmount,
     totalInvoiceAmountCurrency,
 }: ClientCardProps) {
+    const navigate = useNavigate();
     return (
         <>
-            <AppCard>
-                <h3>{client_name}</h3>
+            <AppCard
+                onClick={() => navigate(`/clients/${clientId}`)}
+                onEdit={() => navigate(`/clients/${clientId}`)}
+            >
+                <h3>{clientName}</h3>
                 <div className="flex justify-between flex-nowrap">
                     <div className="flex w-3/8 space-x-8 justify-start">
                         <p className="flex italic font-semibold text-sm">

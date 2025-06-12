@@ -25,7 +25,10 @@ function InvoiceCard({
 
     return (
         <>
-            <AppCard onEdit={() => navigate(`/invoices/${invoiceId}`)}>
+            <AppCard
+                onClick={() => navigate(`/invoices/${invoiceId}`)}
+                onEdit={() => navigate(`/invoices/${invoiceId}`)}
+            >
                 <h3>{invoiceDescription}</h3>
                 <div className="flex justify-between flex-nowrap">
                     <div className="flex w-3/8 space-x-8 justify-start">
