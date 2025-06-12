@@ -25,12 +25,12 @@ function ClientCard({
                     </div>
                     <div className="w-3/8"></div>
                     <div className="flex w-2/8 space-x-8 justify-evenly">
-                        <p className="font-semibold">
-                            <p className="flex font-semibold">
+                        <div className="font-semibold">
+                            <span className="flex font-semibold">
                                 {totalInvoiceAmount}{" "}
                                 {totalInvoiceAmountCurrency}
-                            </p>
-                        </p>
+                            </span>
+                        </div>
                         <div className="my-auto w-1/30"></div>
                     </div>
                 </div>

@@ -27,7 +27,7 @@ import {
     useFetchInvoice,
     useFetchInvoiceUrl,
 } from "@/hooks/api/invoice";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useFetchClient } from "@/hooks/api/client";
 import { z } from "zod";
 import PdfPreview from "@/components/PdfPreview";
@@ -41,7 +41,7 @@ function ViewInvoice() {
     const { invoiceId } = useParams();
     const [editMode, setEditMode] = useState(false);
 
-    const { invoice, isLoading, error } = useFetchInvoice(invoiceId);
+    const { invoice } = useFetchInvoice(invoiceId);
     const { url: invoiceUrl } = useFetchInvoiceUrl(invoiceId);
     const { currencies } = useFetchCurrencies();
     const { client } = useFetchClient(invoice?.clientId);
