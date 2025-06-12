@@ -43,9 +43,9 @@ function AddInvoice() {
     const file = useLocation().state?.file;
     const { isSubmitted, setIsSubmitted } = useIsSubmittedAlert();
     const addInvoice = useAddInvoice();
-    const fetchClients = useFetchClients();
-    const fetchCurrencies = useFetchCurrencies();
     const [isNewClientModalOpen, setIsNewClientModalOpen] = useState(false);
+    const { clients } = useFetchClients();
+    const { currencies } = useFetchCurrencies();
 
     const formSchema = z.object({
         invoiceNumber: z.string().min(1, "Invoice number is required"),
@@ -67,10 +67,6 @@ function AddInvoice() {
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
     });
-
-    const { clients } = fetchClients();
-
-    const { currencies } = fetchCurrencies();
 
     const onSubmit = (values: z.infer<typeof formSchema>) => {
         addInvoice(file, {

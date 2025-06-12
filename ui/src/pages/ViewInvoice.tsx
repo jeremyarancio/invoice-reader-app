@@ -41,10 +41,13 @@ function ViewInvoice() {
     const { invoiceId } = useParams();
     const [editMode, setEditMode] = useState(false);
 
-    const fetchInvoiceUrl = useFetchInvoiceUrl();
-    const fetchInvoice = useFetchInvoice();
-    const fetchClient = useFetchClient();
-    const fetchCurrencies = useFetchCurrencies();
+    const { invoice, isLoading, error } = useFetchInvoice(invoiceId);
+    const { url: invoiceUrl } = useFetchInvoiceUrl(invoiceId);
+    const { currencies } = useFetchCurrencies();
+    const { client } = useFetchClient(invoice?.clientId);
+
+    const currency =
+        currencies?.find((c) => c.id === invoice?.currencyId)?.name || "";
 
     const invoiceSchema = z.object({
         invoiceNumber: z.string(),
@@ -56,20 +59,6 @@ function ViewInvoice() {
         invoicedDate: z.date(),
         paidDate: z.date().optional(),
     });
-
-    
-    if (!invoiceId) {
-        return <div>Error: Invoice ID is required</div>;
-    }
-
-    const { invoice, isLoading, error } = fetchInvoice(invoiceId);
-    const { url: invoiceUrl } = fetchInvoiceUrl(invoiceId);
-    const { client } = invoice
-        ? fetchClient(invoice.clientId)
-        : { client: null };
-    const { currencies } = fetchCurrencies();
-    const currency =
-        currencies?.find((c) => c.id === invoice?.currencyId)?.name || "";
 
     const form = useForm<z.infer<typeof invoiceSchema>>({
         resolver: zodResolver(invoiceSchema),
@@ -86,9 +75,6 @@ function ViewInvoice() {
     });
 
     const onSubmit = (values: z.infer<typeof invoiceSchema>) => {};
-
-    if (isLoading) return <div>Loading...</div>;
-    if (error) return <div>Error: {error.message}</div>;
 
     return (
         <div className="flex mt-20 mb-40 justify-around">

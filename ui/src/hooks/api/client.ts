@@ -14,27 +14,27 @@ import { queryClient } from "@/services/api/main";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
 
-export const useFetchClient = () => {
-    return (clientId: string) => {
-        const { data, isLoading, error } = useQuery({
-            queryKey: ["client", clientId],
-            queryFn: () => fetchClient(clientId),
-        });
-        const client = data ? mapGetClientToClient(data) : null;
-        return { client, isLoading, error };
-    };
+export const useFetchClient = (clientId: string | undefined) => {
+    const { data, isLoading, error } = useQuery({
+        queryKey: ["client", clientId],
+        queryFn: () => fetchClient(clientId as string),
+        enabled: !!clientId,
+    });
+    const client = data ? mapGetClientToClient(data) : null;
+    return { client, isLoading, error };
 };
 
-export const useFetchClients = () => {
-    return (pageNumber: number = 1, perPage: number = 10) => {
-        const { data, isLoading, error } = useQuery({
-            queryKey: ["clients", pageNumber, perPage],
-            queryFn: () => fetchClients(pageNumber, perPage),
-        });
-        const clients = data?.data.map(mapGetClientToClient) || [];
+export const useFetchClients = (
+    pageNumber: number = 1,
+    perPage: number = 10
+) => {
+    const { data, isLoading, error } = useQuery({
+        queryKey: ["clients", pageNumber, perPage],
+        queryFn: () => fetchClients(pageNumber, perPage),
+    });
+    const clients = data?.data.map(mapGetClientToClient) || [];
 
-        return { clients, isLoading, error };
-    };
+    return { clients, isLoading, error };
 };
 
 export const useDeleteClients = () => {

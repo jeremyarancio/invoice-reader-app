@@ -9,11 +9,9 @@ import { useNavigate } from "react-router-dom";
 function Invoices() {
     const navigate = useNavigate();
     const [selectedFile, setSelectedFile] = useState(null);
-    const fetchInvoices = useFetchInvoices();
-    const fetchCurrencies = useFetchCurrencies();
 
-    const { invoices, isLoading } = fetchInvoices();
-    const { currencies } = fetchCurrencies();
+    const { invoices, isLoading } = useFetchInvoices();
+    const { currencies } = useFetchCurrencies();
 
     const handleUpload = () => {
         selectedFile &&

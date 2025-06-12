@@ -16,26 +16,35 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
 
 export const useFetchCurrencies = () => {
-    return () => {
-        const { data, isLoading, error } = useQuery({
-            queryKey: ["currencies"],
-            queryFn: () => fetchCurrencies(),
-        });
-        const currencies = data?.map(mapGetCurrencyToCurrency) || [];
-        return { currencies, isLoading, error };
-    };
+    const { data, isLoading, error } = useQuery({
+        queryKey: ["currencies"],
+        queryFn: () => fetchCurrencies(),
+    });
+    const currencies = data?.map(mapGetCurrencyToCurrency) || [];
+    return { currencies, isLoading, error };
 };
 
-export const useFetchInvoices = () => {
-    return (pageNumber: number = 1, perPage: number = 10) => {
-        const { data, isLoading, error } = useQuery({
-            queryKey: ["invoices", pageNumber, perPage],
-            queryFn: () => fetchInvoices(pageNumber, perPage),
-        });
-        const invoices = data?.data.map(mapGetInvoiceToInvoice) || [];
+export const useFetchInvoices = (
+    pageNumber: number = 1,
+    perPage: number = 10
+) => {
+    const { data, isLoading, error } = useQuery({
+        queryKey: ["invoices", pageNumber, perPage],
+        queryFn: () => fetchInvoices(pageNumber, perPage),
+    });
+    const invoices = data?.data.map(mapGetInvoiceToInvoice) || [];
 
-        return { invoices, isLoading, error };
-    };
+    return { invoices, isLoading, error };
+};
+
+export const useFetchInvoiceUrl = (invoiceId: string | undefined) => {
+    const { data, isLoading, error } = useQuery({
+        queryKey: ["invoices", invoiceId],
+        queryFn: () => fetchInvoiceUrl(invoiceId as string),
+        enabled: !!invoiceId,
+    });
+    const url = data || null;
+    return { url, isLoading, error };
 };
 
 export const useAddInvoice = () => {
@@ -65,15 +74,14 @@ export const useAddInvoice = () => {
         addInvoiceMutation.mutate({ file, data });
 };
 
-export const useFetchInvoice = () => {
-    return (id: string) => {
-        const { data, isLoading, error } = useQuery({
-            queryKey: ["invoice", id],
-            queryFn: () => fetchInvoice(id),
-        });
-        const invoice = data ? mapGetInvoiceToInvoice(data) : null;
-        return { invoice, isLoading, error };
-    };
+export const useFetchInvoice = (invoiceId: string | undefined) => {
+    const { data, isLoading, error } = useQuery({
+        queryKey: ["invoice", invoiceId],
+        queryFn: () => fetchInvoice(invoiceId as string),
+        enabled: !!invoiceId,
+    });
+    const invoice = data ? mapGetInvoiceToInvoice(data) : null;
+    return { invoice, isLoading, error };
 };
 
 export const useUpdateInvoice = () => {
@@ -90,15 +98,4 @@ export const useUpdateInvoice = () => {
         },
     });
     return (data: UpdateInvoice) => updateInvoiceMutation.mutate(data);
-};
-
-export const useFetchInvoiceUrl = () => {
-    return (invoiceId: string) => {
-        const { data, isLoading, error } = useQuery({
-            queryKey: ["invoices", invoiceId],
-            queryFn: () => fetchInvoiceUrl(invoiceId),
-        });
-        const url = data || null;
-        return { url, isLoading, error };
-    };
 };

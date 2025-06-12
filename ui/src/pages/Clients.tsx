@@ -6,9 +6,7 @@ import { useNavigate } from "react-router-dom";
 
 function Clients() {
     const navigate = useNavigate();
-    const fetchClients = useFetchClients();
-
-    const { clients, isLoading } = fetchClients();
+    const { clients, isLoading } = useFetchClients();
 
     return (
         <>
@@ -24,7 +22,9 @@ function Clients() {
             <div className="max-w-96 px-4 mb-20 mx-auto mt-5">
                 <Input placeholder="Search"></Input>
             </div>
-            {clients.length === 0 && !isLoading && <NoElementFound type="client" />}
+            {clients.length === 0 && !isLoading && (
+                <NoElementFound type="client" />
+            )}
             <div className="flex flex-col space-y-2 mt-5 mx-auto max-w-4xl px-4 h-full">
                 {clients.map((client) => (
                     <ClientCard
