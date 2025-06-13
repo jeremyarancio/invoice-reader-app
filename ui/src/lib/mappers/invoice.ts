@@ -21,7 +21,7 @@ export function mapGetInvoiceToInvoice(getInvoice: GetInvoice): Invoice {
     };
 }
 
-export function mapInvoiceToPutInvoice(invoice: Invoice): UpdateInvoice {
+export function mapInvoiceToUpdateInvoice(invoice: Invoice): UpdateInvoice {
     return {
         id: invoice.id,
         invoice: {

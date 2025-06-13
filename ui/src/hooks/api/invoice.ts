@@ -1,8 +1,13 @@
 import {
     mapGetCurrencyToCurrency,
     mapGetInvoiceToInvoice,
+    mapInvoiceToUpdateInvoice,
 } from "@/lib/mappers/invoice";
-import type { CreateInvoicePayload, UpdateInvoice } from "@/schemas/invoice";
+import type {
+    CreateInvoicePayload,
+    Invoice,
+    UpdateInvoice,
+} from "@/schemas/invoice";
 import {
     addInvoice,
     fetchCurrencies,
@@ -92,10 +97,12 @@ export const useUpdateInvoice = () => {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["invoices"] });
             queryClient.invalidateQueries({ queryKey: ["invoice"] });
+            window.alert("Invoice updated successfully");
         },
         onError: (error: AxiosError) => {
             window.alert("Error: " + (error.response?.data as any)?.message);
         },
     });
-    return (data: UpdateInvoice) => updateInvoiceMutation.mutate(data);
+    return (data: Invoice) =>
+        updateInvoiceMutation.mutate(mapInvoiceToUpdateInvoice(data));
 };

@@ -12,7 +12,7 @@ function ViewClient() {
         <>
             <div className="mt-10 ml-10">
                 <button
-                    onClick={() => navigate("/invoices")}
+                    onClick={() => navigate("/clients")}
                     className="hover:cursor-pointer"
                 >
                     <ArrowLeft
