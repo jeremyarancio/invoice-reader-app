@@ -137,69 +137,72 @@ function ViewInvoiceForm({ invoice, clients, currencies }: Props) {
                             </FormItem>
                         )}
                     />
+                    <div className="grid grid-cols-4 gap-4">
+                        <FormField
+                            control={form.control}
+                            name="grossAmount"
+                            render={({ field }) => (
+                                <FormItem className="col-span-3">
+                                    <FormLabel>Amount</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            type="number"
+                                            {...field}
+                                            readOnly={!editMode}
+                                            className={
+                                                !editMode ? "bg-muted" : ""
+                                            }
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
 
-                    <FormField
-                        control={form.control}
-                        name="grossAmount"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Amount</FormLabel>
-                                <FormControl>
-                                    <Input
-                                        type="number"
-                                        {...field}
-                                        readOnly={!editMode}
-                                        className={!editMode ? "bg-muted" : ""}
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
+                        <FormField
+                            control={form.control}
+                            name="currencyId"
+                            render={({ field }) => (
+                                <FormItem className="col-span-1">
+                                    <FormLabel>Currency</FormLabel>
+                                    {editMode ? (
+                                        <Select
+                                            onValueChange={field.onChange}
+                                            value={field.value}
+                                        >
+                                            <FormControl>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Select currency" />
+                                                </SelectTrigger>
+                                            </FormControl>
 
-                    <FormField
-                        control={form.control}
-                        name="currencyId"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Currency</FormLabel>
-                                {editMode ? (
-                                    <Select
-                                        onValueChange={field.onChange}
-                                        value={field.value}
-                                    >
-                                        <FormControl>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Select currency" />
-                                            </SelectTrigger>
-                                        </FormControl>
-
-                                        <SelectContent className="bg-stone-50">
-                                            {currencies.map((currency) => (
-                                                <SelectItem
-                                                    key={currency.id}
-                                                    value={currency.id}
-                                                >
-                                                    {currency.name}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                ) : (
-                                    <Input
-                                        value={
-                                            currencies.find(
-                                                (c) => c.id === field.value
-                                            )?.name || ""
-                                        }
-                                        readOnly
-                                        className="bg-muted"
-                                    />
-                                )}
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
+                                            <SelectContent className="bg-stone-50">
+                                                {currencies.map((currency) => (
+                                                    <SelectItem
+                                                        key={currency.id}
+                                                        value={currency.id}
+                                                    >
+                                                        {currency.name}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    ) : (
+                                        <Input
+                                            value={
+                                                currencies.find(
+                                                    (c) => c.id === field.value
+                                                )?.name || ""
+                                            }
+                                            readOnly
+                                            className="bg-muted"
+                                        />
+                                    )}
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
                     <FormField
                         control={form.control}
                         name="clientId"
