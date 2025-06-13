@@ -1,62 +1,70 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Navbar from "@/common/Navbar";
-import InvoiceList from "@/pages/invoices/components/InvoiceList";
-import ClientList from "@/pages/clients/components/ClientList";
-import UploadInvoice from "@/pages/invoices/components/UploadInvoice";
-import { queryClient } from "@/services/api";
-import { QueryClientProvider } from "@tanstack/react-query";
-import ClientForm from "@/pages/clients/components/ClientForm";
-import ProtectedRoute from "@/common/components/ProtectedRoute";
-import SignIn from "@/pages/auth/SignIn";
-import SignUp from "@/pages/auth/SignUp";
+import Invoices from "@/pages/Invoices";
+import Clients from "@/pages/Clients";
+import SidebarLayout from "./components/SidebarLayout";
+import AddInvoice from "@/pages/AddInvoice";
+import AddClient from "@/pages/AddClient";
+import SignIn from "@/pages/SignIn";
+import SignUp from "@/pages/SignUp";
+import { AuthLayout } from "@/components/layouts/AuthLayout";
 import PageNotFound from "@/pages/PageNotFound";
+import UserProfile from "@/pages/UserProfile";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { queryClient } from "@/services/api/main";
+import ProtectedRoute from "@/components/ProtectedRoute"; // Import the ProtectedRoute
+import AuthProvider from "./components/AuthProvider";
+import ViewInvoice from "./pages/ViewInvoice";
+import ViewClient from "./pages/ViewClient";
 
 function App() {
     return (
-        <QueryClientProvider client={queryClient}>
-            <BrowserRouter>
-                <Navbar />
-                <div className="container mt-4">
-                    <Routes>
-                        <Route
-                            path="/"
-                            element={
-                                <ProtectedRoute>
-                                    <InvoiceList />
-                                </ProtectedRoute>
-                            }
-                        />
-                        <Route
-                            path="/clients"
-                            element={
-                                <ProtectedRoute>
-                                    <ClientList />
-                                </ProtectedRoute>
-                            }
-                        />
-                        <Route
-                            path="/upload"
-                            element={
-                                <ProtectedRoute>
-                                    <UploadInvoice />
-                                </ProtectedRoute>
-                            }
-                        />
-                        <Route
-                            path="/clientform"
-                            element={
-                                <ProtectedRoute>
-                                    <ClientForm />
-                                </ProtectedRoute>
-                            }
-                        />
-                        <Route path="/signin" element={<SignIn />} />
-                        <Route path="/signup" element={<SignUp />} />
-                        <Route path="/*" element={<PageNotFound />} />
-                    </Routes>
-                </div>
-            </BrowserRouter>
-        </QueryClientProvider>
+        <>
+            <QueryClientProvider client={queryClient}>
+                <AuthProvider>
+                    <BrowserRouter>
+                        <Routes>
+                            <Route element={<AuthLayout />}>
+                                <Route path="/signin" element={<SignIn />} />
+                                <Route path="/signup" element={<SignUp />} />
+                            </Route>
+                            <Route element={<ProtectedRoute />}>
+                                <Route element={<SidebarLayout />}>
+                                    <Route
+                                        path="/invoices"
+                                        element={<Invoices />}
+                                    />
+                                    <Route
+                                        path="/invoices/add"
+                                        element={<AddInvoice />}
+                                    />
+                                    <Route
+                                        path="/invoices/:invoiceId"
+                                        element={<ViewInvoice />}
+                                    />
+                                    <Route
+                                        path="/clients"
+                                        element={<Clients />}
+                                    />
+                                    <Route
+                                        path="/clients/add"
+                                        element={<AddClient />}
+                                    />
+                                    <Route
+                                        path="/clients/:clientId"
+                                        element={<ViewClient />}
+                                    />
+                                    <Route
+                                        path="/user"
+                                        element={<UserProfile />}
+                                    />
+                                </Route>
+                            </Route>
+                            <Route path="/*" element={<PageNotFound />} />
+                        </Routes>
+                    </BrowserRouter>
+                </AuthProvider>
+            </QueryClientProvider>
+        </>
     );
 }
 
