@@ -1,12 +1,12 @@
 export interface Client {
     id: string;
     clientName: string;
-    streetNumber: number;
+    streetNumber: string;
     streetAddress: string;
-    zipcode: number;
+    zipcode: string;
     city: string;
     country: string;
-    totalRevenu: number;
+    totalRevenu?: number;
 }
 
 export interface CreateClient {
@@ -27,9 +27,9 @@ export interface GetPagedClients {
 export interface GetClient {
     client_id: string;
     client_name: string;
-    street_number: number;
+    street_number: string;
     street_address: string;
-    zipcode: number;
+    zipcode: string;
     city: string;
     country: string;
     total_revenu: number;
@@ -39,9 +39,9 @@ export interface UpdateClient {
     id: string;
     client: {
         client_name: string;
-        street_number: number;
+        street_number: string;
         street_address: string;
-        zipcode: number;
+        zipcode: string;
         city: string;
         country: string;
     };
