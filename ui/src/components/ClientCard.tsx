@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { AppCard } from "./AppCard";
+import { useDeleteClient } from "@/hooks/api/client";
 
 interface ClientCardProps {
     clientId: string;
@@ -17,11 +18,14 @@ function ClientCard({
     totalInvoiceAmountCurrency,
 }: ClientCardProps) {
     const navigate = useNavigate();
+    const deleteClient = useDeleteClient();
+
     return (
         <>
             <AppCard
                 onClick={() => navigate(`/clients/${clientId}`)}
                 onEdit={() => navigate(`/clients/${clientId}`)}
+                onDelete={() => deleteClient(clientId)}
             >
                 <h3>{clientName}</h3>
                 <div className="flex justify-between flex-nowrap">

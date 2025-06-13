@@ -43,34 +43,16 @@ export const fetchCurrencies = async (): Promise<GetCurrency[]> => {
     return response.data;
 };
 
-export const deleteInvoices = async (invoice_ids: string[]) => {
-    await Promise.all(
-        invoice_ids.map(async (invoice_id) => {
-            await api.delete("invoices/" + invoice_id, {
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            });
-        })
-    );
+export const deleteInvoice = async (invoiceId: string) => {
+    await api.delete("invoices/" + invoiceId);
 };
 
 export const updateInvoice = async (invoice: UpdateInvoice) => {
-    const response = await api.put("invoices/" + invoice.id, invoice.invoice, {
-        headers: {
-            "Content-Type": "application/json",
-        },
-    });
-
+    const response = await api.put("invoices/" + invoice.id, invoice.invoice);
     return response.data;
 };
 
 export const fetchInvoiceUrl = async (id: string): Promise<string> => {
-    const response = await api.get("invoices/" + id + "/url/", {
-        headers: {
-            "Content-Type": "application/json",
-        },
-    });
-
+    const response = await api.get("invoices/" + id + "/url/");
     return response.data;
 };

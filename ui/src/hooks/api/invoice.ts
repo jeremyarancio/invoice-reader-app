@@ -10,6 +10,7 @@ import type {
 } from "@/schemas/invoice";
 import {
     addInvoice,
+    deleteInvoice,
     fetchCurrencies,
     fetchInvoice,
     fetchInvoices,
@@ -64,6 +65,7 @@ export const useAddInvoice = () => {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["invoices"] });
             queryClient.invalidateQueries({ queryKey: ["clients"] });
+            console.log("Invoice added successfully");
         },
         onError: (error: AxiosError) => {
             error.status === 409
@@ -105,4 +107,24 @@ export const useUpdateInvoice = () => {
     });
     return (data: Invoice) =>
         updateInvoiceMutation.mutate(mapInvoiceToUpdateInvoice(data));
+};
+
+export const useDeleteInvoice = () => {
+    const deleteInvoicesMutation = useMutation({
+        mutationFn: deleteInvoice,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["invoices"] });
+            window.alert("Invoices deleted successfully");
+        },
+        onError: (error: AxiosError) => {
+            error.status === 422
+                ? window.alert(
+                      "No invoice with this ID exists. Please try again."
+                  )
+                : window.alert(
+                      "Error: " + (error.response?.data as any)?.message
+                  );
+        },
+    });
+    return (invoiceId: string) => deleteInvoicesMutation.mutate(invoiceId);
 };

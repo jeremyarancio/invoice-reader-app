@@ -62,7 +62,7 @@ function AddCompany({ onSuccess, onError }: Props) {
                                     <Input {...field} />
                                 </FormControl>
                                 <FormDescription>
-                                    The invoice number should be unique
+                                    The client name should be unique.
                                 </FormDescription>
                                 <FormMessage />
                             </FormItem>
@@ -113,7 +113,7 @@ function AddCompany({ onSuccess, onError }: Props) {
                                     <span className="text-red-600">*</span>
                                 </FormLabel>
                                 <FormControl>
-                                    <Input {...field} type="number" />
+                                    <Input {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>

@@ -11,6 +11,10 @@ function AddClient() {
     const navigate = useNavigate();
     const { isSubmitted } = useIsSubmittedAlert();
 
+    const onSuccess = () => {
+        navigate("/clients");
+    };
+
     return (
         <>
             <div className="mt-10 ml-10">
@@ -48,7 +52,11 @@ function AddClient() {
                 </button>
             </div>
             <div className="max-w-md mx-auto mb-30">
-                {clientType === "company" ? <AddCompany /> : <AddIndividual />}
+                {clientType === "company" ? (
+                    <AddCompany onSuccess={onSuccess} />
+                ) : (
+                    <AddIndividual />
+                )}
             </div>
             {isSubmitted && <AppAlert />}
         </>

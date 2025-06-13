@@ -8,6 +8,8 @@ function ViewClient() {
     const navigate = useNavigate();
     const { client, isLoading: isClientLoading } = useFetchClient(clientId);
 
+    console.log("Client:", client);
+
     return (
         <>
             <div className="mt-10 ml-10">

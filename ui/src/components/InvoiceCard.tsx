@@ -1,4 +1,5 @@
 import { AppCard } from "@/components/AppCard";
+import { useDeleteInvoice } from "@/hooks/api/invoice";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
 
@@ -22,12 +23,14 @@ function InvoiceCard({
     currency,
 }: InvoiceCardProps) {
     const navigate = useNavigate();
+    const deleteInvoice = useDeleteInvoice();
 
     return (
         <>
             <AppCard
                 onClick={() => navigate(`/invoices/${invoiceId}`)}
                 onEdit={() => navigate(`/invoices/${invoiceId}`)}
+                onDelete={() => deleteInvoice(invoiceId)}
             >
                 <h3>{invoiceDescription}</h3>
                 <div className="flex justify-between flex-nowrap">

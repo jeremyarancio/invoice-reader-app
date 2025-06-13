@@ -5,7 +5,7 @@ import {
 import type { Client, CreateClient } from "@/schemas/client";
 import {
     addClient,
-    deleteClients,
+    deleteClient,
     fetchClient,
     fetchClients,
     updateClient,
@@ -37,24 +37,23 @@ export const useFetchClients = (
     return { clients, isLoading, error };
 };
 
-export const useDeleteClients = () => {
+export const useDeleteClient = () => {
     const deleteMutation = useMutation({
-        mutationFn: deleteClients,
+        mutationFn: deleteClient,
         onSuccess: () => {
             window.alert("Successfully deleted");
             queryClient.invalidateQueries({ queryKey: ["clients"] });
         },
         onError: (error: AxiosError) => {
-            error.status === 409
+            error.status === 422
                 ? window.alert(
-                      "Error: Client already exists. Process cancelled."
+                      "No client with this ID exists. Please try again."
                   )
                 : window.alert("Error: " + error.message);
         },
     });
-    return (clients: Client[]) => {
-        const clientIds = clients.map((client) => client.id);
-        deleteMutation.mutate(clientIds);
+    return (clientId: string) => {
+        deleteMutation.mutate(clientId);
     };
 };
 
@@ -83,6 +82,7 @@ export const useUpdateClient = () => {
         onSuccess: () => {
             window.alert("Client successfully updated.");
             queryClient.invalidateQueries({ queryKey: ["clients"] });
+            queryClient.invalidateQueries({ queryKey: ["client"] });
         },
         onError: (error: AxiosError) => {
             window.alert("Failed to update client: " + error.message);

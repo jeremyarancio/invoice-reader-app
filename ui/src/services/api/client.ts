@@ -37,16 +37,8 @@ export const addClient = async (client: CreateClient) => {
     return response.data;
 };
 
-export const deleteClients = async (client_ids: string[]) => {
-    await Promise.all(
-        client_ids.map(async (client_id) => {
-            await api.delete("clients/" + client_id, {
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            });
-        })
-    );
+export const deleteClient = async (clientId: string) => {
+    await api.delete("clients/" + clientId);
 };
 
 export const updateClient = async (update_client: UpdateClient) => {
