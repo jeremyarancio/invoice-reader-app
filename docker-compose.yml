@@ -107,6 +107,7 @@ services:
             # - "traefik.http.routers.grafana.tls.certresolver=myresolver"
         volumes:
             - grafana-storage:/var/lib/grafana
+            - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
         depends_on:
             - prometheus
         networks:

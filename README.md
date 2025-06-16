@@ -117,7 +117,7 @@ docker compose up -d --build
 4. The application should be available at:
     * `app.localdev.test` for the UI
     * `api.localdev.test` for the server. The server being built with FastAPI, you can check the endpoints at `api.localdev.test/docs`
-    * `monitoring.locadev.test` for the monitoring dashboard. (*Notes: you should add the datasource to Grafana* - WIP)
+    * `monitor.locadev.test` for the monitoring dashboard. (*Notes: you should add the datasource to Grafana* - WIP)
 
 <br>
 
