@@ -73,11 +73,11 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "12.0.0",
+      "pluginVersion": "11.6.0",
       "targets": [
         {
           "editorMode": "code",
-          "expr": "histogram_quantile(\r\n  0.95,\r\n  sum(rate(http_request_duration_highr_seconds_bucket[5m])) by (le)\r\n) * 1000\r\n",
+          "expr": "histogram_quantile(\r\n  0.95,\r\n  sum(rate(http_request_duration_highr_seconds_bucket[10m])) by (le)\r\n) * 1000\r\n",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -138,11 +138,11 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "12.0.0",
+      "pluginVersion": "11.6.0",
       "targets": [
         {
           "editorMode": "code",
-          "expr": "histogram_quantile(\r\n  0.99,\r\n  sum(rate(http_request_duration_highr_seconds_bucket[5m])) by (le)\r\n) * 1000\r\n",
+          "expr": "histogram_quantile(\r\n  0.99,\r\n  sum(rate(http_request_duration_highr_seconds_bucket[10m])) by (le)\r\n) * 1000\r\n",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -233,7 +233,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.0",
+      "pluginVersion": "11.6.0",
       "targets": [
         {
           "datasource": {
@@ -243,7 +243,7 @@
           "disableTextWrap": false,
           "editorMode": "code",
           "exemplar": false,
-          "expr": "rate(http_requests_total{handler!~\"/|/metrics|/openapi.json|none|/docs\"}[1h])",
+          "expr": "sum by(handler) (rate(http_requests_total{handler!~\"/|/metrics|/openapi.json|none|/docs\"}[5m]))",
           "format": "time_series",
           "fullMetaSearch": false,
           "includeNullMetadata": false,
@@ -307,7 +307,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.0",
+      "pluginVersion": "11.6.0",
       "targets": [
         {
           "disableTextWrap": false,
@@ -371,7 +371,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "12.0.0",
+      "pluginVersion": "11.6.0",
       "targets": [
         {
           "disableTextWrap": false,
@@ -444,7 +444,7 @@
         "sizing": "manual",
         "valueMode": "color"
       },
-      "pluginVersion": "12.0.0",
+      "pluginVersion": "11.6.0",
       "targets": [
         {
           "disableTextWrap": false,
@@ -476,5 +476,5 @@
   "timezone": "browser",
   "title": "Invoice Dashboard",
   "uid": "eek7aweml5jpcc",
-  "version": 8
+  "version": 9
 }
