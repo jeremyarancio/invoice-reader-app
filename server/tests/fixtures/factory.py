@@ -68,7 +68,11 @@ def existing_invoice_model(
         user_id=test_existing_user.user_id,
         client_id=test_existing_client.client_id,
         currency_id=test_existing_currency.id,
-        **existing_invoice.model_dump(),
+        amount_excluding_tax=existing_invoice.gross_amount,
+        invoice_number=existing_invoice.invoice_number,
+        invoiced_date=existing_invoice.invoiced_date,
+        description=existing_invoice.description,
+        vat=existing_invoice.vat,
     )
 
 
@@ -87,7 +91,12 @@ def existing_invoice_models(
             user_id=test_existing_user.user_id,
             client_id=test_existing_client.client_id,
             currency_id=test_existing_currency.id,
-            **invoice.model_dump(),
+            amount_excluding_tax=invoice.gross_amount,
+            invoice_number=invoice.invoice_number,
+            invoiced_date=invoice.invoiced_date,
+            description=invoice.description,
+            vat=invoice.vat,
+            paid_date=invoice.paid_date,
         )
         for invoice in existing_invoices
     ]
@@ -180,14 +189,3 @@ def client_repository(session: Session) -> ClientRepository:
 @pytest.fixture
 def user_repository(session: Session) -> UserRepository:
     return UserRepository(session=session)
-
-
-@pytest.fixture
-def refresh_token_repository(session: Session) -> RefreshTokenRepository:
-    return RefreshTokenRepository(session=session)
-
-
-@pytest.fixture
-def existing_refresh_token(existing_user: User) -> str:
-    access_token = auth.create_token(email=existing_user.email)
-    return access_token

@@ -3,6 +3,7 @@ from unittest.mock import Mock
 import pytest
 from fastapi.testclient import TestClient
 
+from invoice_reader.mappers.invoices import InvoiceMapper
 from invoice_reader.models import CurrencyModel, InvoiceModel, UserModel
 from invoice_reader.repository import InvoiceRepository
 from invoice_reader.schemas import AuthToken, FileData
@@ -166,9 +167,12 @@ def test_update_invoice(
     auth_token: AuthToken,
     invoice_repository: InvoiceRepository,
 ):
-    updated_invoice = InvoiceUpdate.model_validate(test_existing_invoice.model_dump())
+    updated_invoice = InvoiceUpdate.model_validate(
+        InvoiceMapper.map_invoice_model_to_invoice(test_existing_invoice).model_dump()
+    )
     updated_invoice.invoice_number = "number1234"
-    updated_invoice.amount_excluding_tax = 1234
+    updated_invoice.description = "Updated description"
+    updated_invoice.gross_amount = 1234
 
     response = api_client.put(
         url=f"/api/v1/invoices/{test_existing_invoice.file_id}",
@@ -183,6 +187,7 @@ def test_update_invoice(
     assert response.status_code == 204
     assert invoice_model.invoice_number == updated_invoice.invoice_number
     assert invoice_model.amount_excluding_tax == 1234
+    assert invoice_model.description == "Updated description"
 
 
 # Add exception no change update

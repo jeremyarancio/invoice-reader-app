@@ -32,8 +32,9 @@ class InvoiceModel(SQLModel, table=True):
     amount_excluding_tax: float
     vat: float
     currency_id: uuid.UUID = Field(foreign_key="currency.id")
-    is_paid: bool
+    description: str
     invoiced_date: datetime.date
+    paid_date: datetime.date | None = None
     uploaded_date: datetime.date | None = Field(default_factory=datetime.datetime.now)
     last_updated_date: datetime.date | None = Field(
         default_factory=datetime.datetime.now

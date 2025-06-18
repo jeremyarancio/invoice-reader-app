@@ -130,12 +130,11 @@ def delete_invoice(
 ) -> Response:
     try:
         presenter.delete_invoice(file_id=file_id, user_id=user_id, session=session)
-        return Response(status_code=204)
+        return Response(content="Invoice successfully deleted.", status_code=204)
     except HTTPException:
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
-    return Response(content="Invoice successfully deleted.", status_code=204)
 
 
 @router.put("/{invoice_id}")
@@ -143,7 +142,6 @@ def update_invoice(
     invoice_id: uuid.UUID,
     invoice_update: InvoiceUpdate,
     session: Annotated[sqlmodel.Session, Depends(db.get_session)],
-    user_id: Annotated[uuid.UUID, Depends(auth.get_current_user_id)],
 ) -> Response:
     try:
         presenter.update_invoice(

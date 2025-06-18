@@ -13,9 +13,9 @@ def new_invoice():
     return InvoiceBase(
         invoiced_date=date(2024, 11, 18),
         invoice_number="14SQ456",
-        amount_excluding_tax=10000,
+        gross_amount=10000,
         vat=20,
-        is_paid=True,
+        description="Test invoice",
     )
 
 
@@ -24,9 +24,10 @@ def existing_invoice() -> InvoiceBase:
     return InvoiceBase(
         invoiced_date=date(2024, 12, 20),
         invoice_number="14SQ456",
-        amount_excluding_tax=10000,
+        gross_amount=10000,
         vat=20,
-        is_paid=False,
+        description="Test invoice",
+        paid_date=None,
     )
 
 
@@ -36,9 +37,10 @@ def existing_invoices() -> list[InvoiceBase]:
         InvoiceBase(
             invoiced_date=date(2024, 11, 18),
             invoice_number=f"number-{i}",
-            amount_excluding_tax=10000,
+            gross_amount=10000,
             vat=20,
-            is_paid=True,
+            description=f"Test invoice {i}",
+            paid_date=None,
         )
         for i in range(TOTAL_N)
     ]

@@ -16,8 +16,9 @@ function ViewInvoice() {
     const { invoice, isLoading: isInvoiceLoading } = useFetchInvoice(invoiceId);
     const { currencies, isLoading: isCurrenciesLoading } = useFetchCurrencies();
     const { clients, isLoading: isClientsLoading } = useFetchClients();
-
     const { url: invoiceUrl } = useFetchInvoiceUrl(invoiceId);
+
+    console.log("Invoice URL:", invoiceUrl);
 
     return (
         <>
@@ -34,13 +35,15 @@ function ViewInvoice() {
             </div>
             <h1 className="text-2xl font-bold ml-20 my-10">Invoice Details</h1>
 
-            <div className="flex mt-20 mb-40 justify-around">
-                {invoiceUrl && (
-                    <div className="px-4 flex justify-center">
-                        <PdfPreview file={invoiceUrl} />
-                    </div>
-                )}
-                <div className="px-4 md:px-20 w-full">
+            <div className="grid grid-cols-5 mt-20 mb-40">
+                <div className="col-span-3 flex justify-center">
+                    {invoiceUrl && (
+                        <div className="px-4 ">
+                            <PdfPreview file={invoiceUrl} />
+                        </div>
+                    )}
+                </div>
+                <div className="col-span-2 md:px-20 w-full">
                     {!isInvoiceLoading &&
                         !isCurrenciesLoading &&
                         !isClientsLoading &&

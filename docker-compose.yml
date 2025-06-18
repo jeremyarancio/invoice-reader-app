@@ -78,7 +78,8 @@ services:
             - "./server/.env"
         volumes:
             - ./server/src:/app/src
-            - ./server/.aws:/root/.aws
+            - ./server/.env:/app/.env
+            - ./server/migrations:/app/migrations
         depends_on:
             - postgres
         networks:

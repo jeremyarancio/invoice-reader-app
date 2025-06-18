@@ -196,7 +196,13 @@ def update_invoice(
     session: sqlmodel.Session,
 ) -> None:
     invoice_repository = InvoiceRepository(session=session)
-    invoice_repository.update(invoice_id=invoice_id, invoice_update=invoice_update)
+
+    invoice_repository.update(
+        invoice_id=invoice_id,
+        values_to_update=InvoiceMapper.map_invoice_update_for_model(
+            invoice_update=invoice_update
+        ),
+    )
 
 
 def get_invoice_url(

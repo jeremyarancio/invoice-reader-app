@@ -6,11 +6,12 @@ from pydantic import BaseModel
 
 
 class InvoiceBase(BaseModel):
-    amount_excluding_tax: float
+    gross_amount: float
     vat: Annotated[float, "In percentage: 20, 21, ..."]
-    is_paid: bool
     invoiced_date: date
+    paid_date: date | None = None
     invoice_number: str
+    description: str
 
 
 class Invoice(InvoiceBase):
@@ -18,6 +19,7 @@ class Invoice(InvoiceBase):
     file_id: uuid.UUID | None = None
     client_id: uuid.UUID
     currency_id: uuid.UUID
+
 
 class InvoiceCreate(BaseModel):
     client_id: uuid.UUID
@@ -41,4 +43,5 @@ class PagedInvoiceResponse(BaseModel):
 
 
 class InvoiceUpdate(InvoiceBase):
-    """Let's see how it can be improved later on."""
+    currency_id: uuid.UUID
+    client_id: uuid.UUID

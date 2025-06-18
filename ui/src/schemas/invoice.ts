@@ -14,30 +14,33 @@ export interface GetInvoice {
 }
 
 export interface GetInvoiceItem {
-    amount_excluding_tax: number;
+    gross_amount: number;
     invoice_number: string;
     invoiced_date: Date;
+    paid_date?: Date;
+    description: string;
     vat: number;
-    is_paid: boolean;
 }
 
 export interface Invoice {
     id: string;
-    clientId: string;
     grossAmount: number;
     vat: number;
-    status: boolean;
     issuedDate: Date;
+    paidDate?: Date;
+    description: string;
     invoiceNumber: string;
+    clientId: string;
     currencyId: string;
 }
 
 export interface CreateInvoice {
-    amount_excluding_tax: number;
+    gross_amount: number;
     vat: number;
     invoiced_date: string;
+    paid_date?: string;
     invoice_number: string;
-    is_paid: boolean;
+    description: string;
 }
 
 export interface CreateInvoicePayload {
@@ -49,11 +52,14 @@ export interface CreateInvoicePayload {
 export interface UpdateInvoice {
     id: string;
     invoice: {
-        amount_excluding_tax: number;
+        gross_amount: number;
         vat: number;
-        invoiced_date: Date;
+        invoiced_date: string;
+        paid_date?: string;
         invoice_number: string;
-        is_paid: boolean;
+        description: string;
+        currency_id: string;
+        client_id: string;
     };
 }
 

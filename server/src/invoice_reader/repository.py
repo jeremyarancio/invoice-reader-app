@@ -16,7 +16,6 @@ from invoice_reader.models import (
     UserModel,
 )
 from invoice_reader.schemas.clients import ClientUpdate
-from invoice_reader.schemas.invoices import InvoiceUpdate
 from invoice_reader.utils.logger import get_logger
 
 LOGGER = get_logger()
@@ -43,13 +42,13 @@ class InvoiceRepository:
         self.session.commit()
         self.session.refresh(invoice_model)
 
-    def update(self, invoice_id: uuid.UUID, invoice_update: InvoiceUpdate) -> None:
+    def update(self, invoice_id: uuid.UUID, values_to_update: dict) -> None:
         invoice_model = self.session.exec(
             sqlmodel.select(InvoiceModel).where(InvoiceModel.file_id == invoice_id)
         ).one_or_none()
         if not invoice_model:
             raise INVOICE_NOT_FOUND
-        invoice_model.sqlmodel_update(invoice_update)
+        invoice_model.sqlmodel_update(values_to_update)
         self.session.add(invoice_model)
         self.session.commit()
         self.session.refresh(invoice_model)

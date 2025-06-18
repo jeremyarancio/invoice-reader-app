@@ -73,10 +73,13 @@ function AddInvoice() {
             client_id: values.client_id,
             currency_id: values.currency_id,
             invoice: {
-                amount_excluding_tax: values.grossAmount,
+                description: values.invoiceDescription,
+                gross_amount: values.grossAmount,
                 invoice_number: values.invoiceNumber,
                 invoiced_date: toDate(values.invoicedDate),
-                is_paid: !!values.paidDate,
+                paid_date: values.paidDate
+                    ? toDate(values.paidDate)
+                    : undefined,
                 vat: values.vat,
             },
         });

@@ -42,28 +42,35 @@ function ViewInvoiceForm({ invoice, clients, currencies }: Props) {
 
     const updateInvoice = useUpdateInvoice();
 
-    const invoiceSchema = z.object({
-        invoiceNumber: z.string(),
-        invoiceDescription: z.string(),
-        grossAmount: z.coerce.number().min(0, "Must be positive"),
-        currencyId: z.string(),
-        vat: z.coerce.number().min(0).max(50),
-        clientId: z.string(),
-        issuedDate: z.date(),
-        paidDate: z.date().optional(),
-    });
+    console.log("Invoice in ViewInvoiceForm:", invoice);
+
+    const invoiceSchema = z
+        .object({
+            invoiceNumber: z.string(),
+            invoiceDescription: z.string(),
+            grossAmount: z.coerce.number().min(0, "Must be positive"),
+            currencyId: z.string(),
+            vat: z.coerce.number().min(0).max(50),
+            clientId: z.string(),
+            issuedDate: z.date(),
+            paidDate: z.date().optional(),
+        })
+        .refine((data) => !data.paidDate || data.paidDate >= data.issuedDate, {
+            message: "Paid date cannot be before issued date",
+            path: ["paidDate"],
+        });
 
     const form = useForm<z.infer<typeof invoiceSchema>>({
         resolver: zodResolver(invoiceSchema),
         defaultValues: {
             invoiceNumber: invoice.invoiceNumber,
-            invoiceDescription: "",
+            invoiceDescription: invoice.description,
             grossAmount: invoice.grossAmount,
             currencyId: invoice.currencyId,
             vat: invoice.vat,
             clientId: invoice.clientId,
             issuedDate: new Date(invoice.issuedDate),
-            paidDate: undefined,
+            paidDate: invoice.paidDate ? new Date(invoice.paidDate) : undefined,
         },
     });
 
@@ -90,7 +97,8 @@ function ViewInvoiceForm({ invoice, clients, currencies }: Props) {
             vat: values.vat,
             clientId: values.clientId,
             issuedDate: values.issuedDate,
-            status: !!values.paidDate,
+            paidDate: values.paidDate,
+            description: values.invoiceDescription,
         });
         setEditMode(false);
     };
@@ -300,6 +308,61 @@ function ViewInvoiceForm({ invoice, clients, currencies }: Props) {
                                         className="bg-muted"
                                     />
                                 )}
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="paidDate"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Paid Date</FormLabel>
+                                {editMode ? (
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                            <FormControl>
+                                                <Button
+                                                    variant={"outline"}
+                                                    className={cn(
+                                                        "w-full pl-3 text-left font-normal",
+                                                        !field.value &&
+                                                            "text-muted-foreground"
+                                                    )}
+                                                >
+                                                    {field.value ? (
+                                                        field.value.toLocaleDateString()
+                                                    ) : (
+                                                        <span>Pick a date</span>
+                                                    )}
+                                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                                </Button>
+                                            </FormControl>
+                                        </PopoverTrigger>
+                                        <PopoverContent
+                                            className="w-auto p-0 bg-stone-50"
+                                            align="start"
+                                        >
+                                            <Calendar
+                                                mode="single"
+                                                selected={field.value}
+                                                onSelect={field.onChange}
+                                                initialFocus
+                                            />
+                                        </PopoverContent>
+                                    </Popover>
+                                ) : (
+                                    <Input
+                                        value={
+                                            field.value
+                                                ? field.value.toLocaleDateString()
+                                                : ""
+                                        }
+                                        readOnly
+                                        className="bg-muted"
+                                    />
+                                )}
+                                <FormMessage />
                             </FormItem>
                         )}
                     />

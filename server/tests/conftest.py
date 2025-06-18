@@ -87,7 +87,9 @@ def bucket() -> str:
 
 @pytest.fixture
 def auth_token(test_existing_user: UserModel) -> AuthToken:
-    access_token = auth.create_token(email=test_existing_user.email)
+    access_token = auth.create_token(
+        email=test_existing_user.email, expire=100, token_type="access"
+    )
     return AuthToken(access_token=access_token, token_type="bearer")
 
 
