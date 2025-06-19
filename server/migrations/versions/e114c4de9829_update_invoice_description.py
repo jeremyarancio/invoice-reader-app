@@ -25,6 +25,11 @@ def upgrade() -> None:
         "invoice",
         sa.Column("description", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     )
+
+    # Set default value "Description" for all null descriptions
+    op.execute(
+        "UPDATE invoice SET description = 'Description' WHERE description IS NULL"
+    )
     # ### end Alembic commands ###
 
 

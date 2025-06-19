@@ -1,4 +1,5 @@
 import uuid
+from typing import Sequence
 
 from invoice_reader.core.stats import compute_total_revenu_per_client
 from invoice_reader.models import ClientModel
@@ -29,7 +30,7 @@ class ClientMapper:
     @classmethod
     def map_client_models_to_clients(
         cls,
-        client_models: list[ClientModel],
+        client_models: Sequence[ClientModel],
     ) -> list[Client]:
         return [
             cls.map_client_model_to_client(client_model=client_model)
