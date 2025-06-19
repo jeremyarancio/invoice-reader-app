@@ -29,6 +29,7 @@ function App() {
                             </Route>
                             <Route element={<ProtectedRoute />}>
                                 <Route element={<SidebarLayout />}>
+                                    <Route path="/" element={<Invoices />} />
                                     <Route
                                         path="/invoices"
                                         element={<Invoices />}
@@ -57,9 +58,12 @@ function App() {
                                         path="/user"
                                         element={<UserProfile />}
                                     />
+                                    <Route
+                                        path="/*"
+                                        element={<PageNotFound />}
+                                    />
                                 </Route>
                             </Route>
-                            <Route path="/*" element={<PageNotFound />} />
                         </Routes>
                     </BrowserRouter>
                 </AuthProvider>
