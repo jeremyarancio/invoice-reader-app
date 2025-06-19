@@ -32,7 +32,7 @@ function Clients() {
                         clientId={client.id}
                         clientName={client.clientName}
                         totalInvoiceNumber={0} //Not implemented
-                        totalInvoiceAmount={client.totalRevenu}
+                        totalInvoiceAmount={client.totalRevenu ?? 0}
                         totalInvoiceAmountCurrency={"-"} //Not implemented
                     />
                 ))}
