@@ -43,7 +43,7 @@ class UserMapper:
         return User(
             hashed_password=hashed_password,
             is_disabled=is_disable,
-            **user_create.model_dump(),
+            email=user_create.email,
         )
 
     @staticmethod

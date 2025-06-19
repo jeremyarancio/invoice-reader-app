@@ -58,7 +58,11 @@ def signin(
         response.set_cookie(
             value=refresh_token,
             expires=settings.REFRESH_TOKEN_EXPIRE,
-            **COOKIE_CONFIG,
+            key="refresh_token",
+            httponly=True,
+            secure=settings.PROTOCOL == "https",
+            samesite="none" if settings.PROTOCOL == "https" else "lax",
+            domain=settings.DOMAIN_NAME,
         )
         return AuthToken(access_token=access_token, token_type="bearer")
     except HTTPException:
@@ -91,7 +95,11 @@ def refresh(request: Request, response: Response) -> AuthToken:
         response.set_cookie(
             value=refresh_token,
             expires=settings.REFRESH_TOKEN_EXPIRE,
-            **COOKIE_CONFIG,
+            key="refresh_token",
+            httponly=True,
+            secure=settings.PROTOCOL == "https",
+            samesite="none" if settings.PROTOCOL == "https" else "lax",
+            domain=settings.DOMAIN_NAME,
         )
 
         return AuthToken(access_token=access_token, token_type="bearer")
@@ -104,6 +112,10 @@ def refresh(request: Request, response: Response) -> AuthToken:
 @router.post("/signout/")
 def signout(response: Response):
     response.delete_cookie(
-        **COOKIE_CONFIG,
+        key="refresh_token",
+        httponly=True,
+        secure=settings.PROTOCOL == "https",
+        samesite="none" if settings.PROTOCOL == "https" else "lax",
+        domain=settings.DOMAIN_NAME,
     )
     return {"message": "User successfully signed out."}

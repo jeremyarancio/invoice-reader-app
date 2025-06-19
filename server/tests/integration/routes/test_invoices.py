@@ -171,7 +171,6 @@ def test_delete_invoice(
 
 def test_update_invoice(
     api_client: TestClient,
-    test_existing_user: UserModel,
     test_existing_invoice: InvoiceModel,
     auth_token: AuthToken,
     invoice_repository: InvoiceRepository,
@@ -192,7 +191,7 @@ def test_update_invoice(
     assert_status_code(response, 204)
 
     invoice_model = invoice_repository.get(
-        file_id=test_existing_invoice.file_id, user_id=test_existing_user.user_id
+        file_id=test_existing_invoice.file_id, user_id=test_existing_invoice.user_id
     )
     assert invoice_model
     assert invoice_model.invoice_number == updated_invoice.invoice_number
