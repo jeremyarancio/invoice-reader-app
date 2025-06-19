@@ -68,23 +68,27 @@ function AddInvoice() {
         resolver: zodResolver(formSchema),
     });
 
-    const onSubmit = (values: z.infer<typeof formSchema>) => {
-        addInvoice(file, {
-            client_id: values.client_id,
-            currency_id: values.currency_id,
-            invoice: {
-                description: values.invoiceDescription,
-                gross_amount: values.grossAmount,
-                invoice_number: values.invoiceNumber,
-                invoiced_date: toDate(values.invoicedDate),
-                paid_date: values.paidDate
-                    ? toDate(values.paidDate)
-                    : undefined,
-                vat: values.vat,
-            },
-        });
-        setIsSubmitted(true);
-        navigate("/invoices"); //Alert can be improved
+    const onSubmit = async (values: z.infer<typeof formSchema>) => {
+        try {
+            await addInvoice(file, {
+                client_id: values.client_id,
+                currency_id: values.currency_id,
+                invoice: {
+                    description: values.invoiceDescription,
+                    gross_amount: values.grossAmount,
+                    invoice_number: values.invoiceNumber,
+                    invoiced_date: toDate(values.invoicedDate),
+                    paid_date: values.paidDate
+                        ? toDate(values.paidDate)
+                        : undefined,
+                    vat: values.vat,
+                },
+            });
+            setIsSubmitted(true);
+            navigate("/invoices"); //Alert can be improved
+        } catch (error) {
+            console.error("Error adding invoice:", error);
+        }
     };
 
     return (

@@ -45,22 +45,26 @@ function ViewClientForm({ client }: Props) {
     });
 
     // We can keep this function for future use
-    const handleCancelEdit = () => {
+    const cancelEdit = () => {
         form.reset(client);
         setEditMode(false);
     };
 
-    const onSubmit = (values: z.infer<typeof clientSchema>) => {
-        updateClient({
-            id: client.id,
-            clientName: values.clientName,
-            streetNumber: values.streetNumber,
-            streetAddress: values.streetAddress,
-            zipcode: values.zipcode,
-            city: values.city,
-            country: values.country,
-        });
-        setEditMode(false);
+    const onSubmit = async (values: z.infer<typeof clientSchema>) => {
+        try {
+            await updateClient({
+                id: client.id,
+                clientName: values.clientName,
+                streetNumber: values.streetNumber,
+                streetAddress: values.streetAddress,
+                zipcode: values.zipcode,
+                city: values.city,
+                country: values.country,
+            });
+            setEditMode(false);
+        } catch (error) {
+            cancelEdit();
+        }
     };
 
     return (
@@ -199,7 +203,7 @@ function ViewClientForm({ client }: Props) {
                         <>
                             <button
                                 className="flex items-center gap-2 button-secondary bg-red-50"
-                                onClick={handleCancelEdit}
+                                onClick={cancelEdit}
                             >
                                 <X className="w-4 h-4" />
                                 <span>Cancel</span>

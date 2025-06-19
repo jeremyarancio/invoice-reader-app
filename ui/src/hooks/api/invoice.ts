@@ -78,7 +78,7 @@ export const useAddInvoice = () => {
         },
     });
     return (file: File, data: CreateInvoicePayload) =>
-        addInvoiceMutation.mutate({ file, data });
+        addInvoiceMutation.mutateAsync({ file, data });
 };
 
 export const useFetchInvoice = (invoiceId: string | undefined) => {
