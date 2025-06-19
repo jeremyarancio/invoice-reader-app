@@ -141,10 +141,12 @@ def delete_invoice(
 def update_invoice(
     invoice_id: uuid.UUID,
     invoice_update: InvoiceUpdate,
+    user_id: Annotated[uuid.UUID, Depends(auth.get_current_user_id)],
     session: Annotated[sqlmodel.Session, Depends(db.get_session)],
 ) -> Response:
     try:
         presenter.update_invoice(
+            user_id=user_id,
             invoice_update=invoice_update,
             invoice_id=invoice_id,
             session=session,

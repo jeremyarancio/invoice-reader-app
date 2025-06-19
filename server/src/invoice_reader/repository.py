@@ -56,7 +56,7 @@ class InvoiceRepository:
     def get(self, file_id: uuid.UUID, user_id: uuid.UUID) -> InvoiceModel | None:
         invoice_model = self.session.exec(
             sqlmodel.select(InvoiceModel).where(
-                InvoiceModel.file_id == file_id and InvoiceModel.user_id == user_id
+                InvoiceModel.file_id == file_id, InvoiceModel.user_id == user_id
             )
         ).one_or_none()
         return invoice_model
@@ -64,7 +64,7 @@ class InvoiceRepository:
     def delete(self, file_id: uuid.UUID, user_id: uuid.UUID) -> None:
         invoice_model = self.session.exec(
             sqlmodel.select(InvoiceModel).where(
-                InvoiceModel.file_id == file_id and InvoiceModel.user_id == user_id
+                InvoiceModel.file_id == file_id, InvoiceModel.user_id == user_id
             )
         ).one_or_none()
         if not invoice_model:
@@ -78,10 +78,15 @@ class InvoiceRepository:
         ).all()
         return invoice_models
 
-    def get_by_invoice_number(self, invoice_number: str) -> InvoiceModel | None:
+    def get_by_invoice_number(
+        self,
+        invoice_number: str,
+        user_id: uuid.UUID,
+    ) -> InvoiceModel | None:
         invoice_model = self.session.exec(
             sqlmodel.select(InvoiceModel).where(
-                InvoiceModel.invoice_number == invoice_number
+                InvoiceModel.invoice_number == invoice_number,
+                InvoiceModel.user_id == user_id,
             )
         ).one_or_none()
         return invoice_model

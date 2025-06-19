@@ -106,7 +106,7 @@ export const useUpdateInvoice = () => {
         },
     });
     return (data: Invoice) =>
-        updateInvoiceMutation.mutate(mapInvoiceToUpdateInvoice(data));
+        updateInvoiceMutation.mutateAsync(mapInvoiceToUpdateInvoice(data));
 };
 
 export const useDeleteInvoice = () => {

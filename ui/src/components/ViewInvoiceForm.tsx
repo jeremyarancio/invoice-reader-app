@@ -74,10 +74,10 @@ function ViewInvoiceForm({ invoice, clients, currencies }: Props) {
         },
     });
 
-    const handleCancelEdit = () => {
+    const cancelEdit = () => {
         form.reset({
             invoiceNumber: invoice.invoiceNumber,
-            invoiceDescription: "",
+            invoiceDescription: invoice.description,
             grossAmount: invoice.grossAmount,
             currencyId: invoice.currencyId,
             vat: invoice.vat,
@@ -88,19 +88,25 @@ function ViewInvoiceForm({ invoice, clients, currencies }: Props) {
         setEditMode(false);
     };
 
-    const onSubmit = (values: z.infer<typeof invoiceSchema>) => {
-        updateInvoice({
-            id: invoice.id,
-            invoiceNumber: values.invoiceNumber,
-            grossAmount: values.grossAmount,
-            currencyId: values.currencyId,
-            vat: values.vat,
-            clientId: values.clientId,
-            issuedDate: values.issuedDate,
-            paidDate: values.paidDate,
-            description: values.invoiceDescription,
-        });
-        setEditMode(false);
+    const onSubmit = async (values: z.infer<typeof invoiceSchema>) => {
+        // We use async to wait fot the mutation to complete
+        // before setting edit mode to false.
+        try {
+            await updateInvoice({
+                id: invoice.id,
+                invoiceNumber: values.invoiceNumber,
+                grossAmount: values.grossAmount,
+                currencyId: values.currencyId,
+                vat: values.vat,
+                clientId: values.clientId,
+                issuedDate: values.issuedDate,
+                paidDate: values.paidDate,
+                description: values.invoiceDescription,
+            });
+            setEditMode(false);
+        } catch (error) {
+            cancelEdit();
+        }
     };
 
     return (
@@ -374,7 +380,7 @@ function ViewInvoiceForm({ invoice, clients, currencies }: Props) {
                         <>
                             <button
                                 className="flex items-center gap-2 button-secondary bg-red-50"
-                                onClick={handleCancelEdit}
+                                onClick={cancelEdit}
                             >
                                 <X className="w-4 h-4" />
                                 <span>Cancel</span>

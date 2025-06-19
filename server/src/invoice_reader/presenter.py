@@ -2,11 +2,13 @@ import uuid
 from typing import BinaryIO
 
 import sqlmodel
+from fastapi import HTTPException
 
 from invoice_reader import settings
 from invoice_reader.app.exceptions import (
     CLIENT_NOT_FOUND,
     EXISTING_CLIENT_EXCEPTION,
+    EXISTING_INVOICE_EXCEPTION,
     INVOICE_NOT_FOUND,
     MISSING_ENVIRONMENT_VARIABLE_EXCEPTION,
     ROLLBACK,
@@ -191,12 +193,27 @@ def delete_user(user_id: uuid.UUID, session: sqlmodel.Session) -> None:
 
 
 def update_invoice(
+    user_id: uuid.UUID,
     invoice_id: uuid.UUID,
     invoice_update: InvoiceUpdate,
     session: sqlmodel.Session,
 ) -> None:
     invoice_repository = InvoiceRepository(session=session)
-
+    existing_invoices = invoice_repository.get_all(
+        user_id=user_id,
+    )
+    if not existing_invoices:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Issue with updating invoice: no existing invoices found. Invoice to update: {invoice_update}",
+        )
+    # Check for duplicate invoice numbers (excluding the current invoice)
+    if any(
+        invoice.invoice_number == invoice_update.invoice_number
+        and invoice.file_id != invoice_id
+        for invoice in existing_invoices
+    ):
+        raise EXISTING_INVOICE_EXCEPTION  # There are multiple invoices with the same number: conflict
     invoice_repository.update(
         invoice_id=invoice_id,
         values_to_update=InvoiceMapper.map_invoice_update_for_model(

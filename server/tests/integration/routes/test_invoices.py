@@ -13,6 +13,9 @@ from invoice_reader.schemas.invoices import (
     InvoiceUpdate,
     PagedInvoiceResponse,
 )
+from invoice_reader.schemas.users import User
+
+from ..utils import assert_status_code
 
 PAGE = 1
 PER_PAGE = 2
@@ -24,6 +27,7 @@ def test_submit_invoice(
     s3_mocker: Mock,
     new_invoice_create: InvoiceCreate,
     auth_token: AuthToken,
+    existing_user: User,
     invoice_repository: InvoiceRepository,
 ):
     data = new_invoice_create.model_dump_json()
@@ -34,11 +38,12 @@ def test_submit_invoice(
         headers={"Authorization": f"{auth_token.token_type} {auth_token.access_token}"},
     )
 
-    invoice_model = invoice_repository.get_by_invoice_number(
-        new_invoice_create.invoice.invoice_number
-    )
+    assert_status_code(response, 201)
 
-    assert response.status_code == 201
+    invoice_model = invoice_repository.get_by_invoice_number(
+        new_invoice_create.invoice.invoice_number,
+        user_id=existing_user.user_id,
+    )
     s3_mocker.upload_fileobj.assert_called_once()
     assert invoice_model.invoice_number == new_invoice_create.invoice.invoice_number
 
@@ -58,7 +63,7 @@ def test_submit_exisiting_invoice(
         files=upload_files,
         headers={"Authorization": f"{auth_token.token_type} {auth_token.access_token}"},
     )
-    assert response.status_code == 409
+    assert_status_code(response, 409)
     s3_mocker.upload_fileobj.assert_not_called()
 
 
@@ -81,7 +86,7 @@ def test_submit_invoice_with_wrong_format(
         files=wrong_files,
         headers={"Authorization": f"{auth_token.token_type} {auth_token.access_token}"},
     )
-    assert response.status_code == 422
+    assert_status_code(response, 422)
     s3_mocker.assert_not_called()
 
 
@@ -96,8 +101,9 @@ def test_get_invoice(
         url=f"/api/v1/invoices/{file_data.file_id}",
         headers={"Authorization": f"{auth_token.token_type} {auth_token.access_token}"},
     )
+    assert_status_code(response, 200)
+
     payload = InvoiceResponse.model_validate(response.json())
-    assert response.status_code == 200
     assert payload.invoice_id == test_existing_invoice.file_id
     assert payload.s3_path == test_existing_invoice.s3_path
     assert payload.data.invoice_number == test_existing_invoice.invoice_number
@@ -111,12 +117,12 @@ def test_get_invoices(
 ):
     response = api_client.get(
         url="/api/v1/invoices/",
-        headers={"Authorization": f"Bearer {auth_token.access_token}"},
+        headers={"Authorization": f"{auth_token.token_type} {auth_token.access_token}"},
         params={"page": PAGE, "per_page": PER_PAGE},
     )
-    paged_invoices = PagedInvoiceResponse.model_validate(response.json())
+    assert_status_code(response, 200)
 
-    assert response.status_code == 200
+    paged_invoices = PagedInvoiceResponse.model_validate(response.json())
     assert len(paged_invoices.data) == PER_PAGE
     assert paged_invoices.total == 3
     assert (
@@ -138,24 +144,27 @@ def test_submit_invoice_unauthorized(
         headers={"Authorization": "Bearer invalid_token"},
     )
 
-    assert response.status_code == 401
+    assert_status_code(response, 401)
 
 
 def test_delete_invoice(
     api_client: TestClient,
     test_existing_invoice: InvoiceModel,
     auth_token: AuthToken,
+    existing_user: User,
     invoice_repository: InvoiceRepository,
     s3_mocker: Mock,
 ):
     response = api_client.delete(
         url=f"/api/v1/invoices/{test_existing_invoice.file_id}",
-        headers={"Authorization": f"Bearer {auth_token.access_token}"},
+        headers={"Authorization": f"{auth_token.token_type} {auth_token.access_token}"},
     )
+    assert_status_code(response, 204)
+
     invoice = invoice_repository.get_by_invoice_number(
-        invoice_number=test_existing_invoice.invoice_number
+        invoice_number=test_existing_invoice.invoice_number,
+        user_id=existing_user.user_id,
     )
-    assert response.status_code == 204
     assert not invoice
     s3_mocker.delete_object.assert_called_once()
 
@@ -177,20 +186,60 @@ def test_update_invoice(
     response = api_client.put(
         url=f"/api/v1/invoices/{test_existing_invoice.file_id}",
         data=updated_invoice.model_dump_json(),
-        headers={"Authorization": f"Bearer {auth_token.access_token}"},
+        headers={"Authorization": f"{auth_token.token_type} {auth_token.access_token}"},
     )
+
+    assert_status_code(response, 204)
 
     invoice_model = invoice_repository.get(
         file_id=test_existing_invoice.file_id, user_id=test_existing_user.user_id
     )
     assert invoice_model
-    assert response.status_code == 204
     assert invoice_model.invoice_number == updated_invoice.invoice_number
     assert invoice_model.amount_excluding_tax == 1234
     assert invoice_model.description == "Updated description"
 
 
-# Add exception no change update
+def test_update_existing_invoice_number(
+    api_client: TestClient,
+    auth_token: AuthToken,
+    test_existing_invoices: list[InvoiceModel],
+):
+    updated_invoice = InvoiceUpdate.model_validate(
+        InvoiceMapper.map_invoice_model_to_invoice(
+            test_existing_invoices[0]
+        ).model_dump()
+    )
+    updated_invoice.invoice_number = test_existing_invoices[1].invoice_number
+    updated_invoice.description = "Updated description"
+    updated_invoice.gross_amount = 1234
+
+    response = api_client.put(
+        url=f"/api/v1/invoices/{test_existing_invoices[0].file_id}",
+        data=updated_invoice.model_dump_json(),
+        headers={"Authorization": f"{auth_token.token_type} {auth_token.access_token}"},
+    )
+    assert_status_code(response, 409)
+
+
+def test_update_invoice_unchanged(
+    api_client: TestClient,
+    auth_token: AuthToken,
+    test_existing_invoices: list[InvoiceModel],
+):
+    "In case there's no change, we want to avoid conflict."
+    updated_invoice = InvoiceUpdate.model_validate(
+        InvoiceMapper.map_invoice_model_to_invoice(
+            test_existing_invoices[0]
+        ).model_dump()
+    )
+
+    response = api_client.put(
+        url=f"/api/v1/invoices/{test_existing_invoices[0].file_id}",
+        data=updated_invoice.model_dump_json(),
+        headers={"Authorization": f"{auth_token.token_type} {auth_token.access_token}"},
+    )
+    assert_status_code(response, 204)
 
 
 def test_get_invoice_url(
@@ -202,7 +251,7 @@ def test_get_invoice_url(
     s3_mocker.generate_presigned_url.return_value = "http://presigned/url"
     response = api_client.get(
         url=f"/api/v1/invoices/{test_existing_invoice.file_id}/url/",
-        headers={"Authorization": f"Bearer {auth_token.access_token}"},
+        headers={"Authorization": f"{auth_token.token_type} {auth_token.access_token}"},
     )
-    assert response.status_code == 200
+    assert_status_code(response, 200)
     s3_mocker.generate_presigned_url.assert_called_once()
