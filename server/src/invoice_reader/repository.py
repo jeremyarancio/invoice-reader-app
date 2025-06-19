@@ -152,11 +152,15 @@ class ClientRepository:
         self.session.add(client_model)
         self.session.commit()
 
-    def get_all(self, user_id: uuid.UUID, limit: int) -> Sequence[ClientModel]:
+    def get_all(
+        self, user_id: uuid.UUID, limit: int | None = None
+    ) -> Sequence[ClientModel]:
         client_models = self.session.exec(
             sqlmodel.select(ClientModel)
             .where(ClientModel.user_id == user_id)
             .limit(limit)
+            if limit
+            else sqlmodel.select(ClientModel).where(ClientModel.user_id == user_id)
         ).all()
         return client_models
 
@@ -179,13 +183,13 @@ class ClientRepository:
         ).one_or_none()
         return client_model
 
-    def update(self, client_id: uuid.UUID, client_update: ClientUpdate) -> None:
+    def update(self, client_id: uuid.UUID, values_to_update: dict) -> None:
         existing_client = self.session.exec(
             sqlmodel.select(ClientModel).where(ClientModel.client_id == client_id)
         ).one_or_none()
         if not existing_client:
             raise CLIENT_NOT_FOUND
-        existing_client.sqlmodel_update(client_update)
+        existing_client.sqlmodel_update(values_to_update)
         self.session.add(existing_client)
         self.session.commit()
 

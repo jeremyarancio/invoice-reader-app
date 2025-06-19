@@ -113,6 +113,7 @@ def update_client(
             client_id=client_id,
             client_update=client_update,
             session=session,
+            user_id=user_id,
         )
         return Response(status_code=204)
     except HTTPException:

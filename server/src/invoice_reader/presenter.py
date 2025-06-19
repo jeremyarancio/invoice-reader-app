@@ -248,9 +248,30 @@ def get_currencies(session: sqlmodel.Session):
 
 
 def update_client(
+    user_id: uuid.UUID,
     client_id: uuid.UUID,
     session: sqlmodel.Session,
     client_update: ClientUpdate,
 ) -> None:
     client_repository = ClientRepository(session=session)
-    client_repository.update(client_id=client_id, client_update=client_update)
+    existing_clients = client_repository.get_all(
+        user_id=user_id,
+    )
+    if not existing_clients:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Issue with updating client: no existing clients found. Client to update: {client_update}",
+        )
+    # Check for duplicate client names (excluding the current client)
+    if any(
+        client.client_name == client_update.client_name
+        and client.client_id != client_id
+        for client in existing_clients
+    ):
+        raise EXISTING_CLIENT_EXCEPTION  # There are multiple clients with the same name: conflict
+    client_repository.update(
+        client_id=client_id,
+        values_to_update=ClientMapper.map_client_update_for_model(
+            client_update=client_update
+        ),
+    )

@@ -89,5 +89,5 @@ export const useUpdateClient = () => {
         },
     });
     return (client: Client) =>
-        updateMutation.mutate(mapClientToUpdateClient(client));
+        updateMutation.mutateAsync(mapClientToUpdateClient(client));
 };
