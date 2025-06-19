@@ -48,7 +48,7 @@ function Invoices() {
                         grossAmount={invoice.grossAmount}
                         invoiceNumber={invoice.invoiceNumber}
                         issuedDate={invoice.issuedDate}
-                        status={invoice.status ? "paid" : "unpaid"} //To change
+                        status={invoice.paidDate ? "paid" : "unpaid"} //To change
                         currency={
                             currencies?.find((c) => c.id === invoice.currencyId)
                                 ?.name ?? "-"
