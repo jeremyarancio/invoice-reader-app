@@ -9,7 +9,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from invoice_reader import db, presenter, settings
 from invoice_reader.app import auth
 from invoice_reader.app.exceptions import NO_REFRESH_TOKEN_EXCEPTION
-from invoice_reader.schemas import AuthToken, UserCreate
+from invoice_reader.schemas import AuthToken, UserCreate, UserResponse
 
 COOKIE_CONFIG = {
     "key": "refresh_token",
@@ -119,3 +119,17 @@ def signout(response: Response):
         domain=settings.DOMAIN_NAME,
     )
     return {"message": "User successfully signed out."}
+
+
+@router.get("/me/")
+def get_current_user(
+    session: Annotated[sqlmodel.Session, Depends(db.get_session)],
+    user_id: Annotated[uuid.UUID, Depends(auth.get_current_user_id)],
+) -> UserResponse:
+    try:
+        user = presenter.get_user(user_id=user_id, session=session)
+        return user
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e)) from e

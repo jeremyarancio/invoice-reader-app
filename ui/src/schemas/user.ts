@@ -17,3 +17,8 @@ export interface PostUser {
     email: string;
     password: string;
 }
+
+export interface GetUser {
+    email: string;
+    password: string;
+}

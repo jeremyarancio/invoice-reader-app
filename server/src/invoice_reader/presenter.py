@@ -43,6 +43,7 @@ from invoice_reader.schemas.invoices import (
 )
 from invoice_reader.schemas.users import (
     User,
+    UserResponse,
 )
 from invoice_reader.utils import logger, s3_utils
 
@@ -274,4 +275,14 @@ def update_client(
         values_to_update=ClientMapper.map_client_update_for_model(
             client_update=client_update
         ),
+    )
+
+
+def get_user(user_id: uuid.UUID, session: sqlmodel.Session) -> UserResponse:
+    user_repository = UserRepository(session=session)
+    user_model = user_repository.get(user_id=user_id)
+    if not user_model:
+        raise HTTPException(status_code=404, detail="User not found")
+    return UserMapper.map_user_to_response(
+        user=UserMapper.map_user_model_to_user(user_model=user_model)
     )

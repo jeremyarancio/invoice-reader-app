@@ -4,7 +4,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from invoice_reader.mappers.invoices import InvoiceMapper
-from invoice_reader.models import CurrencyModel, InvoiceModel, UserModel
+from invoice_reader.models import CurrencyModel, InvoiceModel
 from invoice_reader.repository import InvoiceRepository
 from invoice_reader.schemas import AuthToken, FileData
 from invoice_reader.schemas.invoices import (

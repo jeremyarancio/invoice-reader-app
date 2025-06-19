@@ -15,7 +15,6 @@ from invoice_reader.models import (
     InvoiceModel,
     UserModel,
 )
-from invoice_reader.schemas.clients import ClientUpdate
 from invoice_reader.utils.logger import get_logger
 
 LOGGER = get_logger()
