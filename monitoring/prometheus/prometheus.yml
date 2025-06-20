@@ -6,5 +6,8 @@ global:
 scrape_configs:
   - job_name: 'fastapi'
     metrics_path: '/metrics'
-    static_configs:
-      - targets: ['server:8000']
+    dns_sd_configs:
+      - names:
+          - server
+        type: A
+        port: 8000
