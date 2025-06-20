@@ -1,38 +1,39 @@
 # Use a Python image with uv pre-installed
 FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim AS base
 
-# Arguments for user/group IDs
-ARG USER_ID=1000
-ARG GROUP_ID=1000
+# Arguments for user/group IDs - match your host
+ARG USER_ID=1001
+ARG GROUP_ID=1001
 
 # Install the project into `/app`
 WORKDIR /app
 
 # Enable bytecode compilation
 ENV UV_COMPILE_BYTECODE=1
-
-# Copy from the cache instead of linking since it's a mounted volume
 ENV UV_LINK_MODE=copy
 
-# Install the project's dependencies using the lockfile and settings
+# 1. First install dependencies as root (using root's cache)
 RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=type=bind,source=uv.lock,target=uv.lock \
     --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
     uv sync --frozen --no-install-project --no-dev
 
-# Then, add the rest of the project source code and install it
-ADD --chown=appuser:appuser . /app/
+# 2. Add source code
+ADD . /app/
+
+# 3. Complete installation
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-dev
 
-# Create user with matching IDs
+# 4. Create user and fix permissions
 RUN addgroup --gid $GROUP_ID appuser && \
-    adduser --disabled-password --gecos '' --uid $USER_ID --gid $GROUP_ID appuser
+    adduser --disabled-password --gecos '' --uid $USER_ID --gid $GROUP_ID appuser && \
+    chown -R appuser:appuser /app
 
-# Place executables in the environment at the front of the path
+# 5. Set environment
 ENV PATH="/app/.venv/bin:$PATH"
 
-# DB migration
+# 6. Prepare entrypoint
 RUN chmod +x docker/entrypoint.sh
 USER appuser
 ENTRYPOINT ["/app/docker/entrypoint.sh"]
@@ -43,11 +44,10 @@ CMD ["fastapi", "run", "--host", "0.0.0.0", "--port", "8000", "src/invoice_reade
 
 # Development stage
 FROM base AS dev
-# Install development dependencies
+# Install development dependencies as root
 USER root
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --dev && \
-    chown -R ${USER_ID}:${GROUP_ID} /app
+    chown -R appuser:appuser /app
 USER appuser
-# Use a development server with hot-reloading
 CMD ["fastapi", "dev", "--host", "0.0.0.0", "--port", "8000", "src/invoice_reader/app/main.py"]

@@ -255,7 +255,7 @@
           "useBackend": false
         }
       ],
-      "title": "Req/s (1h)",
+      "title": "Req/s",
       "transparent": true,
       "type": "timeseries"
     },
@@ -476,5 +476,5 @@
   "timezone": "browser",
   "title": "Invoice Dashboard",
   "uid": "eek7aweml5jpcc",
-  "version": 9
+  "version": 10
 }
