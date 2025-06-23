@@ -15,6 +15,7 @@ from invoice_reader.app.exceptions import (
     UNPROCESSABLE_FILE,
 )
 from invoice_reader.core import storage
+from invoice_reader.core.extract import TogetherAIInvoiceParser
 from invoice_reader.infrastructure.storage import S3
 from invoice_reader.mappers import (
     ClientMapper,
@@ -41,6 +42,7 @@ from invoice_reader.schemas.invoices import (
     InvoiceUpdate,
     PagedInvoiceResponse,
 )
+from invoice_reader.schemas.parser import InvoiceExtraction
 from invoice_reader.schemas.users import (
     User,
     UserResponse,
@@ -286,3 +288,8 @@ def get_user(user_id: uuid.UUID, session: sqlmodel.Session) -> UserResponse:
     return UserMapper.map_user_to_response(
         user=UserMapper.map_user_model_to_user(user_model=user_model)
     )
+
+
+def extract_invoice(file: BinaryIO) -> InvoiceExtraction:
+    extracted_data = TogetherAIInvoiceParser().parse(file)
+    return extracted_data
