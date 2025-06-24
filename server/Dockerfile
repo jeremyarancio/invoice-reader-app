@@ -12,6 +12,11 @@ WORKDIR /app
 ENV UV_COMPILE_BYTECODE=1
 ENV UV_LINK_MODE=copy
 
+# Install system dependencies (including poppler-utils for pdf2image)
+RUN apt-get update \
+    && apt-get install -y poppler-utils \
+    && rm -rf /var/lib/apt/lists/*
+
 # 1. First install dependencies as root (using root's cache)
 RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=type=bind,source=uv.lock,target=uv.lock \

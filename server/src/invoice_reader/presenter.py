@@ -290,6 +290,17 @@ def get_user(user_id: uuid.UUID, session: sqlmodel.Session) -> UserResponse:
     )
 
 
-def extract_invoice(file: BinaryIO) -> InvoiceExtraction:
-    extracted_data = TogetherAIInvoiceParser().parse(file)
+def extract_invoice(
+    file: BinaryIO,
+    user_id: uuid.UUID,
+    session: sqlmodel.Session,
+) -> InvoiceExtraction:
+    client_repository = ClientRepository(session=session)
+    currency_repository = CurrencyRepository(session=session)
+    extracted_data = TogetherAIInvoiceParser().parse(
+        file,
+        user_id=user_id,
+        client_repository=client_repository,
+        currency_repository=currency_repository,
+    )
     return extracted_data

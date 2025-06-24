@@ -7,16 +7,10 @@ from pydantic import BaseModel, Field, ValidationError
 
 from invoice_reader import settings
 from invoice_reader.app.exceptions import INVALID_EXTRACTED_DATA_EXCEPTION
-from invoice_reader.schemas.parser import (
-    Address,
-    CompanyDataExtraction,
-    InvoiceDataExtraction,
-    InvoiceExtraction,
-)
 from invoice_reader.utils.files import convert_pdf_to_base64_image
 from invoice_reader.utils.logger import get_logger
 
-LOGGER = get_logger(__name__)
+LOGGER = get_logger()
 
 
 class InvoiceParsingSchema(BaseModel):
@@ -63,47 +57,12 @@ class InvoiceParsingSchema(BaseModel):
         strict = False
 
 
-def map_invoice_parsing_to_response(
-    extraction: InvoiceParsingSchema,
-) -> InvoiceExtraction:
-    """Maps the extracted data to the InvoiceData model."""
-    invoice_extract = InvoiceDataExtraction(
-        gross_amount=extraction.gross_amount,
-        vat=extraction.vat,
-        issued_date=extraction.issued_date,
-        invoice_number=extraction.invoice_number,
-        invoice_description=extraction.invoice_description,
-        currency=extraction.currency,
-    )
-    client_extract = CompanyDataExtraction(
-        name=extraction.buyer_name,
-        address=Address(
-            street_address=extraction.buyer_address,
-            zipcode=extraction.buyer_address_zipcode,
-            city=extraction.buyer_adress_city,
-            country=extraction.buyer_address_country,
-        ),
-    )
-    seller_extract = CompanyDataExtraction(
-        name=extraction.seller_name,
-        address=Address(
-            street_address=extraction.seller_address,
-            zipcode=extraction.seller_address_zipcode,
-            city=extraction.seller_address_city,
-            country=extraction.seller_address_country,
-        ),
-    )
-    return InvoiceExtraction(
-        invoice=invoice_extract, client=client_extract, seller=seller_extract
-    )
-
-
 class TogetherAIParser:
     def __init__(self):
         self.model_name = settings.TOGETHER_MODEL_NAME
         self.client = together.Together()
 
-    def parse(self, file: BinaryIO) -> InvoiceExtraction:
+    def parse(self, file: BinaryIO) -> InvoiceParsingSchema:
         extract = self.client.chat.completions.create(
             messages=[
                 {
@@ -130,11 +89,23 @@ class TogetherAIParser:
         )
         output = json.loads(extract.choices[0].message.content)
         try:
-            invoice_data = InvoiceParsingSchema.model_validate_json(output)
-            return map_invoice_parsing_to_response(invoice_data)
+            invoice_data = InvoiceParsingSchema.model_validate(output)
+            return invoice_data
         except ValidationError as e:
             LOGGER.error(
                 "Invalid data extracted from the invoice. Data: %s",
                 output,
             )
             raise INVALID_EXTRACTED_DATA_EXCEPTION from e
+
+
+if __name__ == "__main__":
+    # Example usage
+    FILE_PATH = "assets/invoice.pdf"
+    with open(FILE_PATH, "rb") as file:
+        parser = TogetherAIParser()
+        try:
+            invoice_extraction = parser.parse(file)
+            print(invoice_extraction)
+        except Exception as e:
+            LOGGER.error("Failed to parse invoice: %s", e)

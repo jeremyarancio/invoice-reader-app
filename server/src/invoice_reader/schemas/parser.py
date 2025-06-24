@@ -1,6 +1,7 @@
 from datetime import date
+from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 
 
 class Address(BaseModel):
@@ -16,15 +17,27 @@ class InvoiceDataExtraction(BaseModel):
     issued_date: date | None = None
     invoice_number: str | None = None
     invoice_description: str | None = None
-    currency: str | None = None
+    currency_id: UUID | None = None
+
+    @field_validator("vat", mode="before")
+    @classmethod
+    def validate_vat(cls, v):
+        if v is None or v >= 0:
+            return v
+        return None
 
 
-class CompanyDataExtraction(BaseModel):
+class ClientDataExtraction(BaseModel):
+    client_id: UUID | None = None
+    address: Address | None = None
+
+
+class SellerDataExtraction(BaseModel):
     name: str | None = None
     address: Address | None = None
 
 
 class InvoiceExtraction(BaseModel):
     invoice: InvoiceDataExtraction
-    client: CompanyDataExtraction
-    seller: CompanyDataExtraction
+    client: ClientDataExtraction
+    seller: SellerDataExtraction

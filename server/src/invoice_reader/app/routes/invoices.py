@@ -81,9 +81,10 @@ def add_invoice(
         raise HTTPException(status_code=500, detail=str(e)) from e
 
 
-@router.post("/invoices/extract/")
+@router.post("/extract/")
 def extract_invoice(
     upload_file: Annotated[UploadFile, File()],
+    session: Annotated[sqlmodel.Session, Depends(db.get_session)],
     user_id: Annotated[uuid.UUID, Depends(auth.get_current_user_id)],
 ) -> InvoiceExtraction:
     if upload_file.content_type != "application/pdf":
@@ -92,7 +93,9 @@ def extract_invoice(
             detail="Only PDF files are allowed for now.",
         )
     try:
-        extraction = presenter.extract_invoice(file=upload_file.file)
+        extraction = presenter.extract_invoice(
+            file=upload_file.file, session=session, user_id=user_id
+        )
         return extraction
     except HTTPException:
         raise
