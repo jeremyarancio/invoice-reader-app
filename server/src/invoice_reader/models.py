@@ -6,7 +6,7 @@ from sqlmodel import Field, Relationship, SQLModel
 
 from invoice_reader.utils.logger import get_logger
 
-LOGGER = get_logger()
+LOGGER = get_logger(__name__)
 
 
 class UserModel(SQLModel, table=True):

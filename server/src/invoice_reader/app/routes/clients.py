@@ -15,7 +15,7 @@ from invoice_reader.schemas.clients import (
 )
 from invoice_reader.utils.logger import get_logger
 
-LOGGER = get_logger()
+LOGGER = get_logger(__name__)
 
 router = APIRouter(
     prefix="/api/v1/clients",

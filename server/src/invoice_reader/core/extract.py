@@ -6,6 +6,9 @@ from invoice_reader.infrastructure.togetherai import TogetherAIParser
 from invoice_reader.mappers.parser import map_invoice_parsing_to_response
 from invoice_reader.repository import ClientRepository, CurrencyRepository
 from invoice_reader.schemas.parser import InvoiceExtraction
+from invoice_reader.utils.logger import get_logger
+
+LOGGER = get_logger(__name__)
 
 
 class InvoiceParser(ABC):
