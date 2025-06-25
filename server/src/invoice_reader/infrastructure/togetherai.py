@@ -1,16 +1,16 @@
 import json
-from datetime import date
+from datetime import date, datetime
 from typing import BinaryIO
 
 import together
-from pydantic import BaseModel, Field, ValidationError
+from pydantic import BaseModel, Field, ValidationError, field_validator
 
 from invoice_reader import settings
 from invoice_reader.app.exceptions import INVALID_EXTRACTED_DATA_EXCEPTION
 from invoice_reader.utils.files import convert_pdf_to_base64_image
 from invoice_reader.utils.logger import get_logger
 
-LOGGER = get_logger()
+LOGGER = get_logger(__name__)
 
 
 class InvoiceParsingSchema(BaseModel):
@@ -33,17 +33,18 @@ class InvoiceParsingSchema(BaseModel):
     buyer_address: str = Field(description="Address of the buyer")
     buyer_address_zipcode: str = Field(description="Zipcode of the buyer's address")
     buyer_address_country: str = Field(
-        description="Country of the buyer's address. Should be the complete name (e.g., France, Germany, etc.)"
+        description="Country of the buyer's address. Should be the complete name (e.g., France, Germany, etc.)",
     )
-    buyer_adress_city: str = Field(
-        description="City of the buyer's address. Should be the complete name (e.g., Paris, Berlin, etc.)"
+    buyer_address_city: str = Field(
+        description="City of the buyer's address. Should be the complete name (e.g., Paris, Berlin, etc.)",
     )
     gross_amount: float = Field(description="Total amount of the invoice before tax")
     vat: int = Field(
-        description="VAT percentage as positive integer (e.g., 20 for 20%)"
+        description="VAT percentage as positive integer (e.g., 20 for 20%)",
     )
-    issued_date: date = Field(
-        description="Date when the invoice was issued. Format: DD-MM-YYYY"
+    # Default to None to allow for optional fields
+    issued_date: date | None = Field(
+        description="Date when the invoice was issued. Format: DD-MM-YYYY", default=None
     )
     invoice_number: str = Field(description="Unique identifier for the invoice")
     invoice_description: str = Field(
@@ -53,8 +54,14 @@ class InvoiceParsingSchema(BaseModel):
         description="Currency of the invoice amount. Should be a valid ISO 4217 currency code (e.g., EUR, USD, GBP).",
     )
 
-    class Config:
-        strict = False
+    @field_validator("issued_date", mode="before")
+    @classmethod
+    def validate_date(cls, value: str) -> date | None:
+        """We return None if the date is not valid instead of validation error."""
+        try:
+            return datetime.strptime(value, "%d-%m-%Y").date()
+        except ValueError:
+            return None
 
 
 class TogetherAIParser:
@@ -87,13 +94,21 @@ class TogetherAIParser:
                 "schema": InvoiceParsingSchema.model_json_schema(),
             },
         )
-        output = json.loads(extract.choices[0].message.content)
         try:
+            output = json.loads(extract.choices[0].message.content)
             invoice_data = InvoiceParsingSchema.model_validate(output)
             return invoice_data
+        except json.JSONDecodeError as e:
+            LOGGER.error(
+                "Failed to decode JSON response from the model.\n Error: %s\n Response: %s",
+                e,
+                extract.choices[0].message.content,
+            )
+            raise INVALID_EXTRACTED_DATA_EXCEPTION from e
         except ValidationError as e:
             LOGGER.error(
-                "Invalid data extracted from the invoice. Data: %s",
+                "Invalid data extracted from the invoice.\n Error: %s\n Data: %s",
+                e,
                 output,
             )
             raise INVALID_EXTRACTED_DATA_EXCEPTION from e
