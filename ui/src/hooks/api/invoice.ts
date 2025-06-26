@@ -130,9 +130,9 @@ export const useDeleteInvoice = () => {
     return (invoiceId: string) => deleteInvoicesMutation.mutate(invoiceId);
 };
 
-export const useParseInvoiceMutation = (file: File) => {
+export const useParseInvoice = (file: File) => {
     const { data, isLoading, error } = useQuery({
-        queryKey: ["parsing", file],
+        queryKey: ["parsing", file?.name],
         queryFn: () => parseInvoice(file),
         enabled: !!file,
     });
