@@ -8,7 +8,6 @@ import {
 } from "@/hooks/api/invoice";
 import { useFetchClients } from "@/hooks/api/client";
 import AddInvoiceForm from "@/components/AddInvoiceForm";
-import { useEffect } from "react";
 
 function AddInvoice() {
     const navigate = useNavigate();
