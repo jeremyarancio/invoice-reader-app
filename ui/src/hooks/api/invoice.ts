@@ -130,15 +130,11 @@ export const useDeleteInvoice = () => {
     return (invoiceId: string) => deleteInvoicesMutation.mutate(invoiceId);
 };
 
-export const useParseInvoiceMutation = () => {
-    return useMutation({
-        mutationFn: parseInvoice,
-        onSuccess: (data) => {
-            console.log("Invoice parsed successfully", data);
-            queryClient.setQueryData(["parsedInvoiceData"], data); //Cache the parsed invoice data
-        },
-        onError: (error: AxiosError) => {
-            console.error("Error parsing invoice:", error);
-        },
+export const useParseInvoiceMutation = (file: File) => {
+    const { data, isLoading, error } = useQuery({
+        queryKey: ["parsing", file],
+        queryFn: () => parseInvoice(file),
+        enabled: !!file,
     });
+    return { data, isLoading, error };
 };

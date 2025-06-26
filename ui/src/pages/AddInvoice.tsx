@@ -15,17 +15,11 @@ function AddInvoice() {
     const file: File = useLocation().state?.file;
     const { clients } = useFetchClients();
     const { currencies } = useFetchCurrencies();
-    const parseInvoiceMutation = useParseInvoiceMutation();
-
-    useEffect(() => {
-        if (file && !parseInvoiceMutation.isPending) {
-            const hasRunRef = { current: false }; // Necessary to avoid double call
-            if (!hasRunRef.current) {
-                hasRunRef.current = true;
-                parseInvoiceMutation.mutate(file);
-            }
-        }
-    }, [file]);
+    const {
+        data: parsedInvoice,
+        isLoading: isParsingLoading,
+        error: parsingError,
+    } = useParseInvoiceMutation(file);
 
     return (
         <>
@@ -45,7 +39,7 @@ function AddInvoice() {
                     <PdfPreview file={file} />
                 </div>
                 <div className="px-4 md:px-20 w-full">
-                    {parseInvoiceMutation.isPending && (
+                    {isParsingLoading && (
                         <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                             <div className="flex items-center space-x-3">
                                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
@@ -59,7 +53,7 @@ function AddInvoice() {
                             </p>
                         </div>
                     )}
-                    {parseInvoiceMutation.isSuccess && (
+                    {parsedInvoice && !isParsingLoading && (
                         <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
                             <div className="flex items-center space-x-3">
                                 <div className="rounded-full h-5 w-5 bg-green-600 flex items-center justify-center">
@@ -77,7 +71,7 @@ function AddInvoice() {
                             </p>
                         </div>
                     )}
-                    {parseInvoiceMutation.isError && (
+                    {parsingError && (
                         <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
                             <div className="flex items-center space-x-3">
                                 <div className="rounded-full h-5 w-5 bg-red-600 flex items-center justify-center">
@@ -95,9 +89,9 @@ function AddInvoice() {
                             </p>
                         </div>
                     )}
-                    {!parseInvoiceMutation.isPending ? (
+                    {!isParsingLoading ? (
                         <AddInvoiceForm
-                            parsedInvoice={parseInvoiceMutation.data}
+                            parsedInvoice={parsedInvoice}
                             clients={clients}
                             currencies={currencies}
                             file={file}
