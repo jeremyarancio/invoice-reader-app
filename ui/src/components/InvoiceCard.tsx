@@ -11,6 +11,7 @@ interface InvoiceCardProps {
     issuedDate: Date;
     status: "paid" | "unpaid" | "overdue";
     currency?: string;
+    clientName: string;
 }
 
 function InvoiceCard({
@@ -21,6 +22,7 @@ function InvoiceCard({
     issuedDate,
     status,
     currency,
+    clientName,
 }: InvoiceCardProps) {
     const navigate = useNavigate();
     const deleteInvoice = useDeleteInvoice();
@@ -33,17 +35,19 @@ function InvoiceCard({
                 onDelete={() => deleteInvoice(invoiceId)}
             >
                 <h3>{invoiceDescription}</h3>
-                <div className="flex justify-between flex-nowrap">
-                    <div className="flex w-3/8 space-x-8 justify-start">
-                        <p className="flex italic font-semibold">
-                            N° {invoiceNumber}
+                <div className="flex justify-between items-center mr-4">
+                    <div className="flex flex-none gap-8 justify-start">
+                        <p className="italic font-semibold whitespace-nowrap">
+                            {invoiceNumber}
                         </p>
-                        <p className="flex font-semibold">
+                        <p className="whitespace-nowrap">
                             {format(issuedDate, "dd/MM/yyyy")}
                         </p>
+                        <p className="italic font-semibold whitespace-nowrap">
+                            {clientName}
+                        </p>
                     </div>
-                    <div className="w-3/8"></div>
-                    <div className="flex w-2/8 space-x-8 justify-evenly">
+                    <div className="flex flex-initial gap-4 justify-end items-center">
                         <p
                             className={`${
                                 status === "paid"
@@ -51,7 +55,7 @@ function InvoiceCard({
                                     : status === "unpaid"
                                     ? "text-yellow-500"
                                     : "text-red-500"
-                            } font-semibold`}
+                            } font-semibold whitespace-nowrap`}
                         >
                             {status === "paid"
                                 ? "Paid"
@@ -59,7 +63,7 @@ function InvoiceCard({
                                 ? "Unpaid"
                                 : "Overdue"}
                         </p>
-                        <p className="font-semibold">
+                        <p className="font-semibold whitespace-nowrap">
                             {grossAmount} {currency}
                         </p>
                     </div>

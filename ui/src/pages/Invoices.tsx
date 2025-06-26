@@ -2,6 +2,7 @@ import InvoiceCard from "@/components/InvoiceCard";
 import NoElementFound from "@/components/NoElementFound";
 import { Input } from "@/components/ui/input";
 import UploadInvoiceModal from "@/components/UploadInvoiceModal";
+import { useFetchClients } from "@/hooks/api/client";
 import { useFetchCurrencies, useFetchInvoices } from "@/hooks/api/invoice";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -12,6 +13,7 @@ function Invoices() {
 
     const { invoices, isLoading } = useFetchInvoices();
     const { currencies } = useFetchCurrencies();
+    const { clients } = useFetchClients();
 
     const handleUpload = () => {
         selectedFile &&
@@ -44,7 +46,7 @@ function Invoices() {
                     <InvoiceCard
                         key={invoice.id}
                         invoiceId={invoice.id}
-                        invoiceDescription={""} // Not implemented
+                        invoiceDescription={invoice.description} // Not implemented
                         grossAmount={invoice.grossAmount}
                         invoiceNumber={invoice.invoiceNumber}
                         issuedDate={invoice.issuedDate}
@@ -52,6 +54,10 @@ function Invoices() {
                         currency={
                             currencies?.find((c) => c.id === invoice.currencyId)
                                 ?.name ?? "-"
+                        }
+                        clientName={
+                            clients?.find((c) => c.id === invoice.clientId)
+                                ?.clientName ?? ""
                         }
                     />
                 ))}
