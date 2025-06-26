@@ -58,11 +58,20 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-[![Product Name Screen Shot](assets/Animation.gif)](assets/Animation.gif)
+[![Product Name Screen Shot](assets/Screenshot.png)](assets/Screenshot.png)
 
-Frustrated to not have a tool to manage my invoices, I decided to create my own!
+As a consultant in Machine Learning, I deal with various invoice templates, from platforms or my own. 
+This leads to adding a lot of information manually.
 
-Feel free to reuse the code for your own project.
+Frustrated to not have a tool to manage my invoices, *I decided to build my own!*
+
+The application allows you to:
+
+* Upload your Invoices and automatically parse them with open-source AI models. **This means your data is not sent to OpenAI or Google!**
+* Manage your invoices and clients in one place.
+* Get insights about your consulting service across your projects.
+
+Feel free to explore the code and test the [App](https://app.myinvoicemanager.pro/)!
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -74,18 +83,18 @@ Feel free to reuse the code for your own project.
 The application is developed as follows: 
 
 * **FastAPI** for the Server
-* **React + TypeScript** for the UI
+* **React + TypeScript + Tailwind** for the UI
 * **Docker Compose** for the deployment in production (VPS on Hostinger)
 * **Prometheus& Grafana** for the monitoring
 * **Traefik** as a Reverse Proxy & Load Balancer
 * **PostgresSQL + SQLModel** for the database
 * **Alembic** for Database migration
 * **AWS S3** for storing documents
+* **Document Parsing** powered by [Together AI](https://www.together.ai/) & **Qwen-2.5-VL-72B**
 
 You'll also find in this repository, under `./infrastructure`, different ways to deploy the application in the cloud, such as AWS ECS or Kubernetes.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 
 ## Getting Started
 
@@ -97,7 +106,7 @@ Also, to keep the user session active using Cookies, you need to create a new lo
 To do so, add to your `etc/hosts` file the following domain and subdomains: 
 
 ```
-127.0.0.1  localdev.test app.localdev.test api.localdev.test
+127.0.0.1  localdev.test app.localdev.test api.localdev.test monitor.localdev.test
 ```
 
 This will redirect your requests from `localhost` to your new custom domain.
