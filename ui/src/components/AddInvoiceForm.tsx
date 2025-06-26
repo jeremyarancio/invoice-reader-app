@@ -91,26 +91,35 @@ function AddInvoiceForm({ file, parsedInvoice, clients, currencies }: Props) {
         paidDate: z.date().optional(),
     });
 
-    const getDefaultValues = () => {
-        if (!parsedInvoice) return {};
-
-        return {
-            invoiceNumber: parsedInvoice.invoice.invoice_number || "",
-            invoiceDescription: parsedInvoice.invoice.invoice_description || "",
-            grossAmount: parsedInvoice.invoice.gross_amount || 0,
-            currency_id: parsedInvoice.invoice.currency_id || "",
-            vat: parsedInvoice.invoice.vat || 0,
-            client_id: parsedInvoice.client.client_id || "",
-            invoicedDate: parsedInvoice.invoice.issued_date
-                ? new Date(parsedInvoice.invoice.issued_date)
-                : new Date(),
-        };
-    };
-
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
-        defaultValues: getDefaultValues(),
     });
+
+    if (parsedInvoice) {
+        parsedInvoice.invoice.invoice_number &&
+            form.setValue(
+                "invoiceNumber",
+                parsedInvoice.invoice.invoice_number
+            );
+        parsedInvoice.invoice.invoice_description &&
+            form.setValue(
+                "invoiceDescription",
+                parsedInvoice.invoice.invoice_description
+            );
+        parsedInvoice.invoice.gross_amount &&
+            form.setValue("grossAmount", parsedInvoice.invoice.gross_amount);
+        parsedInvoice.invoice.currency_id &&
+            form.setValue("currency_id", parsedInvoice.invoice.currency_id);
+        parsedInvoice.invoice.vat &&
+            form.setValue("vat", parsedInvoice.invoice.vat);
+        parsedInvoice.client.client_id &&
+            form.setValue("client_id", parsedInvoice.client.client_id);
+        parsedInvoice.invoice.issued_date &&
+            form.setValue(
+                "invoicedDate",
+                new Date(parsedInvoice.invoice.issued_date)
+            );
+    }
 
     return (
         <>
