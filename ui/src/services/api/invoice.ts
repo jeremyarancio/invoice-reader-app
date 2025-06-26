@@ -5,6 +5,7 @@ import type {
     GetPagedInvoices,
     UpdateInvoice,
 } from "@/schemas/invoice";
+import type { ParsedInvoice } from "@/schemas/parser";
 import { api } from "@/services/api/main";
 
 export const addInvoice = async (file: File, data: CreateInvoicePayload) => {
@@ -54,5 +55,17 @@ export const updateInvoice = async (invoice: UpdateInvoice) => {
 
 export const fetchInvoiceUrl = async (id: string): Promise<string> => {
     const response = await api.get("invoices/" + id + "/url/");
+    return response.data;
+};
+export const parseInvoice = async (file: File): Promise<ParsedInvoice> => {
+    const formData = new FormData();
+    formData.append("upload_file", file);
+
+    const response = await api.post("invoices/extract/", formData, {
+        headers: {
+            "Content-Type": "multipart/form-data",
+        },
+    });
+
     return response.data;
 };

@@ -11,7 +11,7 @@ from invoice_reader import settings
 from invoice_reader.app.routes import clients, invoices, others, users
 from invoice_reader.utils import logger
 
-LOGGER = logger.get_logger()
+LOGGER = logger.get_logger(__name__)
 
 
 app = FastAPI()

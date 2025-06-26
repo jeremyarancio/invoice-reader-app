@@ -15,6 +15,7 @@ import {
     fetchInvoice,
     fetchInvoices,
     fetchInvoiceUrl,
+    parseInvoice,
     updateInvoice,
 } from "@/services/api/invoice";
 import { queryClient } from "@/services/api/main";
@@ -127,4 +128,13 @@ export const useDeleteInvoice = () => {
         },
     });
     return (invoiceId: string) => deleteInvoicesMutation.mutate(invoiceId);
+};
+
+export const useParseInvoiceMutation = (file: File) => {
+    const { data, isLoading, error } = useQuery({
+        queryKey: ["parsing", file],
+        queryFn: () => parseInvoice(file),
+        enabled: !!file,
+    });
+    return { data, isLoading, error };
 };

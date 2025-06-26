@@ -8,7 +8,7 @@ from invoice_reader.schemas import FileData
 from invoice_reader.schemas.invoices import Invoice
 from invoice_reader.utils import logger, s3_utils
 
-LOGGER = logger.get_logger()
+LOGGER = logger.get_logger(__name__)
 
 
 def store(

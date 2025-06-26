@@ -61,3 +61,9 @@ NO_REFRESH_TOKEN_EXCEPTION = HTTPException(
     status_code=status.HTTP_401_UNAUTHORIZED,
     detail="No refresh token found in cookie.",
 )
+
+
+INVALID_EXTRACTED_DATA_EXCEPTION = HTTPException(
+    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+    detail="The extracted data is not valid.",
+)

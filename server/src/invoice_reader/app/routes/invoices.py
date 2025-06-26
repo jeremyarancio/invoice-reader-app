@@ -15,6 +15,7 @@ from invoice_reader.schemas.invoices import (
     InvoiceUpdate,
     PagedInvoiceResponse,
 )
+from invoice_reader.schemas.parser import InvoiceExtraction
 
 router = APIRouter(
     prefix="/api/v1/invoices",
@@ -74,11 +75,28 @@ def add_invoice(
                 content="The file and its information were successfully stored.",
                 status_code=201,
             )
-        # extracted_metadata = presenter.extract(file=upload_file.file)
-        # return Response(
-        #     content={"data": extracted_metadata},
-        #     status_code=201,
-        # )
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e)) from e
+
+
+@router.post("/extract/")
+def extract_invoice(
+    upload_file: Annotated[UploadFile, File()],
+    session: Annotated[sqlmodel.Session, Depends(db.get_session)],
+    user_id: Annotated[uuid.UUID, Depends(auth.get_current_user_id)],
+) -> InvoiceExtraction:
+    if upload_file.content_type != "application/pdf":
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Only PDF files are allowed for now.",
+        )
+    try:
+        extraction = presenter.extract_invoice(
+            file=upload_file.file, session=session, user_id=user_id
+        )
+        return extraction
     except HTTPException:
         raise
     except Exception as e:

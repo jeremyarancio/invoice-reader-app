@@ -17,7 +17,7 @@ from invoice_reader.models import (
 )
 from invoice_reader.utils.logger import get_logger
 
-LOGGER = get_logger()
+LOGGER = get_logger(__name__)
 
 
 class InvoiceRepository:
