@@ -1,0 +1,23 @@
+services:
+    traefik:
+        command:
+            - "--providers.docker=true"
+            - "--providers.docker.exposedbydefault=false"
+            - "--entrypoints.web.address=:80"
+            - "--api.insecure=true"
+        ports:
+            - 8080:8080
+    ui:
+        volumes:
+            - ./ui/:/app
+    postgres:
+        ports:
+            - 5432:5432
+
+    server:
+        volumes:
+            - ./server/src:/app/src
+            - ./server/.env:/app/.env
+            - ./server/migrations:/app/migrations
+        env_file:
+            - "./server/.env"

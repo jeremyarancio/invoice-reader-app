@@ -9,6 +9,7 @@ dev-server:
 
 #----Formating----
 fix: lint format
+
 format:
 	cd server && uv tool run ruff format .
 

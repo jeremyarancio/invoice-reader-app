@@ -9,24 +9,10 @@ services:
     traefik:
         image: traefik:v3.4
         container_name: traefik
-        command:
-            - "--api.insecure=true"
-            - "--providers.docker=true"
-            - "--providers.docker.exposedbydefault=false"
-            - "--entrypoints.web.address=:80"
-            # - "--entrypoints.websecure.address=:443"
-            # - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
-            # - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
-            # - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
-            # - "--certificatesresolvers.myresolver.acme.email=contact@${DOMAIN_NAME:-localdev.com}"
-            # - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
         ports:
             - 80:80
-            - 443:443
-            - 8080:8080
         volumes:
             - /var/run/docker.sock:/var/run/docker.sock
-            - letsencrypt:/letsencrypt
         networks:
             - app-network
 
@@ -35,8 +21,6 @@ services:
         restart: unless-stopped
         image: postgres:17.2-alpine
         environment: *db-env
-        ports:
-            - 5432:5432
         volumes:
             - postgres_data:/var/lib/postgresql/data
         networks:
@@ -46,40 +30,23 @@ services:
         restart: unless-stopped
         build:
             context: ./ui
-            target: ${TARGET:-dev}
-        volumes:
-            - ./ui:/app
+            target: dev
         networks:
             - app-network
         labels:
             - "traefik.enable=true"
             - "traefik.http.routers.ui.rule=Host(`app.${DOMAIN_NAME:-localhost}`)"
             - "traefik.http.services.ui.loadbalancer.server.port=5173"
-            # - "traefik.http.routers.ui.entrypoints=websecure"
-            # - "traefik.http.routers.ui.tls=true"
-            # - "traefik.http.routers.ui.tls.certresolver=myresolver"
 
     server:
         restart: unless-stopped
         build:
             context: ./server
-            target: ${TARGET:-dev}
-        deploy:
-            mode: replicated
-            replicas: 1
+            target: dev
         labels:
             - "traefik.enable=true"
             - "traefik.http.routers.server.rule=Host(`api.${DOMAIN_NAME:-localhost}`)"
             - "traefik.http.services.server.loadbalancer.server.port=8000"
-            # - "traefik.http.routers.server.tls=true"
-            # - "traefik.http.routers.server.tls.certresolver=myresolver"
-            # - "traefik.http.routers.server.entrypoints=websecure"
-        env_file:
-            - "./server/.env"
-        volumes:
-            - ./server/src:/app/src
-            - ./server/.env:/app/.env
-            - ./server/migrations:/app/migrations
         depends_on:
             - postgres
         networks:
@@ -103,9 +70,6 @@ services:
         labels:
             - "traefik.enable=true"
             - "traefik.http.routers.grafana.rule=Host(`monitor.${DOMAIN_NAME:-localhost}`)"
-            # - "traefik.http.routers.grafana.entrypoints=websecure"
-            # - "traefik.http.routers.grafana.tls=true"
-            # - "traefik.http.routers.grafana.tls.certresolver=myresolver"
         volumes:
             - grafana-storage:/var/lib/grafana
             - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
@@ -117,7 +81,6 @@ services:
 volumes:
     postgres_data:
     grafana-storage:
-    letsencrypt:
 
 networks:
     app-network:

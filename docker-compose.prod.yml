@@ -1,0 +1,57 @@
+services:
+    traefik:
+        command:
+            - "--providers.docker=true"
+            - "--providers.docker.exposedbydefault=false"
+            - "--entrypoints.web.address=:80"
+            - "--entrypoints.websecure.address=:443"
+            - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+            - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+            - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
+            - "--certificatesresolvers.myresolver.acme.email=contact@${DOMAIN_NAME:-localdev.com}"
+            - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+        ports:
+            - 443:443
+        volumes:
+            - letsencrypt:/letsencrypt
+
+    ui:
+        restart: always
+        build:
+            context: ./ui
+            target: prod
+        labels:
+            - "traefik.http.routers.ui.entrypoints=websecure"
+            - "traefik.http.routers.ui.tls=true"
+            - "traefik.http.routers.ui.tls.certresolver=myresolver"
+
+    postgres:
+        restart: always
+        env_file:
+            - "./.env.prod"
+        expose:
+            - 5432
+
+    server:
+        restart: always
+        build:
+            context: ./server
+            target: prod
+        deploy:
+            mode: replicated
+            replicas: 3
+        labels:
+            - "traefik.http.routers.server.tls=true"
+            - "traefik.http.routers.server.tls.certresolver=myresolver"
+            - "traefik.http.routers.server.entrypoints=websecure"
+        env_file:
+            - "./server/.env.prod"
+
+    grafana:
+        labels:
+            - "traefik.http.routers.grafana.entrypoints=websecure"
+            - "traefik.http.routers.grafana.tls=true"
+            - "traefik.http.routers.grafana.tls.certresolver=myresolver"
+
+volumes:
+    letsencrypt:
