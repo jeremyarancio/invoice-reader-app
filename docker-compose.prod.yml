@@ -27,8 +27,6 @@ services:
 
     postgres:
         restart: always
-        env_file:
-            - "./.env.prod"
         expose:
             - 5432
 
