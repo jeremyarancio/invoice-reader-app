@@ -1,5 +1,12 @@
 # Notes
 
+## Llama.cpp
+* Building llama.cpp:
+
+```bash
+sudo apt install libcurl4-openssl-dev
+```
+
 ## Docker React Vite
 * Super tricky, Vite is not configured to run on Docker natively. The solution: `npm run dev -- --host`
 

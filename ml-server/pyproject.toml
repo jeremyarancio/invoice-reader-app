@@ -1,0 +1,27 @@
+[project]
+name = "ml-server"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "pydantic>=2.11.7",
+    "pydantic-settings>=2.10.1",
+    "litserve>=0.2.13",
+    "pillow>=11.3.0",
+    "transformers[torch]>=4.53.1",
+    "torchvision>=0.22.1",
+    "llama-cpp-python>=0.3.1",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+    "huggingface-hub[cli]>=0.33.2",
+    "ipykernel>=6.29.5",
+    "llama-cpp-python==0.3.12",
+    "openai>=1.93.3",
+]
