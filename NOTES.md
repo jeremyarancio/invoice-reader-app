@@ -1,5 +1,17 @@
 # Notes
 
+## Deploy vLLM on Cloud Run
+* To access other instances, we need to configure a Service Account
+
+```bash
+gcloud iam service-accounts create $SERVICE_ACCOUNT
+gcloud artifacts repositories create $DOCKER_IMAGE_REGISTRY \
+  --repository-format docker \
+  --project $PROJECT_ID \
+  --allow-vulnerability-scanning \
+  --location $REGION
+```
+
 ## Llama.cpp
 * Building llama.cpp:
 
