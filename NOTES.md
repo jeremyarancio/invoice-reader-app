@@ -2,14 +2,26 @@
 
 ## Deploy vLLM on Cloud Run
 * To access other instances, we need to configure a Service Account
+* Also request the L4  instances on GCP quotas
 
 ```bash
 gcloud iam service-accounts create $SERVICE_ACCOUNT
 gcloud artifacts repositories create $DOCKER_IMAGE_REGISTRY \
   --repository-format docker \
   --project $PROJECT_ID \
-  --allow-vulnerability-scanning \
   --location $REGION
+gcloud run deploy vllm-parser \
+  --source . \
+  --cpu 8 \
+  --gpu 1 \
+  --gpu-type nvidia-l4 \
+  --max-instances 1 \
+  --memory 16Gi \
+  --allow-unauthenticated \
+  --no-cpu-throttling \
+  --no-gpu-zonal-redundancy \
+  --timeout=600 
+  --image $DOCKER_IMAGE_REGISTRY/$IMAGE_NAME:latest
 ```
 
 ## Llama.cpp
