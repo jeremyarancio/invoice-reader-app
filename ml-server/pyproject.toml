@@ -1,17 +1,17 @@
 [project]
 name = "ml-server"
 version = "0.1.0"
-description = "Add your description here"
+description = "Invoice Manager ML Server"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "pydantic>=2.11.7",
     "pydantic-settings>=2.10.1",
-    "litserve>=0.2.13",
     "pillow>=11.3.0",
-    "transformers[torch]>=4.53.1",
-    "torchvision>=0.22.1",
-    "llama-cpp-python>=0.3.1",
+    "openai>=1.97.1",
+    "fastapi[standard]>=0.116.1",
+    "loguru>=0.7.3",
+    "pdf2image>=1.17.0",
 ]
 
 [build-system]
@@ -22,6 +22,4 @@ build-backend = "hatchling.build"
 dev = [
     "huggingface-hub[cli]>=0.33.2",
     "ipykernel>=6.29.5",
-    "llama-cpp-python==0.3.12",
-    "openai>=1.93.3",
 ]
