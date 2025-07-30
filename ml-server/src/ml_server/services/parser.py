@@ -19,10 +19,7 @@ class ParserInteface(ABC):
 class ParserService:
     @staticmethod
     async def parse(file: BinaryIO, parser: ParserInteface) -> InvoiceExtraction:
-        try:
-            LOGGER.info("Starting invoice parsing")
-            invoice_extraction = await parser.parse(file)
-            LOGGER.info("Invoice parsing completed successfully")
-            return invoice_extraction
-        except ParserException:
-            raise
+        LOGGER.info("Starting invoice parsing")
+        invoice_extraction = await parser.parse(file)
+        LOGGER.info("Invoice parsing completed successfully")
+        return invoice_extraction
