@@ -23,3 +23,24 @@ dev = [
     "huggingface-hub[cli]>=0.33.2",
     "ipykernel>=6.29.5",
 ]
+
+[tool.ty.rules]
+
+[tool.ruff.lint]
+select = [
+    # pycodestyle
+    "E",
+    # Pyflakes
+    "F",
+    # pyupgrade
+    "UP",
+    # flake8-bugbear
+    "B",
+    # flake8-simplify
+    "SIM",
+    # isort
+    "I",
+]
+
+[tool.ruff]
+line-length = 100
