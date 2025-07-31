@@ -92,8 +92,8 @@ class vLLMParser(ParserInteface):
             api_key=settings.parser_api_key,
         )
 
-        response = await client.chat.completions.create(
-            model="vllm-parser",
+        response = await client.chat.completions.parse(
+            model=settings.model_name,
             messages=[
                 {
                     "role": "user",
@@ -102,7 +102,7 @@ class vLLMParser(ParserInteface):
                         {
                             "type": "image_url",
                             "image_url": {
-                                "url": f"data:image/png;base64,'{img_str}'",
+                                "url": f"data:image/png;base64,{img_str}",
                             },
                         },
                     ],
@@ -111,9 +111,17 @@ class vLLMParser(ParserInteface):
             response_format=InvoiceExtraction,
         )
 
+        LOGGER.info("LLM response: {}", response.to_json(indent=2))
+        LOGGER.info(
+            "Token usage : {}",
+            response.usage.to_json(indent=2) if response.usage else "No usage data",
+        )
+
         output = response.choices[0].message
         if output.refusal:
-            raise ParserException("Parser refused to process the image.")
+            raise ParserException(
+                f"Error during image processing.\nOutput:\n{output.to_json(indent=2)}"
+            )
         else:
             LOGGER.info("LLM output: {}", output.content)
             try:

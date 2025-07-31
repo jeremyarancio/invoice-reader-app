@@ -6,6 +6,7 @@ class Settings(BaseSettings):
 
     parser_api_url: str
     parser_api_key: str
+    model_name: str
 
 
 settings = Settings()
