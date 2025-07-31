@@ -22,6 +22,7 @@ build-backend = "hatchling.build"
 dev = [
     "huggingface-hub[cli]>=0.33.2",
     "ipykernel>=6.29.5",
+    "pytest>=8.4.1",
 ]
 
 [tool.ty.rules]

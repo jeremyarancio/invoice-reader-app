@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 from typing import BinaryIO
 
 from ml_server.domain.invoice import InvoiceExtraction
-from ml_server.services.exceptions import ParserException
 from ml_server.utils.logger import get_logger
 
 LOGGER = get_logger()

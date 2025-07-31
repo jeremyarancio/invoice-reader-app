@@ -1,35 +1,33 @@
 from datetime import date, datetime
-from typing import Annotated
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, BeforeValidator, ValidationInfo, field_validator
 
 CURRENCIES = ["USD", "EUR", "GBP"]
 
 
-def _is_positive_integer(value: int | None) -> int | None:
-    return int(value) if value and value >= 0 else None
+def _is_positive_integer(value) -> int | None:
+    return int(value) if isinstance(value, float | int) and value >= 0 else None
 
 
-def _is_positive_float(value: float | None) -> float | None:
-    return float(value) if value and value >= 0 else None
+def _is_positive_float(value) -> float | None:
+    return value if isinstance(value, float | int) and value >= 0 else None
 
 
-def _is_valid_currency(value: str | None) -> str | None:
-    if value and value.upper() in CURRENCIES:
+def _is_valid_currency(value: str) -> str | None:
+    if value.upper() in CURRENCIES:
         return value.upper()
     return None
 
 
-def _is_valid_date(value: str | date | None) -> date | None:
-    if value:
-        if isinstance(value, date):
-            return value
-        else:
-            try:
-                return datetime.strptime(value, "%d/%m/%Y").date()
-            except (ValueError, TypeError):
-                return None
-    return None
+def _is_valid_date(value) -> date | None:
+    if isinstance(value, date):
+        return value
+    else:
+        try:
+            return datetime.strptime(value, "%d/%m/%Y").date()
+        except (ValueError, TypeError):
+            return None
 
 
 class Address(BaseModel):
@@ -46,7 +44,9 @@ class Invoice(BaseModel):
     due_date: date | None = None
     invoice_number: str | None = None
     invoice_description: str | None = None
-    currency: Annotated[str | None, BeforeValidator(_is_valid_currency)] = None
+    currency: Annotated[
+        Literal["USD", "EUR", "GBP"] | None, BeforeValidator(_is_valid_currency)
+    ] = None
 
     @field_validator("due_date", mode="before")
     @classmethod

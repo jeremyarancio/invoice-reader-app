@@ -1,13 +1,13 @@
-from loguru import Logger, logger
+from loguru import logger
+
+logger.add(
+    "app.log",
+    level="INFO",
+    format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}",
+    enqueue=True,
+)
 
 
-def get_logger() -> Logger:
+def get_logger():
     """Get the configured logger instance."""
-    logger.add(
-        "app.log",
-        rotation="10 MB",
-        level="INFO",
-        format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}",
-        enqueue=True,
-    )
     return logger

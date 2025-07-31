@@ -10,7 +10,6 @@ from pydantic import ValidationError
 from ml_server.domain.invoice import (
     Address,
     Client,
-    Currency,
     Invoice,
     InvoiceExtraction,
     Seller,
@@ -24,7 +23,7 @@ LOGGER = get_logger()
 
 
 class TestParser(ParserInteface):
-    def parse(self, file: BytesIO) -> InvoiceExtraction:
+    def parse(self) -> InvoiceExtraction:
         return InvoiceExtraction(
             invoice=Invoice(
                 gross_amount=10000,
@@ -32,7 +31,7 @@ class TestParser(ParserInteface):
                 issued_date=date(2023, 10, 1),
                 invoice_number="INV-12345",
                 invoice_description="Test Invoice",
-                currency=Currency.USD,
+                currency="USD",
             ),
             client=Client(
                 name="Test Client",
