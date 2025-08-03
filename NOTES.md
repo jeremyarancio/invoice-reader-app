@@ -1,5 +1,83 @@
 # Notes
 
+## Deploy vLLM on Cloud Run
+* To access other instances, we need to configure a Service Account
+* **Also request the L4 instances on GCP quotas**
+* Build and Push model is long! Leverage CloudBuild to async the process
+
+```bash
+gcloud iam service-accounts create $SERVICE_ACCOUNT
+
+gcloud artifacts repositories create $DOCKER_IMAGE_REGISTRY \
+  --repository-format docker \
+  --project $PROJECT_ID \
+  --location $REGION
+
+gcloud run deploy vllm-server \
+  --cpu 8 \
+  --gpu 1 \
+  --gpu-type nvidia-l4 \
+  --max-instances 1 \
+  --memory 16Gi \
+  --no-allow-unauthenticated \
+  --no-cpu-throttling \
+  --no-gpu-zonal-redundancy \
+  --timeout=300 \
+  --image europe-west1-docker.pkg.dev/invoice-reader-app/vllm-parser/vllm-parser:latest \
+  --region europe-west1 \
+```
+
+* To request the endpoint, use the gcloud token:
+```bash
+curl -X POST "https://vllm-server-47464370972.europe-west1.run.app" \
+-H "Authorization: bearer $(gcloud auth print-identity-token)" \
+-H "Content-Type: application/json" \
+-d '{
+  "name": "Developer"
+}'
+```
+
+With httpie:
+```bash
+http -A bearer -a $(gcloud auth print-identity-token) \
+POST https://vllm-server-.../v1/chat/completions \
+Content-Type:application/json \
+messages:='[
+    {
+        "role": "user",
+        "content": [
+            {
+                "type": "image_url",
+                "image_url": {
+                    "url": "data:image/png;base64,'$(base64 -w 0 ~/dir/invoice.png)'"
+                }
+            },
+            {
+                "type": "text",
+                "text": "Extract the text from the above document as if you were reading it naturally. Return the tables in html format. Return the equations in LaTeX representation. If there is an image in the document and image caption is not present, add a small description of the image inside the <img></img> tag; otherwise, add the image caption inside <img></img>. Watermarks should be wrapped in brackets. Ex: <watermark>OFFICIAL COPY</watermark>. Page numbers should be wrapped in brackets. Ex: <page_number>14</page_number> or <page_number>9/22</page_number>. Prefer using ☐ and ☑ for check boxes."
+            }
+        ]
+    }
+]'
+```
+
+* By default, **15 min** grace period before scale to zero ([non customizable?](https://cloud.google.com/run/docs/about-instance-autoscaling))
+* Possibility to [mount a model](https://cloud.google.com/run/docs/configuring/services/gpu-best-practices#model-storage) from GCS instead of downloading the model within the image directly (Save CD time)
+
+* Ressources:
+    * https://medium.com/google-cloud/scale-to-zero-llm-inference-with-vllm-cloud-run-and-cloud-storage-fuse-42c7e62f6ec6
+    * https://cloud.google.com/run/docs/tutorials/gpu-gemma-with-ollama
+    * https://codelabs.developers.google.com/codelabs/how-to-run-inference-cloud-run-gpu-vllm?hl=fr#0
+    * https://cloud.google.com/run/docs/configuring/services/gpu-best-practices
+    * https://cloud.google.com/build/docs/deploying-builds/deploy-cloud-run
+
+## Llama.cpp
+* Building llama.cpp:
+
+```bash
+sudo apt install libcurl4-openssl-dev
+```
+
 ## Docker React Vite
 * Super tricky, Vite is not configured to run on Docker natively. The solution: `npm run dev -- --host`
 

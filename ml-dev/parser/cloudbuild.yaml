@@ -1,0 +1,65 @@
+steps:
+  #Pull to leverage cache
+  - name: "gcr.io/cloud-builders/docker"
+    entrypoint: "bash"
+    args: [
+      "-c", 
+      "docker pull ${_REGION}-docker.pkg.dev/${_PROJECT_ID}/${_REPOSITORY}/${_IMAGE}:latest || exit 0"]
+
+  # Build the image
+  - name: "gcr.io/cloud-builders/docker"
+    args: [
+      "build", "-t", "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/${_REPOSITORY}/${_IMAGE}", 
+      "--cache-from", "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/${_REPOSITORY}/${_IMAGE}:latest",
+      "."
+      ]
+
+  # Push the image to Artifact Registry
+  - name: "gcr.io/cloud-builders/docker"
+    args: ["push", "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/${_REPOSITORY}/${_IMAGE}"]
+
+  # Deploy to Cloud Run
+  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+    entrypoint: gcloud
+    args: [
+      "run", "deploy", "${_CLOUD_RUN_NAME}",
+      "--image", "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/${_REPOSITORY}/${_IMAGE}",
+      "--region", "$_REGION",
+      "--cpu", "${_CPU}",
+      "--gpu", "${_GPU_COUNT}",
+      "--gpu-type", "${_GPU_TYPE}",
+      "--max-instances", "${_MAX_INSTANCES}",
+      "--memory", "${_MEMORY}",
+      "--no-allow-unauthenticated", 
+      "--no-gpu-zonal-redundancy",
+      "--no-cpu-throttling",
+      "--timeout", "${_TIMEOUT}",
+      "--port", "${_PORT}",
+      "--concurrency", "${_CONCURRENCY}",
+    ]
+
+# Optional: Store the image in Artifact Registry
+images:
+  - "${_REGION}-docker.pkg.dev/${_PROJECT_ID}/${_REPOSITORY}/${_IMAGE}"
+
+substitutions:
+  # Basic configuration
+  _REGION: "europe-west1"
+  _PROJECT_ID: "invoice-reader-app"
+  _REPOSITORY: "vllm-parser"
+  _IMAGE: "vllm-parser"
+  _CLOUD_RUN_NAME: "vllm-server"
+  
+  # Resource configuration
+  _CPU: "8"
+  _GPU_COUNT: "1"
+  _GPU_TYPE: "nvidia-l4"
+  _MEMORY: "16Gi"
+  _MAX_INSTANCES: "1"
+  _CONCURRENCY: "10"
+  
+  # Performance settings
+  _TIMEOUT: "300"
+  
+  # Network/security
+  _PORT: "8000"
