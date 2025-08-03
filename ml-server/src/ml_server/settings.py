@@ -6,7 +6,7 @@ class Settings(BaseSettings):
 
     parser_api_url: str
     parser_api_key: str
-    model_name: str
+    model_name: str = "nanonets/Nanonets-OCR-s"
 
 
 settings = Settings()

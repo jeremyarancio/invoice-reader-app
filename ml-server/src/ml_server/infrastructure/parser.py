@@ -88,7 +88,7 @@ class vLLMParser(ParserInteface):
         img_str = self._process_file(file=file)
 
         client = AsyncOpenAI(
-            base_url=settings.parser_api_url,
+            base_url=settings.parser_api_url + "/v1",
             api_key=settings.parser_api_key,
         )
 
@@ -130,3 +130,12 @@ class vLLMParser(ParserInteface):
                 raise ParserException(f"Failed to extract JSON from LLM output: {str(e)}") from e
 
         return invoice_extraction
+
+
+if __name__ == "__main__":
+    import asyncio
+    from pathlib import Path
+
+    parser = vLLMParser()
+    with open(Path.home() / "invoice.pdf", "rb") as file:
+        asyncio.run(parser.parse(file=file))

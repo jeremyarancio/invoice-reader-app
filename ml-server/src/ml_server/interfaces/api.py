@@ -1,4 +1,5 @@
 import sys
+import time
 import traceback
 from typing import Annotated
 
@@ -33,8 +34,14 @@ async def custom_exception_handler(request: Request, exc: CustomException):
 @app.middleware("http")
 async def http_exception(request: Request, call_next):
     "Handle uncaught exceptions."
+    timestamp = time.time()
     try:
-        return await call_next(request)
+        response = await call_next(request)
+        process_time = time.time() - timestamp
+        logger.info(
+            f"Request: {request.method} {request.url} completed in {process_time:.2f} seconds"
+        )
+        return response
     except Exception as exc:
         exc_type, exc_value, exc_traceback = sys.exc_info()
         tb_str = "".join(traceback.format_exception(exc_type, exc_value, exc_traceback))
