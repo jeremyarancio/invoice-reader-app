@@ -45,6 +45,14 @@ services:
         env_file:
             - "./server/.env.prod"
 
+    ml-server:
+        restart: always
+        build:
+            context: ./ml-server
+            target: prod
+        env_file:
+            - "./ml-server/.env.prod"
+
     grafana:
         labels:
             - "traefik.http.routers.grafana.entrypoints=websecure"
