@@ -65,5 +65,5 @@ NO_REFRESH_TOKEN_EXCEPTION = HTTPException(
 
 INVALID_EXTRACTED_DATA_EXCEPTION = HTTPException(
     status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-    detail="The extracted data is not valid.",
+    detail="Issue with parsing the document.",
 )
