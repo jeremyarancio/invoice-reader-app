@@ -24,6 +24,8 @@ services:
             - ./server/migrations:/app/migrations
         env_file:
             - "./server/.env"
+        ports:
+            - 8000:8000
 
     ml-server:
         volumes:
@@ -31,4 +33,5 @@ services:
             - ./ml-server/.env:/app/.env
         env_file:
             - "./ml-server/.env"
-
+        ports:
+            - 5000:5000

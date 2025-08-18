@@ -2,7 +2,7 @@ from datetime import date
 from typing import BinaryIO
 
 import httpx
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel
 
 from invoice_reader import settings
 from invoice_reader.app.exceptions import INVALID_EXTRACTED_DATA_EXCEPTION
@@ -44,9 +44,9 @@ class InvoiceExtraction(BaseModel):
 def parse_invoice(file: BinaryIO) -> InvoiceExtraction:
     """Parse document using the /parser endpoint from the ML server."""
     files = {"upload_file": file}
-    api_url = settings.ML_SERVER_URL + "v1/parse"
+    api_url = settings.ML_SERVER_URL + "/v1/parse"
     response = httpx.post(api_url, files=files)
     if response.status_code != 200:
         raise INVALID_EXTRACTED_DATA_EXCEPTION
-    invoice_data = InvoiceExtraction.model_validate_json(response.json())
+    invoice_data = InvoiceExtraction.model_validate(response.json())
     return invoice_data

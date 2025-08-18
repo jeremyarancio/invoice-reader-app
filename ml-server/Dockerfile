@@ -33,7 +33,7 @@ ENV PATH="/app/.venv/bin:$PATH"
 WORKDIR /app
 
 # Run the FastAPI application by default
-CMD ["fastapi", "run", "--host", "0.0.0.0", "src/ml_server/interfaces/api.py"]
+CMD ["fastapi", "run", "--host", "0.0.0.0", "--port", "5000", "src/ml_server/interfaces/api.py"]
 
 
 # Development
@@ -45,4 +45,4 @@ ENV PATH="/app/.venv/bin:$PATH"
 
 WORKDIR /app
 
-CMD ["fastapi", "dev", "--host", "0.0.0.0", "src/ml_server/interfaces/api.py"]
+CMD ["fastapi", "dev", "--host", "0.0.0.0", "--port", "5000", "src/ml_server/interfaces/api.py"]
