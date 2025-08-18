@@ -23,7 +23,7 @@ LOGGER = get_logger()
 
 
 class TestParser(ParserInteface):
-    def parse(self) -> InvoiceExtraction:
+    async def parse(self, file: BinaryIO) -> InvoiceExtraction:
         return InvoiceExtraction(
             invoice=Invoice(
                 gross_amount=10000,
@@ -67,7 +67,7 @@ class vLLMParser(ParserInteface):
     """
 
     @staticmethod
-    def _process_file(file: BinaryIO) -> str:
+    async def _process_file(file: BinaryIO) -> str:
         try:
             pdf_bytes = file.read()
 
@@ -85,7 +85,7 @@ class vLLMParser(ParserInteface):
 
     async def parse(self, file: BinaryIO) -> InvoiceExtraction:
         """Using the deployed VLM, parse the document and return the extracted information."""
-        img_str = self._process_file(file=file)
+        img_str = await self._process_file(file=file)
 
         client = AsyncOpenAI(
             base_url=settings.parser_api_url + "/v1",

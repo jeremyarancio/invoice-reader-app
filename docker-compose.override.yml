@@ -9,7 +9,10 @@ services:
             - 8080:8080
     ui:
         volumes:
-            - ./ui/:/app
+            - ./ui/src:/app/src
+            - ./ui/public:/app/public
+            - ./ui/package.json:/app/package.json
+            - ./ui/package-lock.json:/app/package-lock.json
     postgres:
         ports:
             - 5432:5432
@@ -21,3 +24,14 @@ services:
             - ./server/migrations:/app/migrations
         env_file:
             - "./server/.env"
+        ports:
+            - 8000:8000
+
+    ml-server:
+        volumes:
+            - ./ml-server/src:/app/src
+            - ./ml-server/.env:/app/.env
+        env_file:
+            - "./ml-server/.env"
+        ports:
+            - 5000:5000

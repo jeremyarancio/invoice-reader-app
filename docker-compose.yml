@@ -27,7 +27,6 @@ services:
             - app-network
 
     ui:
-        restart: unless-stopped
         build:
             context: ./ui
             target: dev
@@ -39,7 +38,6 @@ services:
             - "traefik.http.services.ui.loadbalancer.server.port=5173"
 
     server:
-        restart: unless-stopped
         build:
             context: ./server
             target: dev
@@ -49,6 +47,13 @@ services:
             - "traefik.http.services.server.loadbalancer.server.port=8000"
         depends_on:
             - postgres
+        networks:
+            - app-network
+
+    ml-server:
+        build:
+            context: ./ml-server
+            target: dev
         networks:
             - app-network
 
