@@ -1,3 +1,5 @@
+import traceback
+
 from fastapi import (
     FastAPI,
     Request,
@@ -8,17 +10,20 @@ from fastapi.responses import JSONResponse, Response
 from prometheus_fastapi_instrumentator import Instrumentator
 
 from invoice_reader import settings
-from invoice_reader.app.routes import clients, invoices, others, users
+from invoice_reader.interfaces.api.routers import (
+    client_router,
+    user_router,
+    invoice_router,
+)
 from invoice_reader.utils import logger
 
 LOGGER = logger.get_logger(__name__)
 
 
 app = FastAPI()
-app.include_router(users.router)
-app.include_router(invoices.router)
-app.include_router(clients.router)
-app.include_router(others.router)
+app.include_router(user_router)
+app.include_router(invoice_router)
+app.include_router(client_router)
 
 app.add_middleware(
     CORSMiddleware,
@@ -45,6 +50,30 @@ def http_exception_handler(request: Request, exc: HTTPException):
 @app.get("/")
 async def root(response: Response):
     return {"message": "Welcome to the Invoice Reader API!"}
+
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    # Get root cause
+    root_cause = str(exc)
+    traceback_str = "".join(
+        traceback.format_exception(type(exc), exc, exc.__traceback__)
+    )
+
+    # For production, log the full traceback but don't return it
+    LOGGER.error(f"ERROR: {traceback_str}")  # Log to your system
+
+    return JSONResponse(
+        status_code=500,
+        content={
+            "error": {
+                "type": exc.__class__.__name__,
+                "msg": root_cause,
+                # Include location only for validation errors
+                "loc": getattr(exc, "loc", None),
+            }
+        },
+    )
 
 
 # Monitoring

@@ -18,7 +18,7 @@ from invoice_reader.utils.logger import get_logger
 LOGGER = get_logger(__name__)
 
 router = APIRouter(
-    prefix="/api/v1/clients",
+    prefix="/v1/clients",
     tags=["Clients"],
 )
 

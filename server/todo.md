@@ -1,0 +1,2 @@
+- [ ] Session for lifetime
+- [ ] Move PDF check into Services

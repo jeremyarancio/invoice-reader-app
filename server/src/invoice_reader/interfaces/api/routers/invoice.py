@@ -8,17 +8,18 @@ from fastapi.exceptions import HTTPException
 from pydantic import BaseModel, ValidationError
 
 from invoice_reader import db, presenter, settings
-from invoice_reader.app import auth
-from invoice_reader.schemas.invoices import (
+from invoice_reader.interfaces.api.dependencies import auth
+from invoice_reader.interfaces.schemas.invoice import (
     InvoiceCreate,
-    InvoiceResponse,
     InvoiceUpdate,
     PagedInvoiceResponse,
+    InvoiceResponse,
 )
-from invoice_reader.schemas.parser import InvoiceExtraction
+from invoice_reader.domain.parser import InvoiceExtraction  # TODO: restructure
+from invoice_reader.services.invoice import InvoiceService
 
 router = APIRouter(
-    prefix="/api/v1/invoices",
+    prefix="/v1/invoices",
     tags=["Invoices"],
 )
 
@@ -28,9 +29,6 @@ class Checker:
     However, HTTP protocole doesn't allow file & body.
     Therefore, we send data as Form as `{"data": json_dumps(invoice_data)}
     along with the file.
-
-    More information here:
-    https://shorturl.at/Beaur
     """
 
     def __init__(self, model: "BaseModel"):
@@ -54,31 +52,18 @@ def add_invoice(
         InvoiceCreate | None,
         Depends(Checker(InvoiceCreate)),
     ],
-    session: Annotated[sqlmodel.Session, Depends(db.get_session)],
     user_id: Annotated[uuid.UUID, Depends(auth.get_current_user_id)],
 ):
-    if upload_file.content_type != "application/pdf":
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Only PDF files are allowed for now.",
-        )
-    try:
-        if data:
-            presenter.add_invoice(
-                user_id=user_id,
-                file=upload_file.file,
-                filename=upload_file.filename,
-                invoice_create=data,
-                session=session,
-            )
-            return Response(
-                content="The file and its information were successfully stored.",
-                status_code=201,
-            )
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)) from e
+    InvoiceService.add_invoice(
+        user_id=user_id,
+        file=upload_file.file,
+        filename=upload_file.filename,
+        invoice_create=data,
+    )
+    return Response(
+        content="The file and its information were successfully stored.",
+        status_code=201,
+    )
 
 
 @router.post("/extract/")

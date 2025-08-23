@@ -52,29 +52,6 @@ from invoice_reader.utils import logger, s3_utils
 LOGGER = logger.get_logger(__name__)
 
 
-def add_invoice(
-    user_id: uuid.UUID,
-    file: BinaryIO,
-    filename: str | None,
-    invoice_create: InvoiceCreate,
-    session: sqlmodel.Session,
-) -> None:
-    if not filename:
-        raise UNPROCESSABLE_FILE
-    if not settings.S3_BUCKET_NAME:
-        raise MISSING_ENVIRONMENT_VARIABLE_EXCEPTION
-    file_data = FileData(user_id=user_id, filename=filename)
-    s3_model = S3.init(bucket=settings.S3_BUCKET_NAME)
-    invoice_repository = InvoiceRepository(session=session)
-
-    invoice = InvoiceMapper.map_invoice_create_to_invoice(invoice_create)
-    storage.store(
-        file=file,
-        file_data=file_data,
-        invoice=invoice,
-        invoice_repository=invoice_repository,
-        s3_model=s3_model,
-    )
 
 
 def get_user_by_email(email: str, session: sqlmodel.Session) -> User | None:

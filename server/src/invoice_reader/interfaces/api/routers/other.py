@@ -7,7 +7,7 @@ from invoice_reader import db, presenter
 from invoice_reader.schemas import Currency
 
 router = APIRouter(
-    prefix="/api/v1",
+    prefix="/v1",
     tags=["Others"],
 )
 

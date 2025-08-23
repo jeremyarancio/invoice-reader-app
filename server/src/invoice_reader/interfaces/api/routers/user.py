@@ -21,7 +21,7 @@ COOKIE_CONFIG = {
 
 
 router = APIRouter(
-    prefix="/api/v1/users",
+    prefix="/v1/users",
     tags=["Users"],
 )
 
