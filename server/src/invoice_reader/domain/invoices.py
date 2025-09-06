@@ -16,7 +16,7 @@ class Currency(StrEnum):
     GBP = "gbp"
 
 
-def is_valid_file_format(filename: str) -> bool:
+def _is_valid_file_format(filename: str) -> bool:
     if any(filename.endswith(format) for format in ACCEPTED_FILE_FORMATS):
         return True
     raise ValueError(
@@ -25,19 +25,25 @@ def is_valid_file_format(filename: str) -> bool:
 
 
 class File(BaseModel):
-    filename: Annotated[str, BeforeValidator(is_valid_file_format)]
+    filename: Annotated[str, BeforeValidator(_is_valid_file_format)]
+    storage_path: Annotated[
+        str, Field(pattern=r"^s3://.+/.+$")
+    ]  # NOTE: What if not S3?
 
     @property
     def format(self):
         return os.path.splitext(self.filename)[-1]
 
 
+class InvoiceID(UUID):
+    pass
+
+
 class Invoice(BaseModel):
-    id_: Annotated[UUID, Field(default_factory=uuid4)]
+    id_: Annotated[InvoiceID, Field(default_factory=uuid4)]
     client_id: UUID
     user_id: UUID
     file: File
-    storage_path: Annotated[str, Field(pattern=r"^s3://.+/.+$")]
     currency: Currency
     invoice_number: str
     gross_amount: float

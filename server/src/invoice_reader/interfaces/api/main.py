@@ -47,11 +47,6 @@ def http_exception_handler(request: Request, exc: HTTPException):
     )
 
 
-@app.get("/")
-async def root(response: Response):
-    return {"message": "Welcome to the Invoice Reader API!"}
-
-
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
     # Get root cause
@@ -74,6 +69,11 @@ async def global_exception_handler(request: Request, exc: Exception):
             }
         },
     )
+
+
+@app.get("/")
+async def root(response: Response):
+    return {"message": "Welcome to the Invoice Reader API!"}
 
 
 # Monitoring

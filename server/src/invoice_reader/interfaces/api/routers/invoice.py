@@ -1,5 +1,5 @@
-import uuid
-from typing import Annotated
+from uuid import UUID
+from typing import TypeVar, Generic, Annotated
 
 import sqlmodel
 from fastapi import APIRouter, Depends, File, Form, Query, Response, UploadFile, status
@@ -7,15 +7,13 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import HTTPException
 from pydantic import BaseModel, ValidationError
 
-from invoice_reader import db, presenter, settings
-from invoice_reader.interfaces.api.dependencies import auth
-from invoice_reader.interfaces.schemas.invoice import (
-    InvoiceCreate,
-    InvoiceUpdate,
-    PagedInvoiceResponse,
-    InvoiceResponse,
+from invoice_reader.interfaces.dependencies.infrastructure import (
+    get_file_repository,
+    get_invoice_repository,
 )
-from invoice_reader.domain.parser import InvoiceExtraction  # TODO: restructure
+from invoice_reader.interfaces.dependencies.auth import get_current_user_id
+from invoice_reader.interfaces.schemas import InvoiceCreate
+from invoice_reader.services.interfaces import IFileRepository, IInvoiceRepository
 from invoice_reader.services.invoice import InvoiceService
 
 router = APIRouter(
@@ -24,17 +22,17 @@ router = APIRouter(
 )
 
 
-class Checker:
+class Checker[T: BaseModel]:
     """When POST File & Payload, HTTP sends a Form request.
-    However, HTTP protocole doesn't allow file & body.
+    However, HTTP protocol doesn't allow file & body.
     Therefore, we send data as Form as `{"data": json_dumps(invoice_data)}
     along with the file.
     """
 
-    def __init__(self, model: "BaseModel"):
+    def __init__(self, model: type[T]):
         self.model = model
 
-    def __call__(self, data: str = Form(None)):
+    def __call__(self, data: str = Form(None)) -> T:
         if data:
             try:
                 return self.model.model_validate_json(data)
@@ -43,22 +41,30 @@ class Checker:
                     detail=jsonable_encoder(e.errors()),
                     status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                 ) from e
+        raise HTTPException(
+            detail="Data payload is required.",
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        )
 
 
 @router.post("/")
 def add_invoice(
     upload_file: Annotated[UploadFile, File()],
     data: Annotated[
-        InvoiceCreate | None,
+        InvoiceCreate,
         Depends(Checker(InvoiceCreate)),
     ],
-    user_id: Annotated[uuid.UUID, Depends(auth.get_current_user_id)],
+    user_id: Annotated[UUID, Depends(get_current_user_id)],
+    file_repository: Annotated[IFileRepository, Depends(get_file_repository)],
+    invoice_repository: Annotated[IInvoiceRepository, Depends(get_invoice_repository)],
 ):
     InvoiceService.add_invoice(
         user_id=user_id,
         file=upload_file.file,
-        filename=upload_file.filename,
+        filename=upload_file.filename if upload_file.filename else "",
         invoice_create=data,
+        file_repository=file_repository,
+        invoice_repository=invoice_repository,
     )
     return Response(
         content="The file and its information were successfully stored.",
@@ -69,7 +75,7 @@ def add_invoice(
 @router.post("/extract/")
 def extract_invoice(
     upload_file: Annotated[UploadFile, File()],
-    user_id: Annotated[uuid.UUID, Depends(auth.get_current_user_id)],
+    user_id: Annotated[uuid.UUID, Depends(get_current_user_id)],
 ) -> InvoiceExtraction:
     if upload_file.content_type != "application/pdf":
         raise HTTPException(
