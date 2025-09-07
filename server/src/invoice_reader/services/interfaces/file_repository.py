@@ -1,10 +1,11 @@
 from abc import ABC, abstractmethod
-from typing import BinaryIO
+
+from invoice_reader.domain import File
 
 
 class IFileRepository(ABC):
     @abstractmethod
-    def store(self, file: BinaryIO) -> None:
+    def store(self, file: File) -> None:
         pass
 
     @abstractmethod
@@ -13,4 +14,8 @@ class IFileRepository(ABC):
 
     @abstractmethod
     def get_url(self, file_path: str) -> str:
+        pass
+
+    @abstractmethod
+    def create_path(self, filename: str) -> str:
         pass

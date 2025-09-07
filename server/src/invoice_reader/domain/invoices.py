@@ -2,7 +2,7 @@ from enum import StrEnum
 import os
 from uuid import UUID, uuid4
 from datetime import date
-from typing import Annotated
+from typing import Annotated, BinaryIO
 
 from pydantic import BaseModel, Field, BeforeValidator
 
@@ -26,6 +26,7 @@ def _is_valid_file_format(filename: str) -> bool:
 
 class File(BaseModel):
     filename: Annotated[str, BeforeValidator(_is_valid_file_format)]
+    file: BinaryIO
     storage_path: Annotated[
         str, Field(pattern=r"^s3://.+/.+$")
     ]  # NOTE: What if not S3?
@@ -39,15 +40,19 @@ class InvoiceID(UUID):
     pass
 
 
-class Invoice(BaseModel):
-    id_: Annotated[InvoiceID, Field(default_factory=uuid4)]
-    client_id: UUID
-    user_id: UUID
-    file: File
-    currency: Currency
+class InvoiceData(BaseModel):
     invoice_number: str
     gross_amount: float
     vat: Annotated[int, Field(ge=0, le=50)]
     description: Annotated[str, Field(max_length=500)]
     issued_date: date
     paid_date: date | None = None
+    currency: Currency
+
+
+class Invoice(BaseModel):
+    id_: InvoiceID = Field(default_factory=uuid4)
+    client_id: UUID
+    user_id: UUID
+    file: File
+    data: InvoiceData

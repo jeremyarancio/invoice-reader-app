@@ -15,6 +15,7 @@ from invoice_reader.interfaces.dependencies.auth import get_current_user_id
 from invoice_reader.interfaces.schemas import InvoiceCreate
 from invoice_reader.services.interfaces import IFileRepository, IInvoiceRepository
 from invoice_reader.services.invoice import InvoiceService
+from invoice_reader.domain.invoices import InvoiceData
 
 router = APIRouter(
     prefix="/v1/invoices",
@@ -58,11 +59,21 @@ def add_invoice(
     file_repository: Annotated[IFileRepository, Depends(get_file_repository)],
     invoice_repository: Annotated[IInvoiceRepository, Depends(get_invoice_repository)],
 ):
+    invoice_data = InvoiceData(
+        invoice_number=data.invoice.invoice_number,
+        gross_amount=data.invoice.gross_amount,
+        vat=data.invoice.vat,
+        description=data.invoice.description,
+        issued_date=data.invoice.issued_date,
+        paid_date=data.invoice.paid_date,
+        currency=data.invoice.currency,
+    )
     InvoiceService.add_invoice(
         user_id=user_id,
-        file=upload_file.file,
+        client_id=data.client_id,
+        invoice_data=invoice_data,
+        file_bin=upload_file.file,
         filename=upload_file.filename if upload_file.filename else "",
-        invoice_create=data,
         file_repository=file_repository,
         invoice_repository=invoice_repository,
     )

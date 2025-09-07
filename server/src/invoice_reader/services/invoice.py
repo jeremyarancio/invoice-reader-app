@@ -3,24 +3,63 @@ from uuid import UUID
 from typing import BinaryIO
 
 from invoice_reader import settings
-from invoice_reader.domain import Invoice
+from invoice_reader.domain import InvoiceData, Invoice, File
 from invoice_reader.interfaces.schemas.invoice import InvoiceCreate
 from invoice_reader.services.interfaces import IInvoiceRepository, IFileRepository
 
 
 class InvoiceService:
-    @staticmethod
+    @classmethod
     def add_invoice(
+        cls,
+        file_bin: BinaryIO,
+        filename: str,
+        user_id: UUID,
+        client_id: UUID,
+        invoice_data: InvoiceData,
         file_repository: IFileRepository,
         invoice_repository: IInvoiceRepository,
     ) -> None:
-        file_repository.store(
-            file=file,
-            file_data=file_data,
-            invoice=invoice,
-            invoice_repository=invoice_repository,
-            s3_model=s3_model,
+        storage_path = file_repository.create_path(filename=filename)
+        file = File(
+            file=file_bin,
+            filename=filename,
+            storage_path=storage_path,
         )
+        invoice = Invoice(
+            user_id=user_id,
+            client_id=client_id,
+            data=invoice_data,
+            file=file,
+        )
+        try:
+            file_repository.store(file=file)
+
+            existing_invoice = invoice_repository.get_by_invoice_number(
+                user_id=user_id,
+                invoice_number=invoice_data.invoice_number,
+            )
+            if existing_invoice:
+                raise EXISTING_INVOICE_EXCEPTION
+            invoice_repository.add(invoice=invoice)
+        except Exception:
+            cls._rollback(
+                invoice=invoice,
+                file_repository=file_repository,
+                invoice_repository=invoice_repository,
+            )
+
+    @staticmethod
+    def _rollback(
+        invoice: Invoice,
+        file_repository: IFileRepository,
+        invoice_repository: IInvoiceRepository,
+    ) -> None:
+        try:
+            file_repository.delete(file_path=invoice.file.storage_path)
+            invoice_repository.delete(invoice_id=invoice.id_)
+        except Exception:
+            pass  # TODO: Custom exception for rollback success or failure
 
     @classmethod
     def get_invoice(

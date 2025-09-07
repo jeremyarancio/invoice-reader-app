@@ -2,27 +2,24 @@ from abc import ABC, abstractmethod
 from uuid import UUID
 from typing import Sequence
 
-from invoice_reader.domain import Invoice
+from invoice_reader.domain import Invoice, InvoiceID
 
 
 class IInvoiceRepository(ABC):
     @abstractmethod
-    def add(
-        self,
-        user_id: UUID,
-    ) -> None:
+    def add(self, invoice: Invoice) -> None:
         pass
 
     @abstractmethod
-    def update(self, invoice_id: UUID, invoice: Invoice) -> None:
+    def update(self, invoice: Invoice) -> None:
         pass
 
     @abstractmethod
-    def get(self, invoice_id: UUID, user_id: UUID) -> Invoice | None:
+    def get(self, invoice_id: InvoiceID) -> Invoice | None:
         pass
 
     @abstractmethod
-    def delete(self, invoice_id: UUID, user_id: UUID) -> None:
+    def delete(self, invoice_id: InvoiceID) -> None:
         pass
 
     @abstractmethod

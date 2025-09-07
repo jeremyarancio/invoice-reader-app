@@ -1,13 +1,13 @@
 from uuid import UUID
 from pydantic import BaseModel
 
-from invoice_reader.domain.invoices import InvoiceBase
+from invoice_reader.domain.invoices import InvoiceData
 
 
 class InvoiceCreate(BaseModel):
     client_id: UUID
     currency_id: UUID
-    invoice: InvoiceBase
+    invoice: InvoiceData
 
 
 class InvoiceResponse(BaseModel):
