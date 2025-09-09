@@ -27,9 +27,7 @@ def _is_valid_file_format(filename: str) -> bool:
 class File(BaseModel):
     filename: Annotated[str, BeforeValidator(_is_valid_file_format)]
     file: BinaryIO
-    storage_path: Annotated[
-        str, Field(pattern=r"^s3://.+/.+$")
-    ]  # NOTE: What if not S3?
+    storage_path: str
 
     @property
     def format(self):

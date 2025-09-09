@@ -16,7 +16,7 @@ from invoice_reader.app.exceptions import (
 )
 from invoice_reader.core import storage
 from invoice_reader.infrastructure.parser import parse_invoice
-from invoice_reader.infrastructure.storage import S3
+from invoice_reader.infrastructure.repositories.file import S3
 from invoice_reader.mappers import (
     ClientMapper,
     CurrencyMapper,
@@ -52,8 +52,6 @@ from invoice_reader.utils import logger, s3_utils
 LOGGER = logger.get_logger(__name__)
 
 
-
-
 def get_user_by_email(email: str, session: sqlmodel.Session) -> User | None:
     user_repository = UserRepository(session=session)
     user_model = user_repository.get_user_by_email(email=email)
@@ -64,9 +62,6 @@ def add_user(user: User, session: sqlmodel.Session) -> None:
     user_repository = UserRepository(session=session)
     user_model = UserMapper.map_user_to_model(user=user)
     user_repository.add(user_model=user_model)
-
-
-
 
 
 def add_client(
@@ -112,8 +107,6 @@ def get_paged_clients(
     )
 
 
-
-
 def delete_client(
     client_id: uuid.UUID, user_id: uuid.UUID, session: sqlmodel.Session
 ) -> None:
@@ -124,8 +117,6 @@ def delete_client(
 def delete_user(user_id: uuid.UUID, session: sqlmodel.Session) -> None:
     user_repository = UserRepository(session=session)
     user_repository.delete(user_id=user_id)
-
-
 
 
 def get_currencies(session: sqlmodel.Session):
@@ -173,4 +164,3 @@ def get_user(user_id: uuid.UUID, session: sqlmodel.Session) -> UserResponse:
     return UserMapper.map_user_to_response(
         user=UserMapper.map_user_model_to_user(user_model=user_model)
     )
-

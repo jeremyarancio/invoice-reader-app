@@ -18,32 +18,6 @@ class UserModel(SQLModel, table=True):
     hashed_password: str
 
 
-class InvoiceModel(SQLModel, table=True):
-    __tablename__ = "invoice"
-
-    file_id: uuid.UUID = Field(
-        primary_key=True,
-        description="file_id is required since manually added to store both in S3 and in the DB",
-    )
-    user_id: uuid.UUID = Field(foreign_key="user.user_id")
-    client_id: uuid.UUID = Field(foreign_key="client.client_id")
-    s3_path: str
-    invoice_number: str
-    amount_excluding_tax: float
-    vat: float
-    currency_id: uuid.UUID = Field(foreign_key="currency.id")
-    description: str
-    invoiced_date: datetime.date
-    paid_date: datetime.date | None = None
-    uploaded_date: datetime.date | None = Field(default_factory=datetime.datetime.now)
-    last_updated_date: datetime.date | None = Field(
-        default_factory=datetime.datetime.now
-    )
-
-    client: "ClientModel" = Relationship()
-    currency: "CurrencyModel" = Relationship()
-
-
 class ClientModel(SQLModel, table=True):
     __tablename__ = "client"
 

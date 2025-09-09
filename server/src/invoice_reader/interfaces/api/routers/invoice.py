@@ -1,5 +1,5 @@
 from uuid import UUID
-from typing import TypeVar, Generic, Annotated
+from typing import Annotated
 
 import sqlmodel
 from fastapi import APIRouter, Depends, File, Form, Query, Response, UploadFile, status
@@ -12,10 +12,18 @@ from invoice_reader.interfaces.dependencies.infrastructure import (
     get_invoice_repository,
 )
 from invoice_reader.interfaces.dependencies.auth import get_current_user_id
-from invoice_reader.interfaces.schemas import InvoiceCreate
-from invoice_reader.services.interfaces import IFileRepository, IInvoiceRepository
+from invoice_reader.interfaces.schemas import (
+    InvoiceCreate,
+    InvoiceResponse,
+    PagedInvoiceResponse,
+    InvoiceUpdate,
+)
+from invoice_reader.services.interfaces.repositories import (
+    IFileRepository,
+    IInvoiceRepository,
+)
 from invoice_reader.services.invoice import InvoiceService
-from invoice_reader.domain.invoices import InvoiceData
+from invoice_reader.domain.invoices import InvoiceData, InvoiceID, Invoice
 
 router = APIRouter(
     prefix="/v1/invoices",
@@ -68,7 +76,7 @@ def add_invoice(
         paid_date=data.invoice.paid_date,
         currency=data.invoice.currency,
     )
-    InvoiceService.add_invoice(
+    InvoiceService.upload_invoice(
         user_id=user_id,
         client_id=data.client_id,
         invoice_data=invoice_data,
@@ -106,75 +114,81 @@ def extract_invoice(
 
 @router.get("/{file_id}")
 def get_invoice(
-    file_id: uuid.UUID,
-    session: Annotated[sqlmodel.Session, Depends(db.get_session)],
-    user_id: Annotated[uuid.UUID, Depends(auth.get_current_user_id)],
+    file_id: InvoiceID,
+    user_id: Annotated[UUID, Depends(get_current_user_id)],
+    invoice_repository: Annotated[IInvoiceRepository, Depends(get_invoice_repository)],
 ) -> InvoiceResponse:
-    try:
-        invoice = presenter.get_invoice(
-            user_id=user_id, file_id=file_id, session=session
-        )
-        return invoice
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Uncaught exception {str(e)}"
-        ) from e
+    invoice = InvoiceService.get_invoice(
+        invoice_id=file_id, invoice_repository=invoice_repository
+    )
+    return InvoiceResponse(
+        invoice_id=invoice.id_,
+        client_id=invoice.client_id,
+        s3_path=invoice.file.storage_path,
+        currency_id=invoice.data.currency,  # TODO: Migrate to Enum
+        data=invoice.data,
+    )
 
 
 @router.get("/")
 def get_invoices(
-    session: Annotated[sqlmodel.Session, Depends(db.get_session)],
-    user_id: Annotated[uuid.UUID, Depends(auth.get_current_user_id)],
-    page: int = Query(1, ge=1),
-    per_page: int = Query(settings.PER_PAGE, ge=1),
+    user_id: Annotated[UUID, Depends(get_current_user_id)],
+    invoice_repository: Annotated[IInvoiceRepository, Depends(get_invoice_repository)],
+    page: int = Query(default=1, ge=1),
+    per_page: int = Query(default=10, ge=1),
 ) -> PagedInvoiceResponse:
-    try:
-        paged_invoices = presenter.get_paged_invoices(
-            user_id=user_id, session=session, page=page, per_page=per_page
-        )
-        return paged_invoices
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)) from e
+    paged_invoices = InvoiceService.get_paged_invoices(
+        user_id=user_id,
+        invoice_repository=invoice_repository,
+        page=page,
+        per_page=per_page,
+    )
+    return PagedInvoiceResponse(
+        page=page,
+        per_page=per_page,
+        total=len(paged_invoices),
+        data=[
+            InvoiceResponse(
+                invoice_id=invoice.id_,
+                client_id=invoice.client_id,
+                s3_path=invoice.file.storage_path,
+                currency_id=invoice.data.currency,  # TODO: Migrate to Enum
+                data=invoice.data,
+            )
+            for invoice in paged_invoices
+        ],
+    )
 
 
-@router.delete("/{file_id}")
+@router.delete("/{file_id}", dependencies=[Depends(get_current_user_id)])
 def delete_invoice(
-    file_id: uuid.UUID,
-    session: Annotated[sqlmodel.Session, Depends(db.get_session)],
-    user_id: Annotated[uuid.UUID, Depends(auth.get_current_user_id)],
+    file_id: InvoiceID,
+    invoice_repository: Annotated[IInvoiceRepository, Depends(get_invoice_repository)],
+    file_repository: Annotated[IFileRepository, Depends(get_file_repository)],
 ) -> Response:
-    try:
-        presenter.delete_invoice(file_id=file_id, user_id=user_id, session=session)
-        return Response(content="Invoice successfully deleted.", status_code=204)
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)) from e
+    InvoiceService.delete_invoice(
+        invoice_id=file_id,
+        invoice_repository=invoice_repository,
+        file_repository=file_repository,
+    )
+    return Response(content="Invoice successfully deleted.", status_code=204)
 
 
 @router.put("/{invoice_id}")
 def update_invoice(
-    invoice_id: uuid.UUID,
+    invoice_id: InvoiceID,
     invoice_update: InvoiceUpdate,
-    user_id: Annotated[uuid.UUID, Depends(auth.get_current_user_id)],
-    session: Annotated[sqlmodel.Session, Depends(db.get_session)],
+    user_id: Annotated[UUID, Depends(get_current_user_id)],
+    invoice_repository: Annotated[IInvoiceRepository, Depends(get_invoice_repository)],
 ) -> Response:
-    try:
-        presenter.update_invoice(
-            user_id=user_id,
-            invoice_update=invoice_update,
-            invoice_id=invoice_id,
-            session=session,
-        )
-        return Response(status_code=204)
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)) from e
+    InvoiceService.update_invoice(
+        user_id=user_id,
+        invoice_id=invoice_id,
+        client_id=invoice_update.client_id,
+        invoice_data=invoice_update.data,
+        invoice_repository=invoice_repository,
+    )
+    return Response(content="Invoice successfully updated.", status_code=204)
 
 
 @router.get("/{invoice_id}/url/")

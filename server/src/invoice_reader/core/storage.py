@@ -1,7 +1,7 @@
 from typing import BinaryIO
 
 from invoice_reader.app.exceptions import ROLLBACK, ExistingInvoiceException
-from invoice_reader.infrastructure.storage import S3
+from invoice_reader.infrastructure.repositories.file import S3
 from invoice_reader.mappers import InvoiceMapper
 from invoice_reader.repository import InvoiceRepository
 from invoice_reader.schemas import FileData

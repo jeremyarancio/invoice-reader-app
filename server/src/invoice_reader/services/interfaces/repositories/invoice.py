@@ -8,23 +8,23 @@ from invoice_reader.domain import Invoice, InvoiceID
 class IInvoiceRepository(ABC):
     @abstractmethod
     def add(self, invoice: Invoice) -> None:
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     def update(self, invoice: Invoice) -> None:
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     def get(self, invoice_id: InvoiceID) -> Invoice | None:
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     def delete(self, invoice_id: InvoiceID) -> None:
-        pass
+        raise NotImplementedError
 
     @abstractmethod
-    def get_all(self, user_id: UUID) -> Sequence[Invoice]:
-        pass
+    def get_all(self, user_id: UUID) -> list[Invoice]:
+        raise NotImplementedError
 
     @abstractmethod
     def get_by_invoice_number(
@@ -32,4 +32,4 @@ class IInvoiceRepository(ABC):
         invoice_number: str,
         user_id: UUID,
     ) -> Invoice | None:
-        pass
+        raise NotImplementedError

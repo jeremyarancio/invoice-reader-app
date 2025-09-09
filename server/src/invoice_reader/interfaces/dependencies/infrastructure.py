@@ -1,4 +1,4 @@
-from invoice_reader.services.interfaces import IFileRepository, IInvoiceRepository
+from invoice_reader.services.interfaces.repositories import IFileRepository, IInvoiceRepository
 
 
 def get_file_repository() -> IFileRepository:

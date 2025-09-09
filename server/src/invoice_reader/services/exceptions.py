@@ -67,3 +67,25 @@ INVALID_EXTRACTED_DATA_EXCEPTION = HTTPException(
     status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
     detail="Issue with parsing the document.",
 )
+
+
+class CustomException(Exception):
+    """Base exception with status code support"""
+
+    def __init__(self, message: str, status_code: int = 500):
+        self.message = message
+        self.status_code = status_code
+
+
+class ExistingEntityException(CustomException):
+    def __init__(self, message: str):
+        super().__init__(message, status_code=409)
+
+
+class RollbackException(CustomException):
+    pass
+
+
+class EntityNotFoundException(CustomException):
+    def __init__(self, message: str):
+        super().__init__(message, status_code=404)

@@ -5,7 +5,7 @@ from typing import Sequence
 from invoice_reader.domain import User
 
 
-class UserRepositoryPort(ABC):
+class IUserRepository(ABC):
     @abstractmethod
     def add(
         self,

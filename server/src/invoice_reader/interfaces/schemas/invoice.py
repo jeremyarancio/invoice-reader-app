@@ -1,7 +1,7 @@
 from uuid import UUID
 from pydantic import BaseModel
 
-from invoice_reader.domain.invoices import InvoiceData
+from invoice_reader.domain.invoices import InvoiceData, InvoiceID
 
 
 class InvoiceCreate(BaseModel):
@@ -11,11 +11,11 @@ class InvoiceCreate(BaseModel):
 
 
 class InvoiceResponse(BaseModel):
-    invoice_id: UUID
+    invoice_id: InvoiceID
     client_id: UUID
     s3_path: str
     currency_id: UUID
-    data: InvoiceBase
+    data: InvoiceData
 
 
 class PagedInvoiceResponse(BaseModel):
@@ -25,6 +25,6 @@ class PagedInvoiceResponse(BaseModel):
     data: list[InvoiceResponse]
 
 
-class InvoiceUpdate(InvoiceBase):
-    currency_id: UUID
+class InvoiceUpdate(InvoiceResponse):
     client_id: UUID
+    data: InvoiceData
