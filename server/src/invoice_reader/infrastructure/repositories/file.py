@@ -1,8 +1,8 @@
 import boto3
 from botocore.config import Config
 
-from invoice_reader.services.interfaces.repositories import IFileRepository
 from invoice_reader.domain import File
+from invoice_reader.services.interfaces.repositories import IFileRepository
 
 
 class FileRepository(IFileRepository):

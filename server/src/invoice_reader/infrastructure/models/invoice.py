@@ -1,7 +1,7 @@
-from uuid import UUID
 from datetime import date
+from uuid import UUID
 
-from sqlmodel import Field, Relationship, SQLModel
+from sqlmodel import Field, SQLModel
 
 from invoice_reader.domain.invoices import Currency, InvoiceID
 

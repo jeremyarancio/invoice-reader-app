@@ -12,8 +12,8 @@ from prometheus_fastapi_instrumentator import Instrumentator
 from invoice_reader import settings
 from invoice_reader.interfaces.api.routers import (
     client_router,
-    user_router,
     invoice_router,
+    user_router,
 )
 from invoice_reader.utils import logger
 
@@ -51,9 +51,7 @@ def http_exception_handler(request: Request, exc: HTTPException):
 async def global_exception_handler(request: Request, exc: Exception):
     # Get root cause
     root_cause = str(exc)
-    traceback_str = "".join(
-        traceback.format_exception(type(exc), exc, exc.__traceback__)
-    )
+    traceback_str = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
 
     # For production, log the full traceback but don't return it
     LOGGER.error(f"ERROR: {traceback_str}")  # Log to your system

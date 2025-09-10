@@ -1,38 +1,30 @@
 from abc import ABC, abstractmethod
 from uuid import UUID
-from typing import Sequence
 
-from invoice_reader.domain import Client
+from invoice_reader.domain.clients import Client, ClientID
 
 
 class IClientRepository(ABC):
     @abstractmethod
-    def add(
-        self,
-        user_id: UUID,
-    ) -> None:
-        pass
+    def add(self, client: Client) -> None:
+        raise NotImplementedError
 
     @abstractmethod
-    def update(self, client_id: UUID, client: Client) -> None:
-        pass
+    def update(self, client: Client) -> None:
+        raise NotImplementedError
 
     @abstractmethod
-    def get(self, client_id: UUID, user_id: UUID) -> Client | None:
-        pass
+    def get(self, client_id: ClientID) -> Client | None:
+        raise NotImplementedError
 
     @abstractmethod
-    def delete(self, client_id: UUID, user_id: UUID) -> None:
-        pass
+    def delete(self, client_id: ClientID) -> None:
+        raise NotImplementedError
 
     @abstractmethod
-    def get_all(self, user_id: UUID) -> Sequence[Client]:
-        pass
+    def get_all(self, user_id: UUID) -> list[Client]:
+        raise NotImplementedError
 
     @abstractmethod
-    def get_by_client_number(
-        self,
-        client_number: str,
-        user_id: UUID,
-    ) -> Client | None:
-        pass
+    def get_by_name(self, user_id: UUID, client_name: str) -> Client | None:
+        raise NotImplementedError

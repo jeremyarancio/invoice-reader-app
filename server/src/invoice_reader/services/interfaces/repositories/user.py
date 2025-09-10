@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
-from uuid import UUID
 from typing import Sequence
+from uuid import UUID
 
 from invoice_reader.domain import User
 

@@ -1,20 +1,21 @@
 from uuid import UUID
+
 from pydantic import BaseModel
 
-from invoice_reader.domain.invoices import InvoiceData, InvoiceID
+from invoice_reader.domain.invoices import Currency, InvoiceData, InvoiceID
 
 
 class InvoiceCreate(BaseModel):
     client_id: UUID
-    currency_id: UUID
+    currency: Currency
     invoice: InvoiceData
 
 
 class InvoiceResponse(BaseModel):
     invoice_id: InvoiceID
     client_id: UUID
-    s3_path: str
-    currency_id: UUID
+    storage_path: str
+    currency: Currency
     data: InvoiceData
 
 

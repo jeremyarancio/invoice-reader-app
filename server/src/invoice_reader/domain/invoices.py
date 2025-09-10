@@ -1,11 +1,10 @@
-from enum import StrEnum
 import os
-from uuid import UUID, uuid4
 from datetime import date
+from enum import StrEnum
 from typing import Annotated, BinaryIO
+from uuid import UUID, uuid4
 
-from pydantic import BaseModel, Field, BeforeValidator
-
+from pydantic import BaseModel, BeforeValidator, Field
 
 ACCEPTED_FILE_FORMATS = [".pdf"]
 
@@ -51,7 +50,7 @@ class InvoiceData(BaseModel):
 
 
 class Invoice(BaseModel):
-    id_: InvoiceID = Field(default_factory=uuid4)
+    id_: InvoiceID = Field(default_factory=InvoiceID.create)
     client_id: UUID
     user_id: UUID
     storage_path: str

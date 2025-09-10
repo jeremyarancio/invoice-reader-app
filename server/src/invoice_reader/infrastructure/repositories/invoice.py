@@ -2,9 +2,9 @@ from uuid import UUID
 
 from sqlmodel import Session, select
 
-from invoice_reader.services.interfaces.repositories import IInvoiceRepository
-from invoice_reader.domain import Invoice, InvoiceID, InvoiceData
+from invoice_reader.domain import Invoice, InvoiceData, InvoiceID
 from invoice_reader.infrastructure.models import InvoiceModel
+from invoice_reader.services.interfaces.repositories import IInvoiceRepository
 
 
 class SQLModelInvoiceRepository(IInvoiceRepository):
@@ -79,9 +79,7 @@ class SQLModelInvoiceRepository(IInvoiceRepository):
             for invoice_model in invoice_models
         ]
 
-    def get_by_invoice_number(
-        self, invoice_number: str, user_id: UUID
-    ) -> Invoice | None:
+    def get_by_invoice_number(self, invoice_number: str, user_id: UUID) -> Invoice | None:
         invoice_model = self.session.exec(
             select(InvoiceModel).where(
                 InvoiceModel.invoice_number == invoice_number,

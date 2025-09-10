@@ -1,17 +1,18 @@
-from uuid import UUID
 from typing import Annotated
+from uuid import UUID
 
-import sqlmodel
 from fastapi import APIRouter, Depends, File, Form, Query, Response, UploadFile, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import HTTPException
 from pydantic import BaseModel, ValidationError
 
+from invoice_reader.domain.invoices import InvoiceData, InvoiceID, InvoiceUpdate
+from invoice_reader.domain.parser import InvoiceExtraction
+from invoice_reader.interfaces.dependencies.auth import get_current_user_id
 from invoice_reader.interfaces.dependencies.infrastructure import (
     get_file_repository,
     get_invoice_repository,
 )
-from invoice_reader.interfaces.dependencies.auth import get_current_user_id
 from invoice_reader.interfaces.schemas import (
     InvoiceCreate,
     InvoiceResponse,
@@ -22,7 +23,6 @@ from invoice_reader.services.interfaces.repositories import (
     IInvoiceRepository,
 )
 from invoice_reader.services.invoice import InvoiceService
-from invoice_reader.domain.invoices import InvoiceData, InvoiceID, InvoiceUpdate
 
 router = APIRouter(
     prefix="/v1/invoices",
@@ -75,7 +75,7 @@ def add_invoice(
         paid_date=data.invoice.paid_date,
         currency=data.invoice.currency,
     )
-    InvoiceService.upload_invoice(
+    InvoiceService.add_invoice(
         user_id=user_id,
         client_id=data.client_id,
         invoice_data=invoice_data,
@@ -90,41 +90,29 @@ def add_invoice(
     )
 
 
-@router.post("/extract/")
+@router.post("/extract/", dependencies=[Depends(get_current_user_id)])
 def extract_invoice(
     upload_file: Annotated[UploadFile, File()],
-    user_id: Annotated[uuid.UUID, Depends(get_current_user_id)],
 ) -> InvoiceExtraction:
-    if upload_file.content_type != "application/pdf":
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Only PDF files are allowed for now.",
-        )
-    try:
-        extraction = presenter.extract_invoice(
-            file=upload_file.file,
-        )
-        return extraction
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)) from e
+    extraction = InvoiceService.extract_invoice(
+        file=upload_file.file,
+    )
+    return extraction
 
 
-@router.get("/{file_id}")
+@router.get("/{invoice_id}", dependencies=[Depends(get_current_user_id)])
 def get_invoice(
-    file_id: InvoiceID,
-    user_id: Annotated[UUID, Depends(get_current_user_id)],
+    invoice_id: InvoiceID,
     invoice_repository: Annotated[IInvoiceRepository, Depends(get_invoice_repository)],
 ) -> InvoiceResponse:
     invoice = InvoiceService.get_invoice(
-        invoice_id=file_id, invoice_repository=invoice_repository
+        invoice_id=invoice_id, invoice_repository=invoice_repository
     )
     return InvoiceResponse(
         invoice_id=invoice.id_,
         client_id=invoice.client_id,
-        s3_path=invoice.file.storage_path,
-        currency_id=invoice.data.currency,  # TODO: Migrate to Enum
+        storage_path=invoice.storage_path,
+        currency=invoice.data.currency,
         data=invoice.data,
     )
 
@@ -150,8 +138,8 @@ def get_invoices(
             InvoiceResponse(
                 invoice_id=invoice.id_,
                 client_id=invoice.client_id,
-                s3_path=invoice.file.storage_path,
-                currency_id=invoice.data.currency,  # TODO: Migrate to Enum
+                storage_path=invoice.storage_path,
+                currency=invoice.data.currency,
                 data=invoice.data,
             )
             for invoice in paged_invoices
@@ -189,20 +177,15 @@ def update_invoice(
     return Response(content="Invoice successfully updated.", status_code=204)
 
 
-@router.get("/{invoice_id}/url/")
+@router.get("/{invoice_id}/url/", dependencies=[Depends(get_current_user_id)])
 def get_invoice_url(
-    invoice_id: uuid.UUID,
-    session: Annotated[sqlmodel.Session, Depends(db.get_session)],
-    user_id: Annotated[uuid.UUID, Depends(auth.get_current_user_id)],
+    invoice_id: InvoiceID,
+    file_repository: Annotated[IFileRepository, Depends(get_file_repository)],
+    invoice_repository: Annotated[IInvoiceRepository, Depends(get_invoice_repository)],
 ) -> str:
-    try:
-        url = presenter.get_invoice_url(
-            invoice_id=invoice_id,
-            user_id=user_id,
-            session=session,
-        )
-        return url
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)) from e
+    url = InvoiceService.get_invoice_url(
+        invoice_id=invoice_id,
+        file_repository=file_repository,
+        invoice_repository=invoice_repository,
+    )
+    return url

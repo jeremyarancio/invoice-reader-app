@@ -1,21 +1,18 @@
-import uuid
 from typing import Annotated
+from uuid import UUID
 
-import sqlmodel
 from fastapi import APIRouter, Depends, Query, Response
-from fastapi.exceptions import HTTPException
 
-from invoice_reader import db, presenter, settings
-from invoice_reader.app import auth
-from invoice_reader.schemas.clients import (
+from invoice_reader.domain.clients import BaseClient, ClientID, ClientUpdate
+from invoice_reader.interfaces.dependencies.auth import get_current_user_id
+from invoice_reader.interfaces.dependencies.infrastructure import get_client_repository
+from invoice_reader.interfaces.schemas.client import (
     ClientCreate,
     ClientResponse,
-    ClientUpdate,
     PagedClientResponse,
 )
-from invoice_reader.utils.logger import get_logger
-
-LOGGER = get_logger(__name__)
+from invoice_reader.services.client import ClientService
+from invoice_reader.services.interfaces.repositories import IClientRepository
 
 router = APIRouter(
     prefix="/v1/clients",
@@ -25,98 +22,94 @@ router = APIRouter(
 
 @router.get("/")
 def get_clients(
-    session: Annotated[sqlmodel.Session, Depends(db.get_session)],
-    user_id: Annotated[uuid.UUID, Depends(auth.get_current_user_id)],
+    user_id: Annotated[UUID, Depends(get_current_user_id)],
+    client_repository: Annotated[IClientRepository, Depends(get_client_repository)],
     page: int = Query(1, ge=1),
-    per_page: int = Query(settings.PER_PAGE, ge=1),
+    per_page: int = Query(10, ge=1),
 ) -> PagedClientResponse:
-    try:
-        paged_client_response = presenter.get_paged_clients(
-            user_id=user_id,
-            session=session,
-            page=page,
-            per_page=per_page,
-        )
-        return paged_client_response
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=str(e),
-        ) from e
+    clients = ClientService.get_paged_clients(
+        user_id=user_id,
+        client_repository=client_repository,
+        page=page,
+        per_page=per_page,
+    )
+    return PagedClientResponse(
+        total=len(clients),
+        page=page,
+        per_page=per_page,
+        data=[
+            ClientResponse(
+                client_name=client.client_name,
+                city=client.city,
+                country=client.country,
+                street_address=client.street_address,
+                street_number=client.street_number,
+                zipcode=client.zipcode,
+            )
+            for client in clients
+        ],
+    )
 
 
 @router.get("/{client_id}")
 def get_client(
-    client_id: uuid.UUID,
-    session: Annotated[sqlmodel.Session, Depends(db.get_session)],
-    user_id: Annotated[uuid.UUID, Depends(auth.get_current_user_id)],
+    client_id: ClientID,
+    client_repository: Annotated[IClientRepository, Depends(get_client_repository)],
 ) -> ClientResponse:
-    try:
-        client = presenter.get_client(
-            user_id=user_id, client_id=client_id, session=session
-        )
-        return client
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Uncaught exception {str(e)}"
-        ) from e
+    client = ClientService.get_client(client_id=client_id, client_repository=client_repository)
+    return ClientResponse(
+        client_name=client.client_name,
+        city=client.city,
+        country=client.country,
+        street_address=client.street_address,
+        street_number=client.street_number,
+        zipcode=client.zipcode,
+    )
 
 
 @router.post("/")
 def add_client(
     client_create: ClientCreate,
-    session: Annotated[sqlmodel.Session, Depends(db.get_session)],
-    user_id: Annotated[uuid.UUID, Depends(auth.get_current_user_id)],
+    user_id: Annotated[UUID, Depends(get_current_user_id)],
+    client_repository: Annotated[IClientRepository, Depends(get_client_repository)],
 ) -> Response:
-    try:
-        presenter.add_client(
-            user_id=user_id, client_create=client_create, session=session
-        )
-        return Response(
-            content="New client added to the database.",
-            status_code=201,
-        )
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)) from e
+    client_data = BaseClient(
+        client_name=client_create.client_name,
+        street_number=client_create.street_number,
+        street_address=client_create.street_address,
+        zipcode=client_create.zipcode,
+        city=client_create.city,
+        country=client_create.country,
+    )
+    ClientService.add_client(
+        user_id=user_id, client_data=client_data, client_repository=client_repository
+    )
+    return Response(
+        content="New client added to the database.",
+        status_code=201,
+    )
 
 
-@router.delete("/{client_id}")
+@router.delete("/{client_id}", dependencies=[Depends(get_current_user_id)])
 def delete_client(
-    client_id: uuid.UUID,
-    session: Annotated[sqlmodel.Session, Depends(db.get_session)],
-    user_id: Annotated[uuid.UUID, Depends(auth.get_current_user_id)],
+    client_id: ClientID,
+    client_repository: Annotated[IClientRepository, Depends(get_client_repository)],
 ) -> Response:
-    try:
-        presenter.delete_client(client_id=client_id, user_id=user_id, session=session)
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)) from e
+    ClientService.delete_client(client_id=client_id, client_repository=client_repository)
     return Response(status_code=204)
 
 
 @router.put("/{client_id}")
 def update_client(
-    client_id: uuid.UUID,
+    user_id: UUID,
+    client_id: ClientID,
     client_update: ClientUpdate,
-    session: Annotated[sqlmodel.Session, Depends(db.get_session)],
-    user_id: Annotated[uuid.UUID, Depends(auth.get_current_user_id)],
+    client_repository: Annotated[IClientRepository, Depends(get_client_repository)],
 ) -> Response:
-    try:
-        presenter.update_client(
-            client_id=client_id,
-            client_update=client_update,
-            session=session,
-            user_id=user_id,
-        )
-        return Response(status_code=204)
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)) from e
+    ClientService.update_client(
+        user_id=user_id,
+        client_id=client_id,
+        client_update=client_update,
+        client_repository=client_repository,
+    )
+    return Response(status_code=204)
