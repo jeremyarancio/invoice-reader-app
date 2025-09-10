@@ -16,14 +16,13 @@ from invoice_reader.interfaces.schemas import (
     InvoiceCreate,
     InvoiceResponse,
     PagedInvoiceResponse,
-    InvoiceUpdate,
 )
 from invoice_reader.services.interfaces.repositories import (
     IFileRepository,
     IInvoiceRepository,
 )
 from invoice_reader.services.invoice import InvoiceService
-from invoice_reader.domain.invoices import InvoiceData, InvoiceID, Invoice
+from invoice_reader.domain.invoices import InvoiceData, InvoiceID, InvoiceUpdate
 
 router = APIRouter(
     prefix="/v1/invoices",
@@ -184,8 +183,7 @@ def update_invoice(
     InvoiceService.update_invoice(
         user_id=user_id,
         invoice_id=invoice_id,
-        client_id=invoice_update.client_id,
-        invoice_data=invoice_update.data,
+        invoice_update=invoice_update,
         invoice_repository=invoice_repository,
     )
     return Response(content="Invoice successfully updated.", status_code=204)

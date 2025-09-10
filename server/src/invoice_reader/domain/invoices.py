@@ -35,7 +35,9 @@ class File(BaseModel):
 
 
 class InvoiceID(UUID):
-    pass
+    @classmethod
+    def create(cls) -> "InvoiceID":
+        return cls(uuid4().hex)
 
 
 class InvoiceData(BaseModel):
@@ -52,5 +54,9 @@ class Invoice(BaseModel):
     id_: InvoiceID = Field(default_factory=uuid4)
     client_id: UUID
     user_id: UUID
-    file: File
+    storage_path: str
     data: InvoiceData
+
+
+class InvoiceUpdate(InvoiceData):
+    client_id: UUID

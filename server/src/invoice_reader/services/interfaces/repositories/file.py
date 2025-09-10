@@ -9,13 +9,13 @@ class IFileRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def delete(self, file: File) -> None:
+    def delete(self, storage_path: str) -> None:
         raise NotImplementedError
 
     @abstractmethod
-    def get_url(self, file: File) -> str:
+    def get_url(self, storage_path: str) -> str:
         raise NotImplementedError
 
     @abstractmethod
-    def create_storage_path(self, filename: str) -> str:
+    def create_storage_path(self, initial_path: str) -> str:
         raise NotImplementedError

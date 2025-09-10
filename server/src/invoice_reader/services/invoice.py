@@ -1,8 +1,8 @@
 from uuid import UUID
 from typing import BinaryIO
 
-from invoice_reader import settings
 from invoice_reader.domain import InvoiceData, Invoice, File, InvoiceID
+from invoice_reader.domain.invoices import InvoiceUpdate
 from invoice_reader.services.interfaces.repositories import (
     IInvoiceRepository,
     IFileRepository,
@@ -38,16 +38,20 @@ class InvoiceService:
             raise ExistingEntityException(
                 message="Invoice with this number already exists."
             )
-        storage_path = file_repository.create_storage_path(filename=filename)
+
+        invoice_id = InvoiceID.create()
+        initial_path = f"{user_id}/{invoice_id}.{filename.split('.')[-1]}"
+        storage_path = file_repository.create_storage_path(initial_path=initial_path)
         file = File(
             file=file_bin,
             filename=filename,
             storage_path=storage_path,
         )
         invoice = Invoice(
+            id_=invoice_id,
             user_id=user_id,
             client_id=client_id,
-            file=file,
+            storage_path=storage_path,
             data=invoice_data,
         )
         try:
@@ -69,7 +73,7 @@ class InvoiceService:
         error: Exception,
     ) -> None:
         try:
-            file_repository.delete(file=invoice.file)
+            file_repository.delete(storage_path=invoice.storage_path)
             invoice_repository.delete(invoice_id=invoice.id_)
             raise RollbackException(
                 message=f"Invoice not properly uploaded. Rollback successful. Error: {error}"
@@ -77,23 +81,24 @@ class InvoiceService:
         except Exception as e:
             raise RollbackException(message=f"Rollback failed. Error: {e}") from e
 
-    @staticmethod
-    def _rollback_deletion(
-        invoice: Invoice,
-        file_repository: IFileRepository,
-        invoice_repository: IInvoiceRepository,
-        error: Exception,
-    ) -> None:
-        try:
-            invoice_repository.add(invoice=invoice)
-            file_repository.store(file=invoice.file)
-            raise RollbackException(
-                message=f"Invoice not properly deleted. Rollback successful. Error: {error}"
-            )
-        except Exception as e:
-            raise RollbackException(
-                message=f"Rollback failed. Error: {e}. Check invoice id {invoice.id_} and file storage path {invoice.file.storage_path} if nothing is missing."
-            ) from e
+    # @staticmethod
+    # def _rollback_deletion(
+    #     invoice: Invoice,
+    #     file: File,
+    #     file_repository: IFileRepository,
+    #     invoice_repository: IInvoiceRepository,
+    #     error: Exception,
+    # ) -> None:
+    #     try:
+    #         invoice_repository.add(invoice=invoice)
+    #         file_repository.store(file=file)
+    #         raise RollbackException(
+    #             message=f"Invoice not properly deleted. Rollback successful. Error: {error}"
+    #         )
+    #     except Exception as e:
+    #         raise RollbackException(
+    #             message=f"Rollback failed. Error: {e}. Check invoice id {invoice.id_} and file storage path {invoice.file.storage_path} if nothing is missing."
+    #         ) from e
 
     @staticmethod
     def get_invoice(
@@ -124,30 +129,22 @@ class InvoiceService:
         invoice_repository: IInvoiceRepository,
         file_repository: IFileRepository,
     ) -> None:
-        try:
-            # DB
-            invoice = invoice_repository.get(invoice_id=invoice_id)
-            if not invoice:
-                raise EntityNotFoundException(
-                    message="Invoice not found. Deletion cancelled."
-                )
-            invoice_repository.delete(invoice_id=invoice_id)
-            # Storage
-            file_repository.delete(file=invoice.file)
-        except Exception as e:
-            cls._rollback_deletion(
-                invoice=invoice,  # NOTE: Potentially an issue here!
-                invoice_repository=invoice_repository,
-                file_repository=file_repository,
-                error=e,
+        # TODO: Think about rollback
+        # DB
+        invoice = invoice_repository.get(invoice_id=invoice_id)
+        if not invoice:
+            raise EntityNotFoundException(
+                message="Invoice not found. Deletion cancelled."
             )
+        invoice_repository.delete(invoice_id=invoice_id)
+        # Storage
+        file_repository.delete(storage_path=invoice.storage_path)
 
     @staticmethod
     def update_invoice(
         user_id: UUID,
         invoice_id: InvoiceID,
-        client_id: UUID,
-        invoice_data: InvoiceData,
+        invoice_update: InvoiceUpdate,
         invoice_repository: IInvoiceRepository,
     ) -> None:
         # Check for duplicate invoice numbers (excluding the current invoice)
@@ -157,42 +154,54 @@ class InvoiceService:
                 message=f"No existing invoices found for user {user_id}."
             )
         if any(
-            invoice.data.invoice_number == invoice_data.invoice_number
+            invoice.data.invoice_number == invoice_update.invoice_number
             and invoice.id_ != invoice_id
             for invoice in existing_invoices
         ):
             raise ExistingEntityException(
-                message=f"Invoice with number {invoice_data.invoice_number} already exists."
+                message=f"Invoice with number {invoice_update.invoice_number} already exists."
             )
 
         # Update invoice
-        invoice = invoice_repository.get(invoice_id=invoice_id)
-        invoice_repository.update(
-            invoice=invoice,
-            values_to_update=InvoiceMapper.map_invoice_update_for_model(
-                invoice_update=invoice_update
-            ),
+        invoice = next(
+            (invoice for invoice in existing_invoices if invoice.id_ == invoice_id),
+            None,  # Pick the invoice to update for the already fetched invoices
         )
+        if not invoice:
+            raise EntityNotFoundException(
+                message=f"Invoice with id {invoice_id} not found."
+            )
+        updated_invoice = invoice.model_copy(
+            update={
+                "client_id": invoice_update.client_id,
+                "data": invoice.data.model_copy(
+                    update={
+                        "invoice_number": invoice_update.invoice_number,
+                        "gross_amount": invoice_update.gross_amount,
+                        "vat": invoice_update.vat,
+                        "description": invoice_update.description,
+                        "issued_date": invoice_update.issued_date,
+                        "paid_date": invoice_update.paid_date,
+                        "currency": invoice_update.currency,
+                    }
+                ),
+            },
+        )
+        invoice_repository.update(invoice=updated_invoice)
 
+    @staticmethod
     def get_invoice_url(
-        invoice_id: uuid.UUID, user_id: uuid.UUID, session: sqlmodel.Session
+        invoice_id: InvoiceID,
+        file_repository: IFileRepository,
+        invoice_repository: IInvoiceRepository,
     ) -> str:
-        if not settings.S3_BUCKET_NAME:
-            raise MISSING_ENVIRONMENT_VARIABLE_EXCEPTION
-        s3 = S3.init(bucket=settings.S3_BUCKET_NAME)
-        invoice_repository = InvoiceRepository(session=session)
-        invoice_model = invoice_repository.get(file_id=invoice_id, user_id=user_id)
-        if not invoice_model:
-            raise INVOICE_NOT_FOUND
-        invoice = InvoiceMapper.map_invoice_model_to_invoice(
-            invoice_model=invoice_model
-        )
-        if not invoice.s3_path:
-            raise ValueError(f"s3_path of invoice {invoice_id} not found.")
-        suffix = s3_utils.get_suffix_from_s3_path(s3_path=invoice.s3_path)
-        url = s3.create_presigned_url(suffix=suffix)
+        invoice = invoice_repository.get(invoice_id=invoice_id)
+        if not invoice:
+            raise EntityNotFoundException(message="Invoice not found.")
+        url = file_repository.get_url(storage_path=invoice.storage_path)
         return url
 
+    @staticmethod
     def extract_invoice(
         file: BinaryIO,
     ) -> InvoiceExtraction:

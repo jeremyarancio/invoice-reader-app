@@ -3,20 +3,22 @@ from datetime import date
 
 from sqlmodel import Field, Relationship, SQLModel
 
+from invoice_reader.domain.invoices import Currency, InvoiceID
+
 
 class InvoiceModel(SQLModel, table=True):
-    __tablename__ = "invoice"
+    __tablename__ = "invoice"  # type: ignore
 
-    file_id: UUID = Field(
+    invoice_id: InvoiceID = Field(
         primary_key=True,
     )
     user_id: UUID = Field(foreign_key="user.user_id")
     client_id: UUID = Field(foreign_key="client.client_id")
-    s3_path: str
+    storage_path: str
     invoice_number: str
     amount_excluding_tax: float
-    vat: float
-    currency_id: UUID = Field(foreign_key="currency.id") #TODO: Migrate for currency string directly
+    vat: int
+    currency: Currency
     description: str
     invoiced_date: date
     paid_date: date | None = None

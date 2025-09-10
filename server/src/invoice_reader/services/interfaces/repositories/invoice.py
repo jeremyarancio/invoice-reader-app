@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 from uuid import UUID
-from typing import Sequence
 
 from invoice_reader.domain import Invoice, InvoiceID
 

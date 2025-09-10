@@ -23,8 +23,3 @@ class PagedInvoiceResponse(BaseModel):
     per_page: int
     total: int
     data: list[InvoiceResponse]
-
-
-class InvoiceUpdate(InvoiceResponse):
-    client_id: UUID
-    data: InvoiceData
