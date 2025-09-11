@@ -4,11 +4,7 @@ import sqlmodel
 from fastapi import Depends
 from sqlalchemy.engine import Engine
 
-from invoice_reader.infrastructure.models import (  # noqa: F401 (prevent ruff to delete this line)
-    ClientModel,
-    InvoiceModel,
-    UserModel,
-)
+from invoice_reader.infrastructure.models import *  # noqa: F403
 from invoice_reader.infrastructure.repositories import (
     S3FileRepository,
     SQLModelClientRepository,

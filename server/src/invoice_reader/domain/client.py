@@ -15,7 +15,7 @@ class ClientBase(BaseModel):
     client_name: str
     street_number: int
     street_address: str
-    zipcode: int
+    zipcode: str
     city: str
     country: str
 

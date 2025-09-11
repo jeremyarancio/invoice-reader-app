@@ -20,7 +20,14 @@ class SQLModelUserRepository(IUserRepository):
         self.session.commit()
 
     def update(self, user: User) -> None:
-        return super().update(user)
+        user_model = UserModel(
+            user_id=user.id_,
+            email=user.email,
+            hashed_password=user.hashed_password,
+            is_disabled=user.is_disabled,
+        )
+        self.session.add(user_model)
+        self.session.commit()
 
     def get(self, user_id: UserID) -> User | None:
         user_model = self.session.exec(

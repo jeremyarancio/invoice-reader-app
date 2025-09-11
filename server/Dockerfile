@@ -39,9 +39,8 @@ RUN addgroup --gid $GROUP_ID appuser && \
 ENV PATH="/app/.venv/bin:$PATH"
 
 # 6. Prepare entrypoint
-RUN chmod +x docker/entrypoint.sh
 USER appuser
-ENTRYPOINT ["/app/docker/entrypoint.sh"]
+RUN alembic upgrade head
 
 # Production stage
 FROM base AS prod
