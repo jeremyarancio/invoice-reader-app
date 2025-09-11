@@ -1,4 +1,5 @@
 import traceback
+from contextlib import asynccontextmanager
 
 from fastapi import (
     FastAPI,
@@ -13,16 +14,25 @@ from invoice_reader.interfaces.api.routers import (
     invoice_router,
     user_router,
 )
+from invoice_reader.interfaces.dependencies.repository import create_tables
 from invoice_reader.services.exceptions import CustomException
 from invoice_reader.settings import get_settings
-from invoice_reader.utils import logger
+from invoice_reader.utils.logger import get_logger
 
 settings = get_settings()
 
-LOGGER = logger.get_logger(__name__)
+LOGGER = get_logger(__name__)
 
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Create db tables
+    LOGGER.info("Creating database tables...")
+    create_tables()
+    yield
+
+
+app = FastAPI(lifespan=lifespan, title="Invoice Reader API", version="1.0.0")
 app.include_router(user_router)
 app.include_router(invoice_router)
 app.include_router(client_router)
@@ -41,7 +51,7 @@ app.add_middleware(
 @app.exception_handler(CustomException)
 def http_exception_handler(request: Request, exc: CustomException):
     # Log the status code and error message
-    LOGGER.error("HTTP Error: %s - %s", exc.status_code, exc.message)
+    LOGGER.error("Error: {} - {}", exc.status_code, exc.message)
     # Return the default HTTPException response
     return JSONResponse(
         status_code=exc.status_code,
@@ -56,7 +66,7 @@ async def global_exception_handler(request: Request, exc: Exception):
     traceback_str = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
 
     # For production, log the full traceback but don't return it
-    LOGGER.error(f"ERROR: {traceback_str}")  # Log to your system
+    LOGGER.error("Error: {}", traceback_str)  # Log to your system
 
     return JSONResponse(
         status_code=500,

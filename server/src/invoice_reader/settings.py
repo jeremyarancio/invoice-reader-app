@@ -22,6 +22,7 @@ class Settings(BaseSettings):
 
     presigned_url_expiration: int = 3600
     s3_bucket_name: str
+    s3_region: str = "eu-central-1"
 
     ml_server_url: str = "http://ml-server:5000"
 

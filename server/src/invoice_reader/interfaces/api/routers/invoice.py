@@ -9,7 +9,7 @@ from invoice_reader.domain.invoice import InvoiceBase, InvoiceID, InvoiceUpdate
 from invoice_reader.domain.parser import InvoiceExtraction
 from invoice_reader.domain.user import UserID
 from invoice_reader.interfaces.dependencies.auth import get_current_user_id
-from invoice_reader.interfaces.dependencies.infrastructure import (
+from invoice_reader.interfaces.dependencies.repository import (
     get_file_repository,
     get_invoice_repository,
 )

@@ -5,7 +5,7 @@ from invoice_reader.domain.invoice import File
 from invoice_reader.services.interfaces.repositories import IFileRepository
 
 
-class FileRepository(IFileRepository):
+class S3FileRepository(IFileRepository):
     bucket: str
     region: str
     presigned_url_expiration: int

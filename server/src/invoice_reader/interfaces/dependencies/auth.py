@@ -5,7 +5,7 @@ from fastapi.security import OAuth2PasswordBearer
 
 from invoice_reader.domain.auth import EncodedToken
 from invoice_reader.domain.user import UserID
-from invoice_reader.interfaces.dependencies.infrastructure import get_user_repository
+from invoice_reader.interfaces.dependencies.repository import get_user_repository
 from invoice_reader.services.auth import AuthService
 from invoice_reader.services.exceptions import EntityNotFoundException
 from invoice_reader.services.interfaces.repositories import IUserRepository
@@ -24,4 +24,4 @@ def get_current_user_id(
     user = user_repository.get_by_email(email=payload.email)
     if not user:
         raise EntityNotFoundException(message="User not found.")
-    return user.user_id
+    return user.id_

@@ -21,7 +21,7 @@ class ClientBase(BaseModel):
 
 
 class Client(ClientBase):
-    client_id: ClientID = Field(default_factory=ClientID.create)
+    id_: ClientID = Field(default_factory=ClientID.create)
     user_id: UserID
     total_revenue: float = Field(
         ge=0, default=0

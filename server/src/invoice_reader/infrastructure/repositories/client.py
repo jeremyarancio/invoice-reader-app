@@ -12,7 +12,7 @@ class SQLModelClientRepository(IClientRepository):
 
     def add(self, client: Client) -> None:
         client_model = ClientModel(
-            client_id=client.client_id,
+            client_id=client.id_,
             user_id=client.user_id,
             client_name=client.client_name,
             street_number=client.street_number,
@@ -30,7 +30,7 @@ class SQLModelClientRepository(IClientRepository):
         ).one_or_none()
         if client_model:
             return Client(
-                client_id=client_model.client_id,
+                id_=client_model.client_id,
                 user_id=client_model.user_id,
                 client_name=client_model.client_name,
                 street_number=client_model.street_number,
@@ -57,7 +57,7 @@ class SQLModelClientRepository(IClientRepository):
         ).all()
         return [
             Client(
-                client_id=client_model.client_id,
+                id_=client_model.client_id,
                 user_id=client_model.user_id,
                 client_name=client_model.client_name,
                 street_number=client_model.street_number,
@@ -77,7 +77,7 @@ class SQLModelClientRepository(IClientRepository):
         ).one_or_none()
         if client_model:
             return Client(
-                client_id=client_model.client_id,
+                id_=client_model.client_id,
                 user_id=client_model.user_id,
                 client_name=client_model.client_name,
                 street_number=client_model.street_number,

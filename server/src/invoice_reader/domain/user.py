@@ -10,7 +10,7 @@ class UserID(UUID):
 
 
 class User(BaseModel):
-    user_id: UserID = Field(default_factory=UserID.create)
+    id_: UserID = Field(default_factory=UserID.create)
     email: EmailStr
     is_disabled: bool = False
     hashed_password: str

@@ -6,7 +6,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from invoice_reader.domain.auth import EncodedToken
 from invoice_reader.domain.user import UserID
 from invoice_reader.interfaces.dependencies.auth import get_current_user_id
-from invoice_reader.interfaces.dependencies.infrastructure import get_user_repository
+from invoice_reader.interfaces.dependencies.repository import get_user_repository
 from invoice_reader.interfaces.schemas.auth import AuthToken
 from invoice_reader.interfaces.schemas.user import UserCreate, UserResponse
 from invoice_reader.services.auth import AuthService
@@ -108,6 +108,6 @@ def get_current_user(
 ) -> UserResponse:
     user = UserService.get_user(user_id=user_id, user_repository=user_repository)
     return UserResponse(
-        user_id=user.user_id,
+        user_id=user.id_,
         email=user.email,
     )

@@ -63,15 +63,13 @@ class ClientService:
         if not existing_clients:
             raise EntityNotFoundException(message=f"No existing clients found for user {user_id}.")
         if any(
-            client.client_name == client_update.client_name and client.client_id != client_id
+            client.client_name == client_update.client_name and client.id_ != client_id
             for client in existing_clients
         ):
             raise ExistingEntityException(
                 message=f"Client with name {client_update.client_name} already exists."
             )
-        client = next(
-            (client for client in existing_clients if client.client_id == client_id), None
-        )
+        client = next((client for client in existing_clients if client.id_ == client_id), None)
         if not client:
             raise EntityNotFoundException(message=f"Client with id {client_id} not found.")
         updated_client = client.model_copy(

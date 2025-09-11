@@ -1,4 +1,3 @@
-
 from sqlmodel import Session, select
 
 from invoice_reader.domain.invoice import Invoice, InvoiceID

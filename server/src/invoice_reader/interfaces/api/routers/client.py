@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, Query, Response
 from invoice_reader.domain.client import ClientBase, ClientID, ClientUpdate
 from invoice_reader.domain.user import UserID
 from invoice_reader.interfaces.dependencies.auth import get_current_user_id
-from invoice_reader.interfaces.dependencies.infrastructure import get_client_repository
+from invoice_reader.interfaces.dependencies.repository import get_client_repository
 from invoice_reader.interfaces.schemas.client import (
     ClientCreate,
     ClientResponse,
