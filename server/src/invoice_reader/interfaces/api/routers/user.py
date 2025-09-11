@@ -1,24 +1,21 @@
-import uuid
 from typing import Annotated
 
-import sqlmodel
 from fastapi import APIRouter, Depends, Request, Response
-from fastapi.exceptions import HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 
-from invoice_reader import db, presenter, settings
-from invoice_reader.app import auth
-from invoice_reader.app.exceptions import NO_REFRESH_TOKEN_EXCEPTION
-from invoice_reader.schemas import AuthToken, UserCreate, UserResponse
+from invoice_reader.domain.auth import EncodedToken
+from invoice_reader.domain.user import UserID
+from invoice_reader.interfaces.dependencies.auth import get_current_user_id
+from invoice_reader.interfaces.dependencies.infrastructure import get_user_repository
+from invoice_reader.interfaces.schemas.auth import AuthToken
+from invoice_reader.interfaces.schemas.user import UserCreate, UserResponse
+from invoice_reader.services.auth import AuthService
+from invoice_reader.services.exceptions import AuthenticationException
+from invoice_reader.services.interfaces.repositories import IUserRepository
+from invoice_reader.services.user import UserService
+from invoice_reader.settings import get_settings
 
-COOKIE_CONFIG = {
-    "key": "refresh_token",
-    "httponly": True,
-    "secure": settings.PROTOCOL == "https",
-    "samesite": "none" if settings.PROTOCOL == "https" else "lax",
-    "domain": settings.DOMAIN_NAME,
-}
-
+settings = get_settings()
 
 router = APIRouter(
     prefix="/v1/users",
@@ -29,59 +26,45 @@ router = APIRouter(
 @router.post("/signup/")
 def signup(
     user_create: UserCreate,
-    session: Annotated[sqlmodel.Session, Depends(db.get_session)],
-):
-    auth.register_user(user_create=user_create, session=session)
+    user_repository: Annotated[IUserRepository, Depends(get_user_repository)],
+) -> Response:
+    UserService.register_user(
+        email=user_create.email,
+        password=user_create.password,
+        user_repository=user_repository,
+    )
     return Response(content="User has been added to the database.", status_code=201)
 
 
 @router.post("/signin/")
 def signin(
-    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
-    session: Annotated[sqlmodel.Session, Depends(db.get_session)],
     response: Response,
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+    user_repository: Annotated[IUserRepository, Depends(get_user_repository)],
 ) -> AuthToken:
-    try:
-        user = auth.authenticate_user(
-            email=form_data.username, password=form_data.password, session=session
-        )
-        access_token = auth.create_token(
-            email=user.email,
-            expire=settings.ACCESS_TOKEN_EXPIRE,
-            token_type="access",
-        )
-        refresh_token = auth.create_token(
-            email=user.email,
-            expire=settings.REFRESH_TOKEN_EXPIRE,
-            token_type="refresh",
-        )
-        response.set_cookie(
-            value=refresh_token,
-            expires=settings.REFRESH_TOKEN_EXPIRE,
-            key="refresh_token",
-            httponly=True,
-            secure=settings.PROTOCOL == "https",
-            samesite="none" if settings.PROTOCOL == "https" else "lax",
-            domain=settings.DOMAIN_NAME,
-        )
-        return AuthToken(access_token=access_token, token_type="bearer")
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)) from e
+    access_token, refresh_token = UserService.authenticate_user(
+        email=form_data.username,
+        password=form_data.password,
+        user_repository=user_repository,
+    )
+    response.set_cookie(
+        value=refresh_token,
+        expires=settings.refresh_token_expire,
+        key="refresh_token",
+        httponly=True,
+        secure=settings.protocol == "https",
+        samesite="none" if settings.protocol == "https" else "lax",
+        domain=settings.domain_name,
+    )
+    return AuthToken(access_token=access_token, token_type="bearer")
 
 
 @router.delete("/")
 def delete_user(
-    session: Annotated[sqlmodel.Session, Depends(db.get_session)],
-    user_id: Annotated[uuid.UUID, Depends(auth.get_current_user_id)],
+    user_id: Annotated[UserID, Depends(get_current_user_id)],
+    user_repository: Annotated[IUserRepository, Depends(get_user_repository)],
 ) -> Response:
-    try:
-        presenter.delete_user(user_id=user_id, session=session)
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)) from e
+    UserService.delete(user_id=user_id, user_repository=user_repository)
     return Response(content="User successfully deleted.", status_code=204)
 
 
@@ -89,47 +72,42 @@ def delete_user(
 def refresh(request: Request, response: Response) -> AuthToken:
     refresh_token = request.cookies.get("refresh_token")
     if not refresh_token:
-        raise NO_REFRESH_TOKEN_EXCEPTION
-    try:
-        access_token, refresh_token = auth.refresh_token(token=refresh_token)
-        response.set_cookie(
-            value=refresh_token,
-            expires=settings.REFRESH_TOKEN_EXPIRE,
-            key="refresh_token",
-            httponly=True,
-            secure=settings.PROTOCOL == "https",
-            samesite="none" if settings.PROTOCOL == "https" else "lax",
-            domain=settings.DOMAIN_NAME,
-        )
+        raise AuthenticationException(message="No refresh token found.")
+    access_token, refresh_token = AuthService.refresh_token(
+        token=EncodedToken.convert_str(refresh_token)
+    )
+    response.set_cookie(
+        value=refresh_token,
+        expires=settings.refresh_token_expire,
+        key="refresh_token",
+        httponly=True,
+        secure=settings.protocol == "https",
+        samesite="none" if settings.protocol == "https" else "lax",
+        domain=settings.domain_name,
+    )
 
-        return AuthToken(access_token=access_token, token_type="bearer")
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)) from e
+    return AuthToken(access_token=access_token, token_type="bearer")
 
 
 @router.post("/signout/")
-def signout(response: Response):
+def signout(response: Response) -> Response:
     response.delete_cookie(
         key="refresh_token",
         httponly=True,
-        secure=settings.PROTOCOL == "https",
-        samesite="none" if settings.PROTOCOL == "https" else "lax",
-        domain=settings.DOMAIN_NAME,
+        secure=settings.protocol == "https",
+        samesite="none" if settings.protocol == "https" else "lax",
+        domain=settings.domain_name,
     )
-    return {"message": "User successfully signed out."}
+    return Response(content="User successfully signed out.", status_code=204)
 
 
 @router.get("/me/")
 def get_current_user(
-    session: Annotated[sqlmodel.Session, Depends(db.get_session)],
-    user_id: Annotated[uuid.UUID, Depends(auth.get_current_user_id)],
+    user_id: Annotated[UserID, Depends(get_current_user_id)],
+    user_repository: Annotated[IUserRepository, Depends(get_user_repository)],
 ) -> UserResponse:
-    try:
-        user = presenter.get_user(user_id=user_id, session=session)
-        return user
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)) from e
+    user = UserService.get_user(user_id=user_id, user_repository=user_repository)
+    return UserResponse(
+        user_id=user.user_id,
+        email=user.email,
+    )

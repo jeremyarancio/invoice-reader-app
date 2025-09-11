@@ -1,19 +1,19 @@
 from typing import Annotated
-from uuid import UUID
 
 from fastapi import APIRouter, Depends, File, Form, Query, Response, UploadFile, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import HTTPException
 from pydantic import BaseModel, ValidationError
 
-from invoice_reader.domain.invoices import InvoiceData, InvoiceID, InvoiceUpdate
+from invoice_reader.domain.invoice import InvoiceBase, InvoiceID, InvoiceUpdate
 from invoice_reader.domain.parser import InvoiceExtraction
+from invoice_reader.domain.user import UserID
 from invoice_reader.interfaces.dependencies.auth import get_current_user_id
 from invoice_reader.interfaces.dependencies.infrastructure import (
     get_file_repository,
     get_invoice_repository,
 )
-from invoice_reader.interfaces.schemas import (
+from invoice_reader.interfaces.schemas.invoice import (
     InvoiceCreate,
     InvoiceResponse,
     PagedInvoiceResponse,
@@ -62,11 +62,11 @@ def add_invoice(
         InvoiceCreate,
         Depends(Checker(InvoiceCreate)),
     ],
-    user_id: Annotated[UUID, Depends(get_current_user_id)],
+    user_id: Annotated[UserID, Depends(get_current_user_id)],
     file_repository: Annotated[IFileRepository, Depends(get_file_repository)],
     invoice_repository: Annotated[IInvoiceRepository, Depends(get_invoice_repository)],
 ):
-    invoice_data = InvoiceData(
+    invoice_data = InvoiceBase(
         invoice_number=data.invoice.invoice_number,
         gross_amount=data.invoice.gross_amount,
         vat=data.invoice.vat,
@@ -112,14 +112,21 @@ def get_invoice(
         invoice_id=invoice.id_,
         client_id=invoice.client_id,
         storage_path=invoice.storage_path,
-        currency=invoice.data.currency,
-        data=invoice.data,
+        data=InvoiceBase(
+            invoice_number=invoice.invoice_number,
+            gross_amount=invoice.gross_amount,
+            vat=invoice.vat,
+            description=invoice.description,
+            issued_date=invoice.issued_date,
+            paid_date=invoice.paid_date,
+            currency=invoice.currency,
+        ),
     )
 
 
 @router.get("/")
 def get_invoices(
-    user_id: Annotated[UUID, Depends(get_current_user_id)],
+    user_id: Annotated[UserID, Depends(get_current_user_id)],
     invoice_repository: Annotated[IInvoiceRepository, Depends(get_invoice_repository)],
     page: int = Query(default=1, ge=1),
     per_page: int = Query(default=10, ge=1),
@@ -139,22 +146,29 @@ def get_invoices(
                 invoice_id=invoice.id_,
                 client_id=invoice.client_id,
                 storage_path=invoice.storage_path,
-                currency=invoice.data.currency,
-                data=invoice.data,
+                data=InvoiceBase(
+                    invoice_number=invoice.invoice_number,
+                    gross_amount=invoice.gross_amount,
+                    vat=invoice.vat,
+                    description=invoice.description,
+                    issued_date=invoice.issued_date,
+                    paid_date=invoice.paid_date,
+                    currency=invoice.currency,
+                ),
             )
             for invoice in paged_invoices
         ],
     )
 
 
-@router.delete("/{file_id}", dependencies=[Depends(get_current_user_id)])
+@router.delete("/{invoice_id}", dependencies=[Depends(get_current_user_id)])
 def delete_invoice(
-    file_id: InvoiceID,
+    invoice_id: InvoiceID,
     invoice_repository: Annotated[IInvoiceRepository, Depends(get_invoice_repository)],
     file_repository: Annotated[IFileRepository, Depends(get_file_repository)],
 ) -> Response:
     InvoiceService.delete_invoice(
-        invoice_id=file_id,
+        invoice_id=invoice_id,
         invoice_repository=invoice_repository,
         file_repository=file_repository,
     )
@@ -165,7 +179,7 @@ def delete_invoice(
 def update_invoice(
     invoice_id: InvoiceID,
     invoice_update: InvoiceUpdate,
-    user_id: Annotated[UUID, Depends(get_current_user_id)],
+    user_id: Annotated[UserID, Depends(get_current_user_id)],
     invoice_repository: Annotated[IInvoiceRepository, Depends(get_invoice_repository)],
 ) -> Response:
     InvoiceService.update_invoice(

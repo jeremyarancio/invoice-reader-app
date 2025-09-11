@@ -1,9 +1,9 @@
 from typing import BinaryIO
-from uuid import UUID
 
-from invoice_reader.domain import File, Invoice, InvoiceData, InvoiceID
-from invoice_reader.domain.invoices import InvoiceUpdate
+from invoice_reader.domain.client import ClientID
+from invoice_reader.domain.invoice import File, Invoice, InvoiceBase, InvoiceID, InvoiceUpdate
 from invoice_reader.domain.parser import InvoiceExtraction
+from invoice_reader.domain.user import UserID
 from invoice_reader.services.exceptions import (
     EntityNotFoundException,
     ExistingEntityException,
@@ -24,9 +24,9 @@ class InvoiceService:
         cls,
         file_bin: BinaryIO,
         filename: str,
-        user_id: UUID,
-        client_id: UUID,
-        invoice_data: InvoiceData,
+        user_id: UserID,
+        client_id: ClientID,
+        invoice_data: InvoiceBase,
         file_repository: IFileRepository,
         invoice_repository: IInvoiceRepository,
     ) -> None:
@@ -50,13 +50,13 @@ class InvoiceService:
             user_id=user_id,
             client_id=client_id,
             storage_path=storage_path,
-            data=invoice_data,
+            **invoice_data.model_dump(),
         )
         try:
             file_repository.store(file=file)
             invoice_repository.add(invoice=invoice)
         except Exception as err:
-            cls._rollback_upload(
+            cls._rollback_add(
                 invoice=invoice,
                 invoice_repository=invoice_repository,
                 file_repository=file_repository,
@@ -64,7 +64,7 @@ class InvoiceService:
             )
 
     @staticmethod
-    def _rollback_upload(
+    def _rollback_add(
         invoice: Invoice,
         file_repository: IFileRepository,
         invoice_repository: IInvoiceRepository,
@@ -89,7 +89,7 @@ class InvoiceService:
 
     @staticmethod
     def get_paged_invoices(
-        user_id: UUID, invoice_repository: IInvoiceRepository, page: int, per_page: int
+        user_id: UserID, invoice_repository: IInvoiceRepository, page: int, per_page: int
     ) -> list[Invoice]:
         # NOTE: Can also perfom the pagination at the DB level for better performance
         invoices = invoice_repository.get_all(user_id=user_id)
@@ -113,7 +113,7 @@ class InvoiceService:
 
     @staticmethod
     def update_invoice(
-        user_id: UUID,
+        user_id: UserID,
         invoice_id: InvoiceID,
         invoice_update: InvoiceUpdate,
         invoice_repository: IInvoiceRepository,
@@ -123,8 +123,7 @@ class InvoiceService:
         if not existing_invoices:
             raise EntityNotFoundException(message=f"No existing invoices found for user {user_id}.")
         if any(
-            invoice.data.invoice_number == invoice_update.invoice_number
-            and invoice.id_ != invoice_id
+            invoice.invoice_number == invoice_update.invoice_number and invoice.id_ != invoice_id
             for invoice in existing_invoices
         ):
             raise ExistingEntityException(
@@ -141,18 +140,14 @@ class InvoiceService:
         updated_invoice = invoice.model_copy(
             update={
                 "client_id": invoice_update.client_id,
-                "data": invoice.data.model_copy(
-                    update={
-                        "invoice_number": invoice_update.invoice_number,
-                        "gross_amount": invoice_update.gross_amount,
-                        "vat": invoice_update.vat,
-                        "description": invoice_update.description,
-                        "issued_date": invoice_update.issued_date,
-                        "paid_date": invoice_update.paid_date,
-                        "currency": invoice_update.currency,
-                    }
-                ),
-            },
+                "invoice_number": invoice_update.invoice_number,
+                "gross_amount": invoice_update.gross_amount,
+                "vat": invoice_update.vat,
+                "description": invoice_update.description,
+                "issued_date": invoice_update.issued_date,
+                "paid_date": invoice_update.paid_date,
+                "currency": invoice_update.currency,
+            }
         )
         invoice_repository.update(invoice=updated_invoice)
 

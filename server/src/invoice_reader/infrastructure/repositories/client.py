@@ -1,8 +1,7 @@
-from uuid import UUID
-
 from sqlmodel import Session, select
 
-from invoice_reader.domain.clients import Client, ClientID
+from invoice_reader.domain.client import Client, ClientID
+from invoice_reader.domain.user import UserID
 from invoice_reader.infrastructure.models.client import ClientModel
 from invoice_reader.services.interfaces.repositories import IClientRepository
 
@@ -52,7 +51,7 @@ class SQLModelClientRepository(IClientRepository):
             self.session.delete(client_model)
             self.session.commit()
 
-    def get_all(self, user_id: UUID) -> list[Client]:
+    def get_all(self, user_id: UserID) -> list[Client]:
         client_models = self.session.exec(
             select(ClientModel).where(ClientModel.user_id == user_id)
         ).all()
@@ -70,7 +69,7 @@ class SQLModelClientRepository(IClientRepository):
             for client_model in client_models
         ]
 
-    def get_by_name(self, user_id: UUID, client_name: str) -> Client | None:
+    def get_by_name(self, user_id: UserID, client_name: str) -> Client | None:
         client_model = self.session.exec(
             select(ClientModel).where(
                 ClientModel.user_id == user_id, ClientModel.client_name == client_name

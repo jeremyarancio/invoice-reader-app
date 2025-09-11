@@ -1,1 +1,3 @@
-- [ ] Move PDF check into Services
+- [ ] Create tables on server launch
+- [ ] Add session injection
+- [ ] Fix parser

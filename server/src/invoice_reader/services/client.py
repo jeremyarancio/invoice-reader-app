@@ -1,6 +1,5 @@
-from uuid import UUID
-
-from invoice_reader.domain.clients import BaseClient, Client, ClientID, ClientUpdate
+from invoice_reader.domain.client import Client, ClientBase, ClientID, ClientUpdate
+from invoice_reader.domain.user import UserID
 from invoice_reader.services.exceptions import EntityNotFoundException, ExistingEntityException
 from invoice_reader.services.interfaces.repositories import IClientRepository
 
@@ -8,8 +7,8 @@ from invoice_reader.services.interfaces.repositories import IClientRepository
 class ClientService:
     @staticmethod
     def add_client(
-        user_id: UUID,
-        client_data: BaseClient,
+        user_id: UserID,
+        client_data: ClientBase,
         client_repository: IClientRepository,
     ) -> None:
         existing_clients = client_repository.get_all(user_id=user_id)
@@ -17,12 +16,7 @@ class ClientService:
             raise ExistingEntityException(message="Client with this name already exists.")
         client = Client(
             user_id=user_id,
-            client_name=client_data.client_name,
-            street_number=client_data.street_number,
-            street_address=client_data.street_address,
-            zipcode=client_data.zipcode,
-            city=client_data.city,
-            country=client_data.country,
+            **client_data.model_dump(),
         )
         client_repository.add(client=client)
 
@@ -38,7 +32,7 @@ class ClientService:
 
     @staticmethod
     def get_paged_clients(
-        user_id: UUID,
+        user_id: UserID,
         client_repository: IClientRepository,
         page: int,
         per_page: int,
@@ -60,7 +54,7 @@ class ClientService:
 
     @staticmethod
     def update_client(
-        user_id: UUID,
+        user_id: UserID,
         client_id: ClientID,
         client_update: ClientUpdate,
         client_repository: IClientRepository,

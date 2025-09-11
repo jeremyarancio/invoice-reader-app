@@ -2,6 +2,8 @@ from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
 
+from invoice_reader.domain.user import UserID
+
 
 class ClientID(UUID):
     @classmethod
@@ -9,7 +11,7 @@ class ClientID(UUID):
         return cls(uuid4().hex)
 
 
-class BaseClient(BaseModel):
+class ClientBase(BaseModel):
     client_name: str
     street_number: int
     street_address: str
@@ -18,13 +20,13 @@ class BaseClient(BaseModel):
     country: str
 
 
-class Client(BaseClient):
+class Client(ClientBase):
     client_id: ClientID = Field(default_factory=ClientID.create)
-    user_id: UUID
-    total_revenu: float = Field(
+    user_id: UserID
+    total_revenue: float = Field(
         ge=0, default=0
     )  # TODO: Change into an Amount entity for currency conversion
 
 
-class ClientUpdate(BaseClient):
+class ClientUpdate(ClientBase):
     pass

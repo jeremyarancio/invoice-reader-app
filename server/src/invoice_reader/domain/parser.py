@@ -21,9 +21,9 @@ class InvoiceDataExtraction(BaseModel):
 
     @field_validator("vat", mode="before")
     @classmethod
-    def validate_vat(cls, v):
+    def validate_vat(cls, v: float | int | None) -> int | None:
         if v is None or v >= 0:
-            return v
+            return int(v)
         return None
 
 

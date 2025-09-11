@@ -6,6 +6,9 @@ from uuid import UUID, uuid4
 
 from pydantic import BaseModel, BeforeValidator, Field
 
+from invoice_reader.domain.client import ClientID
+from invoice_reader.domain.user import UserID
+
 ACCEPTED_FILE_FORMATS = [".pdf"]
 
 
@@ -39,7 +42,7 @@ class InvoiceID(UUID):
         return cls(uuid4().hex)
 
 
-class InvoiceData(BaseModel):
+class InvoiceBase(BaseModel):
     invoice_number: str
     gross_amount: float
     vat: Annotated[int, Field(ge=0, le=50)]
@@ -49,13 +52,12 @@ class InvoiceData(BaseModel):
     currency: Currency
 
 
-class Invoice(BaseModel):
+class Invoice(InvoiceBase):
     id_: InvoiceID = Field(default_factory=InvoiceID.create)
-    client_id: UUID
-    user_id: UUID
+    client_id: ClientID
+    user_id: UserID
     storage_path: str
-    data: InvoiceData
 
 
-class InvoiceUpdate(InvoiceData):
-    client_id: UUID
+class InvoiceUpdate(InvoiceBase):
+    client_id: ClientID

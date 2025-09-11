@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from invoice_reader.domain import File
+from invoice_reader.domain.invoice import File
 
 
 class IFileRepository(ABC):

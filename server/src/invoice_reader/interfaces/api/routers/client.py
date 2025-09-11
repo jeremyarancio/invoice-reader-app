@@ -1,9 +1,9 @@
 from typing import Annotated
-from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query, Response
 
-from invoice_reader.domain.clients import BaseClient, ClientID, ClientUpdate
+from invoice_reader.domain.client import ClientBase, ClientID, ClientUpdate
+from invoice_reader.domain.user import UserID
 from invoice_reader.interfaces.dependencies.auth import get_current_user_id
 from invoice_reader.interfaces.dependencies.infrastructure import get_client_repository
 from invoice_reader.interfaces.schemas.client import (
@@ -22,7 +22,7 @@ router = APIRouter(
 
 @router.get("/")
 def get_clients(
-    user_id: Annotated[UUID, Depends(get_current_user_id)],
+    user_id: Annotated[UserID, Depends(get_current_user_id)],
     client_repository: Annotated[IClientRepository, Depends(get_client_repository)],
     page: int = Query(1, ge=1),
     per_page: int = Query(10, ge=1),
@@ -51,7 +51,7 @@ def get_clients(
     )
 
 
-@router.get("/{client_id}")
+@router.get("/{client_id}", dependencies=[Depends(get_current_user_id)])
 def get_client(
     client_id: ClientID,
     client_repository: Annotated[IClientRepository, Depends(get_client_repository)],
@@ -70,10 +70,10 @@ def get_client(
 @router.post("/")
 def add_client(
     client_create: ClientCreate,
-    user_id: Annotated[UUID, Depends(get_current_user_id)],
+    user_id: Annotated[UserID, Depends(get_current_user_id)],
     client_repository: Annotated[IClientRepository, Depends(get_client_repository)],
 ) -> Response:
-    client_data = BaseClient(
+    client_data = ClientBase(
         client_name=client_create.client_name,
         street_number=client_create.street_number,
         street_address=client_create.street_address,
@@ -101,9 +101,9 @@ def delete_client(
 
 @router.put("/{client_id}")
 def update_client(
-    user_id: UUID,
     client_id: ClientID,
     client_update: ClientUpdate,
+    user_id: Annotated[UserID, Depends(get_current_user_id)],
     client_repository: Annotated[IClientRepository, Depends(get_client_repository)],
 ) -> Response:
     ClientService.update_client(

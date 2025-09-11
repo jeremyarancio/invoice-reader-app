@@ -4,18 +4,20 @@ from fastapi import (
     FastAPI,
     Request,
 )
-from fastapi.exceptions import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
 from prometheus_fastapi_instrumentator import Instrumentator
 
-from invoice_reader import settings
 from invoice_reader.interfaces.api.routers import (
     client_router,
     invoice_router,
     user_router,
 )
+from invoice_reader.services.exceptions import CustomException
+from invoice_reader.settings import get_settings
 from invoice_reader.utils import logger
+
+settings = get_settings()
 
 LOGGER = logger.get_logger(__name__)
 
@@ -28,7 +30,7 @@ app.include_router(client_router)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        settings.FRONT_END_URL,
+        settings.frontend_url,
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -36,14 +38,14 @@ app.add_middleware(
 )
 
 
-@app.exception_handler(HTTPException)
-def http_exception_handler(request: Request, exc: HTTPException):
+@app.exception_handler(CustomException)
+def http_exception_handler(request: Request, exc: CustomException):
     # Log the status code and error message
-    LOGGER.error("HTTP Error: %s - %s", exc.status_code, exc.detail)
+    LOGGER.error("HTTP Error: %s - %s", exc.status_code, exc.message)
     # Return the default HTTPException response
     return JSONResponse(
         status_code=exc.status_code,
-        content={"message": exc.detail},
+        content={"message": exc.message},
     )
 
 

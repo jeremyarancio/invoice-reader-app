@@ -2,10 +2,10 @@ from datetime import date
 from typing import BinaryIO
 
 import httpx
+from invoice_reader.app.exceptions import INVALID_EXTRACTED_DATA_EXCEPTION
 from pydantic import BaseModel
 
 from invoice_reader import settings
-from invoice_reader.app.exceptions import INVALID_EXTRACTED_DATA_EXCEPTION
 
 
 class Address(BaseModel):
