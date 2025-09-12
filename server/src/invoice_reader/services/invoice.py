@@ -1,9 +1,9 @@
 from typing import BinaryIO
+from uuid import uuid4
 
-from invoice_reader.domain.client import Client, ClientID
-from invoice_reader.domain.invoice import File, Invoice, InvoiceBase, InvoiceID, InvoiceUpdate
+from invoice_reader.domain.client import UUID, Client
+from invoice_reader.domain.invoice import File, Invoice, InvoiceBase, InvoiceUpdate
 from invoice_reader.domain.parser import ParsedInvoiceData
-from invoice_reader.domain.user import UserID
 from invoice_reader.services.exceptions import (
     EntityNotFoundException,
     ExistingEntityException,
@@ -26,8 +26,8 @@ class InvoiceService:
         cls,
         file_bin: BinaryIO,
         filename: str,
-        user_id: UserID,
-        client_id: ClientID,
+        user_id: UUID,
+        client_id: UUID,
         invoice_data: InvoiceBase,
         file_repository: IFileRepository,
         invoice_repository: IInvoiceRepository,
@@ -39,11 +39,11 @@ class InvoiceService:
         if existing_invoice:
             raise ExistingEntityException(message="Invoice with this number already exists.")
 
-        invoice_id = InvoiceID.create()
+        invoice_id = uuid4()
         initial_path = f"{user_id}/{invoice_id}.{filename.split('.')[-1]}"
         storage_path = file_repository.create_storage_path(initial_path=initial_path)
         file = File(
-            file=file_bin,
+            file=file_bin.read(),
             filename=filename,
             storage_path=storage_path,
         )
@@ -82,7 +82,7 @@ class InvoiceService:
             raise RollbackException(message=f"Rollback failed. Error: {e}") from e
 
     @staticmethod
-    def get_invoice(invoice_id: InvoiceID, invoice_repository: IInvoiceRepository) -> Invoice:
+    def get_invoice(invoice_id: UUID, invoice_repository: IInvoiceRepository) -> Invoice:
         invoice = invoice_repository.get(invoice_id=invoice_id)
         if invoice:
             return invoice
@@ -91,7 +91,7 @@ class InvoiceService:
 
     @staticmethod
     def get_paged_invoices(
-        user_id: UserID, invoice_repository: IInvoiceRepository, page: int, per_page: int
+        user_id: UUID, invoice_repository: IInvoiceRepository, page: int, per_page: int
     ) -> list[Invoice]:
         # NOTE: Can also perfom the pagination at the DB level for better performance
         invoices = invoice_repository.get_all(user_id=user_id)
@@ -102,7 +102,7 @@ class InvoiceService:
     @classmethod
     def delete_invoice(
         cls,
-        invoice_id: InvoiceID,
+        invoice_id: UUID,
         invoice_repository: IInvoiceRepository,
         file_repository: IFileRepository,
     ) -> None:
@@ -115,8 +115,8 @@ class InvoiceService:
 
     @staticmethod
     def update_invoice(
-        user_id: UserID,
-        invoice_id: InvoiceID,
+        user_id: UUID,
+        invoice_id: UUID,
         invoice_update: InvoiceUpdate,
         invoice_repository: IInvoiceRepository,
     ) -> None:
@@ -155,7 +155,7 @@ class InvoiceService:
 
     @staticmethod
     def get_invoice_url(
-        invoice_id: InvoiceID,
+        invoice_id: UUID,
         file_repository: IFileRepository,
         invoice_repository: IInvoiceRepository,
     ) -> str:
@@ -170,7 +170,7 @@ class InvoiceService:
         file: BinaryIO,
         parser: IParser,
         client_repository: IClientRepository,
-        user_id: UserID,
+        user_id: UUID,
     ) -> tuple[ParsedInvoiceData, Client | None]:
         parsed_data = parser.parse(file=file)
         client = (

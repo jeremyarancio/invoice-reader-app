@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 
-from invoice_reader.domain.invoice import Invoice, InvoiceID
-from invoice_reader.domain.user import UserID
+from invoice_reader.domain.invoice import UUID, Invoice
 
 
 class IInvoiceRepository(ABC):
@@ -14,17 +13,17 @@ class IInvoiceRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def get(self, invoice_id: InvoiceID) -> Invoice | None:
+    def get(self, invoice_id: UUID) -> Invoice | None:
         raise NotImplementedError
 
     @abstractmethod
-    def delete(self, invoice_id: InvoiceID) -> None:
+    def delete(self, invoice_id: UUID) -> None:
         raise NotImplementedError
 
     @abstractmethod
-    def get_all(self, user_id: UserID) -> list[Invoice]:
+    def get_all(self, user_id: UUID) -> list[Invoice]:
         raise NotImplementedError
 
     @abstractmethod
-    def get_by_invoice_number(self, invoice_number: str, user_id: UserID) -> Invoice | None:
+    def get_by_invoice_number(self, invoice_number: str, user_id: UUID) -> Invoice | None:
         raise NotImplementedError

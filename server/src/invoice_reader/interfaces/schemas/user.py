@@ -1,6 +1,6 @@
-from pydantic import BaseModel, EmailStr, Field
+from uuid import UUID
 
-from invoice_reader.domain.user import UserID
+from pydantic import BaseModel, EmailStr, Field
 
 
 class UserCreate(BaseModel):
@@ -9,5 +9,5 @@ class UserCreate(BaseModel):
 
 
 class UserResponse(BaseModel):
-    user_id: UserID
+    user_id: UUID
     email: EmailStr

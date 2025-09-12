@@ -1,12 +1,12 @@
 from typing import Annotated
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, File, Form, Query, Response, UploadFile, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import HTTPException
 from pydantic import BaseModel, ValidationError
 
-from invoice_reader.domain.invoice import InvoiceBase, InvoiceID, InvoiceUpdate
-from invoice_reader.domain.user import UserID
+from invoice_reader.domain.invoice import InvoiceBase, InvoiceUpdate
 from invoice_reader.interfaces.dependencies.auth import get_current_user_id
 from invoice_reader.interfaces.dependencies.parser import get_parser
 from invoice_reader.interfaces.dependencies.repository import (
@@ -66,7 +66,7 @@ def add_invoice(
         InvoiceCreate,
         Depends(Checker(InvoiceCreate)),
     ],
-    user_id: Annotated[UserID, Depends(get_current_user_id)],
+    user_id: Annotated[UUID, Depends(get_current_user_id)],
     file_repository: Annotated[IFileRepository, Depends(get_file_repository)],
     invoice_repository: Annotated[IInvoiceRepository, Depends(get_invoice_repository)],
 ):
@@ -99,7 +99,7 @@ def parse_invoice(
     upload_file: Annotated[UploadFile, File()],
     parser: Annotated[IParser, Depends(get_parser)],
     client_repository: Annotated[IClientRepository, Depends(get_client_repository)],
-    user_id: Annotated[UserID, Depends(get_current_user_id)],
+    user_id: Annotated[UUID, Depends(get_current_user_id)],
 ) -> ParserResponse:
     invoice_data, client = InvoiceService.parse_invoice(
         file=upload_file.file,
@@ -112,7 +112,7 @@ def parse_invoice(
 
 @router.get("/{invoice_id}", dependencies=[Depends(get_current_user_id)])
 def get_invoice(
-    invoice_id: InvoiceID,
+    invoice_id: UUID,
     invoice_repository: Annotated[IInvoiceRepository, Depends(get_invoice_repository)],
 ) -> InvoiceResponse:
     invoice = InvoiceService.get_invoice(
@@ -136,7 +136,7 @@ def get_invoice(
 
 @router.get("/")
 def get_invoices(
-    user_id: Annotated[UserID, Depends(get_current_user_id)],
+    user_id: Annotated[UUID, Depends(get_current_user_id)],
     invoice_repository: Annotated[IInvoiceRepository, Depends(get_invoice_repository)],
     page: int = Query(default=1, ge=1),
     per_page: int = Query(default=10, ge=1),
@@ -173,7 +173,7 @@ def get_invoices(
 
 @router.delete("/{invoice_id}", dependencies=[Depends(get_current_user_id)])
 def delete_invoice(
-    invoice_id: InvoiceID,
+    invoice_id: UUID,
     invoice_repository: Annotated[IInvoiceRepository, Depends(get_invoice_repository)],
     file_repository: Annotated[IFileRepository, Depends(get_file_repository)],
 ) -> Response:
@@ -187,9 +187,9 @@ def delete_invoice(
 
 @router.put("/{invoice_id}")
 def update_invoice(
-    invoice_id: InvoiceID,
+    invoice_id: UUID,
     invoice_update: InvoiceUpdate,
-    user_id: Annotated[UserID, Depends(get_current_user_id)],
+    user_id: Annotated[UUID, Depends(get_current_user_id)],
     invoice_repository: Annotated[IInvoiceRepository, Depends(get_invoice_repository)],
 ) -> Response:
     InvoiceService.update_invoice(
@@ -203,7 +203,7 @@ def update_invoice(
 
 @router.get("/{invoice_id}/url/", dependencies=[Depends(get_current_user_id)])
 def get_invoice_url(
-    invoice_id: InvoiceID,
+    invoice_id: UUID,
     file_repository: Annotated[IFileRepository, Depends(get_file_repository)],
     invoice_repository: Annotated[IInvoiceRepository, Depends(get_invoice_repository)],
 ) -> str:

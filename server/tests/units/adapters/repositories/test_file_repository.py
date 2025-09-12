@@ -8,7 +8,6 @@ from invoice_reader.infrastructure.repositories.file import S3FileRepository
 
 
 @pytest.fixture(scope="session")
-@pytest.fixture
 def s3_client_mock():
     with patch("boto3.client") as mock_client:
         client_instance = MagicMock()
@@ -27,7 +26,7 @@ def repository(s3_client_mock: MagicMock) -> S3FileRepository:
 def file():
     return File(
         filename="test.pdf",
-        file=io.BytesIO(b"dummy data"),
+        file=io.BytesIO(b"dummy data").read(),
         storage_path="s3://test-bucket/test.pdf",
     )
 

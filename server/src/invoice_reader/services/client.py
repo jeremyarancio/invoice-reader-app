@@ -1,5 +1,6 @@
-from invoice_reader.domain.client import Client, ClientBase, ClientID, ClientUpdate
-from invoice_reader.domain.user import UserID
+from uuid import UUID
+
+from invoice_reader.domain.client import Client, ClientBase, ClientUpdate
 from invoice_reader.services.exceptions import EntityNotFoundException, ExistingEntityException
 from invoice_reader.services.interfaces.repositories import IClientRepository
 
@@ -7,7 +8,7 @@ from invoice_reader.services.interfaces.repositories import IClientRepository
 class ClientService:
     @staticmethod
     def add_client(
-        user_id: UserID,
+        user_id: UUID,
         client_data: ClientBase,
         client_repository: IClientRepository,
     ) -> None:
@@ -22,7 +23,7 @@ class ClientService:
 
     @staticmethod
     def get_client(
-        client_id: ClientID,
+        client_id: UUID,
         client_repository: IClientRepository,
     ) -> Client:
         client = client_repository.get(client_id=client_id)
@@ -32,7 +33,7 @@ class ClientService:
 
     @staticmethod
     def get_paged_clients(
-        user_id: UserID,
+        user_id: UUID,
         client_repository: IClientRepository,
         page: int,
         per_page: int,
@@ -44,7 +45,7 @@ class ClientService:
 
     @staticmethod
     def delete_client(
-        client_id: ClientID,
+        client_id: UUID,
         client_repository: IClientRepository,
     ) -> None:
         client = client_repository.get(client_id=client_id)
@@ -54,8 +55,8 @@ class ClientService:
 
     @staticmethod
     def update_client(
-        user_id: UserID,
-        client_id: ClientID,
+        user_id: UUID,
+        client_id: UUID,
         client_update: ClientUpdate,
         client_repository: IClientRepository,
     ) -> None:

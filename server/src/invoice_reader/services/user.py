@@ -1,5 +1,7 @@
+from uuid import UUID
+
 from invoice_reader.domain.auth import EncodedToken
-from invoice_reader.domain.user import User, UserID
+from invoice_reader.domain.user import User
 from invoice_reader.services.auth import AuthService
 from invoice_reader.services.exceptions import (
     AuthenticationException,
@@ -14,7 +16,7 @@ settings = get_settings()
 
 class UserService:
     @staticmethod
-    def get_user(user_id: UserID, user_repository: IUserRepository) -> User:
+    def get_user(user_id: UUID, user_repository: IUserRepository) -> User:
         user = user_repository.get(user_id=user_id)
         if not user:
             raise EntityNotFoundException(message="User not found.")
@@ -57,7 +59,7 @@ class UserService:
         return access_token, refresh_token
 
     @staticmethod
-    def delete(user_id: UserID, user_repository: IUserRepository) -> None:
+    def delete(user_id: UUID, user_repository: IUserRepository) -> None:
         user = user_repository.get(user_id=user_id)
         if not user:
             raise EntityNotFoundException(message="User not found. Deletion cancelled.")

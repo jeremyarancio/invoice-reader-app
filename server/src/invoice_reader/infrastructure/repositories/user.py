@@ -1,6 +1,8 @@
+from uuid import UUID
+
 from sqlmodel import Session, select
 
-from invoice_reader.domain.user import User, UserID
+from invoice_reader.domain.user import User
 from invoice_reader.infrastructure.models import UserModel
 from invoice_reader.services.interfaces.repositories import IUserRepository
 
@@ -20,16 +22,20 @@ class SQLModelUserRepository(IUserRepository):
         self.session.commit()
 
     def update(self, user: User) -> None:
+        existing_user_model = self.session.exec(
+            select(UserModel).where(UserModel.user_id == user.id_)
+        ).one()
         user_model = UserModel(
             user_id=user.id_,
             email=user.email,
             hashed_password=user.hashed_password,
             is_disabled=user.is_disabled,
         )
-        self.session.add(user_model)
+        updated_user_model = existing_user_model.sqlmodel_update(user_model)
+        self.session.add(updated_user_model)
         self.session.commit()
 
-    def get(self, user_id: UserID) -> User | None:
+    def get(self, user_id: UUID) -> User | None:
         user_model = self.session.exec(
             select(UserModel).where(UserModel.user_id == user_id)
         ).one_or_none()
@@ -41,7 +47,7 @@ class SQLModelUserRepository(IUserRepository):
                 is_disabled=user_model.is_disabled,
             )
 
-    def delete(self, user_id: UserID) -> None:
+    def delete(self, user_id: UUID) -> None:
         user_model = self.session.exec(select(UserModel).where(UserModel.user_id == user_id)).one()
         self.session.delete(user_model)
         self.session.commit()

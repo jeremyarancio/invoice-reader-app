@@ -1,7 +1,8 @@
+from uuid import UUID
+
 from sqlmodel import Session, select
 
-from invoice_reader.domain.invoice import Invoice, InvoiceID
-from invoice_reader.domain.user import UserID
+from invoice_reader.domain.invoice import Invoice
 from invoice_reader.infrastructure.models import InvoiceModel
 from invoice_reader.services.interfaces.repositories import IInvoiceRepository
 
@@ -27,7 +28,7 @@ class SQLModelInvoiceRepository(IInvoiceRepository):
         self.session.add(invoice_model)
         self.session.commit()
 
-    def get(self, invoice_id: InvoiceID) -> Invoice | None:
+    def get(self, invoice_id: UUID) -> Invoice | None:
         invoice_model = self.session.exec(
             select(InvoiceModel).where(InvoiceModel.invoice_id == invoice_id)
         ).one_or_none()
@@ -46,14 +47,14 @@ class SQLModelInvoiceRepository(IInvoiceRepository):
                 currency=invoice_model.currency,
             )
 
-    def delete(self, invoice_id: InvoiceID) -> None:
+    def delete(self, invoice_id: UUID) -> None:
         invoice_model = self.session.exec(
             select(InvoiceModel).where(InvoiceModel.invoice_id == invoice_id)
         ).one()
         self.session.delete(invoice_model)
         self.session.commit()
 
-    def get_all(self, user_id: UserID) -> list[Invoice]:
+    def get_all(self, user_id: UUID) -> list[Invoice]:
         invoice_models = self.session.exec(
             select(InvoiceModel).where(InvoiceModel.user_id == user_id)
         ).all()
@@ -74,7 +75,7 @@ class SQLModelInvoiceRepository(IInvoiceRepository):
             for invoice_model in invoice_models
         ]
 
-    def get_by_invoice_number(self, invoice_number: str, user_id: UserID) -> Invoice | None:
+    def get_by_invoice_number(self, invoice_number: str, user_id: UUID) -> Invoice | None:
         invoice_model = self.session.exec(
             select(InvoiceModel).where(
                 InvoiceModel.invoice_number == invoice_number,
@@ -97,6 +98,9 @@ class SQLModelInvoiceRepository(IInvoiceRepository):
             )
 
     def update(self, invoice: Invoice) -> None:
+        existing_invoice_model = self.session.exec(
+            select(InvoiceModel).where(InvoiceModel.invoice_id == invoice.id_)
+        ).one()
         invoice_model = InvoiceModel(
             invoice_id=invoice.id_,
             user_id=invoice.user_id,
@@ -110,5 +114,6 @@ class SQLModelInvoiceRepository(IInvoiceRepository):
             invoiced_date=invoice.issued_date,
             paid_date=invoice.paid_date,
         )
-        self.session.add(invoice_model)
+        updated_invoice_model = existing_invoice_model.sqlmodel_update(invoice_model)
+        self.session.add(updated_invoice_model)
         self.session.commit()

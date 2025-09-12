@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from invoice_reader.domain.user import User, UserID
+from invoice_reader.domain.user import UUID, User
 
 
 class IUserRepository(ABC):
@@ -13,11 +13,11 @@ class IUserRepository(ABC):
         pass
 
     @abstractmethod
-    def get(self, user_id: UserID) -> User | None:
+    def get(self, user_id: UUID) -> User | None:
         pass
 
     @abstractmethod
-    def delete(self, user_id: UserID) -> None:
+    def delete(self, user_id: UUID) -> None:
         pass
 
     @abstractmethod

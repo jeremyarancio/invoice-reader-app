@@ -1,14 +1,14 @@
-from typing import Generator
+from collections.abc import Generator
 
 import pytest
 from sqlalchemy import StaticPool
-from sqlmodel import Session, create_engine, SQLModel
 from sqlalchemy.engine import Engine
+from sqlmodel import Session, SQLModel, create_engine
 
 from invoice_reader.infrastructure.models import *
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def engine() -> Engine:
     return create_engine(
         "sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool
@@ -16,7 +16,7 @@ def engine() -> Engine:
 
 
 @pytest.fixture
-def session_fixture(engine: Engine) -> Generator[Session, None, None]:
+def session(engine: Engine) -> Generator[Session, None, None]:
     SQLModel.metadata.create_all(engine)
     with Session(engine) as session:
         yield session

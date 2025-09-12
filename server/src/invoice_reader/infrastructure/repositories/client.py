@@ -1,7 +1,8 @@
+from uuid import UUID
+
 from sqlmodel import Session, select
 
-from invoice_reader.domain.client import Client, ClientID
-from invoice_reader.domain.user import UserID
+from invoice_reader.domain.client import Client
 from invoice_reader.infrastructure.models.client import ClientModel
 from invoice_reader.services.interfaces.repositories import IClientRepository
 
@@ -24,7 +25,7 @@ class SQLModelClientRepository(IClientRepository):
         self.session.add(client_model)
         self.session.commit()
 
-    def get(self, client_id: ClientID) -> Client | None:
+    def get(self, client_id: UUID) -> Client | None:
         client_model = self.session.exec(
             select(ClientModel).where(ClientModel.client_id == client_id)
         ).one_or_none()
@@ -41,9 +42,24 @@ class SQLModelClientRepository(IClientRepository):
             )
 
     def update(self, client: Client) -> None:
-        pass
+        existing_client_model = self.session.exec(
+            select(ClientModel).where(ClientModel.client_id == client.id_)
+        ).one()
+        client_model = ClientModel(
+            client_id=client.id_,
+            user_id=client.user_id,
+            client_name=client.client_name,
+            street_number=client.street_number,
+            street_address=client.street_address,
+            zipcode=client.zipcode,
+            city=client.city,
+            country=client.country,
+        )
+        updated_client_model = existing_client_model.sqlmodel_update(client_model)
+        self.session.add(updated_client_model)
+        self.session.commit()
 
-    def delete(self, client_id: ClientID) -> None:
+    def delete(self, client_id: UUID) -> None:
         client_model = self.session.exec(
             select(ClientModel).where(ClientModel.client_id == client_id)
         ).one()
@@ -51,7 +67,7 @@ class SQLModelClientRepository(IClientRepository):
             self.session.delete(client_model)
             self.session.commit()
 
-    def get_all(self, user_id: UserID) -> list[Client]:
+    def get_all(self, user_id: UUID) -> list[Client]:
         client_models = self.session.exec(
             select(ClientModel).where(ClientModel.user_id == user_id)
         ).all()
@@ -69,7 +85,7 @@ class SQLModelClientRepository(IClientRepository):
             for client_model in client_models
         ]
 
-    def get_by_name(self, user_id: UserID, client_name: str) -> Client | None:
+    def get_by_name(self, user_id: UUID, client_name: str) -> Client | None:
         client_model = self.session.exec(
             select(ClientModel).where(
                 ClientModel.user_id == user_id, ClientModel.client_name == client_name

@@ -9,8 +9,8 @@ class Settings(BaseSettings):
     postgres_password: str = "postgres"
     postgres_db: str = "postgres"
 
-    jwt_secret_key: str
-    jwt_algorithm: str
+    jwt_secret_key: str = "1234"
+    jwt_algorithm: str = "HS256"
     access_token_expire: int = 60
     refresh_token_expire: int = 60 * 60 * 24
 
@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     frontend_subdomain: str = "app"
 
     presigned_url_expiration: int = 3600
-    s3_bucket_name: str
+    s3_bucket_name: str = "bucket"
     s3_region: str = "eu-central-1"
 
     ml_server_url: str = "http://ml-server:5000"

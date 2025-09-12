@@ -1,18 +1,17 @@
-from sqlmodel import Field, SQLModel  # type: ignore
+from uuid import UUID
 
-from invoice_reader.domain.client import ClientID
-from invoice_reader.domain.user import UserID
+from sqlmodel import Field, SQLModel  # type: ignore
 
 
 class ClientModel(SQLModel, table=True):
     __tablename__ = "client"  # type: ignore
 
-    client_id: ClientID
-    user_id: UserID = Field(foreign_key="user.user_id")
+    client_id: UUID = Field(primary_key=True)
+    user_id: UUID = Field(foreign_key="user.user_id")
     client_name: str
     street_number: int
     street_address: str
-    zipcode: int
+    zipcode: str
     city: str
     country: str
 

@@ -1,10 +1,10 @@
 from typing import Annotated
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, Request, Response
 from fastapi.security import OAuth2PasswordRequestForm
 
 from invoice_reader.domain.auth import EncodedToken
-from invoice_reader.domain.user import UserID
 from invoice_reader.interfaces.dependencies.auth import get_current_user_id
 from invoice_reader.interfaces.dependencies.repository import get_user_repository
 from invoice_reader.interfaces.schemas.auth import AuthToken
@@ -61,7 +61,7 @@ def signin(
 
 @router.delete("/")
 def delete_user(
-    user_id: Annotated[UserID, Depends(get_current_user_id)],
+    user_id: Annotated[UUID, Depends(get_current_user_id)],
     user_repository: Annotated[IUserRepository, Depends(get_user_repository)],
 ) -> Response:
     UserService.delete(user_id=user_id, user_repository=user_repository)
@@ -103,7 +103,7 @@ def signout(response: Response) -> Response:
 
 @router.get("/me/")
 def get_current_user(
-    user_id: Annotated[UserID, Depends(get_current_user_id)],
+    user_id: Annotated[UUID, Depends(get_current_user_id)],
     user_repository: Annotated[IUserRepository, Depends(get_user_repository)],
 ) -> UserResponse:
     user = UserService.get_user(user_id=user_id, user_repository=user_repository)

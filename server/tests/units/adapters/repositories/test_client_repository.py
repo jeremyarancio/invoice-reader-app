@@ -1,8 +1,9 @@
+from uuid import uuid4
+
 import pytest
 from sqlmodel import Session
 
 from invoice_reader.domain.client import Client
-from invoice_reader.domain.user import UserID
 from invoice_reader.infrastructure.repositories.client import SQLModelClientRepository
 
 
@@ -14,7 +15,7 @@ def repository(session: Session) -> SQLModelClientRepository:
 @pytest.fixture
 def client() -> Client:
     return Client(
-        user_id=UserID.create(),
+        user_id=uuid4(),
         client_name="Test Client",
         city="Test City",
         country="Test Country",

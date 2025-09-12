@@ -1,11 +1,10 @@
 from datetime import date
+from uuid import uuid4
 
 import pytest
 from sqlmodel import Session
 
-from invoice_reader.domain.client import ClientID
 from invoice_reader.domain.invoice import Currency, Invoice
-from invoice_reader.domain.user import UserID
 from invoice_reader.infrastructure.repositories.invoice import SQLModelInvoiceRepository
 
 
@@ -17,8 +16,8 @@ def repository(session: Session) -> SQLModelInvoiceRepository:
 @pytest.fixture
 def invoice() -> Invoice:
     return Invoice(
-        user_id=UserID.create(),
-        client_id=ClientID.create(),
+        user_id=uuid4(),
+        client_id=uuid4(),
         currency=Currency.USD,
         invoice_number="INV-001",
         gross_amount=100.0,

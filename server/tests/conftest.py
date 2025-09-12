@@ -16,11 +16,6 @@
 # from invoice_reader.schemas.users import User
 
 pytest_plugins = [
-    # "tests.fixtures.factory",
-    # "tests.fixtures.entities.invoices",
-    # "tests.fixtures.entities.users",
-    # "tests.fixtures.entities.clients",
-    # "tests.fixtures.entities.currencies",
     "tests.fixtures.db",
 ]
 
