@@ -1,4 +1,5 @@
 from typing import BinaryIO
+from datetime import date
 
 import httpx
 
@@ -6,8 +7,31 @@ from invoice_reader.domain.parser import ParserExtraction
 from invoice_reader.services.exceptions import InfrastructureException
 from invoice_reader.services.interfaces.parser import IParser
 from invoice_reader.settings import get_settings
+from invoice_reader.domain.parser import ParserExtraction, ParsedClientData, ParsedInvoiceData
+from invoice_reader.domain.invoice import Currency
 
 settings = get_settings()
+
+
+class TestParser(IParser):
+    def parse(self, file: BinaryIO) -> ParserExtraction:
+        return ParserExtraction(
+            invoice=ParsedInvoiceData(
+                gross_amount=100.0,
+                vat=20,
+                issued_date=date(2023, 1, 1),
+                currency=Currency.EUR,
+                invoice_number="INV-1000",
+                invoice_description="Test invoice",
+            ),
+            client=ParsedClientData(
+                client_name="Test Client",
+                street_address="123 Test St",
+                zipcode="12345",
+                city="Test City",
+                country="Test Country",
+            ),
+        )
 
 
 class MLServerParser(IParser):

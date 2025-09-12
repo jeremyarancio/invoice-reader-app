@@ -21,13 +21,13 @@ from invoice_reader.utils.logger import get_logger
 
 settings = get_settings()
 
-LOGGER = get_logger(__name__)
+logger = get_logger()
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Create db tables
-    LOGGER.info("Creating database tables...")
+    logger.info("Creating database tables...")
     create_tables()
     yield
 
@@ -51,7 +51,7 @@ app.add_middleware(
 @app.exception_handler(CustomException)
 def http_exception_handler(request: Request, exc: CustomException):
     # Log the status code and error message
-    LOGGER.error("Error: {} - {}", exc.status_code, exc.message)
+    logger.error("Error: {} - {}", exc.status_code, exc.message)
     # Return the default HTTPException response
     return JSONResponse(
         status_code=exc.status_code,
@@ -66,7 +66,7 @@ async def global_exception_handler(request: Request, exc: Exception):
     traceback_str = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
 
     # For production, log the full traceback but don't return it
-    LOGGER.error("Error: {}", traceback_str)  # Log to your system
+    logger.error("Error: {}", traceback_str)  # Log to your system
 
     return JSONResponse(
         status_code=500,

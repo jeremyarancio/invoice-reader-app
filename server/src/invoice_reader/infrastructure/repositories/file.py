@@ -5,6 +5,23 @@ from invoice_reader.domain.invoice import File
 from invoice_reader.services.interfaces.repositories import IFileRepository
 
 
+class InMemoryFileRepository(IFileRepository):
+    storage: dict[str, bytes] = {}
+
+    def create_storage_path(self, initial_path: str) -> str:
+        return initial_path
+
+    def store(self, file: File) -> None:
+        self.storage[file.storage_path] = file.file
+
+    def delete(self, storage_path: str) -> None:
+        if storage_path in self.storage:
+            del self.storage[storage_path]
+
+    def get_url(self, storage_path: str) -> str:
+        return f"inmemory://{storage_path}"
+
+
 class S3FileRepository(IFileRepository):
     bucket: str
     region: str

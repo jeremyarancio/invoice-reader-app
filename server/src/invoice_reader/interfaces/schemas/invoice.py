@@ -1,11 +1,10 @@
 from pydantic import BaseModel
 
-from invoice_reader.domain.invoice import UUID, Currency, InvoiceBase
+from invoice_reader.domain.invoice import UUID, InvoiceBase
 
 
 class InvoiceCreate(BaseModel):
     client_id: UUID
-    currency: Currency
     invoice: InvoiceBase
 
 
