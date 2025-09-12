@@ -1,13 +1,6 @@
 from pydantic import BaseModel
 
-
-class ClientBase(BaseModel):
-    client_name: str
-    street_number: int
-    street_address: str
-    zipcode: int
-    city: str
-    country: str
+from invoice_reader.domain.client import ClientBase
 
 
 class ClientCreate(ClientBase):

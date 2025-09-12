@@ -1,15 +1,17 @@
 from typing import BinaryIO
 
-from invoice_reader.domain.client import ClientID
+from invoice_reader.domain.client import Client, ClientID
 from invoice_reader.domain.invoice import File, Invoice, InvoiceBase, InvoiceID, InvoiceUpdate
-from invoice_reader.domain.parser import InvoiceExtraction
+from invoice_reader.domain.parser import ParsedInvoiceData
 from invoice_reader.domain.user import UserID
 from invoice_reader.services.exceptions import (
     EntityNotFoundException,
     ExistingEntityException,
     RollbackException,
 )
+from invoice_reader.services.interfaces.parser import IParser
 from invoice_reader.services.interfaces.repositories import (
+    IClientRepository,
     IFileRepository,
     IInvoiceRepository,
 )
@@ -164,8 +166,23 @@ class InvoiceService:
         return url
 
     @staticmethod
-    def extract_invoice(
+    def parse_invoice(
         file: BinaryIO,
-    ) -> InvoiceExtraction:
-        # TODO: Implement extraction infrastructure
-        return parse_invoice(file)
+        parser: IParser,
+        client_repository: IClientRepository,
+        user_id: UserID,
+    ) -> tuple[ParsedInvoiceData, Client | None]:
+        parsed_data = parser.parse(file=file)
+        client = (
+            client_repository.get_by_name(
+                client_name=parsed_data.client.client_name, user_id=user_id
+            )
+            if parsed_data.client.client_name
+            else None
+        )
+        if not client:
+            logger.warning(
+                "Client with the name {} not found in the database during parsing.",
+                parsed_data.client.client_name,
+            )
+        return parsed_data.invoice, client

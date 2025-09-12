@@ -6,10 +6,11 @@ from fastapi.exceptions import HTTPException
 from pydantic import BaseModel, ValidationError
 
 from invoice_reader.domain.invoice import InvoiceBase, InvoiceID, InvoiceUpdate
-from invoice_reader.domain.parser import InvoiceExtraction
 from invoice_reader.domain.user import UserID
 from invoice_reader.interfaces.dependencies.auth import get_current_user_id
+from invoice_reader.interfaces.dependencies.parser import get_parser
 from invoice_reader.interfaces.dependencies.repository import (
+    get_client_repository,
     get_file_repository,
     get_invoice_repository,
 )
@@ -18,10 +19,13 @@ from invoice_reader.interfaces.schemas.invoice import (
     InvoiceResponse,
     PagedInvoiceResponse,
 )
+from invoice_reader.interfaces.schemas.parser import ParserResponse
+from invoice_reader.services.interfaces.parser import IParser
 from invoice_reader.services.interfaces.repositories import (
     IFileRepository,
     IInvoiceRepository,
 )
+from invoice_reader.services.interfaces.repositories.client import IClientRepository
 from invoice_reader.services.invoice import InvoiceService
 
 router = APIRouter(
@@ -90,14 +94,20 @@ def add_invoice(
     )
 
 
-@router.post("/extract/", dependencies=[Depends(get_current_user_id)])
-def extract_invoice(
+@router.post("/parse/")
+def parse_invoice(
     upload_file: Annotated[UploadFile, File()],
-) -> InvoiceExtraction:
-    extraction = InvoiceService.extract_invoice(
+    parser: Annotated[IParser, Depends(get_parser)],
+    client_repository: Annotated[IClientRepository, Depends(get_client_repository)],
+    user_id: Annotated[UserID, Depends(get_current_user_id)],
+) -> ParserResponse:
+    invoice_data, client = InvoiceService.parse_invoice(
         file=upload_file.file,
+        parser=parser,
+        client_repository=client_repository,
+        user_id=user_id,
     )
-    return extraction
+    return ParserResponse(invoice=invoice_data, client=client)
 
 
 @router.get("/{invoice_id}", dependencies=[Depends(get_current_user_id)])

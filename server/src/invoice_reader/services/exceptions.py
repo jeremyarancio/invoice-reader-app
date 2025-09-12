@@ -25,3 +25,10 @@ class AuthenticationException(CustomException):
 
     def __init__(self, message: str, status_code: int = 401):
         super().__init__(message, status_code=status_code)
+
+
+class InfrastructureException(CustomException):
+    """Exception for external infrastructure errors."""
+
+    def __init__(self, message: str, status_code: int = 502):
+        super().__init__(message, status_code=status_code)
