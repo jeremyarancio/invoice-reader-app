@@ -1,24 +1,23 @@
 # from io import BytesIO
-# from pathlib import Path
+from ast import In
+from pathlib import Path
 # from unittest.mock import Mock
 
-# import pytest
-# from fastapi.testclient import TestClient
+import pytest
 
-# from invoice_reader import db
-# from invoice_reader.app import auth
-# from invoice_reader.app.main import app
-# from invoice_reader.models import UserModel
-# from invoice_reader.schemas import (
-#     AuthToken,
-#     FileData,
-# )
-# from invoice_reader.schemas.users import User
+from invoice_reader.infrastructure.repositories.invoice import InMemoryInvoiceRepository
+from invoice_reader.infrastructure.repositories.file import InMemoryFileRepository
+from invoice_reader.infrastructure.repositories.client import InMemoryClientRepository
+from invoice_reader.infrastructure.repositories.user import InMemoryUserRepository
 
 pytest_plugins = [
     "tests.fixtures.db",
+    "tests.fixtures.domain.client",
+    "tests.fixtures.domain.invoice",
+    "tests.fixtures.domain.user",
 ]
 
+InMemoryInvoiceRepository.init()
 
 # @pytest.fixture()
 # def api_client(session: Session):
@@ -29,18 +28,6 @@ pytest_plugins = [
 #     client = TestClient(app)
 #     yield client
 #     app.dependency_overrides.clear()
-
-
-# @pytest.fixture
-# def filepath() -> Path:
-#     return Path("tests/assets/paper.pdf")
-
-
-# @pytest.fixture
-# def upload_files(filepath):
-#     with open(filepath, "rb") as f:
-#         files = {"upload_file": ("filename.pdf", f, "application/pdf")}
-#         yield files
 
 
 # @pytest.fixture
