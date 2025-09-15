@@ -2,7 +2,7 @@ from typing import BinaryIO
 from uuid import uuid4
 
 from invoice_reader.domain.client import UUID, Client
-from invoice_reader.domain.invoice import File, Invoice, InvoiceBase, InvoiceUpdate
+from invoice_reader.domain.invoice import File, Invoice, InvoiceData
 from invoice_reader.domain.parser import ParsedInvoiceData
 from invoice_reader.services.exceptions import (
     EntityNotFoundException,
@@ -28,7 +28,7 @@ class InvoiceService:
         filename: str,
         user_id: UUID,
         client_id: UUID,
-        invoice_data: InvoiceBase,
+        invoice_data: InvoiceData,
         file_repository: IFileRepository,
         invoice_repository: IInvoiceRepository,
     ) -> None:
@@ -52,7 +52,7 @@ class InvoiceService:
             user_id=user_id,
             client_id=client_id,
             storage_path=storage_path,
-            **invoice_data.model_dump(),
+            data=invoice_data,
         )
         try:
             file_repository.store(file=file)
@@ -117,7 +117,7 @@ class InvoiceService:
     def update_invoice(
         user_id: UUID,
         invoice_id: UUID,
-        invoice_update: InvoiceUpdate,
+        udpated_invoice: InvoiceData,
         invoice_repository: IInvoiceRepository,
     ) -> None:
         # Check for duplicate invoice numbers (excluding the current invoice)
@@ -125,11 +125,12 @@ class InvoiceService:
         if not existing_invoices:
             raise EntityNotFoundException(message=f"No existing invoices found for user {user_id}.")
         if any(
-            invoice.invoice_number == invoice_update.invoice_number and invoice.id_ != invoice_id
+            udpated_invoice.invoice_number == udpated_invoice.invoice_number
+            and invoice.id_ != invoice_id
             for invoice in existing_invoices
         ):
             raise ExistingEntityException(
-                message=f"Invoice with number {invoice_update.invoice_number} already exists."
+                message=f"Invoice with number {udpated_invoice.invoice_number} already exists."
             )
 
         # Update invoice
@@ -141,14 +142,14 @@ class InvoiceService:
             raise EntityNotFoundException(message=f"Invoice with id {invoice_id} not found.")
         updated_invoice = invoice.model_copy(
             update={
-                "client_id": invoice_update.client_id,
-                "invoice_number": invoice_update.invoice_number,
-                "gross_amount": invoice_update.gross_amount,
-                "vat": invoice_update.vat,
-                "description": invoice_update.description,
-                "issued_date": invoice_update.issued_date,
-                "paid_date": invoice_update.paid_date,
-                "currency": invoice_update.currency,
+                "client_id": invoice.client_id,
+                "invoice_number": udpated_invoice.invoice_number,
+                "gross_amount": udpated_invoice.gross_amount,
+                "vat": udpated_invoice.vat,
+                "description": udpated_invoice.description,
+                "issued_date": udpated_invoice.issued_date,
+                "paid_date": udpated_invoice.paid_date,
+                "currency": udpated_invoice.currency,
             }
         )
         invoice_repository.update(invoice=updated_invoice)

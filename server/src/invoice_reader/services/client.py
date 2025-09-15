@@ -1,6 +1,7 @@
 from uuid import UUID
 
-from invoice_reader.domain.client import Client, ClientBase, ClientUpdate
+from invoice_reader.domain.client import Client, ClientData
+from invoice_reader.interfaces.schemas.client import ClientUpdate
 from invoice_reader.services.exceptions import EntityNotFoundException, ExistingEntityException
 from invoice_reader.services.interfaces.repositories import IClientRepository
 
@@ -9,15 +10,15 @@ class ClientService:
     @staticmethod
     def add_client(
         user_id: UUID,
-        client_data: ClientBase,
+        client_data: ClientData,
         client_repository: IClientRepository,
     ) -> None:
         existing_clients = client_repository.get_all(user_id=user_id)
-        if any(client.client_name == client_data.client_name for client in existing_clients):
+        if any(client.data.client_name == client_data.client_name for client in existing_clients):
             raise ExistingEntityException(message="Client with this name already exists.")
         client = Client(
             user_id=user_id,
-            **client_data.model_dump(),
+            data=client_data,
         )
         client_repository.add(client=client)
 
@@ -64,7 +65,7 @@ class ClientService:
         if not existing_clients:
             raise EntityNotFoundException(message=f"No existing clients found for user {user_id}.")
         if any(
-            client.client_name == client_update.client_name and client.id_ != client_id
+            client.data.client_name == client_update.client_name and client.id_ != client_id
             for client in existing_clients
         ):
             raise ExistingEntityException(

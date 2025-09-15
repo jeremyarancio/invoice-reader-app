@@ -5,10 +5,10 @@ from uuid import UUID, uuid4
 import pytest
 
 from invoice_reader.domain.client import Client
-from invoice_reader.domain.invoice import Currency, File, Invoice, InvoiceBase, InvoiceUpdate
+from invoice_reader.domain.invoice import Currency, File, Invoice, InvoiceData
 from invoice_reader.domain.user import User
 from invoice_reader.infrastructure.repositories.invoice import InMemoryInvoiceRepository
-from invoice_reader.interfaces.schemas.invoice import InvoiceCreate
+from invoice_reader.interfaces.schemas.invoice import InvoiceCreate, InvoiceUpdate
 
 TOTAL_N = 3
 
@@ -35,8 +35,8 @@ def upload_files(file: File):
 
 
 @pytest.fixture
-def invoice_base() -> InvoiceBase:
-    return InvoiceBase(
+def invoice_data() -> InvoiceData:
+    return InvoiceData(
         invoice_number="14SQ456",
         gross_amount=10000,
         vat=20,
@@ -54,15 +54,14 @@ def invoice_id() -> UUID:
 
 @pytest.fixture
 def invoice(
-    invoice_id: UUID, invoice_base: InvoiceBase, client: Client, user: User, file: File
+    invoice_id: UUID, invoice_data: InvoiceData, client: Client, user: User, file: File
 ) -> Invoice:
-    # TODO: remove this **model_dump() logic: futur bugs
     return Invoice(
         id_=invoice_id,
         client_id=client.id_,
         user_id=user.id_,
         storage_path=file.storage_path,
-        **invoice_base.model_dump(),
+        data=invoice_data,
     )
 
 
@@ -73,15 +72,18 @@ def existing_invoice(invoice: Invoice) -> Invoice:
 
 
 @pytest.fixture
-def invoice_create(invoice_base: InvoiceBase, client: Client) -> InvoiceCreate:
+def invoice_create(invoice_data: InvoiceData, client: Client) -> InvoiceCreate:
     return InvoiceCreate(
         client_id=client.id_,
-        invoice=invoice_base,
+        data=invoice_data,
     )
 
 
 @pytest.fixture
-def invoice_update(client: Client, invoice_base: InvoiceBase) -> InvoiceUpdate:
-    invoice_base.gross_amount = 20000
-    invoice_base.vat = 10
-    return InvoiceUpdate(client_id=client.id_, **invoice_base.model_dump())
+def invoice_update(client: Client, invoice_data: InvoiceData) -> InvoiceUpdate:
+    invoice_data.gross_amount = 20000
+    invoice_data.vat = 10
+    return InvoiceUpdate(
+        client_id=client.id_,
+        data=invoice_data,
+    )

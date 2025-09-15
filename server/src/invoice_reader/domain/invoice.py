@@ -27,7 +27,7 @@ class File(BaseModel):
         return os.path.splitext(self.filename)[-1]
 
 
-class InvoiceBase(BaseModel):
+class InvoiceData(BaseModel):
     invoice_number: str
     gross_amount: float
     vat: Annotated[int, Field(ge=0, le=50)]
@@ -37,12 +37,9 @@ class InvoiceBase(BaseModel):
     currency: Currency
 
 
-class Invoice(InvoiceBase):
+class Invoice(BaseModel):
     id_: UUID = Field(default_factory=uuid4)
     client_id: UUID
     user_id: UUID
     storage_path: str
-
-
-class InvoiceUpdate(InvoiceBase):
-    client_id: UUID
+    data: InvoiceData

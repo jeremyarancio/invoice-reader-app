@@ -6,7 +6,6 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import HTTPException
 from pydantic import BaseModel, ValidationError
 
-from invoice_reader.domain.invoice import InvoiceBase, InvoiceUpdate
 from invoice_reader.interfaces.dependencies.auth import get_current_user_id
 from invoice_reader.interfaces.dependencies.parser import get_parser
 from invoice_reader.interfaces.dependencies.repository import (
@@ -17,6 +16,7 @@ from invoice_reader.interfaces.dependencies.repository import (
 from invoice_reader.interfaces.schemas.invoice import (
     InvoiceCreate,
     InvoiceResponse,
+    InvoiceUpdate,
     PagedInvoiceResponse,
 )
 from invoice_reader.interfaces.schemas.parser import ParserResponse
@@ -70,19 +70,10 @@ def add_invoice(
     file_repository: Annotated[IFileRepository, Depends(get_file_repository)],
     invoice_repository: Annotated[IInvoiceRepository, Depends(get_invoice_repository)],
 ):
-    invoice_data = InvoiceBase(
-        invoice_number=data.invoice.invoice_number,
-        gross_amount=data.invoice.gross_amount,
-        vat=data.invoice.vat,
-        description=data.invoice.description,
-        issued_date=data.invoice.issued_date,
-        paid_date=data.invoice.paid_date,
-        currency=data.invoice.currency,
-    )
     InvoiceService.add_invoice(
         user_id=user_id,
         client_id=data.client_id,
-        invoice_data=invoice_data,
+        invoice_data=data.data,
         file_bin=upload_file.file,
         filename=upload_file.filename if upload_file.filename else "",
         file_repository=file_repository,
@@ -122,15 +113,7 @@ def get_invoice(
         invoice_id=invoice.id_,
         client_id=invoice.client_id,
         storage_path=invoice.storage_path,
-        data=InvoiceBase(
-            invoice_number=invoice.invoice_number,
-            gross_amount=invoice.gross_amount,
-            vat=invoice.vat,
-            description=invoice.description,
-            issued_date=invoice.issued_date,
-            paid_date=invoice.paid_date,
-            currency=invoice.currency,
-        ),
+        data=invoice.data,
     )
 
 
@@ -151,20 +134,12 @@ def get_invoices(
         page=page,
         per_page=per_page,
         total=len(paged_invoices),
-        data=[
+        invoices=[
             InvoiceResponse(
                 invoice_id=invoice.id_,
                 client_id=invoice.client_id,
                 storage_path=invoice.storage_path,
-                data=InvoiceBase(
-                    invoice_number=invoice.invoice_number,
-                    gross_amount=invoice.gross_amount,
-                    vat=invoice.vat,
-                    description=invoice.description,
-                    issued_date=invoice.issued_date,
-                    paid_date=invoice.paid_date,
-                    currency=invoice.currency,
-                ),
+                data=invoice.data,
             )
             for invoice in paged_invoices
         ],
@@ -195,7 +170,7 @@ def update_invoice(
     InvoiceService.update_invoice(
         user_id=user_id,
         invoice_id=invoice_id,
-        invoice_update=invoice_update,
+        udpated_invoice=invoice_update.data,
         invoice_repository=invoice_repository,
     )
     return Response(content="Invoice successfully updated.", status_code=204)

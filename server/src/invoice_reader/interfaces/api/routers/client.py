@@ -3,12 +3,13 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query, Response
 
-from invoice_reader.domain.client import ClientBase, ClientUpdate
+from invoice_reader.domain.client import ClientData
 from invoice_reader.interfaces.dependencies.auth import get_current_user_id
 from invoice_reader.interfaces.dependencies.repository import get_client_repository
 from invoice_reader.interfaces.schemas.client import (
     ClientCreate,
     ClientResponse,
+    ClientUpdate,
     PagedClientResponse,
 )
 from invoice_reader.services.client import ClientService
@@ -37,15 +38,9 @@ def get_clients(
         total=len(clients),
         page=page,
         per_page=per_page,
-        data=[
+        clients=[
             ClientResponse(
-                client_id=client.id_,
-                client_name=client.client_name,
-                city=client.city,
-                country=client.country,
-                street_address=client.street_address,
-                street_number=client.street_number,
-                zipcode=client.zipcode,
+                client_id=client.id_, total_revenue=client.total_revenue, data=client.data
             )
             for client in clients
         ],
@@ -59,13 +54,7 @@ def get_client(
 ) -> ClientResponse:
     client = ClientService.get_client(client_id=client_id, client_repository=client_repository)
     return ClientResponse(
-        client_id=client.id_,
-        client_name=client.client_name,
-        city=client.city,
-        country=client.country,
-        street_address=client.street_address,
-        street_number=client.street_number,
-        zipcode=client.zipcode,
+        client_id=client.id_, total_revenue=client.total_revenue, data=client.data
     )
 
 
@@ -75,7 +64,7 @@ def add_client(
     user_id: Annotated[UUID, Depends(get_current_user_id)],
     client_repository: Annotated[IClientRepository, Depends(get_client_repository)],
 ) -> Response:
-    client_data = ClientBase(
+    client_data = ClientData(
         client_name=client_create.client_name,
         street_number=client_create.street_number,
         street_address=client_create.street_address,

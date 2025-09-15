@@ -2,18 +2,20 @@ from uuid import UUID
 
 from pydantic import BaseModel
 
-from invoice_reader.domain.client import ClientBase
+from invoice_reader.domain.client import ClientData
 
 
-class ClientCreate(ClientBase):
+class ClientCreate(ClientData):
     pass
 
 
-class ClientResponse(ClientBase):
+class ClientResponse(BaseModel):
     client_id: UUID
     total_revenue: float = 0
+    data: ClientData
 
-class ClientUpdate(ClientBase):
+
+class ClientUpdate(ClientData):
     pass
 
 
@@ -21,4 +23,4 @@ class PagedClientResponse(BaseModel):
     page: int
     per_page: int
     total: int
-    data: list[ClientResponse]
+    clients: list[ClientResponse]

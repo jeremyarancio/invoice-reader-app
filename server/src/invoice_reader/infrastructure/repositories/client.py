@@ -2,7 +2,7 @@ from uuid import UUID
 
 from sqlmodel import Session, select
 
-from invoice_reader.domain.client import Client
+from invoice_reader.domain.client import Client, ClientData
 from invoice_reader.infrastructure.models.client import ClientModel
 from invoice_reader.services.interfaces.repositories import IClientRepository
 
@@ -33,7 +33,7 @@ class InMemoryClientRepository(IClientRepository):
 
     def get_by_name(self, user_id: UUID, client_name: str) -> Client | None:
         for client in self.clients.values():
-            if client.user_id == user_id and client.client_name == client_name:
+            if client.user_id == user_id and client.data.client_name == client_name:
                 return client
 
 
@@ -46,12 +46,12 @@ class SQLModelClientRepository(IClientRepository):
         return ClientModel(
             client_id=client.id_,
             user_id=client.user_id,
-            client_name=client.client_name,
-            street_number=client.street_number,
-            street_address=client.street_address,
-            zipcode=client.zipcode,
-            city=client.city,
-            country=client.country,
+            client_name=client.data.client_name,
+            street_number=client.data.street_number,
+            street_address=client.data.street_address,
+            zipcode=client.data.zipcode,
+            city=client.data.city,
+            country=client.data.country,
         )
 
     def _to_entity(self, model: ClientModel) -> Client:
@@ -59,13 +59,16 @@ class SQLModelClientRepository(IClientRepository):
         return Client(
             id_=model.client_id,
             user_id=model.user_id,
-            client_name=model.client_name,
-            street_number=model.street_number,
-            street_address=model.street_address,
-            zipcode=model.zipcode,
-            city=model.city,
-            country=model.country,
-        )
+            data=ClientData(
+                client_name=model.client_name,
+                street_number=model.street_number,
+                street_address=model.street_address,
+                zipcode=model.zipcode,
+                city=model.city,
+                country=model.country,
+            ),
+            total_revenue=0,
+        )  # TODO: Add total revenue calculation
 
     def add(self, client: Client) -> None:
         client_model = self._to_model(client)

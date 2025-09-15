@@ -3,7 +3,7 @@ from uuid import uuid4
 import pytest
 from fastapi.testclient import TestClient
 
-from invoice_reader.domain.client import Client, ClientUpdate
+from invoice_reader.domain.client import Client
 from invoice_reader.domain.user import User
 from invoice_reader.infrastructure.repositories.client import InMemoryClientRepository
 from invoice_reader.interfaces.api.main import app
@@ -12,6 +12,7 @@ from invoice_reader.interfaces.dependencies.repository import get_client_reposit
 from invoice_reader.interfaces.schemas.client import (
     ClientCreate,
     ClientResponse,
+    ClientUpdate,
     PagedClientResponse,
 )
 
@@ -56,7 +57,7 @@ def test_get_client(test_client: TestClient, existing_client: Client):
     client_response = ClientResponse.model_validate(response.json())
     assert response.status_code == 200
     assert client_response.client_id == existing_client.id_
-    assert client_response.client_name == existing_client.client_name
+    assert client_response.data.client_name == existing_client.data.client_name
 
 
 def test_update_client(
@@ -69,8 +70,8 @@ def test_update_client(
     updated_client = InMemoryClientRepository().get(client_id=existing_client.id_)
     assert response.status_code == 204
     assert updated_client is not None
-    assert updated_client.client_name == client_update.client_name
-    assert updated_client.street_number == client_update.street_number
+    assert updated_client.data.client_name == client_update.client_name
+    assert updated_client.data.street_number == client_update.street_number
 
 
 def test_delete_client(test_client: TestClient, existing_client: Client):
@@ -85,7 +86,7 @@ def test_get_paged_clients(test_client: TestClient, existing_client: Client):
     paged_clients = PagedClientResponse.model_validate(response.json())
     assert response.status_code == 200
     assert paged_clients.total == 1
-    assert paged_clients.data[0].client_id == existing_client.id_
+    assert paged_clients.clients[0].client_id == existing_client.id_
 
 
 def test_get_client_not_found(test_client: TestClient):
