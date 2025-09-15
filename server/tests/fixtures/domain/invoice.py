@@ -25,7 +25,7 @@ def file(filepath: Path, user: User, invoice_id: UUID) -> File:
         return File(
             filename=filepath.name,
             file=f.read(),
-            storage_path=f"s3://bucket/{user.id_}/{invoice_id}{filepath.suffix}",
+            storage_path=f"inmemory://bucket/{user.id_}/{invoice_id}{filepath.suffix}",
         )
 
 

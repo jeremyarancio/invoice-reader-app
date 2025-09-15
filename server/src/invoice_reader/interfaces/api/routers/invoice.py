@@ -94,7 +94,7 @@ def add_invoice(
     )
 
 
-@router.post("/parse/")
+@router.post("/parse")
 def parse_invoice(
     upload_file: Annotated[UploadFile, File()],
     parser: Annotated[IParser, Depends(get_parser)],

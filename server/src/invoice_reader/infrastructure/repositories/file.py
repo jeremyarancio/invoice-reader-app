@@ -18,8 +18,8 @@ class InMemoryFileRepository(IFileRepository):
         if storage_path in self.storage:
             del self.storage[storage_path]
 
-    def get_url(self, storage_path: str) -> str:
-        return f"inmemory://{storage_path}"
+    def get_url(self, storage_path) -> str:
+        return "fake_url"
 
 
 class S3FileRepository(IFileRepository):
