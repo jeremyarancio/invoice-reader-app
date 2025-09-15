@@ -1,14 +1,13 @@
-from typing import BinaryIO
 from datetime import date
+from typing import BinaryIO
 
 import httpx
 
-from invoice_reader.domain.parser import ParserExtraction
+from invoice_reader.domain.invoice import Currency
+from invoice_reader.domain.parser import ParsedClientData, ParsedInvoiceData, ParserExtraction
 from invoice_reader.services.exceptions import InfrastructureException
 from invoice_reader.services.interfaces.parser import IParser
 from invoice_reader.settings import get_settings
-from invoice_reader.domain.parser import ParserExtraction, ParsedClientData, ParsedInvoiceData
-from invoice_reader.domain.invoice import Currency
 
 settings = get_settings()
 

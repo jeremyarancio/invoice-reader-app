@@ -62,13 +62,20 @@ def test_client(user: User):
     app.dependency_overrides.clear()
 
 
-def test_add_invoice(test_client: TestClient, upload_files: Any, invoice_create: InvoiceCreate):
+def test_add_invoice(
+    test_client: TestClient, upload_files: Any, invoice_create: InvoiceCreate, user: User
+):
     response = test_client.post(
         "/v1/invoices/",
         files=upload_files,
         data={"data": invoice_create.model_dump_json()},
     )
     assert response.status_code == 201
+    invoice = InMemoryInvoiceRepository().get_by_invoice_number(
+        invoice_create.invoice.invoice_number, user_id=user.id_
+    )
+    assert invoice
+    assert invoice.invoice_number == invoice_create.invoice.invoice_number
 
 
 def test_add_exisiting_invoice(
@@ -118,7 +125,7 @@ def test_delete_invoice(test_client: TestClient, existing_invoice: Invoice):
 
 
 def test_get_paged_invoices(test_client: TestClient, existing_invoice: Invoice):
-    response = test_client.get("/v1/invoices/?skip=0&limit=1")
+    response = test_client.get("/v1/invoices")
     paged_invoices = PagedInvoiceResponse.model_validate(response.json())
     assert response.status_code == 200
     assert paged_invoices.total == 1

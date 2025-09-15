@@ -39,6 +39,7 @@ def get_clients(
         per_page=per_page,
         data=[
             ClientResponse(
+                client_id=client.id_,
                 client_name=client.client_name,
                 city=client.city,
                 country=client.country,
@@ -58,6 +59,7 @@ def get_client(
 ) -> ClientResponse:
     client = ClientService.get_client(client_id=client_id, client_repository=client_repository)
     return ClientResponse(
+        client_id=client.id_,
         client_name=client.client_name,
         city=client.city,
         country=client.country,

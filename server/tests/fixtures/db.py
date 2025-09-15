@@ -5,7 +5,7 @@ from sqlalchemy import StaticPool
 from sqlalchemy.engine import Engine
 from sqlmodel import Session, SQLModel, create_engine
 
-from invoice_reader.infrastructure.models import *
+from invoice_reader.infrastructure.models import *  # noqa: F401, F403
 
 
 @pytest.fixture(scope="function")

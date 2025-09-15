@@ -4,7 +4,7 @@ import jwt
 from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
 from passlib.context import CryptContext
 
-from invoice_reader.domain.auth import DecodedToken, EncodedToken
+from invoice_reader.domain.auth import DecodedToken
 from invoice_reader.services.exceptions import AuthenticationException
 from invoice_reader.settings import get_settings
 
@@ -23,7 +23,7 @@ class AuthService:
         return pwd_context.hash(password)
 
     @staticmethod
-    def decode_token(token: EncodedToken) -> DecodedToken:
+    def decode_token(token: str) -> DecodedToken:
         try:
             payload = jwt.decode(  # type: ignore
                 jwt=token,
@@ -43,7 +43,7 @@ class AuthService:
             ) from e
 
     @classmethod
-    def refresh_token(cls, token: EncodedToken) -> tuple[EncodedToken, EncodedToken]:
+    def refresh_token(cls, token: str) -> tuple[str, str]:
         payload = cls.decode_token(token=token)
         if email := payload.email:
             access_token = cls.create_token(
@@ -62,7 +62,7 @@ class AuthService:
             raise AuthenticationException(status_code=401, message="Email not found in token.")
 
     @staticmethod
-    def create_token(email: str, expire: int, token_type: str) -> EncodedToken:
+    def create_token(email: str, expire: int, token_type: str) -> str:
         exp = datetime.now() + timedelta(seconds=expire)
         payload = DecodedToken(
             email=email,
@@ -74,4 +74,4 @@ class AuthService:
             key=settings.jwt_secret_key,
             algorithm=settings.jwt_algorithm,
         )
-        return EncodedToken.convert_str(encoded_jwt)
+        return encoded_jwt

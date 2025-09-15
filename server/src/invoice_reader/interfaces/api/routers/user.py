@@ -4,7 +4,6 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Request, Response
 from fastapi.security import OAuth2PasswordRequestForm
 
-from invoice_reader.domain.auth import EncodedToken
 from invoice_reader.interfaces.dependencies.auth import get_current_user_id
 from invoice_reader.interfaces.dependencies.repository import get_user_repository
 from invoice_reader.interfaces.schemas.auth import AuthToken
@@ -73,9 +72,7 @@ def refresh(request: Request, response: Response) -> AuthToken:
     refresh_token = request.cookies.get("refresh_token")
     if not refresh_token:
         raise AuthenticationException(message="No refresh token found.")
-    access_token, refresh_token = AuthService.refresh_token(
-        token=EncodedToken.convert_str(refresh_token)
-    )
+    access_token, refresh_token = AuthService.refresh_token(token=refresh_token)
     response.set_cookie(
         value=refresh_token,
         expires=settings.refresh_token_expire,

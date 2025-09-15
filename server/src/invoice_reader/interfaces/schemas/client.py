@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from pydantic import BaseModel
 
 from invoice_reader.domain.client import ClientBase
@@ -8,8 +10,8 @@ class ClientCreate(ClientBase):
 
 
 class ClientResponse(ClientBase):
-    pass
-
+    client_id: UUID
+    total_revenue: float = 0
 
 class ClientUpdate(ClientBase):
     pass

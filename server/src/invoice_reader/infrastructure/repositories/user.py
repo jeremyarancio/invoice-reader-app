@@ -8,8 +8,11 @@ from invoice_reader.services.interfaces.repositories import IUserRepository
 
 
 class InMemoryUserRepository(IUserRepository):
-    def __init__(self):
-        self.users: dict[UUID, User] = {}
+    users: dict[UUID, User] = {}
+
+    @classmethod
+    def init(cls):
+        cls.users = {}
 
     def add(self, user: User) -> None:
         self.users[user.id_] = user

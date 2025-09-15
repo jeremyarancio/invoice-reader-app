@@ -1,6 +1,5 @@
 from uuid import UUID
 
-from invoice_reader.domain.auth import EncodedToken
 from invoice_reader.domain.user import User
 from invoice_reader.services.auth import AuthService
 from invoice_reader.services.exceptions import (
@@ -39,7 +38,7 @@ class UserService:
         email: str,
         password: str,
         user_repository: IUserRepository,
-    ) -> tuple[EncodedToken, EncodedToken]:
+    ) -> tuple[str, str]:
         user = user_repository.get_by_email(email=email)
         if not user:
             raise EntityNotFoundException(message="User not found.")

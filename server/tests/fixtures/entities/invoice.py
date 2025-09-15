@@ -4,12 +4,11 @@ from uuid import UUID, uuid4
 
 import pytest
 
-from invoice_reader.domain.invoice import Invoice, InvoiceBase, Currency, File, InvoiceUpdate
 from invoice_reader.domain.client import Client
+from invoice_reader.domain.invoice import Currency, File, Invoice, InvoiceBase, InvoiceUpdate
 from invoice_reader.domain.user import User
 from invoice_reader.infrastructure.repositories.invoice import InMemoryInvoiceRepository
 from invoice_reader.interfaces.schemas.invoice import InvoiceCreate
-
 
 TOTAL_N = 3
 

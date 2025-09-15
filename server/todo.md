@@ -1,3 +1,7 @@
 - [ ] Create tables on server launch
 - [ ] Add session injection
 - [ ] Fix parser
+- [ ] Update ENV variables in production
+- [ ] Add rules to Invoice entity
+- [ ] Remove inheritance of domain entities
+- [ ] Consider re-adding custom id and EncodedToken
