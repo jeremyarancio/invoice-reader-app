@@ -7,6 +7,7 @@ import pytest
 from invoice_reader.domain.client import Client
 from invoice_reader.domain.invoice import Currency, File, Invoice, InvoiceData
 from invoice_reader.domain.user import User
+from invoice_reader.infrastructure.repositories.file import InMemoryFileRepository
 from invoice_reader.infrastructure.repositories.invoice import InMemoryInvoiceRepository
 from invoice_reader.interfaces.schemas.invoice import InvoiceCreate, InvoiceUpdate
 
@@ -87,3 +88,9 @@ def invoice_update(client: Client, invoice_data: InvoiceData) -> InvoiceUpdate:
         client_id=client.id_,
         data=invoice_data,
     )
+
+
+@pytest.fixture
+def existing_file(file: File) -> File:
+    InMemoryFileRepository().store(file=file)
+    return file

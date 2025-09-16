@@ -21,6 +21,9 @@ class InMemoryFileRepository(IFileRepository):
     def get_url(self, storage_path) -> str:
         return "fake_url"
 
+    def get(self, storage_path: str) -> bytes | None:
+        return self.storage.get(storage_path)
+
 
 class S3FileRepository(IFileRepository):
     bucket: str
