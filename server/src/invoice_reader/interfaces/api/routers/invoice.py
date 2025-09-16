@@ -109,12 +109,7 @@ def get_invoice(
     invoice = InvoiceService.get_invoice(
         invoice_id=invoice_id, invoice_repository=invoice_repository
     )
-    return InvoiceResponse(
-        invoice_id=invoice.id_,
-        client_id=invoice.client_id,
-        storage_path=invoice.storage_path,
-        data=invoice.data,
-    )
+    return InvoiceResponse.from_invoice(invoice)
 
 
 @router.get("/")
@@ -134,15 +129,7 @@ def get_invoices(
         page=page,
         per_page=per_page,
         total=len(paged_invoices),
-        invoices=[
-            InvoiceResponse(
-                invoice_id=invoice.id_,
-                client_id=invoice.client_id,
-                storage_path=invoice.storage_path,
-                data=invoice.data,
-            )
-            for invoice in paged_invoices
-        ],
+        invoices=[InvoiceResponse.from_invoice(invoice) for invoice in paged_invoices],
     )
 
 

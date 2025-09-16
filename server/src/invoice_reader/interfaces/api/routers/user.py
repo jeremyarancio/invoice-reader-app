@@ -104,7 +104,4 @@ def get_current_user(
     user_repository: Annotated[IUserRepository, Depends(get_user_repository)],
 ) -> UserResponse:
     user = UserService.get_user(user_id=user_id, user_repository=user_repository)
-    return UserResponse(
-        user_id=user.id_,
-        email=user.email,
-    )
+    return UserResponse.from_user(user)

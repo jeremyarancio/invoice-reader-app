@@ -38,12 +38,7 @@ def get_clients(
         total=len(clients),
         page=page,
         per_page=per_page,
-        clients=[
-            ClientResponse(
-                client_id=client.id_, total_revenue=client.total_revenue, data=client.data
-            )
-            for client in clients
-        ],
+        clients=[ClientResponse.from_client(client) for client in clients],
     )
 
 
@@ -53,9 +48,7 @@ def get_client(
     client_repository: Annotated[IClientRepository, Depends(get_client_repository)],
 ) -> ClientResponse:
     client = ClientService.get_client(client_id=client_id, client_repository=client_repository)
-    return ClientResponse(
-        client_id=client.id_, total_revenue=client.total_revenue, data=client.data
-    )
+    return ClientResponse.from_client(client)
 
 
 @router.post("/")
