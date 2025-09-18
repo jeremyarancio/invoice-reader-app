@@ -5,6 +5,7 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     postgres_host: str = "postgres"
+    postgres_port: int = 5432
     postgres_user: str = "postgres"
     postgres_password: str = "postgres"
     postgres_db: str = "postgres"
@@ -32,7 +33,7 @@ class Settings(BaseSettings):
 
     @property
     def database_url(self) -> str:
-        return f"postgresql://{self.postgres_user}:{self.postgres_password}@{self.postgres_host}/{self.postgres_db}"
+        return f"postgresql://{self.postgres_user}:{self.postgres_password}@{self.postgres_host}:{self.postgres_port}/{self.postgres_db}"
 
     @property
     def parser_endpoint(self) -> str:

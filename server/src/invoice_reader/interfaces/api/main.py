@@ -26,9 +26,6 @@ logger = get_logger()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Create db tables
-    logger.info("Creating database tables...")
-    create_tables()
     yield
 
 
