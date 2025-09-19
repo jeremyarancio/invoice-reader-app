@@ -74,6 +74,8 @@ services:
         labels:
             - "traefik.enable=true"
             - "traefik.http.routers.grafana.rule=Host(`monitor.${DOMAIN_NAME:-localhost}`)"
+            - "traefik.http.services.grafana.loadbalancer.server.port=3000"
+
         volumes:
             - grafana-storage:/var/lib/grafana
             - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
