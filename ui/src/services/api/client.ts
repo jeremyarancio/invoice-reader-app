@@ -41,10 +41,10 @@ export const deleteClient = async (clientId: string) => {
     await api.delete("clients/" + clientId);
 };
 
-export const updateClient = async (update_client: UpdateClient) => {
+export const updateClient = async (client_id: string, update_client: UpdateClient) => {
     const response = await api.put(
-        "clients/" + update_client.id,
-        update_client.client,
+        "clients/" + client_id,
+        update_client,
         {
             headers: {
                 "Content-Type": "application/json",

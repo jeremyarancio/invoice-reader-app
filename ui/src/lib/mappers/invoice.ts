@@ -1,7 +1,5 @@
 import type {
     CreateInvoicePayload,
-    Currency,
-    GetCurrency,
     GetInvoice,
     Invoice,
     UpdateInvoice,
@@ -14,26 +12,25 @@ export function mapGetInvoiceToInvoice(getInvoice: GetInvoice): Invoice {
         grossAmount: getInvoice.data.gross_amount,
         invoiceNumber: getInvoice.data.invoice_number,
         vat: getInvoice.data.vat,
-        issuedDate: getInvoice.data.invoiced_date,
+        issuedDate: getInvoice.data.issued_date,
         paidDate: getInvoice.data.paid_date,
         description: getInvoice.data.description,
-        currencyId: getInvoice.currency_id,
+        currency: getInvoice.data.currency,
         clientId: getInvoice.client_id,
     };
 }
 
 export function mapInvoiceToUpdateInvoice(invoice: Invoice): UpdateInvoice {
     return {
-        id: invoice.id,
-        invoice: {
+        client_id: invoice.clientId,
+        data: {
             gross_amount: invoice.grossAmount,
             invoice_number: invoice.invoiceNumber,
-            invoiced_date: toDate(invoice.issuedDate),
+            issued_date: toDate(invoice.issuedDate),
             paid_date: invoice.paidDate ? toDate(invoice.paidDate) : undefined,
             vat: invoice.vat,
             description: invoice.description,
-            currency_id: invoice.currencyId,
-            client_id: invoice.clientId,
+            currency: invoice.currency,
         },
     };
 }
@@ -42,22 +39,15 @@ export function mapInvoicetoCreateInvoice(
     invoice: Omit<Invoice, "id">
 ): CreateInvoicePayload {
     return {
-        invoice: {
+        data: {
             gross_amount: invoice.grossAmount,
             invoice_number: invoice.invoiceNumber,
-            invoiced_date: toDate(invoice.issuedDate),
+            issued_date: toDate(invoice.issuedDate),
             vat: invoice.vat,
             paid_date: invoice.paidDate ? toDate(invoice.paidDate) : undefined,
             description: invoice.description,
+            currency: invoice.currency,
         },
         client_id: invoice.clientId,
-        currency_id: invoice.currencyId,
-    };
-}
-
-export function mapGetCurrencyToCurrency(currency: GetCurrency): Currency {
-    return {
-        id: currency.currency_id,
-        name: currency.currency,
     };
 }

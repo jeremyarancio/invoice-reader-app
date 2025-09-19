@@ -4,9 +4,8 @@ from alembic import context
 from sqlalchemy import engine_from_config, pool
 from sqlmodel import SQLModel
 
-from invoice_reader import settings
-from invoice_reader.settings import get_settings
 from invoice_reader.infrastructure.models import *
+from invoice_reader.settings import get_settings
 
 settings = get_settings()
 

@@ -2,7 +2,7 @@ import { ArrowLeft } from "lucide-react";
 
 import { useNavigate, useLocation } from "react-router-dom";
 import PdfPreview from "@/components/PdfPreview";
-import { useFetchCurrencies, useParseInvoice } from "@/hooks/api/invoice";
+import { useParseInvoice } from "@/hooks/api/invoice";
 import { useFetchClients } from "@/hooks/api/client";
 import AddInvoiceForm from "@/components/AddInvoiceForm";
 
@@ -10,7 +10,6 @@ function AddInvoice() {
     const navigate = useNavigate();
     const file: File = useLocation().state?.file;
     const { clients } = useFetchClients();
-    const { currencies } = useFetchCurrencies();
     const {
         data: parsedInvoice,
         isLoading: isParsingLoading,
@@ -89,7 +88,6 @@ function AddInvoice() {
                         <AddInvoiceForm
                             parsedInvoice={parsedInvoice}
                             clients={clients}
-                            currencies={currencies}
                             file={file}
                         />
                     ) : (

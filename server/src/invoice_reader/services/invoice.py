@@ -55,8 +55,11 @@ class InvoiceService:
             data=invoice_data,
         )
         try:
+            logger.info("Start storing file")
             file_repository.store(file=file)
+            logger.info(f"File stored at {storage_path}.")
             invoice_repository.add(invoice=invoice)
+            logger.info(f"Invoice with id {invoice.id_} added to the repository.")
         except Exception as err:
             cls._rollback_add(
                 invoice=invoice,
@@ -72,6 +75,7 @@ class InvoiceService:
         invoice_repository: IInvoiceRepository,
         error: Exception,
     ) -> None:
+        logger.error("Issue when storing invoice.\nError: {}\nStarting rollback.", error)
         try:
             file_repository.delete(storage_path=invoice.storage_path)
             invoice_repository.delete(invoice_id=invoice.id_)

@@ -153,7 +153,7 @@ def test_parser_with_client_not_found(test_client: TestClient, upload_files: Any
     response = test_client.post("/v1/invoices/parse", files=upload_files)
     assert response.status_code == 200
     parsed_data = ParserResponse.model_validate(response.json())
-    assert parsed_data.client is None
+    assert parsed_data.client_id is None
 
 
 def test_parser_with_client_found(
@@ -162,5 +162,5 @@ def test_parser_with_client_found(
     response = test_client.post("/v1/invoices/parse", files=upload_files)
     assert response.status_code == 200
     parser_response = ParserResponse.model_validate(response.json())
-    assert parser_response.client is not None
-    assert parser_response.client.id_ == existing_client.id_
+    assert parser_response.client_id is not None
+    assert parser_response.client_id == existing_client.id_

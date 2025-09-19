@@ -23,7 +23,7 @@ function AddIndividual() {
         email: z.string(),
         phoneNumber: z.coerce.string(),
         address: z.coerce.string(),
-        zipcode: z.coerce.string(),
+        zipcode: z.string(),
         city: z.coerce.string(),
         country: z.coerce.string(),
     });

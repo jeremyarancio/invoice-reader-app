@@ -1,3 +1,5 @@
+import io
+
 import boto3
 from botocore.config import Config
 
@@ -45,7 +47,7 @@ class S3FileRepository(IFileRepository):
 
     def store(self, file: File) -> None:
         self.client.upload_fileobj(
-            file.file,
+            io.BytesIO(file.file),  # Require a readable file-like object
             self.bucket,
             self._get_suffix_from_s3_path(file.storage_path),
         )

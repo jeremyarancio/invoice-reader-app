@@ -1,5 +1,4 @@
 import {
-    useFetchCurrencies,
     useFetchInvoice,
     useFetchInvoiceUrl,
 } from "@/hooks/api/invoice";
@@ -14,7 +13,6 @@ function ViewInvoice() {
     const navigate = useNavigate();
 
     const { invoice, isLoading: isInvoiceLoading } = useFetchInvoice(invoiceId);
-    const { currencies, isLoading: isCurrenciesLoading } = useFetchCurrencies();
     const { clients, isLoading: isClientsLoading } = useFetchClients();
     const { url: invoiceUrl } = useFetchInvoiceUrl(invoiceId);
 
@@ -45,13 +43,11 @@ function ViewInvoice() {
                 </div>
                 <div className="col-span-2 md:px-20 w-full">
                     {!isInvoiceLoading &&
-                        !isCurrenciesLoading &&
                         !isClientsLoading &&
                         !!invoice && (
                             <ViewInvoiceForm
                                 invoice={invoice}
                                 clients={clients}
-                                currencies={currencies}
                             />
                         )}
                 </div>

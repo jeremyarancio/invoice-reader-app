@@ -98,7 +98,7 @@ def parse_invoice(
         client_repository=client_repository,
         user_id=user_id,
     )
-    return ParserResponse(invoice=invoice_data, client=client)
+    return ParserResponse(invoice=invoice_data, client_id=client.id_ if client else None)
 
 
 @router.get("/{invoice_id}", dependencies=[Depends(get_current_user_id)])

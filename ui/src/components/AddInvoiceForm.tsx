@@ -26,7 +26,6 @@ import {
 import { Input } from "@/components/ui/input";
 import type { ParsedInvoice } from "@/schemas/parser";
 import type { Client } from "@/schemas/client";
-import type { Currency } from "@/schemas/invoice";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -37,15 +36,15 @@ import { useIsSubmittedAlert } from "@/hooks/alert-hooks";
 import NewClientModal from "./NewClientModal";
 import { useNavigate } from "react-router-dom";
 import { useAddInvoice } from "@/hooks/api/invoice";
+import { CURRENCIES } from "@/schemas/invoice";
 
 interface Props {
     file: File;
     clients: Client[];
-    currencies: Currency[];
     parsedInvoice?: ParsedInvoice;
 }
 
-function AddInvoiceForm({ file, parsedInvoice, clients, currencies }: Props) {
+function AddInvoiceForm({ file, parsedInvoice, clients }: Props) {
     const [isNewClientModalOpen, setIsNewClientModalOpen] = useState(false);
     const { isSubmitted, setIsSubmitted } = useIsSubmittedAlert();
     const navigate = useNavigate();
@@ -55,16 +54,16 @@ function AddInvoiceForm({ file, parsedInvoice, clients, currencies }: Props) {
         try {
             await addInvoice(file, {
                 client_id: values.client_id,
-                currency_id: values.currency_id,
-                invoice: {
+                data: {
                     description: values.invoiceDescription,
                     gross_amount: values.grossAmount,
                     invoice_number: values.invoiceNumber,
-                    invoiced_date: toDate(values.invoicedDate),
+                    issued_date: toDate(values.issuedDate),
                     paid_date: values.paidDate
                         ? toDate(values.paidDate)
                         : undefined,
                     vat: values.vat,
+                    currency: Object.entries(CURRENCIES).find(([, val]) => val === values.currency)?.[0] ?? "",
                 },
             });
             setIsSubmitted(true);
@@ -84,10 +83,10 @@ function AddInvoiceForm({ file, parsedInvoice, clients, currencies }: Props) {
             .number()
             .min(0, "Gross amount must be a positive number")
             .max(1000000, "Gross amount must be less than 1,000,000"),
-        currency_id: z.string(),
+        currency: z.string(),
         vat: z.coerce.number().min(0).max(50),
         client_id: z.string(),
-        invoicedDate: z.date(),
+        issuedDate: z.date(),
         paidDate: z.date().optional(),
     });
 
@@ -108,15 +107,15 @@ function AddInvoiceForm({ file, parsedInvoice, clients, currencies }: Props) {
             );
         parsedInvoice.invoice.gross_amount &&
             form.setValue("grossAmount", parsedInvoice.invoice.gross_amount);
-        parsedInvoice.invoice.currency_id &&
-            form.setValue("currency_id", parsedInvoice.invoice.currency_id);
+        parsedInvoice.invoice.currency &&
+            form.setValue("currency", CURRENCIES[parsedInvoice.invoice.currency as keyof typeof CURRENCIES]);
         parsedInvoice.invoice.vat &&
             form.setValue("vat", parsedInvoice.invoice.vat);
-        parsedInvoice.client.client_id &&
-            form.setValue("client_id", parsedInvoice.client.client_id);
+        parsedInvoice.client_id &&
+            form.setValue("client_id", parsedInvoice.client_id);
         parsedInvoice.invoice.issued_date &&
             form.setValue(
-                "invoicedDate",
+                "issuedDate",
                 new Date(parsedInvoice.invoice.issued_date)
             );
     }
@@ -197,7 +196,7 @@ function AddInvoiceForm({ file, parsedInvoice, clients, currencies }: Props) {
                     />
                     <FormField
                         control={form.control}
-                        name="currency_id"
+                        name="currency"
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel>
@@ -206,7 +205,7 @@ function AddInvoiceForm({ file, parsedInvoice, clients, currencies }: Props) {
                                 </FormLabel>
                                 <Select
                                     onValueChange={field.onChange}
-                                    defaultValue={field.name}
+                                    defaultValue={field.value}
                                 >
                                     <FormControl>
                                         <SelectTrigger>
@@ -214,12 +213,12 @@ function AddInvoiceForm({ file, parsedInvoice, clients, currencies }: Props) {
                                         </SelectTrigger>
                                     </FormControl>
                                     <SelectContent className="bg-stone-50">
-                                        {currencies.map((currency) => (
+                                        {Object.values(CURRENCIES).map((currency) => (
                                             <SelectItem
-                                                key={currency.id}
-                                                value={currency.id}
+                                                key={currency}
+                                                value={currency}
                                             >
-                                                {currency.name}
+                                                {currency}
                                             </SelectItem>
                                         ))}
                                     </SelectContent>
@@ -295,7 +294,7 @@ function AddInvoiceForm({ file, parsedInvoice, clients, currencies }: Props) {
                     />
                     <FormField
                         control={form.control}
-                        name="invoicedDate"
+                        name="issuedDate"
                         render={({ field }) => (
                             <FormItem className="flex flex-col">
                                 <FormLabel>
@@ -323,6 +322,8 @@ function AddInvoiceForm({ file, parsedInvoice, clients, currencies }: Props) {
                                         </FormControl>
                                     </PopoverTrigger>
                                     <PopoverContent
+                                        side="bottom"
+                                        avoidCollisions={false}
                                         className="w-auto p-0 bg-stone-50"
                                         align="start"
                                     >
@@ -372,8 +373,10 @@ function AddInvoiceForm({ file, parsedInvoice, clients, currencies }: Props) {
                                         </FormControl>
                                     </PopoverTrigger>
                                     <PopoverContent
-                                        className="w-auto p-0 bg-stone-50"
+                                        side="bottom"
+                                        avoidCollisions={false}
                                         align="start"
+                                        className="w-auto p-0 bg-stone-50"
                                     >
                                         <Calendar
                                             mode="single"

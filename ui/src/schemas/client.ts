@@ -13,36 +13,36 @@ export interface CreateClient {
     client_name: string;
     street_number: number;
     street_address: string;
-    zipcode: number;
+    zipcode: string;
     city: string;
     country: string;
 }
 
 export interface GetPagedClients {
+    page: number;
     per_page: number;
     total: number;
-    data: GetClient[];
+    clients: GetClient[];
 }
 
 export interface GetClient {
     client_id: string;
-    client_name: string;
-    street_number: string;
-    street_address: string;
-    zipcode: string;
-    city: string;
-    country: string;
     total_revenu: number;
-}
-
-export interface UpdateClient {
-    id: string;
-    client: {
+    data: {
         client_name: string;
         street_number: string;
         street_address: string;
         zipcode: string;
         city: string;
         country: string;
-    };
+    }
+}
+
+export interface UpdateClient {
+    client_name: string;
+    street_number: string;
+    street_address: string;
+    zipcode: string;
+    city: string;
+    country: string;
 }

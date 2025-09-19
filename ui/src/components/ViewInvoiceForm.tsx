@@ -13,7 +13,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { CalendarIcon, Pencil, Save, X } from "lucide-react";
 import { useUpdateInvoice } from "@/hooks/api/invoice";
-import type { Currency, Invoice } from "@/schemas/invoice";
+import { CURRENCIES, type Invoice } from "@/schemas/invoice";
 import {
     Select,
     SelectContent,
@@ -33,11 +33,10 @@ import type { Client } from "@/schemas/client";
 
 interface Props {
     invoice: Invoice;
-    currencies: Currency[];
     clients: Client[];
 }
 
-function ViewInvoiceForm({ invoice, clients, currencies }: Props) {
+function ViewInvoiceForm({ invoice, clients}: Props) {
     const [editMode, setEditMode] = useState(false);
 
     const updateInvoice = useUpdateInvoice();
@@ -49,7 +48,7 @@ function ViewInvoiceForm({ invoice, clients, currencies }: Props) {
             invoiceNumber: z.string(),
             invoiceDescription: z.string(),
             grossAmount: z.coerce.number().min(0, "Must be positive"),
-            currencyId: z.string(),
+            currency: z.string(),
             vat: z.coerce.number().min(0).max(50),
             clientId: z.string(),
             issuedDate: z.date(),
@@ -66,7 +65,7 @@ function ViewInvoiceForm({ invoice, clients, currencies }: Props) {
             invoiceNumber: invoice.invoiceNumber,
             invoiceDescription: invoice.description,
             grossAmount: invoice.grossAmount,
-            currencyId: invoice.currencyId,
+            currency: invoice.currency,
             vat: invoice.vat,
             clientId: invoice.clientId,
             issuedDate: new Date(invoice.issuedDate),
@@ -79,7 +78,7 @@ function ViewInvoiceForm({ invoice, clients, currencies }: Props) {
             invoiceNumber: invoice.invoiceNumber,
             invoiceDescription: invoice.description,
             grossAmount: invoice.grossAmount,
-            currencyId: invoice.currencyId,
+            currency: invoice.currency,
             vat: invoice.vat,
             clientId: invoice.clientId,
             issuedDate: new Date(invoice.issuedDate),
@@ -96,7 +95,7 @@ function ViewInvoiceForm({ invoice, clients, currencies }: Props) {
                 id: invoice.id,
                 invoiceNumber: values.invoiceNumber,
                 grossAmount: values.grossAmount,
-                currencyId: values.currencyId,
+                currency: values.currency,
                 vat: values.vat,
                 clientId: values.clientId,
                 issuedDate: values.issuedDate,
@@ -172,10 +171,9 @@ function ViewInvoiceForm({ invoice, clients, currencies }: Props) {
                                 </FormItem>
                             )}
                         />
-
                         <FormField
                             control={form.control}
-                            name="currencyId"
+                            name="currency"
                             render={({ field }) => (
                                 <FormItem className="col-span-1">
                                     <FormLabel>Currency</FormLabel>
@@ -191,23 +189,19 @@ function ViewInvoiceForm({ invoice, clients, currencies }: Props) {
                                             </FormControl>
 
                                             <SelectContent className="bg-stone-50">
-                                                {currencies.map((currency) => (
+                                                {Object.entries(CURRENCIES).map(([key, value]) => (
                                                     <SelectItem
-                                                        key={currency.id}
-                                                        value={currency.id}
+                                                        key={key}
+                                                        value={key}
                                                     >
-                                                        {currency.name}
+                                                        {key}
                                                     </SelectItem>
                                                 ))}
                                             </SelectContent>
                                         </Select>
                                     ) : (
                                         <Input
-                                            value={
-                                                currencies.find(
-                                                    (c) => c.id === field.value
-                                                )?.name || ""
-                                            }
+                                            value={field.value}
                                             readOnly
                                             className="bg-muted"
                                         />
