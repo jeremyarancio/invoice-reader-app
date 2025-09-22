@@ -36,12 +36,10 @@ interface Props {
     clients: Client[];
 }
 
-function ViewInvoiceForm({ invoice, clients}: Props) {
+function ViewInvoiceForm({ invoice, clients }: Props) {
     const [editMode, setEditMode] = useState(false);
 
     const updateInvoice = useUpdateInvoice();
-
-    console.log("Invoice in ViewInvoiceForm:", invoice);
 
     const invoiceSchema = z
         .object({
@@ -189,14 +187,16 @@ function ViewInvoiceForm({ invoice, clients}: Props) {
                                             </FormControl>
 
                                             <SelectContent className="bg-stone-50">
-                                                {Object.entries(CURRENCIES).map(([key, value]) => (
-                                                    <SelectItem
-                                                        key={key}
-                                                        value={key}
-                                                    >
-                                                        {key}
-                                                    </SelectItem>
-                                                ))}
+                                                {Object.entries(CURRENCIES).map(
+                                                    ([key, value]) => (
+                                                        <SelectItem
+                                                            key={key}
+                                                            value={value}
+                                                        >
+                                                            {value}
+                                                        </SelectItem>
+                                                    )
+                                                )}
                                             </SelectContent>
                                         </Select>
                                     ) : (
@@ -288,6 +288,8 @@ function ViewInvoiceForm({ invoice, clients}: Props) {
                                         <PopoverContent
                                             className="w-auto p-0 bg-stone-50"
                                             align="start"
+                                            side="bottom"
+                                            avoidCollisions={false}
                                         >
                                             <Calendar
                                                 mode="single"
@@ -342,6 +344,8 @@ function ViewInvoiceForm({ invoice, clients}: Props) {
                                         <PopoverContent
                                             className="w-auto p-0 bg-stone-50"
                                             align="start"
+                                            side="bottom"
+                                            avoidCollisions={false}
                                         >
                                             <Calendar
                                                 mode="single"

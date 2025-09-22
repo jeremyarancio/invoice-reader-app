@@ -8,8 +8,6 @@ function ViewClient() {
     const navigate = useNavigate();
     const { client, isLoading: isClientLoading } = useFetchClient(clientId);
 
-    console.log("Client:", client);
-
     return (
         <>
             <div className="mt-10 ml-10">
@@ -39,7 +37,7 @@ function ViewClient() {
                             Total Revenue:
                         </span>
                         <span className="font-semibold text-lg">
-                            {client?.totalRevenu || 0} €
+                            {client?.totalRevenue || 0} €
                         </span>
                     </div>
                 </div>

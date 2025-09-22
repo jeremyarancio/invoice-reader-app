@@ -34,6 +34,7 @@ build-backend = "hatchling.build"
 
 [tool.ruff]
 line-length = 100
+extend-exclude = ["migrations"]
 
 [tool.ruff.format]
 indent-style = "space"

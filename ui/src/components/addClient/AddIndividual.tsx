@@ -34,7 +34,6 @@ function AddIndividual() {
 
     function onSubmit(values: z.infer<typeof formSchema>) {
         setIsSubmitted(true);
-        console.log(values);
     }
 
     return (

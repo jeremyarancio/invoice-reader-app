@@ -16,7 +16,6 @@ function ViewInvoice() {
     const { clients, isLoading: isClientsLoading } = useFetchClients();
     const { url: invoiceUrl } = useFetchInvoiceUrl(invoiceId);
 
-    console.log("Invoice URL:", invoiceUrl);
 
     return (
         <>

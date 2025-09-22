@@ -67,8 +67,7 @@ class SQLModelClientRepository(IClientRepository):
                 city=model.city,
                 country=model.country,
             ),
-            total_revenue=0,
-        )  # TODO: Add total revenue calculation
+        )
 
     def add(self, client: Client) -> None:
         client_model = self._to_model(client)

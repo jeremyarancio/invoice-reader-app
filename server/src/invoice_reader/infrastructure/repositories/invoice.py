@@ -36,6 +36,9 @@ class InMemoryInvoiceRepository(IInvoiceRepository):
             if invoice.user_id == user_id and invoice.data.invoice_number == invoice_number:
                 return invoice
 
+    def get_by_client_id(self, client_id: UUID) -> list[Invoice]:
+        return [invoice for invoice in self.invoices.values() if invoice.client_id == client_id]
+
 
 class SQLModelInvoiceRepository(IInvoiceRepository):
     def __init__(self, session: Session):
@@ -120,3 +123,9 @@ class SQLModelInvoiceRepository(IInvoiceRepository):
 
         self.session.add(existing_invoice_model)
         self.session.commit()
+
+    def get_by_client_id(self, client_id: UUID) -> list[Invoice]:
+        invoice_models = self.session.exec(
+            select(InvoiceModel).where(InvoiceModel.client_id == client_id)
+        ).all()
+        return [self._to_entity(model) for model in invoice_models]

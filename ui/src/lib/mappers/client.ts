@@ -9,7 +9,8 @@ export function mapGetClientToClient(getClient: GetClient): Client {
         streetAddress: getClient.data.street_address,
         streetNumber: getClient.data.street_number,
         zipcode: getClient.data.zipcode,
-        totalRevenu: getClient.total_revenu,
+        totalRevenue: getClient.total_revenue,
+        nInvoices: getClient.n_invoices,
     };
 }
 
@@ -21,5 +22,5 @@ export function mapClientToUpdateClient(client: Client): UpdateClient {
         zipcode: client.zipcode,
         city: client.city,
         country: client.country,
-        };
     };
+}

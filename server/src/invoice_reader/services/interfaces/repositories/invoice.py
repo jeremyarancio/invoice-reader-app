@@ -27,3 +27,7 @@ class IInvoiceRepository(ABC):
     @abstractmethod
     def get_by_invoice_number(self, invoice_number: str, user_id: UUID) -> Invoice | None:
         raise NotImplementedError
+
+    @abstractmethod
+    def get_by_client_id(self, client_id: UUID) -> list[Invoice]:
+        raise NotImplementedError

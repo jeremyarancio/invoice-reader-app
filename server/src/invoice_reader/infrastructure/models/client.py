@@ -14,5 +14,3 @@ class ClientModel(SQLModel, table=True):
     zipcode: str
     city: str
     country: str
-
-    # invoices: list["InvoiceModel"] = Relationship(back_populates="client")

@@ -4,6 +4,7 @@ from invoice_reader.domain.client import Client, ClientData
 from invoice_reader.interfaces.schemas.client import ClientUpdate
 from invoice_reader.services.exceptions import EntityNotFoundException, ExistingEntityException
 from invoice_reader.services.interfaces.repositories import IClientRepository
+from invoice_reader.services.interfaces.repositories.invoice import IInvoiceRepository
 
 
 class ClientService:
@@ -26,20 +27,26 @@ class ClientService:
     def get_client(
         client_id: UUID,
         client_repository: IClientRepository,
+        invoice_repository: IInvoiceRepository,
     ) -> Client:
         client = client_repository.get(client_id=client_id)
         if not client:
             raise EntityNotFoundException(message=f"Client with id {client_id} not found.")
+        invoices = invoice_repository.get_by_client_id(client_id=client.id_)
+        client.invoices.extend(invoices)
         return client
 
     @staticmethod
     def get_paged_clients(
         user_id: UUID,
         client_repository: IClientRepository,
+        invoice_repository: IInvoiceRepository,
         page: int,
         per_page: int,
     ) -> list[Client]:
         clients = client_repository.get_all(user_id=user_id)
+        for client in clients:
+            client.invoices.extend(invoice_repository.get_by_client_id(client_id=client.id_))
         start = (page - 1) * per_page
         end = start + per_page
         return clients[start:end]

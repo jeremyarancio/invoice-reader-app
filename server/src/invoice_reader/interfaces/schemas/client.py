@@ -11,7 +11,8 @@ class ClientCreate(ClientData):
 
 class ClientResponse(BaseModel):
     client_id: UUID
-    total_revenue: float = 0
+    total_revenue: float
+    n_invoices: int
     data: ClientData
 
     @classmethod
@@ -20,6 +21,7 @@ class ClientResponse(BaseModel):
             client_id=client.id_,
             total_revenue=client.total_revenue,
             data=client.data,
+            n_invoices=len(client.invoices),
         )
 
 

@@ -1,8 +1,9 @@
-import type {
-    CreateInvoicePayload,
-    GetInvoice,
-    Invoice,
-    UpdateInvoice,
+import {
+    CURRENCIES,
+    type CreateInvoicePayload,
+    type GetInvoice,
+    type Invoice,
+    type UpdateInvoice,
 } from "@/schemas/invoice";
 import { toDate } from "@/lib/utils";
 
@@ -15,7 +16,7 @@ export function mapGetInvoiceToInvoice(getInvoice: GetInvoice): Invoice {
         issuedDate: getInvoice.data.issued_date,
         paidDate: getInvoice.data.paid_date,
         description: getInvoice.data.description,
-        currency: getInvoice.data.currency,
+        currency: CURRENCIES[getInvoice.data.currency as keyof typeof CURRENCIES],
         clientId: getInvoice.client_id,
     };
 }

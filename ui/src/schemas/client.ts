@@ -6,7 +6,8 @@ export interface Client {
     zipcode: string;
     city: string;
     country: string;
-    totalRevenu?: number;
+    totalRevenue: number;
+    nInvoices: number;
 }
 
 export interface CreateClient {
@@ -27,7 +28,8 @@ export interface GetPagedClients {
 
 export interface GetClient {
     client_id: string;
-    total_revenu: number;
+    total_revenue: number;
+    n_invoices: number;
     data: {
         client_name: string;
         street_number: string;
@@ -35,7 +37,7 @@ export interface GetClient {
         zipcode: string;
         city: string;
         country: string;
-    }
+    };
 }
 
 export interface UpdateClient {

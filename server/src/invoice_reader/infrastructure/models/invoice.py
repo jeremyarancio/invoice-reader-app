@@ -22,6 +22,3 @@ class InvoiceModel(SQLModel, table=True):
     paid_date: date | None = None
     uploaded_date: date | None = Field(default_factory=date.today)
     last_updated_date: date | None = Field(default_factory=date.today)
-
-    # client: "ClientModel" = Relationship()
-    # currency: "CurrencyModel" = Relationship()

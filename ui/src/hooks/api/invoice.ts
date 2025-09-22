@@ -56,7 +56,6 @@ export const useAddInvoice = () => {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["invoices"] });
             queryClient.invalidateQueries({ queryKey: ["clients"] });
-            console.log("Invoice added successfully");
         },
         onError: (error: AxiosError) => {
             error.status === 409
