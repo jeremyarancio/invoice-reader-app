@@ -129,7 +129,7 @@ class InvoiceService:
         if not existing_invoices:
             raise EntityNotFoundException(message=f"No existing invoices found for user {user_id}.")
         if any(
-            udpated_invoice.invoice_number == udpated_invoice.invoice_number
+            udpated_invoice.invoice_number == invoice.data.invoice_number
             and invoice.id_ != invoice_id
             for invoice in existing_invoices
         ):
@@ -140,7 +140,7 @@ class InvoiceService:
         # Update invoice
         invoice = next(
             (invoice for invoice in existing_invoices if invoice.id_ == invoice_id),
-            None,  # Pick the invoice to update for the already fetched invoices
+            None,  # Pick the invoice to update from the already fetched invoices
         )
         if not invoice:
             raise EntityNotFoundException(message=f"Invoice with id {invoice_id} not found.")

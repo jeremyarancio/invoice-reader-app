@@ -16,7 +16,8 @@ export function mapGetInvoiceToInvoice(getInvoice: GetInvoice): Invoice {
         issuedDate: getInvoice.data.issued_date,
         paidDate: getInvoice.data.paid_date,
         description: getInvoice.data.description,
-        currency: CURRENCIES[getInvoice.data.currency as keyof typeof CURRENCIES],
+        currency:
+            CURRENCIES[getInvoice.data.currency as keyof typeof CURRENCIES],
         clientId: getInvoice.client_id,
     };
 }
@@ -31,7 +32,10 @@ export function mapInvoiceToUpdateInvoice(invoice: Invoice): UpdateInvoice {
             paid_date: invoice.paidDate ? toDate(invoice.paidDate) : undefined,
             vat: invoice.vat,
             description: invoice.description,
-            currency: invoice.currency,
+            currency:
+                Object.entries(CURRENCIES).find(
+                    ([, value]) => value === invoice.currency
+                )?.[0] || "usd",
         },
     };
 }
