@@ -1,5 +1,4 @@
 import {
-    mapGetCurrencyToCurrency,
     mapGetInvoiceToInvoice,
     mapInvoiceToUpdateInvoice,
 } from "@/lib/mappers/invoice";
@@ -11,7 +10,6 @@ import type {
 import {
     addInvoice,
     deleteInvoice,
-    fetchCurrencies,
     fetchInvoice,
     fetchInvoices,
     fetchInvoiceUrl,
@@ -22,14 +20,6 @@ import { queryClient } from "@/services/api/main";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
 
-export const useFetchCurrencies = () => {
-    const { data, isLoading, error } = useQuery({
-        queryKey: ["currencies"],
-        queryFn: () => fetchCurrencies(),
-    });
-    const currencies = data?.map(mapGetCurrencyToCurrency) || [];
-    return { currencies, isLoading, error };
-};
 
 export const useFetchInvoices = (
     pageNumber: number = 1,
@@ -39,7 +29,7 @@ export const useFetchInvoices = (
         queryKey: ["invoices", pageNumber, perPage],
         queryFn: () => fetchInvoices(pageNumber, perPage),
     });
-    const invoices = data?.data.map(mapGetInvoiceToInvoice) || [];
+    const invoices = data?.invoices.map(mapGetInvoiceToInvoice) || [];
 
     return { invoices, isLoading, error };
 };
@@ -66,7 +56,6 @@ export const useAddInvoice = () => {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["invoices"] });
             queryClient.invalidateQueries({ queryKey: ["clients"] });
-            console.log("Invoice added successfully");
         },
         onError: (error: AxiosError) => {
             error.status === 409
@@ -94,8 +83,8 @@ export const useFetchInvoice = (invoiceId: string | undefined) => {
 
 export const useUpdateInvoice = () => {
     const updateInvoiceMutation = useMutation({
-        mutationFn: (data: UpdateInvoice) => {
-            return updateInvoice(data);
+        mutationFn: ({ invoice_id, data }: { invoice_id: string; data: UpdateInvoice }) => {
+            return updateInvoice(invoice_id, data);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["invoices"] });
@@ -106,8 +95,11 @@ export const useUpdateInvoice = () => {
             window.alert("Error: " + (error.response?.data as any)?.message);
         },
     });
-    return (data: Invoice) =>
-        updateInvoiceMutation.mutateAsync(mapInvoiceToUpdateInvoice(data));
+    return (invoice: Invoice) =>
+        updateInvoiceMutation.mutateAsync({
+            invoice_id: invoice.id,
+            data: mapInvoiceToUpdateInvoice(invoice),
+        });
 };
 
 export const useDeleteInvoice = () => {

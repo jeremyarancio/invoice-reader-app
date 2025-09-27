@@ -1,6 +1,5 @@
 import type {
     CreateInvoicePayload,
-    GetCurrency,
     GetInvoice,
     GetPagedInvoices,
     UpdateInvoice,
@@ -39,18 +38,12 @@ export const fetchInvoices = async (
     return response.data;
 };
 
-export const fetchCurrencies = async (): Promise<GetCurrency[]> => {
-    const response = await api.get("currencies/", {});
-    return response.data;
-};
-
 export const deleteInvoice = async (invoiceId: string) => {
     await api.delete("invoices/" + invoiceId);
 };
 
-export const updateInvoice = async (invoice: UpdateInvoice) => {
-    const response = await api.put("invoices/" + invoice.id, invoice.invoice);
-    return response.data;
+export const updateInvoice = async (invoice_id: string, data: UpdateInvoice) => {
+    await api.put("invoices/" + invoice_id, data);
 };
 
 export const fetchInvoiceUrl = async (id: string): Promise<string> => {
@@ -61,7 +54,7 @@ export const parseInvoice = async (file: File): Promise<ParsedInvoice> => {
     const formData = new FormData();
     formData.append("upload_file", file);
 
-    const response = await api.post("invoices/extract/", formData, {
+    const response = await api.post("invoices/parse/", formData, {
         headers: {
             "Content-Type": "multipart/form-data",
         },

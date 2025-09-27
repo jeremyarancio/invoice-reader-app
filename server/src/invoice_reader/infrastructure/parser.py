@@ -2,51 +2,52 @@ from datetime import date
 from typing import BinaryIO
 
 import httpx
-from pydantic import BaseModel
 
-from invoice_reader import settings
-from invoice_reader.app.exceptions import INVALID_EXTRACTED_DATA_EXCEPTION
+from invoice_reader.domain.invoice import Currency
+from invoice_reader.domain.parser import ParsedClientData, ParsedInvoiceData, ParserExtraction
+from invoice_reader.services.exceptions import InfrastructureException
+from invoice_reader.services.interfaces.parser import IParser
+from invoice_reader.settings import get_settings
 
-
-class Address(BaseModel):
-    street_address: str | None = None
-    zipcode: str | None = None
-    city: str | None = None
-    country: str | None = None
+settings = get_settings()
 
 
-class Invoice(BaseModel):
-    gross_amount: float | None = None
-    vat: int | None = None
-    issued_date: date | None = None
-    due_date: date | None = None
-    invoice_number: str | None = None
-    invoice_description: str | None = None
-    currency: str | None = None
+class TestParser(IParser):
+    def parse(self, file: BinaryIO) -> ParserExtraction:
+        return ParserExtraction(
+            invoice=ParsedInvoiceData(
+                gross_amount=100.0,
+                vat=20,
+                issued_date=date(2023, 1, 1),
+                currency=Currency.EUR,
+                invoice_number="INV-1000",
+                invoice_description="Test invoice",
+            ),
+            client=ParsedClientData(
+                client_name="Test Client",
+                street_address="123 Test St",
+                zipcode="12345",
+                city="Test City",
+                country="Test Country",
+            ),
+        )
 
 
-class Client(BaseModel):
-    name: str | None = None
-    address: Address | None = None
-
-
-class Seller(BaseModel):
-    name: str | None = None
-    address: Address | None = None
-
-
-class InvoiceExtraction(BaseModel):
-    invoice: Invoice
-    client: Client
-    seller: Seller
-
-
-def parse_invoice(file: BinaryIO) -> InvoiceExtraction:
-    """Parse document using the /parser endpoint from the ML server."""
-    files = {"upload_file": file}
-    api_url = settings.ML_SERVER_URL + "/v1/parse"
-    response = httpx.post(api_url, files=files)
-    if response.status_code != 200:
-        raise INVALID_EXTRACTED_DATA_EXCEPTION
-    invoice_data = InvoiceExtraction.model_validate(response.json())
-    return invoice_data
+class MLServerParser(IParser):
+    def parse(self, file: BinaryIO) -> ParserExtraction:
+        """Parse document using the /parser endpoint from the ML server."""
+        files = {"upload_file": file}
+        response = httpx.post(settings.parser_endpoint, files=files)
+        if response.status_code != 200:
+            raise InfrastructureException(
+                message=f"""Failed to parse the invoice document.\n Error: {response.text}. 
+                Response status: {response.status_code}""",
+            )
+        try:
+            parsed_data = ParserExtraction.model_validate(response.json())
+        except Exception as e:
+            raise InfrastructureException(
+                message="Failed to parse the invoice document. Error: " + str(e),
+                status_code=422,
+            ) from e
+        return parsed_data

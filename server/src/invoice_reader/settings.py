@@ -1,42 +1,45 @@
-import os
-from pathlib import Path
+from functools import lru_cache
 
-from dotenv import load_dotenv
-
-load_dotenv()
+from pydantic_settings import BaseSettings
 
 
-REPO_DIR = Path(__file__).parent.parent.parent
+class Settings(BaseSettings):
+    postgres_host: str = "postgres"
+    postgres_port: int = 5432
+    postgres_user: str = "postgres"
+    postgres_password: str = "postgres"
+    postgres_db: str = "postgres"
 
-# DB
-POSTGRES_HOST = os.getenv("POSTGRES_HOST", "postgres")
-POSTGRES_USER = os.getenv("POSTGRES_USER", "postgres")
-POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "postgres")
-POSTGRES_DB = os.getenv("POSTGRES_DB", "postgres")
-DATABASE_URL = (
-    f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}/{POSTGRES_DB}"
-)
-# DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{REPO_DIR / "data/database.db"}")
+    jwt_secret_key: str = "1234"
+    jwt_algorithm: str = "HS256"
+    access_token_expire: int = 60
+    refresh_token_expire: int = 60 * 60 * 24
 
-# Security
-JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
-JWT_ALGORITHM = os.getenv("JWT_ALGORITHM")
-ACCESS_TOKEN_EXPIRE = int(
-    os.getenv("ACCESS_TOKEN_EXPIRE", 60)
-)  # .env always store as string
-REFRESH_TOKEN_EXPIRE = int(os.getenv("REFRESH_TOKEN_EXPIRE", 60 * 60 * 24))
+    per_page: int = 10
 
-# Pagination
-PER_PAGE = 10
+    protocol: str = "http"
+    domain_name: str = "localhost"
+    frontend_subdomain: str = "app"
 
-# Front-End
-PROTOCOL = os.getenv("PROTOCOL", "http")
-DOMAIN_NAME = os.getenv("DOMAIN_NAME", "localhost")
-FRONT_END_SUBDOMAIN = os.getenv("FRONT_END_SUBDOMAIN", "app")
-FRONT_END_URL = f"{PROTOCOL}://{FRONT_END_SUBDOMAIN}.{DOMAIN_NAME}"
+    presigned_url_expiration: int = 3600
+    s3_bucket_name: str = "bucket"
+    s3_region: str = "eu-central-1"
 
-# S3
-PRESIGNED_URL_EXPIRATION = int(os.getenv("PRESIGNED_URL_EXPIRATION", 3600))
-S3_BUCKET_NAME = os.getenv("S3_BUCKET_NAME")
+    ml_server_url: str = "http://ml-server:5000"
 
-ML_SERVER_URL = os.getenv("ML_SERVER_URL", "http://ml-server:5000")
+    @property
+    def frontend_url(self) -> str:
+        return f"{self.protocol}://{self.frontend_subdomain}.{self.domain_name}"
+
+    @property
+    def database_url(self) -> str:
+        return f"postgresql://{self.postgres_user}:{self.postgres_password}@{self.postgres_host}:{self.postgres_port}/{self.postgres_db}"
+
+    @property
+    def parser_endpoint(self) -> str:
+        return f"{self.ml_server_url}/v1/parse"
+
+
+@lru_cache
+def get_settings() -> Settings:
+    return Settings()  # type: ignore

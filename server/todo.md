@@ -1,0 +1,7 @@
+- [x] Add session injection
+- [x] Fix parser
+- [ ] Update ENV variables in production
+- [ ] Add rules to Invoice entity
+- [x] Remove inheritance of domain entities
+- [ ] Add mapper to simplify entity layers relations
+- [ ] Consider re-adding custom id and EncodedToken

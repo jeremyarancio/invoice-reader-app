@@ -1,0 +1,69 @@
+import io
+
+import boto3
+from botocore.config import Config
+
+from invoice_reader.domain.invoice import File
+from invoice_reader.services.interfaces.repositories import IFileRepository
+
+
+class InMemoryFileRepository(IFileRepository):
+    storage: dict[str, bytes] = {}
+
+    def create_storage_path(self, initial_path: str) -> str:
+        return initial_path
+
+    def store(self, file: File) -> None:
+        self.storage[file.storage_path] = file.file
+
+    def delete(self, storage_path: str) -> None:
+        if storage_path in self.storage:
+            del self.storage[storage_path]
+
+    def get_url(self, storage_path) -> str:
+        return "fake_url"
+
+    def get(self, storage_path: str) -> bytes | None:
+        return self.storage.get(storage_path)
+
+
+class S3FileRepository(IFileRepository):
+    bucket: str
+    region: str
+    presigned_url_expiration: int
+
+    def __init__(self, bucket: str, region: str, presigned_url_expiration: int) -> None:
+        self.bucket = bucket
+        self.region = region
+        self.presigned_url_expiration = presigned_url_expiration
+        self.client = boto3.client("s3", config=Config(signature_version="s3v4"))
+
+    @staticmethod
+    def _get_suffix_from_s3_path(s3_path: str) -> str:
+        return "/".join(s3_path.split("://")[-1].split("/")[1:])
+
+    def create_storage_path(self, initial_path: str) -> str:
+        return f"s3://{self.bucket}/{initial_path}"
+
+    def store(self, file: File) -> None:
+        self.client.upload_fileobj(
+            io.BytesIO(file.file),  # Require a readable file-like object
+            self.bucket,
+            self._get_suffix_from_s3_path(file.storage_path),
+        )
+
+    def delete(self, storage_path: str) -> None:
+        self.client.delete_object(
+            Bucket=self.bucket, Key=self._get_suffix_from_s3_path(storage_path)
+        )
+
+    def get_url(self, storage_path: str) -> str:
+        response: str = self.client.generate_presigned_url(
+            "get_object",
+            Params={
+                "Bucket": self.bucket,
+                "Key": self._get_suffix_from_s3_path(storage_path),
+            },
+            ExpiresIn=self.presigned_url_expiration,
+        )
+        return response

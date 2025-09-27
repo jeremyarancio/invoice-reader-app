@@ -2,7 +2,7 @@ import {
     mapClientToUpdateClient,
     mapGetClientToClient,
 } from "@/lib/mappers/client";
-import type { Client, CreateClient } from "@/schemas/client";
+import type { Client, CreateClient, UpdateClient } from "@/schemas/client";
 import {
     addClient,
     deleteClient,
@@ -32,7 +32,7 @@ export const useFetchClients = (
         queryKey: ["clients", pageNumber, perPage],
         queryFn: () => fetchClients(pageNumber, perPage),
     });
-    const clients = data?.data.map(mapGetClientToClient) || [];
+    const clients = data?.clients.map(mapGetClientToClient) || [];
 
     return { clients, isLoading, error };
 };
@@ -78,7 +78,13 @@ export const useAddClient = (config?: {
 
 export const useUpdateClient = () => {
     const updateMutation = useMutation({
-        mutationFn: updateClient,
+        mutationFn: ({
+            client_id,
+            data,
+        }: {
+            client_id: string;
+            data: UpdateClient;
+        }) => updateClient(client_id, data),
         onSuccess: () => {
             window.alert("Client successfully updated.");
             queryClient.invalidateQueries({ queryKey: ["clients"] });
@@ -88,6 +94,9 @@ export const useUpdateClient = () => {
             window.alert("Failed to update client: " + error.message);
         },
     });
-    return (client: Client) =>
-        updateMutation.mutateAsync(mapClientToUpdateClient(client));
+    return (client: Omit<Client, "totalRevenue" | "nInvoices">) =>
+        updateMutation.mutateAsync({
+            client_id: client.id,
+            data: mapClientToUpdateClient(client),
+        });
 };

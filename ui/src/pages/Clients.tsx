@@ -31,9 +31,9 @@ function Clients() {
                         key={client.clientName}
                         clientId={client.id}
                         clientName={client.clientName}
-                        totalInvoiceNumber={0} //Not implemented
-                        totalInvoiceAmount={client.totalRevenu ?? 0}
-                        totalInvoiceAmountCurrency={"-"} //Not implemented
+                        totalInvoice={client.nInvoices}
+                        totalInvoiceAmount={client.totalRevenue}
+                        totalInvoiceAmountCurrency={"-"}
                     />
                 ))}
             </div>

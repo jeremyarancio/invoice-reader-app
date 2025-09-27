@@ -5,7 +5,7 @@ import { useDeleteClient } from "@/hooks/api/client";
 interface ClientCardProps {
     clientId: string;
     clientName: string;
-    totalInvoiceNumber: number;
+    totalInvoice: number;
     totalInvoiceAmount: number;
     totalInvoiceAmountCurrency: string;
 }
@@ -13,7 +13,7 @@ interface ClientCardProps {
 function ClientCard({
     clientId,
     clientName,
-    totalInvoiceNumber,
+    totalInvoice,
     totalInvoiceAmount,
     totalInvoiceAmountCurrency,
 }: ClientCardProps) {
@@ -31,7 +31,7 @@ function ClientCard({
                 <div className="flex justify-between flex-nowrap">
                     <div className="flex w-3/8 space-x-8 justify-start">
                         <p className="flex italic font-semibold text-sm">
-                            {totalInvoiceNumber} invoices
+                            {totalInvoice} invoices
                         </p>
                     </div>
                     <div className="w-3/8"></div>

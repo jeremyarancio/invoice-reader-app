@@ -23,7 +23,7 @@ function AddIndividual() {
         email: z.string(),
         phoneNumber: z.coerce.string(),
         address: z.coerce.string(),
-        zipcode: z.coerce.string(),
+        zipcode: z.string(),
         city: z.coerce.string(),
         country: z.coerce.string(),
     });
@@ -34,7 +34,6 @@ function AddIndividual() {
 
     function onSubmit(values: z.infer<typeof formSchema>) {
         setIsSubmitted(true);
-        console.log(values);
     }
 
     return (

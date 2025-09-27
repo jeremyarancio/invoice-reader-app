@@ -4,15 +4,17 @@ from alembic import context
 from sqlalchemy import engine_from_config, pool
 from sqlmodel import SQLModel
 
-from invoice_reader import settings
-from invoice_reader.models import *
+from invoice_reader.infrastructure.models import *
+from invoice_reader.settings import get_settings
+
+settings = get_settings()
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
 
 # Add Database url based on the environment Dev/Prod
-config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
+config.set_main_option("sqlalchemy.url", settings.database_url)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.

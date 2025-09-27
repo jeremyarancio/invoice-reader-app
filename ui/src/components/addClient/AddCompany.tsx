@@ -27,7 +27,7 @@ function AddCompany({ onSuccess, onError }: Props) {
         client_name: z.string(),
         street_number: z.coerce.number(),
         street_address: z.string(),
-        zipcode: z.coerce.number(),
+        zipcode: z.string(),
         city: z.string(),
         country: z.string(),
         vatNumber: z.coerce.string(),
