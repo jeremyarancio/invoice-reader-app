@@ -57,10 +57,12 @@ def test_get_by_invoice_number(repository: SQLModelInvoiceRepository, invoice: I
 def test_update_invoice(repository: SQLModelInvoiceRepository, invoice: Invoice):
     repository.add(invoice)
     invoice.data.description = "Updated description"
+    invoice.data.issued_date = date(2024, 11, 20)
     repository.update(invoice)
     updated = repository.get(invoice.id_)
     assert updated is not None
     assert updated.data.description == "Updated description"
+    assert updated.data.issued_date == date(2024, 11, 20)
 
 
 def test_delete_invoice(repository: SQLModelInvoiceRepository, invoice: Invoice):

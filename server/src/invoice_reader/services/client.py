@@ -1,7 +1,6 @@
 from uuid import UUID
 
 from invoice_reader.domain.client import Client, ClientData
-from invoice_reader.interfaces.schemas.client import ClientUpdate
 from invoice_reader.services.exceptions import EntityNotFoundException, ExistingEntityException
 from invoice_reader.services.interfaces.repositories import IClientRepository
 from invoice_reader.services.interfaces.repositories.invoice import IInvoiceRepository
@@ -65,30 +64,25 @@ class ClientService:
     def update_client(
         user_id: UUID,
         client_id: UUID,
-        client_update: ClientUpdate,
+        client_update_data: ClientData,
         client_repository: IClientRepository,
     ) -> None:
         existing_clients = client_repository.get_all(user_id=user_id)
         if not existing_clients:
             raise EntityNotFoundException(message=f"No existing clients found for user {user_id}.")
         if any(
-            client.data.client_name == client_update.client_name and client.id_ != client_id
+            client.data.client_name == client_update_data.client_name and client.id_ != client_id
             for client in existing_clients
         ):
             raise ExistingEntityException(
-                message=f"Client with name {client_update.client_name} already exists."
+                message=f"Client with name {client_update_data.client_name} already exists."
             )
         client = next((client for client in existing_clients if client.id_ == client_id), None)
         if not client:
             raise EntityNotFoundException(message=f"Client with id {client_id} not found.")
-        updated_client = client.model_copy(
-            update={
-                "client_name": client_update.client_name,
-                "street_number": client_update.street_number,
-                "street_address": client_update.street_address,
-                "zipcode": client_update.zipcode,
-                "city": client_update.city,
-                "country": client_update.country,
-            }
+        updated_client = Client(
+            id_=client.id_,
+            user_id=client.user_id,
+            data=client_update_data,
         )
         client_repository.update(client=updated_client)

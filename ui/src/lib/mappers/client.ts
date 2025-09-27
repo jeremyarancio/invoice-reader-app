@@ -14,13 +14,17 @@ export function mapGetClientToClient(getClient: GetClient): Client {
     };
 }
 
-export function mapClientToUpdateClient(client: Client): UpdateClient {
+export function mapClientToUpdateClient(
+    client: Omit<Client, "totalRevenue" | "nInvoices">
+): UpdateClient {
     return {
-        client_name: client.clientName,
-        street_number: client.streetNumber,
-        street_address: client.streetAddress,
-        zipcode: client.zipcode,
-        city: client.city,
-        country: client.country,
+        data: {
+            client_name: client.clientName,
+            street_number: client.streetNumber,
+            street_address: client.streetAddress,
+            zipcode: client.zipcode,
+            city: client.city,
+            country: client.country,
+        },
     };
 }

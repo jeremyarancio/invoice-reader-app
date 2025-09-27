@@ -83,8 +83,8 @@ def test_update_client(
     updated_client = InMemoryClientRepository().get(client_id=existing_client.id_)
     assert response.status_code == 204
     assert updated_client is not None
-    assert updated_client.data.client_name == client_update.client_name
-    assert updated_client.data.street_number == client_update.street_number
+    assert updated_client.data.client_name == client_update.data.client_name
+    assert updated_client.data.street_number == client_update.data.street_number
 
 
 def test_delete_client(test_client: TestClient, existing_client: Client):

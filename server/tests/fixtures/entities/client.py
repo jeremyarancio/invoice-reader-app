@@ -5,13 +5,11 @@ from invoice_reader.domain.user import User
 from invoice_reader.infrastructure.repositories.client import InMemoryClientRepository
 from invoice_reader.interfaces.schemas.client import ClientCreate, ClientUpdate
 
-TOTAL_NUMBER = 3
-
 
 @pytest.fixture
 def client_data() -> ClientData:
     return ClientData(
-        client_name="Test Client",  # NOTE: Exact name used in test_parser to match client_id with client_name when parsed
+        client_name="Test Client",  # NOTE: match client_id with client_name when parsed
         street_number=123,
         street_address="Test St",
         city="Test City",
@@ -48,6 +46,11 @@ def client_create(client_data: ClientData) -> ClientCreate:
 
 @pytest.fixture
 def client_update(client_data: ClientData) -> ClientUpdate:
-    client_data.client_name = "Updated Client Name"
-    client_data.street_number = 456
-    return ClientUpdate.model_validate(client_data.model_dump())
+    return ClientUpdate(
+        data=client_data.model_copy(
+            update={
+                "client_name": "Updated Client Name",
+                "street_number": 456,
+            }
+        )
+    )

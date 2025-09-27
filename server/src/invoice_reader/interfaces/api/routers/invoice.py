@@ -144,7 +144,7 @@ def delete_invoice(
         invoice_repository=invoice_repository,
         file_repository=file_repository,
     )
-    return Response(content="Invoice successfully deleted.", status_code=204)
+    return Response(status_code=204)
 
 
 @router.put("/{invoice_id}")
@@ -157,10 +157,11 @@ def update_invoice(
     InvoiceService.update_invoice(
         user_id=user_id,
         invoice_id=invoice_id,
-        udpated_invoice=invoice_update.data,
+        update_client_id=invoice_update.client_id,
+        update_invoice_data=invoice_update.data,
         invoice_repository=invoice_repository,
     )
-    return Response(content="Invoice successfully updated.", status_code=204)
+    return Response(status_code=204)
 
 
 @router.get("/{invoice_id}/url/", dependencies=[Depends(get_current_user_id)])

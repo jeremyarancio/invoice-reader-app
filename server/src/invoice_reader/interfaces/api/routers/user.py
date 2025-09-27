@@ -64,7 +64,7 @@ def delete_user(
     user_repository: Annotated[IUserRepository, Depends(get_user_repository)],
 ) -> Response:
     UserService.delete(user_id=user_id, user_repository=user_repository)
-    return Response(content="User successfully deleted.", status_code=204)
+    return Response(status_code=204)
 
 
 @router.post("/refresh/")
@@ -95,7 +95,7 @@ def signout(response: Response) -> Response:
         samesite="none" if settings.protocol == "https" else "lax",
         domain=settings.domain_name,
     )
-    return Response(content="User successfully signed out.", status_code=204)
+    return Response(status_code=204)
 
 
 @router.get("/me/")

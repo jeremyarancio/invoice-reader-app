@@ -41,10 +41,12 @@ export interface GetClient {
 }
 
 export interface UpdateClient {
-    client_name: string;
-    street_number: string;
-    street_address: string;
-    zipcode: string;
-    city: string;
-    country: string;
+    data: {
+        client_name: string;
+        street_number: string;
+        street_address: string;
+        zipcode: string;
+        city: string;
+        country: string;
+    };
 }

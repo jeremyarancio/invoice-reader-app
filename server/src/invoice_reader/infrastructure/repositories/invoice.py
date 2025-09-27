@@ -115,13 +115,8 @@ class SQLModelInvoiceRepository(IInvoiceRepository):
         existing_invoice_model = self.session.exec(
             select(InvoiceModel).where(InvoiceModel.invoice_id == invoice.id_)
         ).one()
-
-        # Update existing model with new values
-        updated_data = self._to_model(invoice).model_dump(exclude={"id"})
-        for key, value in updated_data.items():
-            setattr(existing_invoice_model, key, value)
-
-        self.session.add(existing_invoice_model)
+        updated_invoice_model = existing_invoice_model.sqlmodel_update(self._to_model(invoice))
+        self.session.add(updated_invoice_model)
         self.session.commit()
 
     def get_by_client_id(self, client_id: UUID) -> list[Invoice]:

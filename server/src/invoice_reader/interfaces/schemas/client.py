@@ -25,8 +25,8 @@ class ClientResponse(BaseModel):
         )
 
 
-class ClientUpdate(ClientData):
-    pass
+class ClientUpdate(BaseModel):
+    data: ClientData
 
 
 class PagedClientResponse(BaseModel):

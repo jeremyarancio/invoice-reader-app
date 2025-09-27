@@ -116,6 +116,7 @@ def test_update_invoice(
     assert updated_invoice.data.gross_amount == invoice_update.data.gross_amount
     assert updated_invoice.data.vat == invoice_update.data.vat
     assert updated_invoice.data.description == invoice_update.data.description
+    assert updated_invoice.data.issued_date == invoice_update.data.issued_date
 
 
 def test_delete_invoice(test_client: TestClient, existing_invoice: Invoice):

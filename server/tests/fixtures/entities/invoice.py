@@ -11,8 +11,6 @@ from invoice_reader.infrastructure.repositories.file import InMemoryFileReposito
 from invoice_reader.infrastructure.repositories.invoice import InMemoryInvoiceRepository
 from invoice_reader.interfaces.schemas.invoice import InvoiceCreate, InvoiceUpdate
 
-TOTAL_N = 3
-
 
 @pytest.fixture
 def filepath() -> Path:
@@ -82,11 +80,16 @@ def invoice_create(invoice_data: InvoiceData, client: Client) -> InvoiceCreate:
 
 @pytest.fixture
 def invoice_update(client: Client, invoice_data: InvoiceData) -> InvoiceUpdate:
-    invoice_data.gross_amount = 20000
-    invoice_data.vat = 10
     return InvoiceUpdate(
         client_id=client.id_,
-        data=invoice_data,
+        data=invoice_data.model_copy(
+            update={
+                "gross_amount": 20000,
+                "vat": 10,
+                "description": "Updated test invoice",
+                "issued_date": date(2024, 11, 20),
+            }
+        ),
     )
 
 

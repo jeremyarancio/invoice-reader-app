@@ -104,7 +104,7 @@ def update_client(
     ClientService.update_client(
         user_id=user_id,
         client_id=client_id,
-        client_update=client_update,
+        client_update_data=client_update.data,
         client_repository=client_repository,
     )
     return Response(status_code=204)

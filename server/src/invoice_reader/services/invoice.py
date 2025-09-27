@@ -121,7 +121,8 @@ class InvoiceService:
     def update_invoice(
         user_id: UUID,
         invoice_id: UUID,
-        udpated_invoice: InvoiceData,
+        update_client_id: UUID,
+        update_invoice_data: InvoiceData,
         invoice_repository: IInvoiceRepository,
     ) -> None:
         # Check for duplicate invoice numbers (excluding the current invoice)
@@ -129,12 +130,12 @@ class InvoiceService:
         if not existing_invoices:
             raise EntityNotFoundException(message=f"No existing invoices found for user {user_id}.")
         if any(
-            udpated_invoice.invoice_number == invoice.data.invoice_number
+            update_invoice_data.invoice_number == invoice.data.invoice_number
             and invoice.id_ != invoice_id
             for invoice in existing_invoices
         ):
             raise ExistingEntityException(
-                message=f"Invoice with number {udpated_invoice.invoice_number} already exists."
+                message=f"Invoice with number {update_invoice_data.invoice_number} already exists."
             )
 
         # Update invoice
@@ -144,17 +145,12 @@ class InvoiceService:
         )
         if not invoice:
             raise EntityNotFoundException(message=f"Invoice with id {invoice_id} not found.")
-        updated_invoice = invoice.model_copy(
-            update={
-                "client_id": invoice.client_id,
-                "invoice_number": udpated_invoice.invoice_number,
-                "gross_amount": udpated_invoice.gross_amount,
-                "vat": udpated_invoice.vat,
-                "description": udpated_invoice.description,
-                "issued_date": udpated_invoice.issued_date,
-                "paid_date": udpated_invoice.paid_date,
-                "currency": udpated_invoice.currency,
-            }
+        updated_invoice = Invoice(
+            id_=invoice.id_,
+            user_id=invoice.user_id,
+            client_id=update_client_id,
+            storage_path=invoice.storage_path,
+            data=update_invoice_data,
         )
         invoice_repository.update(invoice=updated_invoice)
 

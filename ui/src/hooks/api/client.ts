@@ -78,8 +78,13 @@ export const useAddClient = (config?: {
 
 export const useUpdateClient = () => {
     const updateMutation = useMutation({
-        mutationFn: ({ client_id, data }: { client_id: string; data: UpdateClient }) =>
-            updateClient(client_id, data),
+        mutationFn: ({
+            client_id,
+            data,
+        }: {
+            client_id: string;
+            data: UpdateClient;
+        }) => updateClient(client_id, data),
         onSuccess: () => {
             window.alert("Client successfully updated.");
             queryClient.invalidateQueries({ queryKey: ["clients"] });
@@ -89,7 +94,7 @@ export const useUpdateClient = () => {
             window.alert("Failed to update client: " + error.message);
         },
     });
-    return (client: Client) =>
+    return (client: Omit<Client, "totalRevenue" | "nInvoices">) =>
         updateMutation.mutateAsync({
             client_id: client.id,
             data: mapClientToUpdateClient(client),
