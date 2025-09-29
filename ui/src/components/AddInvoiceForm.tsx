@@ -29,7 +29,7 @@ import type { Client } from "@/schemas/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { cn, toDate, toEuropeanDate } from "@/lib/utils";
+import { cn, toEuropeanDate } from "@/lib/utils";
 import AppAlert from "@/components/AppAlert";
 import { useState } from "react";
 import { useIsSubmittedAlert } from "@/hooks/alert-hooks";
