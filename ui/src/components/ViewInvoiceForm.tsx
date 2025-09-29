@@ -13,7 +13,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { CalendarIcon, Pencil, Save, X } from "lucide-react";
 import { useUpdateInvoice } from "@/hooks/api/invoice";
-import { CURRENCIES, type Invoice } from "@/schemas/invoice";
+import { CURRENCIES, type Invoice, type InvoiceData } from "@/schemas/invoice";
 import {
     Select,
     SelectContent,
@@ -89,17 +89,16 @@ function ViewInvoiceForm({ invoice, clients }: Props) {
         // We use async to wait fot the mutation to complete
         // before setting edit mode to false.
         try {
-            await updateInvoice({
-                id: invoice.id,
+            const invoiceData: InvoiceData = {
                 invoiceNumber: values.invoiceNumber,
                 grossAmount: values.grossAmount,
                 currency: values.currency,
                 vat: values.vat,
-                clientId: values.clientId,
                 issuedDate: values.issuedDate,
                 paidDate: values.paidDate,
                 description: values.invoiceDescription,
-            });
+            };
+            await updateInvoice(invoice.id, invoiceData, values.clientId);
             setEditMode(false);
         } catch (error) {
             cancelEdit();
@@ -191,9 +190,9 @@ function ViewInvoiceForm({ invoice, clients }: Props) {
                                                     ([key, value]) => (
                                                         <SelectItem
                                                             key={key}
-                                                            value={value}
+                                                            value={value.symbol}
                                                         >
-                                                            {value}
+                                                            {value.symbol} - {value.name}
                                                         </SelectItem>
                                                     )
                                                 )}

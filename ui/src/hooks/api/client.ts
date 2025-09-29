@@ -2,7 +2,7 @@ import {
     mapClientToUpdateClient,
     mapGetClientToClient,
 } from "@/lib/mappers/client";
-import type { Client, CreateClient, UpdateClient } from "@/schemas/client";
+import type { ClientData, CreateClient, UpdateClient } from "@/schemas/client";
 import {
     addClient,
     deleteClient,
@@ -94,9 +94,9 @@ export const useUpdateClient = () => {
             window.alert("Failed to update client: " + error.message);
         },
     });
-    return (client: Omit<Client, "totalRevenue" | "nInvoices">) =>
+    return (clientId: string, clientData: ClientData) =>
         updateMutation.mutateAsync({
-            client_id: client.id,
-            data: mapClientToUpdateClient(client),
+            client_id: clientId,
+            data: mapClientToUpdateClient(clientData),
         });
 };

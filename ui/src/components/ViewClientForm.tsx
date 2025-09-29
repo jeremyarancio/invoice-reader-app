@@ -52,8 +52,7 @@ function ViewClientForm({ client }: Props) {
 
     const onSubmit = async (values: z.infer<typeof clientSchema>) => {
         try {
-            await updateClient({
-                id: client.id,
+            await updateClient(client.id, {
                 clientName: values.clientName,
                 streetNumber: values.streetNumber,
                 streetAddress: values.streetAddress,
@@ -71,7 +70,7 @@ function ViewClientForm({ client }: Props) {
         <>
             <Form {...form}>
                 <form
-                    onSubmit={form.handleSubmit(onSubmit || (() => {}))}
+                    onSubmit={form.handleSubmit(onSubmit)}
                     className="space-y-6"
                 >
                     <FormField

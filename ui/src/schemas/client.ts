@@ -1,14 +1,17 @@
-export interface Client {
-    id: string;
+export type ClientData = {
     clientName: string;
     streetNumber: string;
     streetAddress: string;
     zipcode: string;
     city: string;
     country: string;
+};
+
+export type Client = {
+    id: string;
     totalRevenue: number;
     nInvoices: number;
-}
+} & ClientData;
 
 export interface CreateClient {
     client_name: string;

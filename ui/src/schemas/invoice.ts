@@ -1,8 +1,33 @@
 export const CURRENCIES = {
-    "usd": "$",
-    "eur": "€",
-    "gbp": "£",
-}
+    usd: { symbol: "$", name: "US Dollar" },
+    eur: { symbol: "€", name: "Euro" },
+    gbp: { symbol: "£", name: "British Pound" },
+} as const;
+
+export type InvoiceData = {
+    grossAmount: number;
+    vat: number;
+    issuedDate: Date;
+    paidDate?: Date;
+    invoiceNumber: string;
+    description: string;
+    currency: string;
+};
+
+export type Invoice = {
+    id: string;
+    clientId: string;
+} & InvoiceData;
+
+export type InvoicePayload = {
+    gross_amount: number;
+    vat: number;
+    issued_date: string;
+    paid_date?: string;
+    invoice_number: string;
+    description: string;
+    currency: string;
+};
 
 export interface GetPagedInvoices {
     page: number;
@@ -12,56 +37,18 @@ export interface GetPagedInvoices {
 }
 
 export interface GetInvoice {
-    data: GetInvoiceItem;
     invoice_id: string;
     client_id: string;
     storage_path: string;
-}
-
-export interface GetInvoiceItem {
-    gross_amount: number;
-    invoice_number: string;
-    issued_date: Date;
-    paid_date?: Date;
-    description: string;
-    vat: number;
-    currency: string;
-}
-
-export interface Invoice {
-    id: string;
-    grossAmount: number;
-    vat: number;
-    issuedDate: Date;
-    paidDate?: Date;
-    description: string;
-    invoiceNumber: string;
-    clientId: string;
-    currency: string;
+    data: InvoicePayload;
 }
 
 export interface CreateInvoicePayload {
-    data: {
-        gross_amount: number;
-        vat: number;
-        issued_date: string;
-        paid_date?: string;
-        invoice_number: string;
-        description: string;
-        currency: string;
-    };
+    data: InvoicePayload;
     client_id: string;
 }
 
 export interface UpdateInvoice {
+    data: InvoicePayload;
     client_id: string;
-    data: {
-        gross_amount: number;
-        vat: number;
-        issued_date: string;
-        paid_date?: string;
-        invoice_number: string;
-        description: string;
-        currency: string;
-    };
 }
