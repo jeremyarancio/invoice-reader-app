@@ -29,7 +29,7 @@ import type { Client } from "@/schemas/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { cn, toDate } from "@/lib/utils";
+import { cn, toDate, toEuropeanDate } from "@/lib/utils";
 import AppAlert from "@/components/AppAlert";
 import { useState } from "react";
 import { useIsSubmittedAlert } from "@/hooks/alert-hooks";
@@ -313,7 +313,7 @@ function AddInvoiceForm({ file, parsedInvoice, clients }: Props) {
                                                 )}
                                             >
                                                 {field.value ? (
-                                                    format(field.value, "PPP")
+                                                    toEuropeanDate(field.value)
                                                 ) : (
                                                     <span>Pick a date</span>
                                                 )}
@@ -364,7 +364,7 @@ function AddInvoiceForm({ file, parsedInvoice, clients }: Props) {
                                                 )}
                                             >
                                                 {field.value ? (
-                                                    format(field.value, "PPP")
+                                                    toEuropeanDate(field.value)
                                                 ) : (
                                                     <span>Pick a date</span>
                                                 )}

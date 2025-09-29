@@ -27,7 +27,7 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { cn, toEuropeanDate } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
 import type { Client } from "@/schemas/client";
 
@@ -277,7 +277,7 @@ function ViewInvoiceForm({ invoice, clients }: Props) {
                                                     )}
                                                 >
                                                     {field.value ? (
-                                                        field.value.toLocaleDateString()
+                                                        toEuropeanDate(field.value)
                                                     ) : (
                                                         <span>Pick a date</span>
                                                     )}
@@ -303,7 +303,7 @@ function ViewInvoiceForm({ invoice, clients }: Props) {
                                     <Input
                                         value={
                                             field.value
-                                                ? field.value.toLocaleDateString()
+                                                ? toEuropeanDate(field.value)
                                                 : ""
                                         }
                                         readOnly
@@ -333,7 +333,7 @@ function ViewInvoiceForm({ invoice, clients }: Props) {
                                                     )}
                                                 >
                                                     {field.value ? (
-                                                        field.value.toLocaleDateString()
+                                                        toEuropeanDate(field.value)
                                                     ) : (
                                                         <span>Pick a date</span>
                                                     )}
@@ -359,7 +359,7 @@ function ViewInvoiceForm({ invoice, clients }: Props) {
                                     <Input
                                         value={
                                             field.value
-                                                ? field.value.toLocaleDateString()
+                                                ? toEuropeanDate(field.value)
                                                 : ""
                                         }
                                         readOnly
