@@ -1,10 +1,10 @@
 import {
     mapGetInvoiceToInvoice,
-    mapInvoiceToUpdateInvoice,
+    mapInvoiceDataToCreateInvoice,
+    mapInvoiceDataToPayload,
 } from "@/lib/mappers/invoice";
 import type {
-    CreateInvoicePayload,
-    Invoice,
+    InvoiceData,
     UpdateInvoice,
 } from "@/schemas/invoice";
 import {
@@ -48,11 +48,16 @@ export const useAddInvoice = () => {
     const addInvoiceMutation = useMutation({
         mutationFn: ({
             file,
-            data,
+            invoiceData,
+            clientId,
         }: {
             file: File;
-            data: CreateInvoicePayload;
-        }) => addInvoice(file, data),
+            invoiceData: InvoiceData;
+            clientId: string;
+        }) => {
+            const payload = mapInvoiceDataToCreateInvoice(invoiceData, clientId);
+            return addInvoice(file, payload);
+        },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["invoices"] });
             queryClient.invalidateQueries({ queryKey: ["clients"] });
@@ -67,8 +72,8 @@ export const useAddInvoice = () => {
                   );
         },
     });
-    return (file: File, data: CreateInvoicePayload) =>
-        addInvoiceMutation.mutateAsync({ file, data });
+    return (file: File, invoiceData: InvoiceData, clientId: string) =>
+        addInvoiceMutation.mutateAsync({ file, invoiceData, clientId });
 };
 
 export const useFetchInvoice = (invoiceId: string | undefined) => {
@@ -83,8 +88,20 @@ export const useFetchInvoice = (invoiceId: string | undefined) => {
 
 export const useUpdateInvoice = () => {
     const updateInvoiceMutation = useMutation({
-        mutationFn: ({ invoice_id, data }: { invoice_id: string; data: UpdateInvoice }) => {
-            return updateInvoice(invoice_id, data);
+        mutationFn: ({
+            invoice_id,
+            invoiceData,
+            clientId
+        }: {
+            invoice_id: string;
+            invoiceData: InvoiceData;
+            clientId: string;
+        }) => {
+            const updateData: UpdateInvoice = {
+                client_id: clientId,
+                data: mapInvoiceDataToPayload(invoiceData),
+            };
+            return updateInvoice(invoice_id, updateData);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["invoices"] });
@@ -95,10 +112,11 @@ export const useUpdateInvoice = () => {
             window.alert("Error: " + (error.response?.data as any)?.message);
         },
     });
-    return (invoice: Invoice) =>
+    return (invoiceId: string, invoiceData: InvoiceData, clientId: string) =>
         updateInvoiceMutation.mutateAsync({
-            invoice_id: invoice.id,
-            data: mapInvoiceToUpdateInvoice(invoice),
+            invoice_id: invoiceId,
+            invoiceData,
+            clientId,
         });
 };
 

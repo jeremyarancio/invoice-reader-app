@@ -8,7 +8,7 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form";
-import { format } from "date-fns";
+
 import { CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -29,14 +29,14 @@ import type { Client } from "@/schemas/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { cn, toDate, toEuropeanDate } from "@/lib/utils";
+import { cn, toEuropeanDate } from "@/lib/utils";
 import AppAlert from "@/components/AppAlert";
 import { useState } from "react";
 import { useIsSubmittedAlert } from "@/hooks/alert-hooks";
 import NewClientModal from "./NewClientModal";
 import { useNavigate } from "react-router-dom";
 import { useAddInvoice } from "@/hooks/api/invoice";
-import { CURRENCIES } from "@/schemas/invoice";
+import { CURRENCIES, type InvoiceData } from "@/schemas/invoice";
 
 interface Props {
     file: File;
@@ -52,20 +52,16 @@ function AddInvoiceForm({ file, parsedInvoice, clients }: Props) {
 
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
         try {
-            await addInvoice(file, {
-                client_id: values.client_id,
-                data: {
-                    description: values.invoiceDescription,
-                    gross_amount: values.grossAmount,
-                    invoice_number: values.invoiceNumber,
-                    issued_date: toDate(values.issuedDate),
-                    paid_date: values.paidDate
-                        ? toDate(values.paidDate)
-                        : undefined,
-                    vat: values.vat,
-                    currency: Object.entries(CURRENCIES).find(([, val]) => val === values.currency)?.[0] ?? "",
-                },
-            });
+            const invoiceData: InvoiceData = {
+                description: values.invoiceDescription,
+                grossAmount: values.grossAmount,
+                invoiceNumber: values.invoiceNumber,
+                issuedDate: values.issuedDate,
+                paidDate: values.paidDate,
+                vat: values.vat,
+                currency: values.currency,
+            };
+            await addInvoice(file, invoiceData, values.client_id);
             setIsSubmitted(true);
             navigate("/invoices"); //Alert can be improved
         } catch (error) {
@@ -108,7 +104,7 @@ function AddInvoiceForm({ file, parsedInvoice, clients }: Props) {
         parsedInvoice.invoice.gross_amount &&
             form.setValue("grossAmount", parsedInvoice.invoice.gross_amount);
         parsedInvoice.invoice.currency &&
-            form.setValue("currency", CURRENCIES[parsedInvoice.invoice.currency as keyof typeof CURRENCIES]);
+            form.setValue("currency", CURRENCIES[parsedInvoice.invoice.currency as keyof typeof CURRENCIES]?.symbol || parsedInvoice.invoice.currency);
         parsedInvoice.invoice.vat &&
             form.setValue("vat", parsedInvoice.invoice.vat);
         parsedInvoice.client_id &&
@@ -213,12 +209,12 @@ function AddInvoiceForm({ file, parsedInvoice, clients }: Props) {
                                         </SelectTrigger>
                                     </FormControl>
                                     <SelectContent className="bg-stone-50">
-                                        {Object.values(CURRENCIES).map((currency) => (
+                                        {Object.entries(CURRENCIES).map(([key, value]) => (
                                             <SelectItem
-                                                key={currency}
-                                                value={currency}
+                                                key={key}
+                                                value={value.symbol}
                                             >
-                                                {currency}
+                                                {value.symbol} - {value.name}
                                             </SelectItem>
                                         ))}
                                     </SelectContent>
