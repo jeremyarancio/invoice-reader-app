@@ -16,14 +16,13 @@ services:
             - letsencrypt:/letsencrypt
 
     ui:
+        image: ghcr.io/${GITHUB_REPOSITORY}-ui:latest
         restart: always
-        build:
-            context: ./ui
-            target: prod
         labels:
             - "traefik.http.routers.ui.entrypoints=websecure"
             - "traefik.http.routers.ui.tls=true"
             - "traefik.http.routers.ui.tls.certresolver=myresolver"
+            - "com.centurylinklabs.watchtower.enable=true"
 
     postgres:
         restart: always
@@ -31,10 +30,8 @@ services:
             - 5432
 
     server:
+        image: ghcr.io/${GITHUB_REPOSITORY}-server:latest
         restart: always
-        build:
-            context: ./server
-            target: prod
         deploy:
             mode: replicated
             replicas: 3
@@ -42,14 +39,15 @@ services:
             - "traefik.http.routers.server.tls=true"
             - "traefik.http.routers.server.tls.certresolver=myresolver"
             - "traefik.http.routers.server.entrypoints=websecure"
+            - "com.centurylinklabs.watchtower.enable=true"
         env_file:
             - "./server/.env.prod"
 
     ml-server:
+        image: ghcr.io/${GITHUB_REPOSITORY}-ml-server:latest
         restart: always
-        build:
-            context: ./ml-server
-            target: prod
+        labels:
+            - "com.centurylinklabs.watchtower.enable=true"
         env_file:
             - "./ml-server/.env.prod"
 
@@ -58,6 +56,23 @@ services:
             - "traefik.http.routers.grafana.entrypoints=websecure"
             - "traefik.http.routers.grafana.tls=true"
             - "traefik.http.routers.grafana.tls.certresolver=myresolver"
+
+    watchtower:
+        image: containrrr/watchtower
+        command:
+            - "--label-enable"
+            - "--rolling-restart"
+            - "--interval"
+            - "30"
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+            - ~/.docker/config.json:/config.json:ro
+        environment:
+            - DOCKER_CONFIG=/
+            - REPO_USER=${GITHUB_USERNAME}
+            - REPO_PASS=${GITHUB_TOKEN}
+        env_file:
+            - "./.env.prod"
 
 volumes:
     letsencrypt:

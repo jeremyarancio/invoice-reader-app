@@ -31,7 +31,7 @@ jobs:
 
   build-ui:
     needs: changes
-    # if: needs.changes.outputs.ui == 'true'
+    if: needs.changes.outputs.ui == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -76,7 +76,7 @@ jobs:
 
   build-server:
     needs: changes
-    # if: needs.changes.outputs.server == 'true'
+    if: needs.changes.outputs.server == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -122,7 +122,7 @@ jobs:
 
   build-ml-server:
     needs: changes
-    # if: needs.changes.outputs.ml-server == 'true'
+    if: needs.changes.outputs.ml-server == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: read
