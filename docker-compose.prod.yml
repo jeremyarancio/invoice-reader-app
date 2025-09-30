@@ -72,7 +72,7 @@ services:
             - REPO_USER=${GITHUB_USERNAME}
             - REPO_PASS=${GITHUB_TOKEN}
         env_file:
-            - "./.env.prod"
+            - "./.env"
 
 volumes:
     letsencrypt:
