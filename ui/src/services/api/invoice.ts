@@ -54,7 +54,7 @@ export const parseInvoice = async (file: File): Promise<ParsedInvoice> => {
     const formData = new FormData();
     formData.append("upload_file", file);
 
-    const response = await api.post("invoices/parse/", formData, {
+    const response = await api.post("invoices/parse", formData, {
         headers: {
             "Content-Type": "multipart/form-data",
         },
