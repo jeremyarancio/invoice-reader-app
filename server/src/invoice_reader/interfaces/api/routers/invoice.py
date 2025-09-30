@@ -59,7 +59,7 @@ class Checker[T: BaseModel]:
         )
 
 
-@router.post("/")
+@router.post("")
 def add_invoice(
     upload_file: Annotated[UploadFile, File()],
     data: Annotated[
@@ -112,7 +112,7 @@ def get_invoice(
     return InvoiceResponse.from_invoice(invoice)
 
 
-@router.get("/")
+@router.get("")
 def get_invoices(
     user_id: Annotated[UUID, Depends(get_current_user_id)],
     invoice_repository: Annotated[IInvoiceRepository, Depends(get_invoice_repository)],
@@ -164,7 +164,7 @@ def update_invoice(
     return Response(status_code=204)
 
 
-@router.get("/{invoice_id}/url/", dependencies=[Depends(get_current_user_id)])
+@router.get("/{invoice_id}/url", dependencies=[Depends(get_current_user_id)])
 def get_invoice_url(
     invoice_id: UUID,
     file_repository: Annotated[IFileRepository, Depends(get_file_repository)],

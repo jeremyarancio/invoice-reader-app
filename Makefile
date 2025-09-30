@@ -7,7 +7,7 @@ prod-up:
 	@echo "Invoice Manager running!"
 
 prod-logs:
-	docker compose -f docker-compose.yml -f docker-compose.prod.yml --env-file .env.prod logs -f
+	docker compose -f docker-compose.yml -f docker-compose.prod.yml --env-file .env.prod logs -f $(SERVICE)
 
 prod-down:
 	docker compose -f docker-compose.yml -f docker-compose.prod.yml --env-file .env.prod down

@@ -15,7 +15,7 @@ export const fetchClients = async (
     pageNumber: number,
     perPage: number
 ): Promise<GetPagedClients> => {
-    const response = await api.get("clients/", {
+    const response = await api.get("clients", {
         params: {
             page: pageNumber,
             per_page: perPage,
@@ -28,7 +28,7 @@ export const fetchClients = async (
 };
 
 export const addClient = async (client: CreateClient) => {
-    const response = await api.post("/clients/", client, {
+    const response = await api.post("/clients", client, {
         headers: {
             "Content-Type": "application/json",
         },

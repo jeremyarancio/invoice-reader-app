@@ -22,7 +22,7 @@ router = APIRouter(
 )
 
 
-@router.post("/signup/")
+@router.post("/signup")
 def signup(
     user_create: UserCreate,
     user_repository: Annotated[IUserRepository, Depends(get_user_repository)],
@@ -35,7 +35,7 @@ def signup(
     return Response(content="User has been added to the database.", status_code=201)
 
 
-@router.post("/signin/")
+@router.post("/signin")
 def signin(
     response: Response,
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
@@ -58,7 +58,7 @@ def signin(
     return AuthToken(access_token=access_token, token_type="bearer")
 
 
-@router.delete("/")
+@router.delete("")
 def delete_user(
     user_id: Annotated[UUID, Depends(get_current_user_id)],
     user_repository: Annotated[IUserRepository, Depends(get_user_repository)],
@@ -67,7 +67,7 @@ def delete_user(
     return Response(status_code=204)
 
 
-@router.post("/refresh/")
+@router.post("/refresh")
 def refresh(request: Request, response: Response) -> AuthToken:
     refresh_token = request.cookies.get("refresh_token")
     if not refresh_token:
@@ -86,7 +86,7 @@ def refresh(request: Request, response: Response) -> AuthToken:
     return AuthToken(access_token=access_token, token_type="bearer")
 
 
-@router.post("/signout/")
+@router.post("/signout")
 def signout(response: Response) -> Response:
     response.delete_cookie(
         key="refresh_token",
@@ -98,7 +98,7 @@ def signout(response: Response) -> Response:
     return Response(status_code=204)
 
 
-@router.get("/me/")
+@router.get("/me")
 def get_current_user(
     user_id: Annotated[UUID, Depends(get_current_user_id)],
     user_repository: Annotated[IUserRepository, Depends(get_user_repository)],

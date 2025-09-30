@@ -14,7 +14,7 @@ export const addInvoice = async (file: File, data: CreateInvoicePayload) => {
     formData.append("upload_file", file);
     formData.append("data", invoiceData);
 
-    const response = await api.post("invoices/", formData, {
+    const response = await api.post("invoices", formData, {
         headers: {
             "Content-Type": "multipart/form-data",
         },
@@ -32,7 +32,7 @@ export const fetchInvoices = async (
     pageNumber: number,
     perPage: number
 ): Promise<GetPagedInvoices> => {
-    const response = await api.get("invoices/", {
+    const response = await api.get("invoices", {
         params: { page: pageNumber, per_page: perPage },
     });
     return response.data;
@@ -42,12 +42,15 @@ export const deleteInvoice = async (invoiceId: string) => {
     await api.delete("invoices/" + invoiceId);
 };
 
-export const updateInvoice = async (invoice_id: string, data: UpdateInvoice) => {
+export const updateInvoice = async (
+    invoice_id: string,
+    data: UpdateInvoice
+) => {
     await api.put("invoices/" + invoice_id, data);
 };
 
 export const fetchInvoiceUrl = async (id: string): Promise<string> => {
-    const response = await api.get("invoices/" + id + "/url/");
+    const response = await api.get("invoices/" + id + "/url");
     return response.data;
 };
 export const parseInvoice = async (file: File): Promise<ParsedInvoice> => {

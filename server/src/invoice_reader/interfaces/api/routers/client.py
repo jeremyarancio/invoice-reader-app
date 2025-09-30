@@ -25,7 +25,7 @@ router = APIRouter(
 )
 
 
-@router.get("/")
+@router.get("")
 def get_clients(
     user_id: Annotated[UUID, Depends(get_current_user_id)],
     client_repository: Annotated[IClientRepository, Depends(get_client_repository)],
@@ -62,7 +62,7 @@ def get_client(
     return ClientResponse.from_client(client)
 
 
-@router.post("/")
+@router.post("")
 def add_client(
     client_create: ClientCreate,
     user_id: Annotated[UUID, Depends(get_current_user_id)],
