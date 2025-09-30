@@ -41,7 +41,7 @@ def test_client(user: User):
 
 def test_add_client(test_client: TestClient, client_create: ClientCreate):
     response = test_client.post(
-        "/v1/clients/",
+        "/v1/clients",
         json=client_create.model_dump(),
     )
     assert response.status_code == 201
@@ -50,7 +50,7 @@ def test_add_client(test_client: TestClient, client_create: ClientCreate):
 def test_add_existing_client(
     test_client: TestClient, client_create: ClientCreate, existing_client: Client
 ):
-    response = test_client.post("/v1/clients/", json=client_create.model_dump())
+    response = test_client.post("/v1/clients", json=client_create.model_dump())
     assert response.status_code == 409
 
 

@@ -67,7 +67,7 @@ def test_add_invoice(
     test_client: TestClient, upload_files: Any, invoice_create: InvoiceCreate, user: User
 ):
     response = test_client.post(
-        "/v1/invoices/",
+        "/v1/invoices",
         files=upload_files,
         data={"data": invoice_create.model_dump_json()},
     )
@@ -86,7 +86,7 @@ def test_add_exisiting_invoice(
     existing_invoice: Invoice,
 ):
     response = test_client.post(
-        "/v1/invoices/", files=upload_files, data={"data": invoice_create.model_dump_json()}
+        "/v1/invoices", files=upload_files, data={"data": invoice_create.model_dump_json()}
     )
     assert response.status_code == 409
 
