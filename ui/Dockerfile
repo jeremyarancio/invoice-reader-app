@@ -25,6 +25,10 @@ WORKDIR /app
 
 COPY --from=builder /app .
 
+# Accept build arg for API URL
+ARG VITE_SERVER_API_URL
+ENV VITE_SERVER_API_URL=$VITE_SERVER_API_URL
+
 # Use .env.prod to overrride .env
 RUN npm run build -- --mode prod 
 
