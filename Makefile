@@ -1,46 +1,26 @@
 .PHONY: *
 
-#----Local dev without Docker----
-dev-ui:
-	cd ui/ && npm run dev
+#----Prod----
+prod-up:
+	@echo "Starting production environment..."
+	docker compose -f docker-compose.yml -f docker-compose.prod.yml --env-file .env.prod up -d
+	@echo "Invoice Manager running!"
 
-dev-server:
-	cd server/ && uv run --directory src/ fastapi dev invoice_reader/app/main.py
+prod-logs:
+	docker compose -f docker-compose.yml -f docker-compose.prod.yml --env-file .env.prod logs -f
 
-#----Formating----
-fix: lint format
+prod-down:
+	docker compose -f docker-compose.yml -f docker-compose.prod.yml --env-file .env.prod down
 
-format:
-	cd server && uv tool run ruff format .
-
-lint:
-	cd server && uv tool run ruff check --fix
-
-
-test:
-	cd server && uv run pytest -vv
-
-#----Docker----
-compose-up:
+#----Dev----
+dev-up:
 	docker compose up -d
 
-compose-build:
+dev-build:
 	docker compose up -d --build
 
-logs:
+dev-logs:
 	docker compose logs -f
 
-down:
+dev-down:
 	docker compose down
-
-build: build-server build-ui build-pg
-
-# We take the prod stage for production
-build-server:
-	docker build -t invoice-server --target prod ./server
-
-build-ui:
-	docker build -t invoice-ui ./ui
-
-build-pg:
-	docker build -t postgres:17.2-alpine

@@ -1,8 +1,3 @@
-x-db-env: &db-env
-    POSTGRES_USER: ${POSTGRES_USER:-postgres}
-    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-    POSTGRES_DB: ${POSTGRES_DB:-postgres}
-
 name: invoice
 
 services:
@@ -19,16 +14,16 @@ services:
     postgres:
         restart: unless-stopped
         image: postgres:17.2-alpine
-        environment: *db-env
         volumes:
             - postgres_data:/var/lib/postgresql/data
         networks:
             - app-network
-
+        environment:
+            POSTGRES_USER: ${POSTGRES_USER:-postgres}
+            POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+            POSTGRES_DB: ${POSTGRES_DB:-postgres}
+            
     ui:
-        build:
-            context: ./ui
-            target: dev
         networks:
             - app-network
         labels:
@@ -37,9 +32,6 @@ services:
             - "traefik.http.services.ui.loadbalancer.server.port=5173"
 
     server:
-        build:
-            context: ./server
-            target: dev
         labels:
             - "traefik.enable=true"
             - "traefik.http.routers.server.rule=Host(`api.${DOMAIN_NAME:-localhost}`)"
@@ -50,9 +42,6 @@ services:
             - app-network
 
     ml-server:
-        build:
-            context: ./ml-server
-            target: dev
         networks:
             - app-network
 

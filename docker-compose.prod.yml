@@ -1,3 +1,4 @@
+# Prod
 services:
     traefik:
         command:
@@ -11,6 +12,7 @@ services:
             - "--certificatesresolvers.myresolver.acme.email=contact@${DOMAIN_NAME:-localdev.com}"
             - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
         ports:
+            - "80:80"
             - 443:443
         volumes:
             - letsencrypt:/letsencrypt
@@ -71,8 +73,6 @@ services:
             - DOCKER_CONFIG=/
             - REPO_USER=${GITHUB_USERNAME}
             - REPO_PASS=${GITHUB_TOKEN}
-        env_file:
-            - "./.env"
 
 volumes:
     letsencrypt:

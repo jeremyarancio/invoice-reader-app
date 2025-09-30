@@ -1,3 +1,4 @@
+# Dev
 services:
     traefik:
         command:
@@ -8,6 +9,9 @@ services:
         ports:
             - 8080:8080
     ui:
+        build:
+            context: ./ui
+            target: dev
         volumes:
             - ./ui/src:/app/src
             - ./ui/public:/app/public
@@ -18,6 +22,9 @@ services:
             - 5432:5432
 
     server:
+        build:
+            context: ./server
+            target: dev
         volumes:
             - ./server/src:/app/src
             - ./server/.env:/app/.env
@@ -28,6 +35,9 @@ services:
             - 8000:8000
 
     ml-server:
+        build:
+            context: ./ml-server
+            target: dev
         volumes:
             - ./ml-server/src:/app/src
             - ./ml-server/.env:/app/.env
