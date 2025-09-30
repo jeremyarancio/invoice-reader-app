@@ -160,6 +160,7 @@ jobs:
     - name: Build and push ML Server Docker image
       uses: docker/build-push-action@v6
       with:
+        target: prod
         context: ./ml-server
         push: true
         tags: ${{ steps.meta.outputs.tags }}
