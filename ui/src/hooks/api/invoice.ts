@@ -3,10 +3,7 @@ import {
     mapInvoiceDataToCreateInvoice,
     mapInvoiceDataToPayload,
 } from "@/lib/mappers/invoice";
-import type {
-    InvoiceData,
-    UpdateInvoice,
-} from "@/schemas/invoice";
+import type { InvoiceData, UpdateInvoice } from "@/schemas/invoice";
 import {
     addInvoice,
     deleteInvoice,
@@ -19,7 +16,7 @@ import {
 import { queryClient } from "@/services/api/main";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
-
+import { useAlert } from "@/contexts/AlertContext";
 
 export const useFetchInvoices = (
     pageNumber: number = 1,
@@ -45,6 +42,8 @@ export const useFetchInvoiceUrl = (invoiceId: string | undefined) => {
 };
 
 export const useAddInvoice = () => {
+    const { showAlert } = useAlert();
+
     const addInvoiceMutation = useMutation({
         mutationFn: ({
             file,
@@ -55,21 +54,24 @@ export const useAddInvoice = () => {
             invoiceData: InvoiceData;
             clientId: string;
         }) => {
-            const payload = mapInvoiceDataToCreateInvoice(invoiceData, clientId);
+            const payload = mapInvoiceDataToCreateInvoice(
+                invoiceData,
+                clientId
+            );
             return addInvoice(file, payload);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["invoices"] });
             queryClient.invalidateQueries({ queryKey: ["clients"] });
+            showAlert("success", "Success!", "Invoice created successfully");
         },
         onError: (error: AxiosError) => {
-            error.status === 409
-                ? window.alert(
-                      "Error: Invoice already exists. Submission aborted."
-                  )
-                : window.alert(
-                      "Error: " + (error.response?.data as any)?.message
-                  );
+            const message =
+                error.status === 409
+                    ? "Invoice already exists. Submission aborted."
+                    : (error.response?.data as any)?.message;
+
+            showAlert("error", "Error", message);
         },
     });
     return (file: File, invoiceData: InvoiceData, clientId: string) =>
@@ -87,11 +89,13 @@ export const useFetchInvoice = (invoiceId: string | undefined) => {
 };
 
 export const useUpdateInvoice = () => {
+    const { showAlert } = useAlert();
+
     const updateInvoiceMutation = useMutation({
         mutationFn: ({
             invoice_id,
             invoiceData,
-            clientId
+            clientId,
         }: {
             invoice_id: string;
             invoiceData: InvoiceData;
@@ -106,10 +110,10 @@ export const useUpdateInvoice = () => {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["invoices"] });
             queryClient.invalidateQueries({ queryKey: ["invoice"] });
-            window.alert("Invoice updated successfully");
+            showAlert("success", "Updated!", "Invoice updated successfully");
         },
         onError: (error: AxiosError) => {
-            window.alert("Error: " + (error.response?.data as any)?.message);
+            showAlert("error", "Error", (error.response?.data as any)?.message);
         },
     });
     return (invoiceId: string, invoiceData: InvoiceData, clientId: string) =>
@@ -121,20 +125,21 @@ export const useUpdateInvoice = () => {
 };
 
 export const useDeleteInvoice = () => {
+    const { showAlert } = useAlert();
+
     const deleteInvoicesMutation = useMutation({
         mutationFn: deleteInvoice,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["invoices"] });
-            window.alert("Invoices deleted successfully");
+            showAlert("success", "Deleted!", "Invoice deleted successfully");
         },
         onError: (error: AxiosError) => {
-            error.status === 422
-                ? window.alert(
-                      "No invoice with this ID exists. Please try again."
-                  )
-                : window.alert(
-                      "Error: " + (error.response?.data as any)?.message
-                  );
+            const message =
+                error.status === 422
+                    ? "No invoice with this ID exists. Please try again."
+                    : "Error: Something went wrong. Please try again later.";
+
+            showAlert("error", "Error", message);
         },
     });
     return (invoiceId: string) => deleteInvoicesMutation.mutate(invoiceId);

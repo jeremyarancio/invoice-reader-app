@@ -13,6 +13,7 @@ import {
 import { queryClient } from "@/services/api/main";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
+import { useAlert } from "@/contexts/AlertContext";
 
 export const useFetchClient = (clientId: string | undefined) => {
     const { data, isLoading, error } = useQuery({
@@ -38,18 +39,20 @@ export const useFetchClients = (
 };
 
 export const useDeleteClient = () => {
+    const { showAlert } = useAlert();
+
     const deleteMutation = useMutation({
         mutationFn: deleteClient,
         onSuccess: () => {
-            window.alert("Successfully deleted");
+            showAlert('success', 'Deleted!', 'Client deleted successfully');
             queryClient.invalidateQueries({ queryKey: ["clients"] });
         },
         onError: (error: AxiosError) => {
-            error.status === 422
-                ? window.alert(
-                      "No client with this ID exists. Please try again."
-                  )
-                : window.alert("Error: " + error.message);
+            const message = error.status === 422
+                ? "No client with this ID exists. Please try again."
+                : error.message;
+
+            showAlert('error', 'Error', message);
         },
     });
     return (clientId: string) => {
@@ -61,15 +64,17 @@ export const useAddClient = (config?: {
     onSuccess?: () => void;
     onError?: (error: AxiosError) => void;
 }) => {
+    const { showAlert } = useAlert();
+
     const submitMutation = useMutation({
         mutationFn: addClient,
         onSuccess: () => {
-            window.alert("Client successfully added.");
+            showAlert('success', 'Success!', 'Client successfully added');
             queryClient.invalidateQueries({ queryKey: ["clients"] });
             config?.onSuccess?.();
         },
         onError: (error: AxiosError) => {
-            window.alert("Failed to add client: " + error.message);
+            showAlert('error', 'Error', 'Failed to add client: ' + error.message);
             config?.onError?.(error);
         },
     });
@@ -77,6 +82,8 @@ export const useAddClient = (config?: {
 };
 
 export const useUpdateClient = () => {
+    const { showAlert } = useAlert();
+
     const updateMutation = useMutation({
         mutationFn: ({
             client_id,
@@ -86,12 +93,12 @@ export const useUpdateClient = () => {
             data: UpdateClient;
         }) => updateClient(client_id, data),
         onSuccess: () => {
-            window.alert("Client successfully updated.");
+            showAlert('success', 'Updated!', 'Client successfully updated');
             queryClient.invalidateQueries({ queryKey: ["clients"] });
             queryClient.invalidateQueries({ queryKey: ["client"] });
         },
         onError: (error: AxiosError) => {
-            window.alert("Failed to update client: " + error.message);
+            showAlert('error', 'Error', 'Failed to update client: ' + error.message);
         },
     });
     return (clientId: string, clientData: ClientData) =>
