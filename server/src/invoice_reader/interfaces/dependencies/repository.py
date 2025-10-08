@@ -26,11 +26,6 @@ def get_engine() -> Engine:
     return sqlmodel.create_engine(settings.database_url, echo=False)
 
 
-def create_tables() -> None:
-    engine = get_engine()
-    sqlmodel.SQLModel.metadata.create_all(engine)
-
-
 def get_session(engine: Annotated[Engine, Depends(get_engine)]):
     with sqlmodel.Session(engine) as session:
         yield session
