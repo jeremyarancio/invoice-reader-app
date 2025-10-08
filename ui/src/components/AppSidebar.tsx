@@ -56,7 +56,7 @@ export function AppSidebar() {
                     <SidebarMenuItem>
                         <SidebarMenuButton asChild>
                             <a
-                                href="https://github.com/jeremyarancio/invoice-reader-app/issues/new"
+                                href="https://github.com/jeremyarancio/invoice-reader-app/issues/new?template=bug_report.yml"
                                 target="_blank"
                                 rel="noopener noreferrer"
                             >
