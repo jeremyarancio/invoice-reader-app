@@ -5,10 +5,12 @@ import { useAuth } from "@/components/AuthProvider";
 import { signIn, signOut, signUp } from "@/services/api/auth";
 import type { PostUser } from "@/schemas/user";
 import { queryClient } from "@/services/api/main";
+import { useAlert } from "@/contexts/AlertContext";
 
 export const useSignIn = () => {
     const { setToken } = useAuth();
     const navigate = useNavigate();
+    const { showAlert } = useAlert();
 
     const signInMutation = useMutation({
         mutationFn: signIn,
@@ -17,9 +19,17 @@ export const useSignIn = () => {
             navigate("/invoices");
         },
         onError: (error: AxiosError) => {
-            error.status === 401
-                ? window.alert("Invalid credentials")
-                : window.alert(error.message);
+            let message: string;
+
+            if (error.status === 401) {
+                message = "Invalid credentials.";
+            } else if (error.status === 404) {
+                message = "There is no user with this email. Are you sure you registered?";
+            } else {
+                message = "Something went wrong.";
+            }
+
+            showAlert("error", "Login Failed", message);
         },
     });
 
@@ -30,16 +40,25 @@ export const useSignIn = () => {
 
 export const useSignUp = () => {
     const navigate = useNavigate();
+    const { showAlert } = useAlert();
+
     const SignUpMutation = useMutation({
         mutationFn: signUp,
         onSuccess: () => {
-            window.alert("User registered successfully. You can sign in!");
+            showAlert(
+                "success",
+                "Success!",
+                "User registered successfully. You can sign in!"
+            );
             navigate("/signin");
         },
         onError: (error: AxiosError) => {
-            error.status === 409
-                ? window.alert("User already registered.")
-                : window.alert(error.message);
+            const message =
+                error.status === 409
+                    ? "User already registered."
+                    : error.message;
+
+            showAlert("error", "Registration Failed", message);
         },
     });
 

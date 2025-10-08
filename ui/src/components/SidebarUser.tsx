@@ -36,7 +36,7 @@ function SidebarUser({}) {
                         >
                             <div className="grid flex-1 text-left text-sm leading-tight">
                                 <span className="truncate font-medium">
-                                    {user.username}
+                                    My profile
                                 </span>
                                 <span className="truncate text-xs">
                                     {user.email}
@@ -54,7 +54,7 @@ function SidebarUser({}) {
                             <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                                 <div className="grid flex-1 text-left text-sm leading-tight">
                                     <span className="truncate font-medium">
-                                        {user.username}
+                                        My profile
                                     </span>
                                     <span className="truncate text-xs">
                                         {user.email}

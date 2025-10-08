@@ -1,4 +1,4 @@
-import { Inbox, User } from "lucide-react";
+import { Inbox, User, Bug } from "lucide-react";
 
 import {
     Sidebar,
@@ -51,7 +51,22 @@ export function AppSidebar() {
                     </SidebarGroupContent>
                 </SidebarGroup>
             </SidebarContent>
-            <SidebarFooter className="flex space-x-4">
+            <SidebarFooter className="flex-col space-y-2">
+                <SidebarMenu>
+                    <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                            <a
+                                href="https://github.com/jeremyarancio/invoice-reader-app/issues/new"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                <Bug />
+                                <span>Report a Bug</span>
+                            </a>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                </SidebarMenu>
+
                 <SidebarUser />
             </SidebarFooter>
         </Sidebar>
