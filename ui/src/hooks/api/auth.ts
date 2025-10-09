@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { AxiosError } from "axios";
-import { useAuth } from "@/components/AuthProvider";
+import { useAuth } from "@/contexts/AuthProvider";
 import { signIn, signOut, signUp } from "@/services/api/auth";
 import type { PostUser } from "@/schemas/user";
 import { queryClient } from "@/services/api/main";
@@ -24,7 +24,8 @@ export const useSignIn = () => {
             if (error.status === 401) {
                 message = "Invalid credentials.";
             } else if (error.status === 404) {
-                message = "There is no user with this email. Are you sure you registered?";
+                message =
+                    "There is no user with this email. Are you sure you registered?";
             } else {
                 message = "Something went wrong.";
             }

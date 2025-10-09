@@ -1,4 +1,3 @@
-// components/UploadInvoiceModal.tsx
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -31,8 +30,18 @@ const UploadInvoiceModal = ({
     >(undefined);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files) {
-            setSelectedFile(e.target.files[0]);
+        if (e.target.files && e.target.files[0]) {
+            const file = e.target.files[0];
+            const fileExtension = file.name.split(".").pop()?.toLowerCase();
+
+            if (fileExtension !== "pdf") {
+                setShowErrorMessage(true);
+                setSelectedFile(null);
+                e.target.value = "";
+                return;
+            }
+
+            setSelectedFile(file);
             setShowErrorMessage(false);
         }
     };
@@ -64,11 +73,12 @@ const UploadInvoiceModal = ({
                             <Input
                                 id="invoice-file"
                                 type="file"
+                                accept=".pdf"
                                 onChange={handleChange}
                             />
                             {showErrorMessage === true && (
                                 <p className="text-red-500 text-sm">
-                                    You need to upload a file.
+                                    You need to upload a PDF file.
                                 </p>
                             )}
                         </div>

@@ -12,7 +12,7 @@ import UserProfile from "@/pages/UserProfile";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@/services/api/main";
 import ProtectedRoute from "@/components/ProtectedRoute"; // Import the ProtectedRoute
-import AuthProvider from "@/components/AuthProvider";
+import AuthProvider from "@/contexts/AuthProvider";
 import ViewInvoice from "@/pages/ViewInvoice";
 import ViewClient from "@/pages/ViewClient";
 import { AlertProvider } from "@/contexts/AlertContext";
@@ -27,12 +27,21 @@ function App() {
                         <BrowserRouter>
                             <Routes>
                                 <Route element={<AuthLayout />}>
-                                    <Route path="/signin" element={<SignIn />} />
-                                    <Route path="/signup" element={<SignUp />} />
+                                    <Route
+                                        path="/signin"
+                                        element={<SignIn />}
+                                    />
+                                    <Route
+                                        path="/signup"
+                                        element={<SignUp />}
+                                    />
                                 </Route>
                                 <Route element={<ProtectedRoute />}>
                                     <Route element={<SidebarLayout />}>
-                                        <Route path="/" element={<Invoices />} />
+                                        <Route
+                                            path="/"
+                                            element={<Invoices />}
+                                        />
                                         <Route
                                             path="/invoices"
                                             element={<Invoices />}
