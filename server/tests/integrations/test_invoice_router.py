@@ -165,3 +165,12 @@ def test_parser_with_client_found(
     parser_response = ParserResponse.model_validate(response.json())
     assert parser_response.client_id is not None
     assert parser_response.client_id == existing_client.id_
+
+
+def test_invoice_not_pdf(test_client: TestClient, invoice_create: InvoiceCreate):
+    response = test_client.post(
+        "/v1/invoices",
+        files={"upload_file": ("test.txt", b"Dummy text content", "text/plain")},
+        data={"data": invoice_create.model_dump_json()},
+    )
+    assert response.status_code == 400

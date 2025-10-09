@@ -14,7 +14,7 @@ from invoice_reader.interfaces.api.routers import (
     invoice_router,
     user_router,
 )
-from invoice_reader.services.exceptions import CustomException
+from invoice_reader.domain.exceptions import CustomException
 from invoice_reader.settings import get_settings
 from invoice_reader.utils.logger import get_logger
 

@@ -4,7 +4,9 @@ from enum import StrEnum
 from typing import Annotated
 from uuid import UUID, uuid4
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
+
+from invoice_reader.domain.exceptions import InvalidFileFormatException
 
 ACCEPTED_FILE_FORMATS = [".pdf"]
 
@@ -16,11 +18,20 @@ class Currency(StrEnum):
 
 
 class File(BaseModel):
-    filename: Annotated[
-        str, Field(pattern=rf".+({'|'.join([fmt.lstrip('.') for fmt in ACCEPTED_FILE_FORMATS])})$")
-    ]
+    filename: str
     file: bytes
     storage_path: str
+
+    @field_validator("filename")
+    @classmethod
+    def validate_file_format(cls, v: str) -> str:
+        file_extension = os.path.splitext(v)[-1].lower()
+        if file_extension not in ACCEPTED_FILE_FORMATS:
+            raise InvalidFileFormatException(
+                f"""Invalid file format '{file_extension}'. 
+                Accepted formats: {", ".join(ACCEPTED_FILE_FORMATS)}"""
+            )
+        return v
 
     @property
     def format(self):
