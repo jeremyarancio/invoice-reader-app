@@ -10,9 +10,23 @@ import { useNavigate } from "react-router-dom";
 function Invoices() {
     const navigate = useNavigate();
     const [selectedFile, setSelectedFile] = useState(null);
+    const [searchQuery, setSearchQuery] = useState("");
 
     const { invoices, isLoading } = useFetchInvoices();
     const { clients } = useFetchClients();
+
+    const filteredInvoices = invoices?.filter((invoice) => {
+        const clientName =
+            clients?.find((c) => c.id === invoice.clientId)?.clientName ?? "";
+        const query = searchQuery.toLowerCase();
+
+        return (
+            invoice.invoiceNumber.toLowerCase().includes(query) ||
+            invoice.description.toLowerCase().includes(query) ||
+            clientName.toLowerCase().includes(query) ||
+            invoice.grossAmount.toString().includes(query)
+        );
+    });
 
     const handleUpload = () => {
         selectedFile &&
@@ -35,27 +49,35 @@ function Invoices() {
             </div>
 
             <div className="max-w-96 px-4 mb-20 mx-auto mt-5">
-                <Input placeholder="Search"></Input>
+                <Input
+                    placeholder="Search invoices..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                />
             </div>
-            {invoices.length === 0 && !isLoading && (
+            {filteredInvoices.length === 0 && !isLoading && (
                 <NoElementFound type="invoice" />
             )}
             <div className="flex flex-col space-y-2 mt-5 mx-auto max-w-4xl px-4 h-full">
-                {invoices?.map((invoice) => (
-                    <InvoiceCard
+                {filteredInvoices?.map((invoice) => (
+                    <div
                         key={invoice.id}
-                        invoiceId={invoice.id}
-                        invoiceDescription={invoice.description} // Not implemented
-                        grossAmount={invoice.grossAmount}
-                        invoiceNumber={invoice.invoiceNumber}
-                        issuedDate={invoice.issuedDate}
-                        status={invoice.paidDate ? "paid" : "unpaid"} //To change
-                        currency={invoice.currency}
-                        clientName={
-                            clients?.find((c) => c.id === invoice.clientId)
-                                ?.clientName ?? ""
-                        }
-                    />
+                        className="animate-in fade-in slide-in-from-top-2 duration-300"
+                    >
+                        <InvoiceCard
+                            invoiceId={invoice.id}
+                            invoiceDescription={invoice.description}
+                            grossAmount={invoice.grossAmount}
+                            invoiceNumber={invoice.invoiceNumber}
+                            issuedDate={invoice.issuedDate}
+                            status={invoice.paidDate ? "paid" : "unpaid"}
+                            currency={invoice.currency}
+                            clientName={
+                                clients?.find((c) => c.id === invoice.clientId)
+                                    ?.clientName ?? ""
+                            }
+                        />
+                    </div>
                 ))}
             </div>
         </>

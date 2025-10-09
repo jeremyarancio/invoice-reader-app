@@ -4,14 +4,18 @@
 @custom-variant dark (&:is(.dark *));
 
 @layer base {
+  html {
+    scrollbar-gutter: stable;
+  }
+
   h1 {
     @apply text-3xl font-bold font-mono tracking-tight text-gray-900 dark:text-white;
   }
-  
+
   h2 {
     @apply text-2xl font-semibold font-mono tracking-tight text-gray-800 dark:text-gray-100;
   }
-  
+
   h3 {
     @apply text-lg font-medium font-sans text-gray-700 dark:text-gray-200;
   }

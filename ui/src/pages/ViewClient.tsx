@@ -37,7 +37,7 @@ function ViewClient() {
                             Total Revenue:
                         </span>
                         <span className="font-semibold text-lg">
-                            {client?.totalRevenue || 0} €
+                            {client?.totalRevenue || 0} € 
                         </span>
                     </div>
                 </div>
