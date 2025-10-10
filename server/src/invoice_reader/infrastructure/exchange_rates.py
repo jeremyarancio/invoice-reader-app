@@ -10,18 +10,6 @@ settings = get_settings()
 
 
 class TestExchangeRatesService(IExchangeRatesService):
-    """Test service with fixed exchange rates for predictable conversions.
-
-    Base: EUR 1.0
-    Conversions: USD = EUR * 1.1, GBP = EUR * 0.9, CZK = EUR * 24.0
-
-    Example: EUR 10,000 converts to:
-    - EUR 10,000 (base)
-    - USD 11,000 (10,000 * 1.1)
-    - GBP 9,000 (10,000 * 0.9)
-    - CZK 240,000 (10,000 * 24.0)
-    """
-
     def get_exchange_rates(
         self, base_currency: Currency, date: date | None = None
     ) -> ExchangeRates:
