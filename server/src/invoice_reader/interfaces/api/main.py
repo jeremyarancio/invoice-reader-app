@@ -9,12 +9,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
 from prometheus_fastapi_instrumentator import Instrumentator
 
+from invoice_reader.domain.exceptions import CustomException
 from invoice_reader.interfaces.api.routers import (
     client_router,
     invoice_router,
     user_router,
 )
-from invoice_reader.domain.exceptions import CustomException
 from invoice_reader.settings import get_settings
 from invoice_reader.utils.logger import get_logger
 

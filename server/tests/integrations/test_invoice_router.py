@@ -5,14 +5,16 @@ import pytest
 from fastapi.testclient import TestClient
 
 from invoice_reader.domain.client import Client
-from invoice_reader.domain.invoice import Invoice
+from invoice_reader.domain.invoice import Currency, Invoice
 from invoice_reader.domain.user import User
+from invoice_reader.infrastructure.exchange_rates import TestExchangeRatesService
 from invoice_reader.infrastructure.parser import TestParser
 from invoice_reader.infrastructure.repositories.client import InMemoryClientRepository
 from invoice_reader.infrastructure.repositories.file import InMemoryFileRepository
 from invoice_reader.infrastructure.repositories.invoice import InMemoryInvoiceRepository
 from invoice_reader.interfaces.api.main import app
 from invoice_reader.interfaces.dependencies.auth import get_current_user_id
+from invoice_reader.interfaces.dependencies.exchange_rates_service import get_exchange_rates_service
 from invoice_reader.interfaces.dependencies.parser import get_parser
 from invoice_reader.interfaces.dependencies.repository import (
     get_client_repository,
@@ -28,37 +30,15 @@ from invoice_reader.interfaces.schemas.invoice import (
 from invoice_reader.interfaces.schemas.parser import ParserResponse
 
 
-def _test_get_invoice_repository():
-    return InMemoryInvoiceRepository()
-
-
-def create_test_get_current_user_id(user: User):
-    def _test_get_current_user_id():
-        return user.id_
-
-    return _test_get_current_user_id
-
-
-def _test_get_parser():
-    return TestParser()
-
-
-def _test_get_file_repository():
-    return InMemoryFileRepository()
-
-
-def _test_get_client_repository():
-    return InMemoryClientRepository()
-
-
 @pytest.fixture
 def test_client(user: User):
     client = TestClient(app)
-    app.dependency_overrides[get_invoice_repository] = _test_get_invoice_repository
-    app.dependency_overrides[get_parser] = _test_get_parser
-    app.dependency_overrides[get_current_user_id] = create_test_get_current_user_id(user=user)
-    app.dependency_overrides[get_file_repository] = _test_get_file_repository
-    app.dependency_overrides[get_client_repository] = _test_get_client_repository
+    app.dependency_overrides[get_invoice_repository] = lambda: InMemoryInvoiceRepository()
+    app.dependency_overrides[get_parser] = lambda: TestParser()
+    app.dependency_overrides[get_current_user_id] = lambda: user.id_
+    app.dependency_overrides[get_file_repository] = lambda: InMemoryFileRepository()
+    app.dependency_overrides[get_client_repository] = lambda: InMemoryClientRepository()
+    app.dependency_overrides[get_exchange_rates_service] = lambda: TestExchangeRatesService()
     yield client
     app.dependency_overrides.clear()
 
@@ -77,6 +57,12 @@ def test_add_invoice(
     )
     assert invoice
     assert invoice.data.invoice_number == invoice_create.data.invoice_number
+    assert invoice.gross_amount.base_amount == invoice_create.data.gross_amount
+    assert invoice.gross_amount.base_currency == invoice_create.data.currency
+    assert invoice.gross_amount.currency_amounts[Currency.EUR] == 10000.0
+    assert invoice.gross_amount.currency_amounts[Currency.USD] == 11000.0
+    assert invoice.gross_amount.currency_amounts[Currency.GBP] == 9000.0
+    assert invoice.gross_amount.currency_amounts[Currency.CZK] == 240000.0
 
 
 def test_add_exisiting_invoice(
@@ -113,10 +99,18 @@ def test_update_invoice(
     assert response.status_code == 204
     updated_invoice = InMemoryInvoiceRepository().get(invoice_id=existing_invoice.id_)
     assert updated_invoice is not None
-    assert updated_invoice.data.gross_amount == invoice_update.data.gross_amount
+    assert updated_invoice.gross_amount.base_amount == invoice_update.data.gross_amount
+    assert updated_invoice.gross_amount.base_currency == invoice_update.data.currency
     assert updated_invoice.data.vat == invoice_update.data.vat
     assert updated_invoice.data.description == invoice_update.data.description
     assert updated_invoice.data.issued_date == invoice_update.data.issued_date
+
+    # Test currency conversions are updated
+    # Updated amount: EUR 20,000 with rates: EUR=1.0, USD=1.1, GBP=0.9, CZK=24.0
+    assert updated_invoice.gross_amount.currency_amounts[Currency.EUR] == 20000.0
+    assert updated_invoice.gross_amount.currency_amounts[Currency.USD] == 22000.0  # 20,000 * 1.1
+    assert updated_invoice.gross_amount.currency_amounts[Currency.GBP] == 18000.0  # 20,000 * 0.9
+    assert updated_invoice.gross_amount.currency_amounts[Currency.CZK] == 480000.0  # 20,000 * 24.0
 
 
 def test_delete_invoice(test_client: TestClient, existing_invoice: Invoice):

@@ -4,7 +4,6 @@ import pytest
 from fastapi.testclient import TestClient
 
 from invoice_reader.domain.client import Client
-from invoice_reader.domain.invoice import Invoice
 from invoice_reader.domain.user import User
 from invoice_reader.infrastructure.repositories.client import InMemoryClientRepository
 from invoice_reader.infrastructure.repositories.invoice import InMemoryInvoiceRepository
@@ -62,15 +61,14 @@ def test_get_client(test_client: TestClient, existing_client: Client):
     assert client_response.data.client_name == existing_client.data.client_name
 
 
-def test_client_with_invoices(
-    test_client: TestClient, existing_client: Client, existing_invoice: Invoice
-):
-    response = test_client.get(f"/v1/clients/{existing_client.id_}")
+def test_client_with_invoices(test_client: TestClient, existing_client_with_invoices: Client):
+    response = test_client.get(f"/v1/clients/{existing_client_with_invoices.id_}")
     client_response = ClientResponse.model_validate(response.json())
     assert response.status_code == 200
-    assert client_response.client_id == existing_client.id_
-    assert client_response.total_revenue == existing_invoice.data.gross_amount
-    assert client_response.n_invoices == 1
+    assert client_response.client_id == existing_client_with_invoices.id_
+    # Client has 3 invoices, each with 10000 EUR base amount
+    assert client_response.total_revenue == 10000.0 * 3
+    assert client_response.n_invoices == 3
 
 
 def test_update_client(

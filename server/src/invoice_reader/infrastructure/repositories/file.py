@@ -1,3 +1,4 @@
+# pyright: basic
 import io
 
 import boto3

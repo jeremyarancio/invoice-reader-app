@@ -11,3 +11,10 @@ class InvalidFileFormatException(CustomException):
 
     def __init__(self, message: str):
         super().__init__(message=message, status_code=400)
+
+
+class AmountsCurrencyMismatchException(CustomException):
+    """Exception for mismatched currencies in Amount operations."""
+
+    def __init__(self, message: str):
+        super().__init__(message=message, status_code=400)

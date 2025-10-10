@@ -4,7 +4,7 @@ from uuid import uuid4
 import pytest
 from sqlmodel import Session
 
-from invoice_reader.domain.invoice import Currency, Invoice, InvoiceData
+from invoice_reader.domain.invoice import Amount, Currency, Invoice, InvoiceData
 from invoice_reader.infrastructure.repositories.invoice import SQLModelInvoiceRepository
 
 
@@ -20,13 +20,15 @@ def invoice() -> Invoice:
         client_id=uuid4(),
         storage_path="/tmp/inv_1.pdf",
         data=InvoiceData(
-            currency=Currency.USD,
             invoice_number="INV-001",
-            gross_amount=100.0,
             vat=20,
             description="Test invoice",
             issued_date=date(2025, 9, 10),
             paid_date=date(2025, 9, 11),
+        ),
+        gross_amount=Amount(
+            currency_amounts={Currency.USD: 120.0, Currency.EUR: 110.0, Currency.GBP: 100.0},
+            base_currency=Currency.USD,
         ),
     )
 

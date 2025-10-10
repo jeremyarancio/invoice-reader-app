@@ -2,7 +2,7 @@ from uuid import UUID
 
 from sqlmodel import Session, select
 
-from invoice_reader.domain.invoice import Invoice, InvoiceData
+from invoice_reader.domain.invoice import Amount, Currency, Invoice, InvoiceData
 from invoice_reader.infrastructure.models import InvoiceModel
 from invoice_reader.services.interfaces.repositories import IInvoiceRepository
 
@@ -50,9 +50,13 @@ class SQLModelInvoiceRepository(IInvoiceRepository):
             invoice_id=invoice.id_,
             user_id=invoice.user_id,
             client_id=invoice.client_id,
-            currency=invoice.data.currency,
+            currency=invoice.gross_amount.base_currency,
             invoice_number=invoice.data.invoice_number,
-            gross_amount=invoice.data.gross_amount,
+            gross_amount=invoice.gross_amount.base_amount,
+            currency_amounts={
+                str(currency): amount
+                for currency, amount in invoice.gross_amount.currency_amounts.items()
+            },
             vat=invoice.data.vat,
             description=invoice.data.description,
             invoiced_date=invoice.data.issued_date,
@@ -69,12 +73,16 @@ class SQLModelInvoiceRepository(IInvoiceRepository):
             storage_path=model.storage_path,
             data=InvoiceData(
                 invoice_number=model.invoice_number,
-                gross_amount=model.gross_amount,
                 vat=model.vat,
                 description=model.description,
                 issued_date=model.invoiced_date,
                 paid_date=model.paid_date,
-                currency=model.currency,
+            ),
+            gross_amount=Amount(
+                currency_amounts={
+                    Currency(cur): amt for cur, amt in model.currency_amounts.items()
+                },
+                base_currency=model.currency,
             ),
         )
 

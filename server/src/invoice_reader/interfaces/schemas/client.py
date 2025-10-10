@@ -19,7 +19,7 @@ class ClientResponse(BaseModel):
     def from_client(cls, client: Client) -> "ClientResponse":
         return cls(
             client_id=client.id_,
-            total_revenue=client.total_revenue,
+            total_revenue=client.total_revenue.base_amount,
             data=client.data,
             n_invoices=len(client.invoices),
         )

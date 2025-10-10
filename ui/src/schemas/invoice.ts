@@ -2,6 +2,7 @@ export const CURRENCIES = {
     usd: { symbol: "$", name: "US Dollar" },
     eur: { symbol: "€", name: "Euro" },
     gbp: { symbol: "£", name: "British Pound" },
+    czk: { symbol: "Kč", name: "Czech Koruna" },
 } as const;
 
 export type InvoiceData = {

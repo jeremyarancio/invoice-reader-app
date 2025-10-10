@@ -2,13 +2,14 @@ from typing import BinaryIO
 from uuid import uuid4
 
 from invoice_reader.domain.client import UUID, Client
-from invoice_reader.domain.invoice import File, Invoice, InvoiceData
+from invoice_reader.domain.invoice import Amount, Currency, File, Invoice, InvoiceData
 from invoice_reader.domain.parser import ParsedInvoiceData
 from invoice_reader.services.exceptions import (
     EntityNotFoundException,
     ExistingEntityException,
     RollbackException,
 )
+from invoice_reader.services.interfaces.exchange_rates import IExchangeRatesService
 from invoice_reader.services.interfaces.parser import IParser
 from invoice_reader.services.interfaces.repositories import (
     IClientRepository,
@@ -29,8 +30,11 @@ class InvoiceService:
         user_id: UUID,
         client_id: UUID,
         invoice_data: InvoiceData,
+        gross_amount: float,
+        currency: Currency,
         file_repository: IFileRepository,
         invoice_repository: IInvoiceRepository,
+        exchange_rate_service: IExchangeRatesService,
     ) -> None:
         existing_invoice = invoice_repository.get_by_invoice_number(
             user_id=user_id,
@@ -42,18 +46,28 @@ class InvoiceService:
         invoice_id = uuid4()
         initial_path = f"{user_id}/{invoice_id}.{filename.split('.')[-1]}"
         storage_path = file_repository.create_storage_path(initial_path=initial_path)
-        file = File(
-            file=file_bin.read(),
-            filename=filename,
-            storage_path=storage_path,
-        )
+        file = File(file=file_bin.read(), filename=filename, storage_path=storage_path)
+
+        try:
+            exchange_rates = exchange_rate_service.get_exchange_rates(
+                base_currency=currency, date=invoice_data.issued_date
+            )
+            amount = Amount.from_rate_exchanges(
+                exchange_rates=exchange_rates, base_amount=gross_amount, base_currency=currency
+            )
+        except Exception as e:
+            logger.error(f"Failed to fetch exchange rates: {e}")
+            amount = Amount(base_currency=currency, currency_amounts={currency: gross_amount})
+
         invoice = Invoice(
             id_=invoice_id,
             user_id=user_id,
             client_id=client_id,
             storage_path=storage_path,
             data=invoice_data,
+            gross_amount=amount,
         )
+
         try:
             logger.info("Start storing file")
             file_repository.store(file=file)
@@ -123,7 +137,10 @@ class InvoiceService:
         invoice_id: UUID,
         update_client_id: UUID,
         update_invoice_data: InvoiceData,
+        updated_currency: Currency,
+        updated_gross_amount: float,
         invoice_repository: IInvoiceRepository,
+        exchange_rate_service: IExchangeRatesService,
     ) -> None:
         # Check for duplicate invoice numbers (excluding the current invoice)
         existing_invoices = invoice_repository.get_all(user_id=user_id)
@@ -145,12 +162,34 @@ class InvoiceService:
         )
         if not invoice:
             raise EntityNotFoundException(message=f"Invoice with id {invoice_id} not found.")
+
+        # Call exchange rate service only if the gross amount has changed
+        if updated_gross_amount != invoice.gross_amount.base_amount:
+            try:
+                exchange_rates = exchange_rate_service.get_exchange_rates(
+                    base_currency=updated_currency, date=update_invoice_data.issued_date
+                )
+                gross_amount = Amount.from_rate_exchanges(
+                    exchange_rates=exchange_rates,
+                    base_amount=updated_gross_amount,
+                    base_currency=updated_currency,
+                )
+            except Exception as e:
+                logger.error(f"Failed to fetch exchange rates: {e}")
+                gross_amount = Amount(
+                    base_currency=updated_currency,
+                    currency_amounts={updated_currency: updated_gross_amount},
+                )
+        else:
+            gross_amount = invoice.gross_amount
+
         updated_invoice = Invoice(
             id_=invoice.id_,
             user_id=invoice.user_id,
             client_id=update_client_id,
             storage_path=invoice.storage_path,
             data=update_invoice_data,
+            gross_amount=gross_amount,
         )
         invoice_repository.update(invoice=updated_invoice)
 
