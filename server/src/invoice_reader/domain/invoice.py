@@ -6,10 +6,7 @@ from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field, field_validator
 
-from invoice_reader.domain.exceptions import (
-    AmountsCurrencyMismatchException,
-    InvalidFileFormatException,
-)
+from invoice_reader.domain.exceptions import InvalidFileFormatException
 
 ACCEPTED_FILE_FORMATS = [".pdf"]
 
@@ -19,40 +16,6 @@ class Currency(StrEnum):
     EUR = "EUR"
     GBP = "GBP"
     CZK = "CZK"
-
-
-type CurrencyAmounts = dict[Currency, float]
-
-type ExchangeRates = dict[Currency, float]
-
-
-class Amount(BaseModel):
-    currency_amounts: CurrencyAmounts
-    base_currency: Currency
-
-    @property
-    def base_amount(self) -> float:
-        return self.currency_amounts.get(self.base_currency, 0)
-
-    @classmethod
-    def from_rate_exchanges(
-        cls, exchange_rates: ExchangeRates, base_amount: float, base_currency: Currency
-    ) -> "Amount":
-        currency_amounts = {cur: rate * base_amount for cur, rate in exchange_rates.items()}
-        return cls(currency_amounts=currency_amounts, base_currency=base_currency)
-
-    def __add__(self, other: "Amount") -> "Amount":
-        """Add two amounts together across all currencies."""
-        if set(self.currency_amounts.keys()) != set(other.currency_amounts.keys()):
-            raise AmountsCurrencyMismatchException("Cannot add amounts with different currencies")
-        new_currency_amounts = {
-            currency: self.currency_amounts[currency] + other.currency_amounts[currency]
-            for currency in self.currency_amounts
-        }
-        return Amount(
-            currency_amounts=new_currency_amounts,
-            base_currency=self.base_currency,
-        )
 
 
 class File(BaseModel):
@@ -82,6 +45,8 @@ class InvoiceData(BaseModel):
     description: Annotated[str, Field(max_length=500)]
     issued_date: date
     paid_date: date | None = None
+    gross_amount: float
+    currency: Currency
 
 
 class Invoice(BaseModel):
@@ -90,4 +55,3 @@ class Invoice(BaseModel):
     user_id: UUID
     storage_path: str
     data: InvoiceData
-    gross_amount: Amount

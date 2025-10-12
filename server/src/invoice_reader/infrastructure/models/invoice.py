@@ -1,8 +1,7 @@
 from datetime import date
 from uuid import UUID
 
-from sqlalchemy import JSON
-from sqlmodel import Column, Field, SQLModel  # type: ignore
+from sqlmodel import Field, SQLModel  # type: ignore
 
 from invoice_reader.domain.invoice import Currency
 
@@ -16,7 +15,6 @@ class InvoiceModel(SQLModel, table=True):
     storage_path: str
     invoice_number: str
     gross_amount: float
-    currency_amounts: dict[str, float] = Field(sa_column=Column(JSON))
     vat: int
     currency: Currency
     description: str

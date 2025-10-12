@@ -68,5 +68,5 @@ enable = [
 ]
 
 [tool.pyright]
-include = ["src"]
+include = ["src", "tests"]
 typeCheckingMode = "strict"

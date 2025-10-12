@@ -6,9 +6,8 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import HTTPException
 from pydantic import BaseModel, ValidationError
 
-from invoice_reader.domain.invoice import InvoiceData
 from invoice_reader.interfaces.dependencies.auth import get_current_user_id
-from invoice_reader.interfaces.dependencies.exchange_rates_service import get_exchange_rates_service
+from invoice_reader.interfaces.dependencies.exchange_rates import get_exchange_rates_service
 from invoice_reader.interfaces.dependencies.parser import get_parser
 from invoice_reader.interfaces.dependencies.repository import (
     get_client_repository,
@@ -22,7 +21,7 @@ from invoice_reader.interfaces.schemas.invoice import (
     PagedInvoiceResponse,
 )
 from invoice_reader.interfaces.schemas.parser import ParserResponse
-from invoice_reader.services.interfaces.exchange_rates import IExchangeRatesService
+from invoice_reader.services.interfaces.exchange_rates import IExchangeRateService
 from invoice_reader.services.interfaces.parser import IParser
 from invoice_reader.services.interfaces.repositories import (
     IFileRepository,
@@ -72,26 +71,16 @@ def add_invoice(
     user_id: Annotated[UUID, Depends(get_current_user_id)],
     file_repository: Annotated[IFileRepository, Depends(get_file_repository)],
     invoice_repository: Annotated[IInvoiceRepository, Depends(get_invoice_repository)],
-    exchange_rate_service: Annotated[IExchangeRatesService, Depends(get_exchange_rates_service)],
+    exchange_rate_service: Annotated[IExchangeRateService, Depends(get_exchange_rates_service)],
 ):
-    invoice_data = InvoiceData(
-        invoice_number=data.data.invoice_number,
-        vat=data.data.vat,
-        description=data.data.description,
-        issued_date=data.data.issued_date,
-        paid_date=data.data.paid_date,
-    )
     InvoiceService.add_invoice(
         user_id=user_id,
         client_id=data.client_id,
         file_bin=upload_file.file,
         filename=upload_file.filename if upload_file.filename else "",
-        gross_amount=data.data.gross_amount,
-        currency=data.data.currency,
-        invoice_data=invoice_data,
+        invoice_data=data.data,
         file_repository=file_repository,
         invoice_repository=invoice_repository,
-        exchange_rate_service=exchange_rate_service,
     )
     return Response(
         content="The file and its information were successfully stored.",
@@ -167,17 +156,13 @@ def update_invoice(
     invoice_update: InvoiceUpdate,
     user_id: Annotated[UUID, Depends(get_current_user_id)],
     invoice_repository: Annotated[IInvoiceRepository, Depends(get_invoice_repository)],
-    exchange_rate_service: Annotated[IExchangeRatesService, Depends(get_exchange_rates_service)],
 ) -> Response:
     InvoiceService.update_invoice(
         user_id=user_id,
         invoice_id=invoice_id,
         update_client_id=invoice_update.client_id,
         update_invoice_data=invoice_update.data,
-        updated_currency=invoice_update.data.currency,
-        updated_gross_amount=invoice_update.data.gross_amount,
         invoice_repository=invoice_repository,
-        exchange_rate_service=exchange_rate_service,
     )
     return Response(status_code=204)
 
