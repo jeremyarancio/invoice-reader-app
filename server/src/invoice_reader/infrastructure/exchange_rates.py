@@ -53,7 +53,7 @@ class ExchangeRatesUniRateAPI(IExchangeRateService):
         if response.status_code == 200:
             rates = {
                 Currency(curr): rate
-                for curr, rate in response.json()["rates"]
+                for curr, rate in response.json()["rates"].items()
                 if curr.upper() in Currency._member_names_
             }
             return ExchangeRates(

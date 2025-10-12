@@ -113,7 +113,17 @@ export const useUpdateInvoice = () => {
             showAlert("success", "Updated!", "Invoice updated successfully");
         },
         onError: (error: AxiosError) => {
-            showAlert("error", "Error", (error.response?.data as any)?.message);
+            error.response?.status === 409
+                ? showAlert(
+                      "error",
+                      "Error",
+                      "Invoice with this number already exists. Update aborted."
+                  )
+                : showAlert(
+                      "error",
+                      "Error",
+                      "Something went wrong. Please try again later."
+                  );
         },
     });
     return (invoiceId: string, invoiceData: InvoiceData, clientId: string) =>

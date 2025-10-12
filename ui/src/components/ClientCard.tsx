@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { AppCard } from "./AppCard";
 import { useDeleteClient } from "@/hooks/api/client";
+import { useCurrencyStore } from "@/stores/currencyStore";
 
 interface ClientCardProps {
     clientId: string;
@@ -17,6 +18,7 @@ function ClientCard({
 }: ClientCardProps) {
     const navigate = useNavigate();
     const deleteClient = useDeleteClient();
+    const { selectedCurrency } = useCurrencyStore();
 
     return (
         <>
@@ -35,15 +37,7 @@ function ClientCard({
                     <div className="w-3/8"></div>
                     <div className="flex w-2/8 space-x-8 justify-evenly">
                         <div className="font-semibold text-right">
-                            {totalRevenue && Object.keys(totalRevenue).length > 0 ? (
-                                Object.entries(totalRevenue).map(([currency, amount]) => (
-                                    <div key={currency} className="font-semibold">
-                                        {amount.toFixed(2)} {currency}
-                                    </div>
-                                ))
-                            ) : (
-                                <span>0</span>
-                            )}
+                            {totalRevenue?.[selectedCurrency]?.toFixed(2) || '0.00'} {selectedCurrency}
                         </div>
                         <div className="my-auto w-1/30"></div>
                     </div>
