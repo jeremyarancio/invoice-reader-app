@@ -53,8 +53,7 @@ function Clients() {
                             clientId={client.id}
                             clientName={client.clientName}
                             totalInvoice={client.nInvoices}
-                            totalInvoiceAmount={client.totalRevenue}
-                            totalInvoiceAmountCurrency={"-"}
+                            totalRevenue={client.totalRevenue}
                         />
                     </div>
                 ))}

@@ -6,16 +6,14 @@ interface ClientCardProps {
     clientId: string;
     clientName: string;
     totalInvoice: number;
-    totalInvoiceAmount: number;
-    totalInvoiceAmountCurrency: string;
+    totalRevenue: Record<string, number>;
 }
 
 function ClientCard({
     clientId,
     clientName,
     totalInvoice,
-    totalInvoiceAmount,
-    totalInvoiceAmountCurrency,
+    totalRevenue,
 }: ClientCardProps) {
     const navigate = useNavigate();
     const deleteClient = useDeleteClient();
@@ -36,11 +34,16 @@ function ClientCard({
                     </div>
                     <div className="w-3/8"></div>
                     <div className="flex w-2/8 space-x-8 justify-evenly">
-                        <div className="font-semibold">
-                            <span className="flex font-semibold">
-                                {totalInvoiceAmount}{" "}
-                                {totalInvoiceAmountCurrency}
-                            </span>
+                        <div className="font-semibold text-right">
+                            {totalRevenue && Object.keys(totalRevenue).length > 0 ? (
+                                Object.entries(totalRevenue).map(([currency, amount]) => (
+                                    <div key={currency} className="font-semibold">
+                                        {amount.toFixed(2)} {currency}
+                                    </div>
+                                ))
+                            ) : (
+                                <span>0</span>
+                            )}
                         </div>
                         <div className="my-auto w-1/30"></div>
                     </div>

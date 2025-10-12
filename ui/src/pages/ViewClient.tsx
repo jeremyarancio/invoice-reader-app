@@ -36,9 +36,17 @@ function ViewClient() {
                         <span className="text-muted-foreground">
                             Total Revenue:
                         </span>
-                        <span className="font-semibold text-lg">
-                            {client?.totalRevenue || 0} € 
-                        </span>
+                        <div className="font-semibold text-lg">
+                            {client?.totalRevenue && Object.keys(client.totalRevenue).length > 0 ? (
+                                Object.entries(client.totalRevenue).map(([currency, amount]) => (
+                                    <div key={currency}>
+                                        {amount.toFixed(2)} {currency}
+                                    </div>
+                                ))
+                            ) : (
+                                <span>0</span>
+                            )}
+                        </div>
                     </div>
                 </div>
 
