@@ -24,3 +24,24 @@ dev-logs:
 
 dev-down:
 	docker compose down
+
+#----Version Management----
+version-current:
+	@echo "Current version: $$(cat VERSION)"
+
+version-bump-patch:
+	@echo "Bumping patch version..."
+	@uvx --with commitizen cz bump --increment PATCH
+
+version-bump-minor:
+	@echo "Bumping minor version..."
+	@uvx --with commitizen cz bump --increment MINOR
+
+version-bump-major:
+	@echo "Bumping major version..."
+	@uvx --with commitizen cz bump --increment MAJOR
+
+version-tag:
+	@echo "Creating git tag for version $$(cat VERSION)..."
+	git tag -a "v$$(cat VERSION)" -m "Release version $$(cat VERSION)"
+	@echo "Tag created. Push with: git push origin v$$(cat VERSION)"

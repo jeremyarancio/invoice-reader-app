@@ -1,6 +1,7 @@
 import sys
 import time
 import traceback
+from importlib.metadata import version
 from typing import Annotated
 
 from fastapi import Depends, FastAPI, Request, UploadFile
@@ -14,11 +15,17 @@ from ml_server.utils.logger import get_logger
 
 logger = get_logger()
 
+# Get version from package metadata
+try:
+    APP_VERSION = version("ml-server")
+except Exception:
+    APP_VERSION = "unknown"
+
 # Initialize FastAPI app
 app = FastAPI(
     title="Invoice Reader ML Server",
     description="A FastAPI server for managing Machine Learning and AI features.",
-    version="0.1.0",
+    version=APP_VERSION,
 )
 
 
@@ -68,7 +75,12 @@ async def home():
 
 @app.get("/health")
 async def health_check():
-    return {"status": "healthy", "service": "ml-server"}
+    """Health check endpoint with version information."""
+    return {
+        "status": "healthy",
+        "version": APP_VERSION,
+        "service": "ml-server",
+    }
 
 
 @app.post("/v1/parse")

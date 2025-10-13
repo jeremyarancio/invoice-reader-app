@@ -1,5 +1,6 @@
 import traceback
 from contextlib import asynccontextmanager
+from importlib.metadata import version
 
 from fastapi import (
     FastAPI,
@@ -22,13 +23,19 @@ settings = get_settings()
 
 logger = get_logger()
 
+# Get version from package metadata
+try:
+    APP_VERSION = version("invoice-reader")
+except Exception:
+    APP_VERSION = "unknown"
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(lifespan=lifespan, title="Invoice Reader API", version="1.0.0")
+app = FastAPI(lifespan=lifespan, title="Invoice Reader API", version=APP_VERSION)
 app.include_router(user_router)
 app.include_router(invoice_router)
 app.include_router(client_router)
@@ -80,6 +87,16 @@ async def global_exception_handler(request: Request, exc: Exception):
 @app.get("/")
 async def root(response: Response):
     return {"message": "Welcome to the Invoice Reader API!"}
+
+
+@app.get("/health")
+async def health():
+    """Health check endpoint with version information."""
+    return {
+        "status": "healthy",
+        "version": APP_VERSION,
+        "service": "invoice-reader-api",
+    }
 
 
 # Monitoring
