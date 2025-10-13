@@ -71,10 +71,14 @@ async def global_exception_handler(request: Request, exc: Exception):
         content={
             "error": {
                 "type": exc.__class__.__name__,
-                "msg": root_cause,
+                "message": root_cause,
                 # Include location only for validation errors
                 "loc": getattr(exc, "loc", None),
             }
+        },
+        headers={
+            "Access-Control-Allow-Origin": settings.frontend_url,
+            "Access-Control-Allow-Credentials": "true",
         },
     )
 
