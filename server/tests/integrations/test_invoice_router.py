@@ -28,37 +28,14 @@ from invoice_reader.interfaces.schemas.invoice import (
 from invoice_reader.interfaces.schemas.parser import ParserResponse
 
 
-def _test_get_invoice_repository():
-    return InMemoryInvoiceRepository()
-
-
-def create_test_get_current_user_id(user: User):
-    def _test_get_current_user_id():
-        return user.id_
-
-    return _test_get_current_user_id
-
-
-def _test_get_parser():
-    return TestParser()
-
-
-def _test_get_file_repository():
-    return InMemoryFileRepository()
-
-
-def _test_get_client_repository():
-    return InMemoryClientRepository()
-
-
 @pytest.fixture
 def test_client(user: User):
     client = TestClient(app)
-    app.dependency_overrides[get_invoice_repository] = _test_get_invoice_repository
-    app.dependency_overrides[get_parser] = _test_get_parser
-    app.dependency_overrides[get_current_user_id] = create_test_get_current_user_id(user=user)
-    app.dependency_overrides[get_file_repository] = _test_get_file_repository
-    app.dependency_overrides[get_client_repository] = _test_get_client_repository
+    app.dependency_overrides[get_invoice_repository] = lambda: InMemoryInvoiceRepository()
+    app.dependency_overrides[get_parser] = lambda: TestParser()
+    app.dependency_overrides[get_current_user_id] = lambda: user.id_
+    app.dependency_overrides[get_file_repository] = lambda: InMemoryFileRepository()
+    app.dependency_overrides[get_client_repository] = lambda: InMemoryClientRepository()
     yield client
     app.dependency_overrides.clear()
 
@@ -114,6 +91,7 @@ def test_update_invoice(
     updated_invoice = InMemoryInvoiceRepository().get(invoice_id=existing_invoice.id_)
     assert updated_invoice is not None
     assert updated_invoice.data.gross_amount == invoice_update.data.gross_amount
+    assert updated_invoice.data.currency == invoice_update.data.currency
     assert updated_invoice.data.vat == invoice_update.data.vat
     assert updated_invoice.data.description == invoice_update.data.description
     assert updated_invoice.data.issued_date == invoice_update.data.issued_date

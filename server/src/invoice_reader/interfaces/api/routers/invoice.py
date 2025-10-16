@@ -7,6 +7,7 @@ from fastapi.exceptions import HTTPException
 from pydantic import BaseModel, ValidationError
 
 from invoice_reader.interfaces.dependencies.auth import get_current_user_id
+from invoice_reader.interfaces.dependencies.exchange_rates import get_exchange_rates_service
 from invoice_reader.interfaces.dependencies.parser import get_parser
 from invoice_reader.interfaces.dependencies.repository import (
     get_client_repository,
@@ -20,6 +21,7 @@ from invoice_reader.interfaces.schemas.invoice import (
     PagedInvoiceResponse,
 )
 from invoice_reader.interfaces.schemas.parser import ParserResponse
+from invoice_reader.services.interfaces.exchange_rates import IExchangeRateService
 from invoice_reader.services.interfaces.parser import IParser
 from invoice_reader.services.interfaces.repositories import (
     IFileRepository,
@@ -69,13 +71,14 @@ def add_invoice(
     user_id: Annotated[UUID, Depends(get_current_user_id)],
     file_repository: Annotated[IFileRepository, Depends(get_file_repository)],
     invoice_repository: Annotated[IInvoiceRepository, Depends(get_invoice_repository)],
+    exchange_rate_service: Annotated[IExchangeRateService, Depends(get_exchange_rates_service)],
 ):
     InvoiceService.add_invoice(
         user_id=user_id,
         client_id=data.client_id,
-        invoice_data=data.data,
         file_bin=upload_file.file,
         filename=upload_file.filename if upload_file.filename else "",
+        invoice_data=data.data,
         file_repository=file_repository,
         invoice_repository=invoice_repository,
     )

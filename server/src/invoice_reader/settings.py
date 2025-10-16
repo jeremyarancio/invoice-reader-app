@@ -39,6 +39,8 @@ class Settings(BaseSettings):
     def parser_endpoint(self) -> str:
         return f"{self.ml_server_url}/v1/parse"
 
+    exchange_rates_api_key: str = ""
+
 
 @lru_cache
 def get_settings() -> Settings:

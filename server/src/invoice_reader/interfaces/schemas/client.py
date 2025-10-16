@@ -3,6 +3,7 @@ from uuid import UUID
 from pydantic import BaseModel
 
 from invoice_reader.domain.client import Client, ClientData
+from invoice_reader.domain.invoice import Currency
 
 
 class ClientCreate(ClientData):
@@ -11,17 +12,19 @@ class ClientCreate(ClientData):
 
 class ClientResponse(BaseModel):
     client_id: UUID
-    total_revenue: float
     n_invoices: int
+    total_revenue: dict[Currency, float]
     data: ClientData
 
     @classmethod
-    def from_client(cls, client: Client) -> "ClientResponse":
+    def from_client(
+        cls, client: Client, total_revenue: dict[Currency, float], n_invoices: int
+    ) -> "ClientResponse":
         return cls(
             client_id=client.id_,
-            total_revenue=client.total_revenue,
             data=client.data,
-            n_invoices=len(client.invoices),
+            n_invoices=n_invoices,
+            total_revenue=total_revenue,
         )
 
 

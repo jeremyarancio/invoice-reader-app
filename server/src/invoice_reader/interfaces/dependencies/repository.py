@@ -11,12 +11,14 @@ from invoice_reader.infrastructure.repositories import (
     SQLModelInvoiceRepository,
     SQLModelUserRepository,
 )
+from invoice_reader.infrastructure.repositories.exchange_rate import InMemoryExchangeRateRepository
 from invoice_reader.services.interfaces.repositories import (
     IClientRepository,
     IFileRepository,
     IInvoiceRepository,
     IUserRepository,
 )
+from invoice_reader.services.interfaces.repositories.exchange_rate import IExchangeRateRepository
 from invoice_reader.settings import get_settings
 
 settings = get_settings()
@@ -55,3 +57,7 @@ def get_user_repository(
     session: Annotated[sqlmodel.Session, Depends(get_session)],
 ) -> IUserRepository:
     return SQLModelUserRepository(session=session)
+
+
+def get_exchange_rate_repository() -> IExchangeRateRepository:
+    return InMemoryExchangeRateRepository()

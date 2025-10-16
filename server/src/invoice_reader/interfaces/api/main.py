@@ -9,12 +9,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
 from prometheus_fastapi_instrumentator import Instrumentator
 
+from invoice_reader.domain.exceptions import CustomException
+from invoice_reader.infrastructure.repositories.exchange_rate import InMemoryExchangeRateRepository
 from invoice_reader.interfaces.api.routers import (
     client_router,
     invoice_router,
     user_router,
 )
-from invoice_reader.domain.exceptions import CustomException
 from invoice_reader.settings import get_settings
 from invoice_reader.utils.logger import get_logger
 
@@ -25,6 +26,7 @@ logger = get_logger()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    InMemoryExchangeRateRepository.init()
     yield
 
 
@@ -69,10 +71,14 @@ async def global_exception_handler(request: Request, exc: Exception):
         content={
             "error": {
                 "type": exc.__class__.__name__,
-                "msg": root_cause,
+                "message": root_cause,
                 # Include location only for validation errors
                 "loc": getattr(exc, "loc", None),
             }
+        },
+        headers={
+            "Access-Control-Allow-Origin": settings.frontend_url,
+            "Access-Control-Allow-Credentials": "true",
         },
     )
 

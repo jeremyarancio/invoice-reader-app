@@ -9,7 +9,7 @@ export type ClientData = {
 
 export type Client = {
     id: string;
-    totalRevenue: number;
+    totalRevenue: Record<string, number>;
     nInvoices: number;
 } & ClientData;
 
@@ -31,7 +31,7 @@ export interface GetPagedClients {
 
 export interface GetClient {
     client_id: string;
-    total_revenue: number;
+    total_revenue: Record<string, number>;
     n_invoices: number;
     data: {
         client_name: string;

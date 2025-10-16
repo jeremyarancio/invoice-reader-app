@@ -44,15 +44,16 @@ export const useDeleteClient = () => {
     const deleteMutation = useMutation({
         mutationFn: deleteClient,
         onSuccess: () => {
-            showAlert('success', 'Deleted!', 'Client deleted successfully');
+            showAlert("success", "Deleted!", "Client deleted successfully");
             queryClient.invalidateQueries({ queryKey: ["clients"] });
         },
         onError: (error: AxiosError) => {
-            const message = error.status === 422
-                ? "No client with this ID exists. Please try again."
-                : error.message;
+            const message =
+                error.status === 422
+                    ? "No client with this ID exists. Please try again."
+                    : error.message;
 
-            showAlert('error', 'Error', message);
+            showAlert("error", "Error", message);
         },
     });
     return (clientId: string) => {
@@ -69,12 +70,16 @@ export const useAddClient = (config?: {
     const submitMutation = useMutation({
         mutationFn: addClient,
         onSuccess: () => {
-            showAlert('success', 'Success!', 'Client successfully added');
+            showAlert("success", "Success!", "Client successfully added");
             queryClient.invalidateQueries({ queryKey: ["clients"] });
             config?.onSuccess?.();
         },
         onError: (error: AxiosError) => {
-            showAlert('error', 'Error', 'Failed to add client: ' + error.message);
+            showAlert(
+                "error",
+                "Error",
+                "Failed to add client: " + error.message
+            );
             config?.onError?.(error);
         },
     });
@@ -93,12 +98,19 @@ export const useUpdateClient = () => {
             data: UpdateClient;
         }) => updateClient(client_id, data),
         onSuccess: () => {
-            showAlert('success', 'Updated!', 'Client successfully updated');
+            showAlert("success", "Updated!", "Client successfully updated");
             queryClient.invalidateQueries({ queryKey: ["clients"] });
             queryClient.invalidateQueries({ queryKey: ["client"] });
         },
         onError: (error: AxiosError) => {
-            showAlert('error', 'Error', 'Failed to update client: ' + error.message);
+            if (error.status === 409) {
+                showAlert(
+                    "error",
+                    "Error",
+                    "Failed to update client: " +
+                        "Client with this name already exists."
+                );
+            }
         },
     });
     return (clientId: string, clientData: ClientData) =>

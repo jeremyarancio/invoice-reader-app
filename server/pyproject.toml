@@ -67,5 +67,6 @@ enable = [
     "no-value-for-parameter",
 ]
 
-[tool.mypy]
-strict = true
+[tool.pyright]
+include = ["src", "tests"]
+typeCheckingMode = "strict"

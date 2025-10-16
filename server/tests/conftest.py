@@ -1,4 +1,5 @@
 from invoice_reader.infrastructure.repositories.client import InMemoryClientRepository
+from invoice_reader.infrastructure.repositories.exchange_rate import InMemoryExchangeRateRepository
 from invoice_reader.infrastructure.repositories.invoice import InMemoryInvoiceRepository
 from invoice_reader.infrastructure.repositories.user import InMemoryUserRepository
 
@@ -7,9 +8,11 @@ pytest_plugins = [
     "tests.fixtures.entities.client",
     "tests.fixtures.entities.invoice",
     "tests.fixtures.entities.user",
+    "tests.fixtures.entities.exchange_rate",
 ]
 
 # Create persistent in memory database
 InMemoryInvoiceRepository.init()
 InMemoryClientRepository.init()
 InMemoryUserRepository.init()
+InMemoryExchangeRateRepository.init()

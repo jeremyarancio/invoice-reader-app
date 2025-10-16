@@ -37,12 +37,12 @@ def upload_files(file: File):
 def invoice_data() -> InvoiceData:
     return InvoiceData(
         invoice_number="14SQ456",
-        gross_amount=10000,
         vat=20,
         description="Test invoice",
         issued_date=date(2024, 11, 18),
         paid_date=None,
-        currency=Currency.EUR,
+        gross_amount=10000,
+        currency=Currency.CZK,
     )
 
 
@@ -53,7 +53,11 @@ def invoice_id() -> UUID:
 
 @pytest.fixture
 def invoice(
-    invoice_id: UUID, invoice_data: InvoiceData, client: Client, user: User, file: File
+    invoice_id: UUID,
+    invoice_data: InvoiceData,
+    client: Client,
+    user: User,
+    file: File,
 ) -> Invoice:
     return Invoice(
         id_=invoice_id,
@@ -65,9 +69,34 @@ def invoice(
 
 
 @pytest.fixture
+def invoices(invoice: Invoice) -> list[Invoice]:
+    return [invoice.model_copy(update={"id_": uuid4()}) for _ in range(3)]
+
+
+@pytest.fixture
+def existing_invoices(invoices: list[Invoice]) -> list[Invoice]:
+    for invoice in invoices:
+        InMemoryInvoiceRepository().add(invoice=invoice)
+    return invoices
+
+
+@pytest.fixture
 def existing_invoice(invoice: Invoice) -> Invoice:
     InMemoryInvoiceRepository().add(invoice=invoice)
     return invoice
+
+
+@pytest.fixture
+def invoice_interface_data(invoice_data: InvoiceData) -> InvoiceData:
+    return InvoiceData(
+        invoice_number=invoice_data.invoice_number,
+        gross_amount=invoice_data.gross_amount,
+        currency=invoice_data.currency,
+        vat=invoice_data.vat,
+        description=invoice_data.description,
+        issued_date=invoice_data.issued_date,
+        paid_date=invoice_data.paid_date,
+    )
 
 
 @pytest.fixture

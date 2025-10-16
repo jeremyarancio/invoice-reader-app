@@ -12,9 +12,10 @@ ACCEPTED_FILE_FORMATS = [".pdf"]
 
 
 class Currency(StrEnum):
-    USD = "usd"
-    EUR = "eur"
-    GBP = "gbp"
+    USD = "USD"
+    EUR = "EUR"
+    GBP = "GBP"
+    CZK = "CZK"
 
 
 class File(BaseModel):
@@ -40,11 +41,11 @@ class File(BaseModel):
 
 class InvoiceData(BaseModel):
     invoice_number: str
-    gross_amount: float
     vat: Annotated[int, Field(ge=0, le=50)]
     description: Annotated[str, Field(max_length=500)]
     issued_date: date
     paid_date: date | None = None
+    gross_amount: float
     currency: Currency
 
 

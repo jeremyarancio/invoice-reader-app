@@ -69,11 +69,11 @@ class SQLModelInvoiceRepository(IInvoiceRepository):
             storage_path=model.storage_path,
             data=InvoiceData(
                 invoice_number=model.invoice_number,
-                gross_amount=model.gross_amount,
                 vat=model.vat,
                 description=model.description,
                 issued_date=model.invoiced_date,
                 paid_date=model.paid_date,
+                gross_amount=model.gross_amount,
                 currency=model.currency,
             ),
         )

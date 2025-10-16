@@ -33,6 +33,12 @@ def existing_client(client: Client):
 
 
 @pytest.fixture
+def existing_client_with_invoices(client_with_invoices: Client):
+    InMemoryClientRepository().add(client_with_invoices)
+    return client_with_invoices
+
+
+@pytest.fixture
 def client_create(client_data: ClientData) -> ClientCreate:
     return ClientCreate(
         city=client_data.city,
@@ -51,6 +57,7 @@ def client_update(client_data: ClientData) -> ClientUpdate:
             update={
                 "client_name": "Updated Client Name",
                 "street_number": 456,
-            }
+            },
+            deep=True,
         )
     )

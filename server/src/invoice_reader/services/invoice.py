@@ -1,7 +1,7 @@
 from typing import BinaryIO
-from uuid import uuid4
+from uuid import UUID, uuid4
 
-from invoice_reader.domain.client import UUID, Client
+from invoice_reader.domain.client import Client
 from invoice_reader.domain.invoice import File, Invoice, InvoiceData
 from invoice_reader.domain.parser import ParsedInvoiceData
 from invoice_reader.services.exceptions import (
@@ -42,11 +42,8 @@ class InvoiceService:
         invoice_id = uuid4()
         initial_path = f"{user_id}/{invoice_id}.{filename.split('.')[-1]}"
         storage_path = file_repository.create_storage_path(initial_path=initial_path)
-        file = File(
-            file=file_bin.read(),
-            filename=filename,
-            storage_path=storage_path,
-        )
+        file = File(file=file_bin.read(), filename=filename, storage_path=storage_path)
+
         invoice = Invoice(
             id_=invoice_id,
             user_id=user_id,
@@ -54,12 +51,10 @@ class InvoiceService:
             storage_path=storage_path,
             data=invoice_data,
         )
+
         try:
-            logger.info("Start storing file")
             file_repository.store(file=file)
-            logger.info(f"File stored at {storage_path}.")
             invoice_repository.add(invoice=invoice)
-            logger.info(f"Invoice with id {invoice.id_} added to the repository.")
         except Exception as err:
             cls._rollback_add(
                 invoice=invoice,
@@ -145,6 +140,7 @@ class InvoiceService:
         )
         if not invoice:
             raise EntityNotFoundException(message=f"Invoice with id {invoice_id} not found.")
+
         updated_invoice = Invoice(
             id_=invoice.id_,
             user_id=invoice.user_id,

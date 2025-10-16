@@ -1,4 +1,4 @@
-import { Inbox, User, Bug } from "lucide-react";
+import { Inbox, User, Bug, DollarSign } from "lucide-react";
 
 import {
     Sidebar,
@@ -12,6 +12,14 @@ import {
     SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import SidebarUser from "./SidebarUser";
+import { useCurrencyStore, type Currency } from "@/stores/currencyStore";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 
 // Menu items.
 const items = [
@@ -27,7 +35,11 @@ const items = [
     },
 ];
 
+const currencies: Currency[] = ['USD', 'EUR', 'GBP', 'CZK'];
+
 export function AppSidebar() {
+    const { selectedCurrency, setSelectedCurrency } = useCurrencyStore();
+
     return (
         <Sidebar collapsible="icon">
             <SidebarContent>
@@ -48,6 +60,27 @@ export function AppSidebar() {
                                 </SidebarMenuItem>
                             ))}
                         </SidebarMenu>
+                    </SidebarGroupContent>
+                </SidebarGroup>
+
+                <SidebarGroup>
+                        <SidebarGroupLabel>Display Currency</SidebarGroupLabel>
+                    <SidebarGroupContent>
+                        <div className="px-2 py-1">
+                            <Select value={selectedCurrency} onValueChange={setSelectedCurrency}>
+                                <SelectTrigger className="w-full">
+                                    <DollarSign className="mr-2 h-4 w-4" />
+                                    <SelectValue placeholder="Select currency" />
+                                </SelectTrigger>
+                                <SelectContent position="popper" side="right" align="start" sideOffset={5} className="z-50">
+                                    {currencies.map((currency) => (
+                                        <SelectItem key={currency} value={currency}>
+                                            {currency}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
                     </SidebarGroupContent>
                 </SidebarGroup>
             </SidebarContent>

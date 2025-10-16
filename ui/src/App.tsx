@@ -17,6 +17,7 @@ import ViewInvoice from "@/pages/ViewInvoice";
 import ViewClient from "@/pages/ViewClient";
 import { AlertProvider } from "@/contexts/AlertContext";
 import AppAlert from "@/components/AppAlert";
+import ApiErrorHandler from "@/components/ApiErrorHandler";
 
 function App() {
     return (
@@ -24,6 +25,7 @@ function App() {
             <QueryClientProvider client={queryClient}>
                 <AuthProvider>
                     <AlertProvider>
+                        <ApiErrorHandler />
                         <BrowserRouter>
                             <Routes>
                                 <Route element={<AuthLayout />}>

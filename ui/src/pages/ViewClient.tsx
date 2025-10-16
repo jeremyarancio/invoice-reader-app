@@ -2,11 +2,13 @@ import { useFetchClient } from "@/hooks/api/client";
 import { useNavigate, useParams } from "react-router-dom";
 import ViewClientForm from "@/components/ViewClientForm";
 import { ArrowLeft } from "lucide-react";
+import { useCurrencyStore } from "@/stores/currencyStore";
 
 function ViewClient() {
     const { clientId } = useParams();
     const navigate = useNavigate();
     const { client, isLoading: isClientLoading } = useFetchClient(clientId);
+    const { selectedCurrency } = useCurrencyStore();
 
     return (
         <>
@@ -34,11 +36,11 @@ function ViewClient() {
                     </h2>
                     <div className="flex justify-between items-center">
                         <span className="text-muted-foreground">
-                            Total Revenue:
+                            Total Revenue ({selectedCurrency}):
                         </span>
-                        <span className="font-semibold text-lg">
-                            {client?.totalRevenue || 0} € 
-                        </span>
+                        <div className="font-semibold text-lg">
+                            {client?.totalRevenue?.[selectedCurrency]?.toFixed(2) || '0.00'} {selectedCurrency}
+                        </div>
                     </div>
                 </div>
 

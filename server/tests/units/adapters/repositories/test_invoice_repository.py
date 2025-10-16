@@ -20,13 +20,13 @@ def invoice() -> Invoice:
         client_id=uuid4(),
         storage_path="/tmp/inv_1.pdf",
         data=InvoiceData(
-            currency=Currency.USD,
             invoice_number="INV-001",
-            gross_amount=100.0,
             vat=20,
             description="Test invoice",
             issued_date=date(2025, 9, 10),
             paid_date=date(2025, 9, 11),
+            gross_amount=120.0,
+            currency=Currency.USD,
         ),
     )
 
