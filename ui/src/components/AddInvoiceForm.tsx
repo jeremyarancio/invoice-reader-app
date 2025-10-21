@@ -79,42 +79,32 @@ function AddInvoiceForm({ file, parsedInvoice, clients }: Props) {
             .number()
             .min(0, "Gross amount must be a positive number")
             .max(1000000, "Gross amount must be less than 1,000,000"),
-        currency: z.string(),
-        vat: z.coerce.number().min(0).max(50),
-        client_id: z.string(),
-        issuedDate: z.date(),
+        currency: z.string().min(1, "Currency is required"),
+        vat: z.coerce.number().min(0, "VAT is required").max(50, "VAT must be less than 50%"),
+        client_id: z.string().min(1, "Client is required"),
+        issuedDate: z.date({
+            required_error: "Issued date is required",
+        }),
         paidDate: z.date().optional(),
     });
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
+        defaultValues: {
+            invoiceNumber: parsedInvoice?.invoice.invoice_number || "",
+            invoiceDescription: parsedInvoice?.invoice.invoice_description || "",
+            grossAmount: parsedInvoice?.invoice.gross_amount || undefined,
+            currency: parsedInvoice?.invoice.currency
+                ? CURRENCIES[parsedInvoice.invoice.currency as keyof typeof CURRENCIES]?.symbol || parsedInvoice.invoice.currency
+                : undefined,
+            vat: parsedInvoice?.invoice.vat || undefined,
+            client_id: parsedInvoice?.client_id || "",
+            issuedDate: parsedInvoice?.invoice.issued_date
+                ? new Date(parsedInvoice.invoice.issued_date)
+                : undefined,
+            paidDate: undefined,
+        },
     });
-
-    if (parsedInvoice) {
-        parsedInvoice.invoice.invoice_number &&
-            form.setValue(
-                "invoiceNumber",
-                parsedInvoice.invoice.invoice_number
-            );
-        parsedInvoice.invoice.invoice_description &&
-            form.setValue(
-                "invoiceDescription",
-                parsedInvoice.invoice.invoice_description
-            );
-        parsedInvoice.invoice.gross_amount &&
-            form.setValue("grossAmount", parsedInvoice.invoice.gross_amount);
-        parsedInvoice.invoice.currency &&
-            form.setValue("currency", CURRENCIES[parsedInvoice.invoice.currency as keyof typeof CURRENCIES]?.symbol || parsedInvoice.invoice.currency);
-        parsedInvoice.invoice.vat &&
-            form.setValue("vat", parsedInvoice.invoice.vat);
-        parsedInvoice.client_id &&
-            form.setValue("client_id", parsedInvoice.client_id);
-        parsedInvoice.invoice.issued_date &&
-            form.setValue(
-                "issuedDate",
-                new Date(parsedInvoice.invoice.issued_date)
-            );
-    }
 
     return (
         <>
