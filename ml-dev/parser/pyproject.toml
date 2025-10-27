@@ -3,8 +3,10 @@ name = "parser"
 version = "0.1.0"
 requires-python = ">=3.12"
 dependencies = [
+    "label-studio-sdk>=2.0.12",
     "paddleocr[all]>=3.3.0",
     "paddlepaddle==3.2.0",
+    "typer>=0.20.0",
 ]
 
 [tool.uv.sources]
@@ -25,3 +27,6 @@ dev = [
 [build-system]
 requires = ["uv_build >= 0.9.5, <0.10.0"]
 build-backend = "uv_build"
+
+[project.scripts]
+parser-cli = "parser.interface.cli:app"
