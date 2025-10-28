@@ -1,5 +1,8 @@
+import json
+
 from label_studio_sdk import LabelStudio
 
+from parser.domain.annotation import Annotation
 from parser.settings import get_settings
 
 settings = get_settings()
@@ -24,3 +27,27 @@ class LabelStudioService:
             description=description,
             label_config=label_config,
         )
+
+    @staticmethod
+    def export_annotations(project_id: int) -> dict:
+        """https://api.labelstud.io/tutorials/tutorials/export-and-convert-snapshots"""
+        client = LabelStudio(
+            base_url=settings.label_studio_url,
+            api_key=settings.label_studio_api_key,
+        )
+        # To get more configuration such as JSON_MIN export, the export job should be processed in background
+        export_job = client.projects.exports.create(id=project_id)
+        # Export in chunks of byte strings
+        annotation_chunks = client.projects.exports.download(
+            id=project_id, export_type="JSON_MIN", export_pk=export_job.id
+        )
+        # Convert generator of byte strings to list[dict]
+        annotations_data = b"".join(annotation_chunks)
+        annotations = [
+            Annotation.model_validate(data)
+            for data in json.loads(annotations_data.decode("utf-8"))
+        ]
+        return annotations
+
+
+LabelStudioService.export_annotations(4)
