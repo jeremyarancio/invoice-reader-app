@@ -3,6 +3,7 @@ name = "parser"
 version = "0.1.0"
 requires-python = ">=3.12"
 dependencies = [
+    "boto3>=1.40.61",
     "label-studio-sdk>=2.0.12",
     "paddleocr[all]>=3.3.0",
     "paddlepaddle==3.2.0",

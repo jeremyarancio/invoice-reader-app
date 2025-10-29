@@ -13,6 +13,9 @@ class Settings(BaseSettings):
     label_studio_api_key: str = "your_api_key_here"
     label_studio_template_dir: Path = REPO_DIR / "label_studio"
 
+    s3_bucket_name: str = "your-s3-bucket-name"
+    benchmark_s3_path: str = "benchmark/invoice-benchmark.parquet"
+
 
 @lru_cache()
 def get_settings() -> Settings:

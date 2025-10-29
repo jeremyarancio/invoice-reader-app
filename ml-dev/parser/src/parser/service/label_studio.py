@@ -3,6 +3,7 @@ import json
 from label_studio_sdk import LabelStudio
 
 from parser.domain.annotation import Annotation
+from parser.service.ports.storage import IStorageRepository
 from parser.settings import get_settings
 
 settings = get_settings()
@@ -29,8 +30,12 @@ class LabelStudioService:
         )
 
     @staticmethod
-    def export_annotations(project_id: int) -> dict:
-        """https://api.labelstud.io/tutorials/tutorials/export-and-convert-snapshots"""
+    def export_annotations(
+        project_id: int,
+        export_path: str,
+        storage_repository: IStorageRepository,
+    ) -> None:
+        """Docs: https://api.labelstud.io/tutorials/tutorials/export-and-convert-snapshots"""
         client = LabelStudio(
             base_url=settings.label_studio_url,
             api_key=settings.label_studio_api_key,
@@ -47,7 +52,7 @@ class LabelStudioService:
             Annotation.model_validate(data)
             for data in json.loads(annotations_data.decode("utf-8"))
         ]
-        return annotations
 
-
-LabelStudioService.export_annotations(4)
+        storage_repository.save_annotations(
+            annotations=annotations, save_path=export_path
+        )
