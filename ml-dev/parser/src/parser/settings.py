@@ -13,8 +13,11 @@ class Settings(BaseSettings):
     label_studio_api_key: str = "your_api_key_here"
     label_studio_template_dir: Path = REPO_DIR / "label_studio"
 
-    s3_bucket_name: str = "your-s3-bucket-name"
+    s3_bucket_name: str = ""
     benchmark_s3_path: str = "benchmark/invoice-benchmark.parquet"
+    benchmark_document_s3_path: str = "benchmark/invoices/"
+
+    gemini_api_key: str = ""
 
 
 @lru_cache()

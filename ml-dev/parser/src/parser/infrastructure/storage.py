@@ -29,3 +29,12 @@ class S3StorageRepository(IStorageRepository):
             self.bucket_name,
             save_path,
         )
+
+    def load_annotations(self) -> list[Annotation]:
+        obj = self.client.get_object(
+            Bucket=self.bucket_name, Key=settings.benchmark_s3_path
+        )
+        df = pd.read_parquet(BytesIO(obj["Body"].read()))
+        return [
+            Annotation.model_validate(record) for record in df.to_dict(orient="records")
+        ]

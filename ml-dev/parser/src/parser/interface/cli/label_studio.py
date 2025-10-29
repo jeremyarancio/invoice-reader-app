@@ -24,7 +24,6 @@ def export_annotations(
     project_id: int, export_path: str = settings.benchmark_s3_path
 ) -> None:
     print(f"Exporting annotations for project ID: {project_id}")
-
     LabelStudioService.export_annotations(
         project_id=project_id,
         export_path=export_path,

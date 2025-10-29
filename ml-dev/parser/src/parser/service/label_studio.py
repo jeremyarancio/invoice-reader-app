@@ -49,10 +49,9 @@ class LabelStudioService:
         # Convert generator of byte strings to list[dict]
         annotations_data = b"".join(annotation_chunks)
         annotations = [
-            Annotation.model_validate(data)
+            Annotation.from_label_studio(data)
             for data in json.loads(annotations_data.decode("utf-8"))
         ]
-
         storage_repository.save_annotations(
             annotations=annotations, save_path=export_path
         )
