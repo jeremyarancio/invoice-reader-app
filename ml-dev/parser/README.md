@@ -13,3 +13,10 @@ The document images are stored confidentially in AWS S3 for future evaluation.
 Scripts:
 - `scripts/0_extract_pictures_from_dataset.py`
 - `scripts/1_convert_pdf_to_image.sh`
+
+# Notes
+
+## Annotation with Label Studio
+
+- Load with S3 instead of manual uplaod: allow image tracking (quite easy to setup)
+- Using presigned-url, the file path is actually base64-encoded!

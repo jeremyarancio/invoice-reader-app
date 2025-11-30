@@ -1,0 +1,66 @@
+[
+    {
+        "image": "s3:\/\/invoice-ml-4845103\/benchmark\/invoices\/09125047-invoice_hf_0.png",
+        "id": 1,
+        "currency": "eur",
+        "gross_amount": [
+            {
+                "number": 467.56
+            }
+        ],
+        "vat": [
+            {
+                "number": 0
+            }
+        ],
+        "issued_date": [
+            {
+                "datetime": "02-03-2008"
+            }
+        ],
+        "invoice_number": "4Y4Md-183",
+        "client_name": "Michelle Larson",
+        "client_street_address_number": "291",
+        "client_street_address": "Kyle Mountains Suite 674",
+        "client_city": "Port Stevenchester",
+        "client_zipcode": "IL 75644",
+        "client_country": "usa",
+        "annotator": 1,
+        "annotation_id": 3,
+        "created_at": 1761484322487,
+        "updated_at": 1761484322487,
+        "lead_time": 70.941
+    },
+    {
+        "image": "s3:\/\/invoice-ml-4845103\/benchmark\/invoices\/d075dcca-invoice_hf_1.png",
+        "id": 2,
+        "currency": "usd",
+        "gross_amount": [
+            {
+                "number": 192.5
+            }
+        ],
+        "vat": [
+            {
+                "number": 7
+            }
+        ],
+        "issued_date": [
+            {
+                "datetime": "27-06-2023"
+            }
+        ],
+        "invoice_number": "12915",
+        "client_name": "Armstrong Engineering Ltd.",
+        "client_street_address_number": "1966",
+        "client_street_address": "Elm Street",
+        "client_city": "New Haven",
+        "client_zipcode": "CT",
+        "client_country": "usa",
+        "annotator": 1,
+        "annotation_id": 4,
+        "created_at": 1761573861037,
+        "updated_at": 1761573861037,
+        "lead_time": 190.742
+    }
+]
