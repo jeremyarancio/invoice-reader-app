@@ -17,9 +17,9 @@ class LabelStudioSettings(BaseModel):
         return self.label_studio_template_dir / "parser_benchmark.xml"
 
 
-class S3Settings(BaseModel):
-    benchmark_dataset_s3_path: str = "benchmark/invoice-benchmark_{}.parquet".format(
-        datetime.now().strftime("%Y%m%d%H%M%S")
+class BenchmarkSettings(BaseModel):
+    benchmark_dataset_s3_path: str = (
+        "benchmark/invoice_parser_benchmark_2025-11-30.parquet"
     )
     benchmark_document_s3_path: str = "benchmark/invoices/"
 
@@ -34,7 +34,8 @@ class Settings(BaseSettings):
 
     # S3
     s3_bucket_name: str = ""
-    s3_settings: S3Settings = S3Settings()
+
+    benchmark: BenchmarkSettings = BenchmarkSettings()
 
 
 @lru_cache()

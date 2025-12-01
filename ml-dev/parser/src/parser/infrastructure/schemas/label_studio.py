@@ -3,7 +3,7 @@ from typing import Annotated
 
 from pydantic import BaseModel, BeforeValidator, Field
 
-from parser.domain.annotation import Annotation
+from parser.domain.parse import Annotation
 
 
 class LabelStudioExportJSONMIN(BaseModel):
@@ -36,7 +36,7 @@ class LabelStudioExportJSONMIN(BaseModel):
     def to_annotation(self) -> Annotation:
         return Annotation(
             annotator_id=self.id_,
-            image_path=self.image_path,
+            image_uri=self.image_path,
             currency=self.currency,
             gross_amount=self.gross_amount,
             vat=self.vat,

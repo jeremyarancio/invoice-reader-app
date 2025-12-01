@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from parser.service.ports.annotation import IAnnotator
-from parser.service.ports.storage import IStorageRepository
+from parser.service.ports.storage import IStorageService
 from parser.settings import get_settings
 
 settings = get_settings()
@@ -25,7 +25,7 @@ class AnnotationService:
     def export_annotations(
         project_id: int,
         dataset_uri: str,
-        storage_repository: IStorageRepository,
+        storage_repository: IStorageService,
         annotation_service: IAnnotator,
     ) -> None:
         annotations = annotation_service.export_annotations(project_id=project_id)

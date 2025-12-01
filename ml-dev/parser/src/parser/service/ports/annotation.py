@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from pathlib import Path
 
-from parser.domain.annotation import Annotation
+from parser.domain.parse import Annotation
 
 
 class IAnnotator(ABC):

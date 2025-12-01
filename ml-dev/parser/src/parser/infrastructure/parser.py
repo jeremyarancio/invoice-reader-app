@@ -1,19 +1,15 @@
 from datetime import datetime
-from PIL.Image import Image
+from PIL import Image
 
 from google import genai
 from google.genai import types
 
 from parser.domain.prediction import Prediction
 from parser.service.ports.parser import IParser
-from parser.settings import get_settings
-
-
-settings = get_settings()
 
 
 class MockParser(IParser):
-    def parse(self, images: list[Image]) -> list[Prediction]:
+    def parse(self, images: list[Image.Image]) -> list[Prediction]:
         return [
             Prediction(
                 currency="USD",
@@ -31,17 +27,20 @@ class MockParser(IParser):
         ] * len(images)
 
 
-class Gemini2_5FlashParser(IParser):
-    def __init__(self) -> None:
+class GeminiParser(IParser):
+    def __init__(self, api_key: str, model_name: str) -> None:
+        self.api_key = api_key
+        self.client = genai.Client(api_key=self.api_key)
+        self.model_name = model_name
         self.instructions = """You are an invoice parser.
         Given an image of an invoice, extract the relevant fields and return them in a structured JSON format as specified.
         """
 
-    def parse(self, images: list[Image]) -> list[Prediction]:
-        client = genai.Client(api_key=settings.gemini_api_key)
+    def parse(self, images: list[Image.Image]) -> list[Prediction]:
+        predictions = []
         for image in images:
-            response = client.models.generate_content(
-                model="gemini-2.5-flash",
+            response = self.client.models.generate_content(
+                model=self.model_name,
                 contents=[
                     types.Part.from_bytes(
                         data=image.tobytes(),
@@ -51,7 +50,8 @@ class Gemini2_5FlashParser(IParser):
                 ],
                 config={
                     "response_mime_type": "application/json",
-                    "response_schema": Prediction,
+                    "response_schema": Prediction.model_json_schema(),
                 },
             )
-        return response.parsed  # type: ignore
+            predictions.append(Prediction.model_validate(response.parsed))
+        return predictions

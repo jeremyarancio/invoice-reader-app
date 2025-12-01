@@ -1,15 +1,13 @@
 from enum import Enum
 
 from parser.infrastructure.annotation import LabelStudioAnnotator
-from parser.infrastructure.document import S3DocumentRepository
 from parser.infrastructure.evaluator import Evaluator
-from parser.infrastructure.parser import Gemini2_5FlashParser, MockParser
+from parser.infrastructure.parser import GeminiParser, MockParser
 from parser.infrastructure.storage import S3StorageRepository
 from parser.service.ports.annotation import IAnnotator
-from parser.service.ports.document import IDocumentRepository
-from parser.service.ports.evaluator import IEvaluator
+from parser.service.ports.evaluator import IEvaluationService
 from parser.service.ports.parser import IParser
-from parser.service.ports.storage import IStorageRepository
+from parser.service.ports.storage import IStorageService
 
 
 class EvaluationModel(Enum):
@@ -29,7 +27,7 @@ def get_annotator(
     )
 
 
-def get_storage_repository(s3_bucket_name: str) -> IStorageRepository:
+def get_storage_service(s3_bucket_name: str) -> IStorageService:
     return S3StorageRepository(
         s3_bucket_name=s3_bucket_name,
     )
@@ -37,14 +35,14 @@ def get_storage_repository(s3_bucket_name: str) -> IStorageRepository:
 
 def get_parser(model: EvaluationModel) -> IParser:
     if model == EvaluationModel.GEMINI_2_5_FLASH:
-        return Gemini2_5FlashParser()
+        return GeminiParser()
     elif model == EvaluationModel.MOCK:
         return MockParser()
     else:
         raise ValueError(f"Unsupported model: {model}")
 
 
-def get_evaluator() -> IEvaluator:
+def get_evaluation_service() -> IEvaluationService:
     return Evaluator()
 
 

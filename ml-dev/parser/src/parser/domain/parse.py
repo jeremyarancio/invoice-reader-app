@@ -4,10 +4,7 @@ from uuid import UUID, uuid4
 from pydantic import BaseModel, Field
 
 
-class Annotation(BaseModel):
-    id_: UUID = Field(default_factory=uuid4)
-    annotator_id: int
-    image_path: str
+class ParsedData(BaseModel):
     currency: str
     gross_amount: float
     vat: float
@@ -19,8 +16,21 @@ class Annotation(BaseModel):
     client_city: str
     client_zipcode: str
     client_country: str
+
+
+class Annotation(BaseModel):
+    id_: UUID = Field(default_factory=uuid4)
+    annotator_id: int
+    image_uri: str
     annotator: int
     annotation_id: int
     created_at: datetime
     updated_at: datetime
     lead_time: float
+    data: ParsedData
+
+
+class Prediction(BaseModel):
+    id_: UUID = Field(default_factory=uuid4)
+    model_name: str
+    data: ParsedData

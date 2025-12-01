@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
-from PIL.Image import Image
+from PIL import Image
 
-from parser.domain.prediction import Prediction
+from parser.domain.parse import Prediction
 
 
 class IParser(ABC):
     @abstractmethod
-    def parse(self, images: list[Image]) -> list[Prediction]:
-        pass
+    def parse(self, images: list[Image.Image]) -> list[Prediction]:
+        raise NotImplementedError

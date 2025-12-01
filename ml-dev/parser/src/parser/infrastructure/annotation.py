@@ -3,7 +3,7 @@ from pathlib import Path
 
 from label_studio_sdk import LabelStudio
 
-from parser.domain.annotation import Annotation
+from parser.domain.parse import Annotation
 from parser.infrastructure.schemas.label_studio import LabelStudioExportJSONMIN
 from parser.service.ports.annotation import IAnnotator
 

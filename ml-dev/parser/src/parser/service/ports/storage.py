@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
 
-from parser.domain.annotation import Annotation
+from parser.domain.parse import Annotation
 
 
-class IStorageRepository(ABC):
+class IStorageService(ABC):
     @abstractmethod
     def export_to_dataset(
         self, annotations: list[Annotation], dataset_uri: str
@@ -11,5 +11,9 @@ class IStorageRepository(ABC):
         pass
 
     @abstractmethod
-    def load_from_dataset(self, dataset_uri: str) -> list[Annotation]:
+    def load_dataset(self, dataset_uri: str) -> list[Annotation]:
         pass
+
+    @abstractmethod
+    def get_document_image(self, image_uri: str):
+        raise NotImplementedError

@@ -1,5 +1,5 @@
-from datetime import date
 from typing import Annotated
+from datetime import date
 
 from pydantic import BaseModel, Field
 

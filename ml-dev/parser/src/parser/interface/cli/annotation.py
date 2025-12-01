@@ -28,13 +28,13 @@ def create_project(project_name: str, description: str = "") -> None:
 @app.command("export-annotations")
 def export_annotations(
     project_id: int,
-    storage_export_path: str = settings.s3_settings.benchmark_dataset_s3_path,
+    storage_export_path: str = settings.benchmark.benchmark_dataset_s3_path,
 ) -> None:
     print(f"Exporting annotations for project ID: {project_id}")
     AnnotationService.export_annotations(
         project_id=project_id,
         dataset_uri=storage_export_path,
-        storage_repository=dependencies.get_storage_repository(
+        storage_repository=dependencies.get_storage_service(
             s3_bucket_name=settings.s3_bucket_name
         ),
         annotation_service=dependencies.get_annotator(
