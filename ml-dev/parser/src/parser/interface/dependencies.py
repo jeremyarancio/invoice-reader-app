@@ -1,16 +1,15 @@
 from enum import Enum
 
+from parser.infrastructure.annotation import LabelStudioAnnotator
 from parser.infrastructure.document import S3DocumentRepository
 from parser.infrastructure.evaluator import Evaluator
 from parser.infrastructure.parser import Gemini2_5FlashParser, MockParser
 from parser.infrastructure.storage import S3StorageRepository
+from parser.service.ports.annotation import IAnnotator
 from parser.service.ports.document import IDocumentRepository
 from parser.service.ports.evaluator import IEvaluator
 from parser.service.ports.parser import IParser
 from parser.service.ports.storage import IStorageRepository
-from parser.settings import get_settings
-
-settings = get_settings()
 
 
 class EvaluationModel(Enum):
@@ -20,8 +19,20 @@ class EvaluationModel(Enum):
     MOCK = "mock"
 
 
-def get_storage_repository() -> IStorageRepository:
-    return S3StorageRepository()
+def get_annotator(
+    label_studio_url: str,
+    label_studio_api_key: str,
+) -> IAnnotator:
+    return LabelStudioAnnotator(
+        label_studio_url=label_studio_url,
+        label_studio_api_key=label_studio_api_key,
+    )
+
+
+def get_storage_repository(s3_bucket_name: str) -> IStorageRepository:
+    return S3StorageRepository(
+        s3_bucket_name=s3_bucket_name,
+    )
 
 
 def get_parser(model: EvaluationModel) -> IParser:

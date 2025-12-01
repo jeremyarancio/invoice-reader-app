@@ -3,6 +3,8 @@ from typing import Annotated
 
 from pydantic import BaseModel, BeforeValidator, Field
 
+from parser.domain.annotation import Annotation
+
 
 class LabelStudioExportJSONMIN(BaseModel):
     id_: Annotated[int, Field(validation_alias="id")]
@@ -30,3 +32,25 @@ class LabelStudioExportJSONMIN(BaseModel):
     created_at: datetime
     updated_at: datetime
     lead_time: float
+
+    def to_annotation(self) -> Annotation:
+        return Annotation(
+            annotator_id=self.id_,
+            image_path=self.image_path,
+            currency=self.currency,
+            gross_amount=self.gross_amount,
+            vat=self.vat,
+            issued_date=self.issued_date,
+            invoice_number=self.invoice_number,
+            client_name=self.client_name,
+            client_street_address_number=self.client_street_address_number,
+            client_street_address=self.client_street_address,
+            client_city=self.client_city,
+            client_zipcode=self.client_zipcode,
+            client_country=self.client_country,
+            annotator=self.annotator,
+            annotation_id=self.annotation_id,
+            created_at=self.created_at,
+            updated_at=self.updated_at,
+            lead_time=self.lead_time,
+        )

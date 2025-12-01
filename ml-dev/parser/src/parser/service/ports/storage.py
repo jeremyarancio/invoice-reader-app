@@ -5,9 +5,11 @@ from parser.domain.annotation import Annotation
 
 class IStorageRepository(ABC):
     @abstractmethod
-    def save_annotations(self, annotations: list[Annotation], save_path: str) -> None:
+    def export_to_dataset(
+        self, annotations: list[Annotation], dataset_uri: str
+    ) -> None:
         pass
 
     @abstractmethod
-    def load_annotations(self) -> list[Annotation]:
+    def load_from_dataset(self, dataset_uri: str) -> list[Annotation]:
         pass

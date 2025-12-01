@@ -1,11 +1,13 @@
 from datetime import datetime, date
+from uuid import UUID, uuid4
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class Annotation(BaseModel):
-    image_name: str
-    id_: int
+    id_: UUID = Field(default_factory=uuid4)
+    annotator_id: int
+    image_path: str
     currency: str
     gross_amount: float
     vat: float

@@ -24,6 +24,7 @@ dev = [
     "google-genai>=1.46.0",
     "huggingface-hub>=0.36.0",
     "ipykernel>=7.0.1",
+    "pytest>=9.0.1",
 ]
 
 [build-system]

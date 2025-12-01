@@ -1,6 +1,6 @@
 [
     {
-        "image": "s3:\/\/invoice-ml-4845103\/benchmark\/invoices\/09125047-invoice_hf_0.png",
+        "image": "http://localhost:8080/tasks/133/resolve/?fileuri=czM6Ly9pbnZvaWNlLW1sLTQ4NDUxMDMvYmVuY2htYXJrL2ludm9pY2VzL0ZhY3R1cmUtT0ZGLUp1aW5fMjAyNC5wbmc=",
         "id": 1,
         "currency": "eur",
         "gross_amount": [
@@ -32,7 +32,7 @@
         "lead_time": 70.941
     },
     {
-        "image": "s3:\/\/invoice-ml-4845103\/benchmark\/invoices\/d075dcca-invoice_hf_1.png",
+        "image": "http://localhost:8080/tasks/133/resolve/?fileuri=czM6Ly9pbnZvaWNlLW1sLTQ4NDUxMDMvYmVuY2htYXJrL2ludm9pY2VzL0ZhY3R1cmUtT0ZGLUp1aW5fMjAyNC5wbmc=",
         "id": 2,
         "currency": "usd",
         "gross_amount": [
