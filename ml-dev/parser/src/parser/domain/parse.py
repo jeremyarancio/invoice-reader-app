@@ -20,13 +20,9 @@ class ParsedData(BaseModel):
 
 class Annotation(BaseModel):
     id_: UUID = Field(default_factory=uuid4)
-    annotator_id: int
     image_uri: str
-    annotator: int
-    annotation_id: int
     created_at: datetime
     updated_at: datetime
-    lead_time: float
     data: ParsedData
 
 

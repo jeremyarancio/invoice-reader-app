@@ -5,8 +5,9 @@ from parser.domain.metrics import Metrics
 
 
 class IEvaluationService(ABC):
+    @classmethod
     @abstractmethod
     def evaluate_parser(
-        self, annotations: list[Annotation], predictions: list[Prediction]
+        cls, annotations: list[Annotation], predictions: list[Prediction]
     ) -> Metrics:
         raise NotImplementedError

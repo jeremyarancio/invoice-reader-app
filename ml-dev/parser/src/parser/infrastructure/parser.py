@@ -4,7 +4,7 @@ from PIL import Image
 from google import genai
 from google.genai import types
 
-from parser.domain.prediction import Prediction
+from parser.domain.parse import Prediction, ParsedData
 from parser.service.ports.parser import IParser
 
 
@@ -12,17 +12,20 @@ class MockParser(IParser):
     def parse(self, images: list[Image.Image]) -> list[Prediction]:
         return [
             Prediction(
-                currency="USD",
-                gross_amount=100.50,
-                vat=20.10,
-                issued_date=datetime(2023, 1, 15),
-                invoice_number="INV-001",
-                client_name="John Doe",
-                client_street_address_number="123",
-                client_street_address="Main Street",
-                client_city="New York",
-                client_zipcode="10001",
-                client_country="USA",
+                model_name="mock",
+                data=ParsedData(
+                    currency="USD",
+                    gross_amount=100.50,
+                    vat=20.10,
+                    issued_date=datetime(2023, 1, 15),
+                    invoice_number="INV-001",
+                    client_name="John Doe",
+                    client_street_address_number="123",
+                    client_street_address="Main Street",
+                    client_city="New York",
+                    client_zipcode="10001",
+                    client_country="USA",
+                ),
             )
         ] * len(images)
 

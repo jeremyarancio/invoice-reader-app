@@ -1,9 +1,6 @@
 from parser.infrastructure.annotation import MockAnnotator
-from parser.infrastructure.storage import InMemoryStorageRepository
+from parser.infrastructure.storage import LocalStorageService
 from parser.service.annotation import AnnotationService
-
-
-InMemoryStorageRepository.init_memory()
 
 
 def test_export_annotation():
@@ -11,5 +8,5 @@ def test_export_annotation():
         project_id=1,
         dataset_uri="tests/data/exports",
         annotation_service=MockAnnotator(),
-        storage_repository=InMemoryStorageRepository(),
+        storage_repository=LocalStorageService(),
     )

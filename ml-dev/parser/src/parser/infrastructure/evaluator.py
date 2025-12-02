@@ -12,7 +12,7 @@ class Evaluator(IEvaluationService):
         return abs(ann_value - pred_value) < 1
 
     @staticmethod
-    def _calculate_str(ann_value: str, pred_value: str, threshold: float = 0.9) -> bool:
+    def _calculate_str(ann_value: str, pred_value: str, threshold: float = 0.8) -> bool:
         """
         Compare strings using similarity ratio.
         threshold: minimum similarity score (0-1) to consider a match
@@ -24,8 +24,9 @@ class Evaluator(IEvaluationService):
         similarity = SequenceMatcher(None, ann_normalized, pred_normalized).ratio()
         return similarity >= threshold
 
+    @classmethod
     def _calculate_field_metrics(
-        self,
+        cls,
         annotations: list[Annotation],
         predictions: list[Prediction],
         field_name: str,
@@ -50,10 +51,10 @@ class Evaluator(IEvaluationService):
                 correct += 1
             elif ann_value is not None and pred_value is not None:
                 if isinstance(ann_value, float):
-                    if self._calculate_float(ann_value, pred_value):
+                    if cls._calculate_float(ann_value, pred_value):
                         correct += 1
                 elif isinstance(ann_value, str):
-                    if self._calculate_str(ann_value, pred_value):
+                    if cls._calculate_str(ann_value, pred_value):
                         correct += 1
                 else:
                     if ann_value == pred_value:
@@ -73,13 +74,14 @@ class Evaluator(IEvaluationService):
             f1_score=f1_score,
         )
 
+    @classmethod
     def evaluate_parser(
-        self, annotations: list[Annotation], predictions: list[Prediction]
+        cls, annotations: list[Annotation], predictions: list[Prediction]
     ) -> Metrics:
         fields = ParsedData.model_fields.keys()
 
         field_metrics = [
-            self._calculate_field_metrics(annotations, predictions, field_name)
+            cls._calculate_field_metrics(annotations, predictions, field_name)
             for field_name in fields
         ]
 

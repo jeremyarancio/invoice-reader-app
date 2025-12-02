@@ -9,7 +9,7 @@ settings = get_settings()
 app = Typer()
 
 
-@app.command("evaluate")
+@app.command()
 def evaluate(model: dependencies.EvaluationModel) -> None:
     metrics = EvaluationService.evaluate_model(
         dataset_uri=settings.benchmark.benchmark_dataset_s3_path,

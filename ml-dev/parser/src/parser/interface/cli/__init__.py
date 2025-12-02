@@ -5,5 +5,5 @@ from parser.interface.cli import evaluate
 
 app = Typer()
 
-app.add_typer(annotation.app, name="label-studio")
-app.add_typer(evaluate.app, name="evaluate")
+app.add_typer(annotation.app, name="ls")
+app.add_typer(evaluate.app, name="eval")
