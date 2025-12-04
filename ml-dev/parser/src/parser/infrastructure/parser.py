@@ -1,10 +1,13 @@
 from datetime import datetime
+import io
 from PIL import Image
 
 from google import genai
 from google.genai import types
+import tqdm
 
 from parser.domain.parse import Prediction, ParsedData
+from parser.infrastructure.schemas.parser import ParsedInvoice
 from parser.service.ports.parser import IParser
 
 
@@ -41,20 +44,32 @@ class GeminiParser(IParser):
 
     def parse(self, images: list[Image.Image]) -> list[Prediction]:
         predictions = []
-        for image in images:
+        for image in tqdm.tqdm(
+            images,
+            desc="Parsing images with Gemini",
+            total=len(images),
+        ):
+            buf = io.BytesIO()
+            image.save(buf, format="PNG")
+            img_bytes = buf.getvalue()
+
             response = self.client.models.generate_content(
                 model=self.model_name,
                 contents=[
                     types.Part.from_bytes(
-                        data=image.tobytes(),
-                        mime_type="image/jpeg",
+                        data=img_bytes,
+                        mime_type="image/png",
                     ),
                     self.instructions,
                 ],
                 config={
                     "response_mime_type": "application/json",
-                    "response_schema": Prediction.model_json_schema(),
+                    "response_schema": ParsedInvoice.model_json_schema(),
                 },
             )
-            predictions.append(Prediction.model_validate(response.parsed))
+            predictions.append(
+                ParsedInvoice.model_validate(response.parsed).to_prediction(
+                    model_name=self.model_name
+                )
+            )
         return predictions

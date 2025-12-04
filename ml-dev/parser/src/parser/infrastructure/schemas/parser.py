@@ -3,8 +3,10 @@ from datetime import date
 
 from pydantic import BaseModel, Field
 
+from parser.domain.parse import ParsedData, Prediction
 
-class Prediction(BaseModel):
+
+class ParsedInvoice(BaseModel):
     currency: Annotated[
         str,
         Field(
@@ -30,3 +32,21 @@ class Prediction(BaseModel):
     client_city: str
     client_zipcode: str
     client_country: str
+
+    def to_prediction(self, model_name: str) -> Prediction:
+        return Prediction(
+            model_name=model_name,
+            data=ParsedData(
+                currency=self.currency,
+                gross_amount=self.gross_amount,
+                vat=self.vat,
+                issued_date=self.issued_date,
+                invoice_number=self.invoice_number,
+                client_name=self.client_name,
+                client_street_address_number=self.client_street_address_number,
+                client_street_address=self.client_street_address,
+                client_city=self.client_city,
+                client_zipcode=self.client_zipcode,
+                client_country=self.client_country,
+            ),
+        )
