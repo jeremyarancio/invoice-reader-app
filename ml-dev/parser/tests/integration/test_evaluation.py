@@ -6,7 +6,7 @@ from parser.service.evaluate import EvaluationService
 
 def test_evaluate():
     EvaluationService.evaluate_model(
-        dataset_uri="path/to/dataset",
+        dataset_uri="tests/data/benchmark_sample.parquet",
         parser=MockParser(),
         storage_service=LocalStorageService(),
         evaluation_service=Evaluator(),

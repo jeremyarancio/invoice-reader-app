@@ -1,10 +1,11 @@
-from functools import lru_cache
 from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import BaseModel
 
+
 REPO_DIR = Path(__file__).parent.parent.parent
+ENV = REPO_DIR / ".env"
 
 
 class LabelStudioSettings(BaseModel):
@@ -23,15 +24,15 @@ class BenchmarkSettings(BaseModel):
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+    model_config = SettingsConfigDict(env_file=ENV, extra="ignore")
 
     # Label Studio
     label_studio_url: str = "http://localhost:8080"
-    label_studio_api_key: str = "your_api_key_here"
+    label_studio_api_key: str
     label_studio_settings: LabelStudioSettings = LabelStudioSettings()
 
     # S3
-    s3_bucket_name: str = ""
+    s3_bucket_name: str
 
     benchmark: BenchmarkSettings = BenchmarkSettings()
 
@@ -40,6 +41,5 @@ class Settings(BaseSettings):
     model_name: str = "gemini-2.5-flash"
 
 
-@lru_cache()
 def get_settings() -> Settings:
-    return Settings()
+    return Settings()  # type: ignore

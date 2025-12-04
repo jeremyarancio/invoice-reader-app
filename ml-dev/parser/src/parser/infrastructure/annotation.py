@@ -67,8 +67,10 @@ class LabelStudioAnnotator(IAnnotator):
         )
         # Convert generator of byte strings to list[dict]
         annotations_data = b"".join(annotation_chunks)
+        decoded_annotation_data = json.loads(annotations_data.decode("utf-8"))
         annotations = [
             LabelStudioExportJSONMIN.model_validate(data).to_annotation()
-            for data in json.loads(annotations_data.decode("utf-8"))
+            for data in decoded_annotation_data
+            if data["annotation_id"]  # If annotated
         ]
         return annotations

@@ -45,7 +45,7 @@ class AnnotationStorageSchema(BaseModel):
     @classmethod
     def from_annotation(cls, annotation: Annotation) -> "AnnotationStorageSchema":
         return cls(
-            id_=1,
+            id_=annotation.id_,
             image_path=annotation.image_uri,
             currency=annotation.data.currency,
             gross_amount=annotation.data.gross_amount,

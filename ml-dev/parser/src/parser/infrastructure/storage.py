@@ -15,17 +15,21 @@ class LocalStorageService(IStorageService):
         self, annotations: list[Annotation], dataset_uri: str | Path
     ) -> None:
         df = pd.DataFrame.from_records(
-            [annotation.model_dump() for annotation in annotations]
+            [
+                AnnotationStorageSchema.from_annotation(annotation).model_dump()
+                for annotation in annotations
+            ]
         )
         df.to_parquet(dataset_uri)
 
     def load_dataset(self, dataset_uri: str | Path) -> list[Annotation]:
         df = pd.read_parquet(dataset_uri)
         return [
-            Annotation.model_validate(record) for record in df.to_dict(orient="records")
+            AnnotationStorageSchema.model_validate(record).to_annotation()
+            for record in df.to_dict(orient="records")
         ]
 
-    def get_document_image(self, image_uri: str | Path) -> Image.Image:
+    def get_document_image(self, image_uri: str) -> Image.Image:
         with open(image_uri, "rb") as f:
             return Image.open(f)
 
@@ -63,9 +67,14 @@ class S3StorageService(IStorageService):
             for record in df.to_dict(orient="records")
         ]
 
-    def get_document_image(self, image_uri: str | Path) -> Image.Image:
+    def get_document_image(self, image_uri: str) -> Image.Image:
+        key = self._get_key_from_s3_uri(image_uri)
         img_data = self.client.get_object(
             Bucket=self.bucket_name,
-            Key=image_uri,
+            Key=key,
         )["Body"].read()
         return Image.open(BytesIO(img_data))
+
+    def _get_key_from_s3_uri(self, s3_uri: str) -> str:
+        # Assuming s3_uri is in the format 's3://bucket_name/key'
+        return s3_uri.split(self.bucket_name + "/")[-1]
