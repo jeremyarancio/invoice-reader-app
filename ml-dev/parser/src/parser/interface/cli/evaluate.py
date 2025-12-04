@@ -12,6 +12,7 @@ app = Typer()
 @app.command()
 def evaluate(model: dependencies.EvaluationModel) -> None:
     metrics = EvaluationService.evaluate_model(
+        evaluation_uri=settings.evaluation_uri,
         dataset_uri=settings.benchmark.benchmark_dataset_s3_path,
         parser=dependencies.get_parser(model=model),
         storage_service=dependencies.get_storage_service(

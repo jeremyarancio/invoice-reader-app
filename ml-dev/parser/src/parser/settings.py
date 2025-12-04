@@ -1,3 +1,4 @@
+import datetime
 from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -39,6 +40,10 @@ class Settings(BaseSettings):
     # Gemini
     gemini_api_key: str = ""
     model_name: str = "gemini-2.5-flash"
+
+    @property
+    def evaluation_uri(self) -> str:
+        return f"benchmark/evaluations/evaluation_{self.model_name}_{datetime.datetime.now().strftime('%d-%m-%Y')}.json"
 
 
 def get_settings() -> Settings:

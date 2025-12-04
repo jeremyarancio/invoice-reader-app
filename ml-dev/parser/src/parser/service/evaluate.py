@@ -8,6 +8,7 @@ class EvaluationService:
     @staticmethod
     def evaluate_model(
         dataset_uri: str,
+        evaluation_uri: str,
         parser: IParser,
         storage_service: IStorageService,
         evaluation_service: IEvaluationService,
@@ -27,6 +28,12 @@ class EvaluationService:
         print("Evaluating parser predictions...")
         metrics = evaluation_service.evaluate_parser(
             annotations=annotations, predictions=predictions
+        )
+        print("Saving evaluation results to storage...")
+        storage_service.save_predictions(
+            evaluation_uri=evaluation_uri,
+            annotations=annotations,
+            predictions=predictions,
         )
         print("Evaluation complete.")
         return metrics

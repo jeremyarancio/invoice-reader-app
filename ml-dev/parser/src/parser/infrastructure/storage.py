@@ -1,11 +1,13 @@
 from io import BytesIO
+import json
 from pathlib import Path
 
 from PIL import Image
 import boto3
 import pandas as pd
+import tqdm
 
-from parser.domain.parse import Annotation
+from parser.domain.parse import Annotation, Prediction
 from parser.infrastructure.schemas.storage import AnnotationStorageSchema
 from parser.service.ports.storage import IStorageService
 
@@ -32,6 +34,14 @@ class LocalStorageService(IStorageService):
     def get_document_image(self, image_uri: str) -> Image.Image:
         with open(image_uri, "rb") as f:
             return Image.open(f)
+
+    def save_predictions(
+        self,
+        evaluation_uri: str,
+        annotations: list[Annotation],
+        predictions: list[Prediction],
+    ) -> None:
+        pass
 
 
 class S3StorageService(IStorageService):
@@ -78,3 +88,30 @@ class S3StorageService(IStorageService):
     def _get_key_from_s3_uri(self, s3_uri: str) -> str:
         # Assuming s3_uri is in the format 's3://bucket_name/key'
         return s3_uri.split(self.bucket_name + "/")[-1]
+
+    def save_predictions(
+        self,
+        evaluation_uri: str,
+        annotations: list[Annotation],
+        predictions: list[Prediction],
+    ) -> None:
+        data = []
+        for annotation, prediction in tqdm.tqdm(
+            zip(annotations, predictions, strict=True),
+            total=len(annotations),
+            desc="Saving evaluation predictions.",
+        ):
+            data.append(
+                [
+                    {
+                        "label_id": str(annotation.id_),
+                        "label": annotation.data.model_dump_json(),
+                        "prediction": prediction.data.model_dump_json(),
+                    }
+                ]
+            )
+        self.client.upload_fileobj(
+            BytesIO(json.dumps(data).encode("utf-8")),
+            self.bucket_name,
+            evaluation_uri,
+        )
