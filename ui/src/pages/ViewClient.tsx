@@ -7,7 +7,7 @@ import { useCurrencyStore } from "@/stores/currencyStore";
 function ViewClient() {
     const { clientId } = useParams();
     const navigate = useNavigate();
-    const { client, isLoading: isClientLoading } = useFetchClient(clientId);
+    const { client, isLoading: isClientLoading } = useFetchClient(clientId!);
     const { selectedCurrency } = useCurrencyStore();
 
     return (
@@ -40,8 +40,12 @@ function ViewClient() {
                         </span>
                         <div className="font-semibold text-lg">
                             {client?.totalRevenue
-                                ? `${client.totalRevenue[selectedCurrency]?.toFixed(2) || '0.00'} ${selectedCurrency}`
-                                : 'Unable to calculate (exchange rate error)'}
+                                ? `${
+                                      client.totalRevenue[
+                                          selectedCurrency
+                                      ]?.toFixed(2) || "0.00"
+                                  } ${selectedCurrency}`
+                                : "Unable to calculate (exchange rate error)"}
                         </div>
                     </div>
                 </div>
