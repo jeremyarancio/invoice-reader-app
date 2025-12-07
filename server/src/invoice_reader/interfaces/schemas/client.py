@@ -12,19 +12,13 @@ class ClientCreate(ClientData):
 
 class ClientResponse(BaseModel):
     client_id: UUID
-    n_invoices: int
-    total_revenue: dict[Currency, float]
     data: ClientData
 
     @classmethod
-    def from_client(
-        cls, client: Client, total_revenue: dict[Currency, float], n_invoices: int
-    ) -> "ClientResponse":
+    def from_client(cls, client: Client) -> "ClientResponse":
         return cls(
             client_id=client.id_,
             data=client.data,
-            n_invoices=n_invoices,
-            total_revenue=total_revenue,
         )
 
 
@@ -37,3 +31,10 @@ class PagedClientResponse(BaseModel):
     per_page: int
     total: int
     clients: list[ClientResponse]
+
+
+class ClientRevenueResponse(BaseModel):
+    client_id: UUID
+    n_invoices: int
+    # In case of error with the Exchange rates service
+    total_revenue: dict[Currency, float] | None = None

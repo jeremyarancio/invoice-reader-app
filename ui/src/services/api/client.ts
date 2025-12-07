@@ -1,4 +1,5 @@
 import type {
+    ClientRevenue,
     CreateClient,
     GetClient,
     GetPagedClients,
@@ -41,15 +42,21 @@ export const deleteClient = async (clientId: string) => {
     await api.delete("clients/" + clientId);
 };
 
-export const updateClient = async (client_id: string, update_client: UpdateClient) => {
-    const response = await api.put(
-        "clients/" + client_id,
-        update_client,
-        {
-            headers: {
-                "Content-Type": "application/json",
-            },
-        }
-    );
+export const updateClient = async (
+    client_id: string,
+    update_client: UpdateClient
+) => {
+    const response = await api.put("clients/" + client_id, update_client, {
+        headers: {
+            "Content-Type": "application/json",
+        },
+    });
+    return response.data;
+};
+
+export const fetchClientRevenue = async (
+    clientId: string
+): Promise<ClientRevenue> => {
+    const response = await api.get("clients/" + clientId + "/revenue");
     return response.data;
 };

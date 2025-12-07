@@ -93,7 +93,7 @@ class ClientService:
         invoice_repository: IInvoiceRepository,
         exchange_rate_service: IExchangeRateService,
         exchange_rate_repository: IExchangeRateRepository,
-    ) -> dict[Currency, float]:
+    ) -> dict[Currency, float] | None:
         logger.info("Calculating total revenue for client: {}", client_id)
         total_revenue = {currency: 0.0 for currency in Currency}
         invoices = invoice_repository.get_by_client_id(client_id=client_id)
@@ -108,32 +108,37 @@ class ClientService:
                     "No cached exchange rates for invoice_id {}, fetching from external service.",
                     invoice.id_,
                 )
-                # Fetch from the external service if not found in the repository
-                exchange_rate = exchange_rate_service.get_exchange_rates(
-                    base_currency=invoice.data.currency,
-                    rate_date=invoice.data.issued_date,
-                )
-                # Persist the fetched exchange rates for future use
-                exchange_rate_repository.add(exchange_rate=exchange_rate)
+                try:
+                    # Fetch from the external service if not found in the repository
+                    exchange_rate = exchange_rate_service.get_exchange_rates(
+                        base_currency=invoice.data.currency,
+                    )
+                    # Persist the fetched exchange rates for future use
+                    exchange_rate_repository.add(exchange_rate=exchange_rate)
+                    logger.info(
+                        "Fetched and cached exchange rates for invoice_id {}: {}",
+                        invoice.id_,
+                        exchange_rate.model_dump_json(),
+                    )
+                except Exception:
+                    return None
+            else:
                 logger.info(
-                    "Fetched and cached exchange rates for invoice_id {}: {}",
+                    "Cached exchange rates found for invoice_id {}: {}",
                     invoice.id_,
                     exchange_rate.model_dump_json(),
                 )
+
+            # Convert gross amount to all currencies
             converted_gross_amounts = {
                 currency: exchange_rate.convert(
                     amount=invoice.data.gross_amount, to_currency=currency
                 )
                 for currency in Currency
             }
-
-            logger.info(
-                "Cached exchange rates found for invoice_id {}: {}",
-                invoice.id_,
-                exchange_rate.model_dump_json(),
-            )
             for currency, amount in converted_gross_amounts.items():
                 total_revenue[currency] += amount
+
         return total_revenue
 
     @staticmethod

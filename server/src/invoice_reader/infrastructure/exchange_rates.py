@@ -6,17 +6,17 @@ from invoice_reader.domain.exchange_rate import ExchangeRates
 from invoice_reader.domain.invoice import Currency
 from invoice_reader.services.interfaces.exchange_rates import IExchangeRateService
 from invoice_reader.settings import get_settings
+from invoice_reader.utils.logger import get_logger
 
 settings = get_settings()
+logger = get_logger()
 
 
 class TestExchangeRatesService(IExchangeRateService):
-    def get_exchange_rates(
-        self, base_currency: Currency, rate_date: date | None = None
-    ) -> ExchangeRates:
+    def get_exchange_rates(self, base_currency: Currency) -> ExchangeRates:
         return ExchangeRates(
             base_currency=base_currency,
-            rate_date=rate_date or date.today(),
+            rate_date=date.today(),
             rates={
                 Currency.EUR: 1.0,
                 Currency.USD: 1.1,
@@ -27,28 +27,17 @@ class TestExchangeRatesService(IExchangeRateService):
 
 
 class ExchangeRatesUniRateAPI(IExchangeRateService):
-    """https://unirateapi.com/apidocs/"""
+    """https://unirateapi.com/apidocs/
+    Note 07/12/2025: Historical rates are deprecated in the free plan.
+    """
 
     def __init__(self):
         self.api_key = settings.exchange_rates_api_key
         self.base_url = "https://api.unirateapi.com/api"
 
-    def get_exchange_rates(
-        self, base_currency: Currency, rate_date: date | None = None
-    ) -> ExchangeRates:
-        if rate_date:
-            url = f"{self.base_url}/historical/rates"
-            response = httpx.get(
-                url=url,
-                params={
-                    "api_key": self.api_key,
-                    "date": rate_date.isoformat(),
-                    "from": base_currency,
-                },
-            )
-        else:
-            url = f"{self.base_url}/rates"
-            response = httpx.get(url=url, params={"api_key": self.api_key, "from": base_currency})
+    def get_exchange_rates(self, base_currency: Currency) -> ExchangeRates:
+        url = f"{self.base_url}/rates"
+        response = httpx.get(url=url, params={"api_key": self.api_key, "from": base_currency})
 
         if response.status_code == 200:
             rates = {
@@ -58,7 +47,7 @@ class ExchangeRatesUniRateAPI(IExchangeRateService):
             }
             return ExchangeRates(
                 base_currency=base_currency,
-                rate_date=rate_date or date.today(),
+                rate_date=date.today(),
                 rates=rates,
             )
 
@@ -71,4 +60,5 @@ class ExchangeRatesUniRateAPI(IExchangeRateService):
         elif response.status_code >= 500:
             raise Exception("Exchange rates service is currently unavailable")
         else:
-            raise Exception("Error fetching exchange rates. No idea why...")
+            logger.error("Unexpected error from exchange rate service: {}", response.text)
+            raise Exception("Error fetching exchange rates.")
