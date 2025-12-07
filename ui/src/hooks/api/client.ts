@@ -7,6 +7,7 @@ import {
     addClient,
     deleteClient,
     fetchClient,
+    fetchClientRevenue,
     fetchClients,
     updateClient,
 } from "@/services/api/client";
@@ -15,14 +16,33 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
 import { useAlert } from "@/contexts/AlertContext";
 
-export const useFetchClient = (clientId: string | undefined) => {
-    const { data, isLoading, error } = useQuery({
+export const useFetchClient = (clientId: string) => {
+    const {
+        data: clientData,
+        isLoading: clientLoading,
+        error: clientError,
+    } = useQuery({
         queryKey: ["client", clientId],
-        queryFn: () => fetchClient(clientId as string),
+        queryFn: () => fetchClient(clientId),
         enabled: !!clientId,
     });
-    const client = data ? mapGetClientToClient(data) : null;
-    return { client, isLoading, error };
+    const {
+        data: clientRevenue,
+        isLoading: revenueLoading,
+        error: revenueError,
+    } = useQuery({
+        queryKey: ["clientRevenue", clientId],
+        queryFn: () => fetchClientRevenue(clientId),
+    });
+    const client =
+        clientData && clientRevenue
+            ? mapGetClientToClient(clientData, clientRevenue)
+            : null;
+    return {
+        client,
+        isLoading: clientLoading || revenueLoading,
+        error: clientError || revenueError,
+    };
 };
 
 export const useFetchClients = (
@@ -31,9 +51,18 @@ export const useFetchClients = (
 ) => {
     const { data, isLoading, error } = useQuery({
         queryKey: ["clients", pageNumber, perPage],
-        queryFn: () => fetchClients(pageNumber, perPage),
+        queryFn: async () => {
+            const pagedClients = await fetchClients(pageNumber, perPage);
+            const clientsWithRevenue = await Promise.all(
+                pagedClients.clients.map(async (client) => {
+                    const revenue = await fetchClientRevenue(client.client_id);
+                    return mapGetClientToClient(client, revenue);
+                })
+            );
+            return clientsWithRevenue;
+        },
     });
-    const clients = data?.clients.map(mapGetClientToClient) || [];
+    const clients = data || [];
 
     return { clients, isLoading, error };
 };

@@ -39,7 +39,9 @@ function ViewClient() {
                             Total Revenue ({selectedCurrency}):
                         </span>
                         <div className="font-semibold text-lg">
-                            {client?.totalRevenue?.[selectedCurrency]?.toFixed(2) || '0.00'} {selectedCurrency}
+                            {client?.totalRevenue
+                                ? `${client.totalRevenue[selectedCurrency]?.toFixed(2) || '0.00'} ${selectedCurrency}`
+                                : 'Unable to calculate (exchange rate error)'}
                         </div>
                     </div>
                 </div>

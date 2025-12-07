@@ -23,6 +23,7 @@ from invoice_reader.interfaces.dependencies.repository import (
 from invoice_reader.interfaces.schemas.client import (
     ClientCreate,
     ClientResponse,
+    ClientRevenueResponse,
     ClientUpdate,
     PagedClientResponse,
 )
@@ -109,15 +110,14 @@ def test_calculate_total_revenue_with_no_cached_exchange_rates(
     existing_client: Client,
     existing_invoices: list[Invoice],
 ):
-    response = test_client.get(f"/v1/clients/{existing_client.id_}")
+    response = test_client.get(f"/v1/clients/{existing_client.id_}/revenue")
     assert response.status_code == 200
-    client_response = ClientResponse.model_validate(response.json())
+    response = ClientRevenueResponse.model_validate(response.json())
 
     # Calculate for the test
     exchange_rates = [
         TestExchangeRatesService().get_exchange_rates(
             base_currency=invoice.data.currency,
-            rate_date=invoice.data.issued_date,
         )
         for invoice in existing_invoices
     ]
@@ -131,7 +131,7 @@ def test_calculate_total_revenue_with_no_cached_exchange_rates(
         for curr, value in amount.items():
             total_revenue[curr] += value
 
-    assert client_response.total_revenue == total_revenue
+    assert response.total_revenue == total_revenue
 
 
 def test_total_revenue_with_cached_exchange_rates(
@@ -140,9 +140,9 @@ def test_total_revenue_with_cached_exchange_rates(
     existing_invoices: list[Invoice],
     existing_historical_exchange_rates: ExchangeRates,
 ):
-    response = test_client.get(f"/v1/clients/{existing_client.id_}")
+    response = test_client.get(f"/v1/clients/{existing_client.id_}/revenue")
     assert response.status_code == 200
-    client_response = ClientResponse.model_validate(response.json())
+    response = ClientRevenueResponse.model_validate(response.json())
 
     # It works only because each invoice was issed on the same date.
     # Otherwise, each invoice would have its own exchange rates at different dates
@@ -157,7 +157,7 @@ def test_total_revenue_with_cached_exchange_rates(
         for curr, value in amount.items():
             total_revenue[curr] += value
 
-    assert client_response.total_revenue == total_revenue
+    assert response.total_revenue == total_revenue
 
 
 def test_count_invoices(
@@ -165,7 +165,7 @@ def test_count_invoices(
     existing_client: Client,
     existing_invoices: list[Invoice],
 ):
-    response = test_client.get(f"/v1/clients/{existing_client.id_}")
+    response = test_client.get(f"/v1/clients/{existing_client.id_}/revenue")
     assert response.status_code == 200
-    client_response = ClientResponse.model_validate(response.json())
-    assert client_response.n_invoices == len(existing_invoices)
+    response = ClientRevenueResponse.model_validate(response.json())
+    assert response.n_invoices == len(existing_invoices)

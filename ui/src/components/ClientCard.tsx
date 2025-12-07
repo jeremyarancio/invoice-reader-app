@@ -7,7 +7,7 @@ interface ClientCardProps {
     clientId: string;
     clientName: string;
     totalInvoice: number;
-    totalRevenue: Record<string, number>;
+    totalRevenue?: Record<string, number>;
 }
 
 function ClientCard({
@@ -37,7 +37,9 @@ function ClientCard({
                     <div className="w-3/8"></div>
                     <div className="flex w-2/8 space-x-8 justify-evenly">
                         <div className="font-semibold text-right">
-                            {totalRevenue?.[selectedCurrency]?.toFixed(2) || '0.00'} {selectedCurrency}
+                            {totalRevenue
+                                ? `${totalRevenue[selectedCurrency]?.toFixed(2) || '0.00'} ${selectedCurrency}`
+                                : 'N/A'}
                         </div>
                         <div className="my-auto w-1/30"></div>
                     </div>

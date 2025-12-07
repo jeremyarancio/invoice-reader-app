@@ -14,6 +14,7 @@ from invoice_reader.interfaces.dependencies.repository import (
 from invoice_reader.interfaces.schemas.client import (
     ClientCreate,
     ClientResponse,
+    ClientRevenueResponse,
     ClientUpdate,
     PagedClientResponse,
 )
@@ -29,16 +30,10 @@ router = APIRouter(
 )
 
 
-# TODO: Separate endpoints
 @router.get("")
 def get_clients(
     user_id: Annotated[UUID, Depends(get_current_user_id)],
     client_repository: Annotated[IClientRepository, Depends(get_client_repository)],
-    invoice_repository: Annotated[IInvoiceRepository, Depends(get_invoice_repository)],
-    exchange_rate_service: Annotated[IExchangeRateService, Depends(get_exchange_rates_service)],
-    exchange_rate_repository: Annotated[
-        IExchangeRateRepository, Depends(get_exchange_rate_repository)
-    ],
     page: int = Query(1, ge=1),
     per_page: int = Query(10, ge=1),
 ) -> PagedClientResponse:
@@ -48,58 +43,24 @@ def get_clients(
         page=page,
         per_page=per_page,
     )
-    n_invoices_per_client = [
-        ClientService.count_invoices(client.id_, invoice_repository) for client in clients
-    ]
-    total_revenue_per_client = [
-        ClientService.calculate_total_revenue(
-            client_id=client.id_,
-            invoice_repository=invoice_repository,
-            exchange_rate_service=exchange_rate_service,
-            exchange_rate_repository=exchange_rate_repository,
-        )
-        for client in clients
-    ]
     return PagedClientResponse(
         total=len(clients),
         page=page,
         per_page=per_page,
-        clients=[
-            ClientResponse.from_client(
-                client=client, n_invoices=n_invoices, total_revenue=total_revenue
-            )
-            for client, n_invoices, total_revenue in zip(
-                clients, n_invoices_per_client, total_revenue_per_client, strict=True
-            )
-        ],
+        clients=[ClientResponse.from_client(client=client) for client in clients],
     )
 
 
-# TODO: Separate endpoints
 @router.get("/{client_id}", dependencies=[Depends(get_current_user_id)])
 def get_client(
     client_id: UUID,
     client_repository: Annotated[IClientRepository, Depends(get_client_repository)],
-    invoice_repository: Annotated[IInvoiceRepository, Depends(get_invoice_repository)],
-    exchange_rate_service: Annotated[IExchangeRateService, Depends(get_exchange_rates_service)],
-    exchange_rate_repository: Annotated[
-        IExchangeRateRepository, Depends(get_exchange_rate_repository)
-    ],
 ) -> ClientResponse:
     client = ClientService.get_client(
         client_id=client_id,
         client_repository=client_repository,
     )
-    n_invoices = ClientService.count_invoices(client_id, invoice_repository)
-    total_revenue = ClientService.calculate_total_revenue(
-        client_id=client_id,
-        invoice_repository=invoice_repository,
-        exchange_rate_service=exchange_rate_service,
-        exchange_rate_repository=exchange_rate_repository,
-    )
-    return ClientResponse.from_client(
-        client=client, n_invoices=n_invoices, total_revenue=total_revenue
-    )
+    return ClientResponse.from_client(client=client)
 
 
 @router.post("")
@@ -148,3 +109,26 @@ def update_client(
         client_repository=client_repository,
     )
     return Response(status_code=204)
+
+
+@router.get("/{client_id}/revenue", dependencies=[Depends(get_current_user_id)])
+def get_client_total_revenue(
+    client_id: UUID,
+    invoice_repository: Annotated[IInvoiceRepository, Depends(get_invoice_repository)],
+    exchange_rate_service: Annotated[IExchangeRateService, Depends(get_exchange_rates_service)],
+    exchange_rate_repository: Annotated[
+        IExchangeRateRepository, Depends(get_exchange_rate_repository)
+    ],
+) -> ClientRevenueResponse:
+    total_revenue = ClientService.calculate_total_revenue(
+        client_id=client_id,
+        invoice_repository=invoice_repository,
+        exchange_rate_service=exchange_rate_service,
+        exchange_rate_repository=exchange_rate_repository,
+    )
+    n_invoices = ClientService.count_invoices(client_id, invoice_repository)
+    return ClientRevenueResponse(
+        client_id=client_id,
+        n_invoices=n_invoices,
+        total_revenue=total_revenue,
+    )

@@ -1,11 +1,15 @@
 import type {
     Client,
     ClientData,
+    ClientRevenue,
     GetClient,
     UpdateClient,
 } from "@/schemas/client";
 
-export function mapGetClientToClient(getClient: GetClient): Client {
+export function mapGetClientToClient(
+    getClient: GetClient,
+    clientRevenue: ClientRevenue
+): Client {
     return {
         id: getClient.client_id,
         city: getClient.data.city,
@@ -14,8 +18,8 @@ export function mapGetClientToClient(getClient: GetClient): Client {
         streetAddress: getClient.data.street_address,
         streetNumber: getClient.data.street_number,
         zipcode: getClient.data.zipcode,
-        totalRevenue: getClient.total_revenue,
-        nInvoices: getClient.n_invoices,
+        totalRevenue: clientRevenue.total_revenue,
+        nInvoices: clientRevenue.n_invoices,
     };
 }
 
