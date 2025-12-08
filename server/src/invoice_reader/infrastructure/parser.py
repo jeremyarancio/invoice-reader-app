@@ -3,8 +3,9 @@ from typing import BinaryIO
 
 import httpx
 
-from invoice_reader.domain.invoice import Currency
-from invoice_reader.domain.parser import ParsedClientData, ParsedInvoiceData, ParserExtraction
+from invoice_reader.domain.client import ClientData
+from invoice_reader.domain.invoice import Currency, InvoiceData
+from invoice_reader.infrastructure.schemas.parser import ParsedData
 from invoice_reader.services.exceptions import InfrastructureException
 from invoice_reader.services.interfaces.parser import IParser
 from invoice_reader.settings import get_settings
@@ -13,28 +14,28 @@ settings = get_settings()
 
 
 class TestParser(IParser):
-    def parse(self, file: BinaryIO) -> ParserExtraction:
-        return ParserExtraction(
-            invoice=ParsedInvoiceData(
-                gross_amount=100.0,
-                vat=20,
-                issued_date=date(2023, 1, 1),
-                currency=Currency.EUR,
-                invoice_number="INV-1000",
-                invoice_description="Test invoice",
-            ),
-            client=ParsedClientData(
-                client_name="Test Client",
-                street_address="123 Test St",
-                zipcode="12345",
-                city="Test City",
-                country="Test Country",
-            ),
+    def parse(self, file: BinaryIO) -> tuple[InvoiceData, ClientData]:
+        invoice_data = InvoiceData(
+            gross_amount=100.0,
+            description="Invoice description",
+            vat=20,
+            issued_date=date(2023, 1, 1),
+            currency=Currency.EUR,
+            invoice_number="INV-1000",
         )
+        client_data = ClientData(
+            client_name="Test Client",
+            street_number="123",
+            street_address="Test St",
+            zipcode="12345",
+            city="Test City",
+            country="Test Country",
+        )
+        return invoice_data, client_data
 
 
 class MLServerParser(IParser):
-    def parse(self, file: BinaryIO) -> ParserExtraction:
+    def parse(self, file: BinaryIO) -> tuple[InvoiceData, ClientData]:
         """Parse document using the /parser endpoint from the ML server."""
         files = {"upload_file": file}
         response = httpx.post(settings.parser_endpoint, files=files)
@@ -44,10 +45,12 @@ class MLServerParser(IParser):
                 Response status: {response.status_code}""",
             )
         try:
-            parsed_data = ParserExtraction.model_validate(response.json())
+            parsed_data = ParsedData.model_validate(response.json())
         except Exception as e:
             raise InfrastructureException(
                 message="Failed to parse the invoice document. Error: " + str(e),
                 status_code=422,
             ) from e
-        return parsed_data
+        client_data = parsed_data.client.to_client_data()
+        invoice_data = parsed_data.invoice.to_invoice_data()
+        return invoice_data, client_data

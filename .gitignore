@@ -1,3 +1,4 @@
 *.env*
 !*.env.template
 .vscode/
+__pycache__

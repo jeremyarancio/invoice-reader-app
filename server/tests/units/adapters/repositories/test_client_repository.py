@@ -18,7 +18,7 @@ def client() -> Client:
         user_id=uuid4(),
         data=ClientData(
             client_name="Test Client",
-            street_number=123,
+            street_number="123",
             street_address="Test St",
             city="Test City",
             country="Test Country",
