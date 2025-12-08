@@ -36,7 +36,7 @@ class Settings(BaseSettings):
         return f"postgresql://{self.postgres_user}:{self.postgres_password}@{self.postgres_host}:{self.postgres_port}/{self.postgres_db}"
 
     @property
-    def parser_endpoint(self) -> str:
+    def parser_endpoint_url(self) -> str:
         return f"{self.ml_server_url}/v1/parse"
 
     exchange_rates_api_key: str = ""

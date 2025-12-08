@@ -15,7 +15,7 @@ class InvoiceModel(SQLModel, table=True):
     storage_path: str
     invoice_number: str
     gross_amount: float
-    vat: int
+    vat: float
     currency: Currency
     description: str
     invoiced_date: date

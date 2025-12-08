@@ -35,10 +35,13 @@ class TestParser(IParser):
 
 
 class MLServerParser(IParser):
+    def __init__(self, parser_endpoint_url: str) -> None:
+        self.ml_server_url = parser_endpoint_url
+
     def parse(self, file: BinaryIO) -> tuple[InvoiceData, ClientData]:
         """Parse document using the /parser endpoint from the ML server."""
-        files = {"upload_file": file}
-        response = httpx.post(settings.parser_endpoint, files=files)
+        files = {"upload_file": ("document.pdf", file, "application/pdf")}
+        response = httpx.post(self.ml_server_url, files=files, timeout=60.0)
         if response.status_code != 200:
             raise InfrastructureException(
                 message=f"""Failed to parse the invoice document.\n Error: {response.text}. 

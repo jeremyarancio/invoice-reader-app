@@ -41,7 +41,7 @@ class File(BaseModel):
 
 class InvoiceData(BaseModel):
     invoice_number: str
-    vat: Annotated[int, Field(ge=0, le=50)]
+    vat: Annotated[float, Field(ge=0, le=50)]
     description: Annotated[str, Field(max_length=500)]
     issued_date: date
     paid_date: date | None = None

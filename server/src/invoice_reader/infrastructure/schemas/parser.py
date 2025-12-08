@@ -8,7 +8,7 @@ from invoice_reader.domain.invoice import Currency, InvoiceData
 
 class ParsedInvoiceData(BaseModel):
     gross_amount: float | None = None
-    vat: int | None = None
+    vat: float | None = None
     issued_date: date | None = None
     invoice_number: str | None = None
     invoice_description: str | None = None
