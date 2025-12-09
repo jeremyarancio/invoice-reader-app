@@ -90,7 +90,7 @@ The application is developed as follows:
 * **PostgresSQL + SQLModel** for the database
 * **Alembic** for Database migration
 * **AWS S3** for storing documents
-* **Document Parsing** powered by [Together AI](https://www.together.ai/) & **Qwen-2.5-VL-72B**
+* **Document Parsing** powered by Gemini-2.5
 
 You'll also find in this repository, under `./infrastructure`, different ways to deploy the application in the cloud, such as AWS ECS or Kubernetes.
 
