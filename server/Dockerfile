@@ -40,4 +40,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 
 ENTRYPOINT ["/entrypoint.sh"]
 
-CMD fastapi dev --host 0.0.0.0 --port 8000 --reload "$API_PATH"
+CMD uvicorn "$API_PATH" \
+    --host 0.0.0.0 \
+    --port 8000 \
+    --reload
