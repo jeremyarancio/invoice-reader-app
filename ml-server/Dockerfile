@@ -24,6 +24,9 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 # Then, use a final image without uv
 FROM python:3.12-slim-bookworm AS prod
 
+# Install poppler-utils for pdf2image
+RUN apt-get update && apt-get install -y poppler-utils && rm -rf /var/lib/apt/lists/*
+
 # Copy the application from the builder
 COPY --from=builder --chown=app:app /app /app
 
@@ -38,6 +41,9 @@ CMD ["fastapi", "run", "--host", "0.0.0.0", "--port", "5000", "src/ml_server/int
 
 # Development
 FROM python:3.12-slim-bookworm AS dev
+
+# Install poppler-utils for pdf2image
+RUN apt-get update && apt-get install -y poppler-utils && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder --chown=app:app /app /app
 

@@ -64,15 +64,14 @@ async def global_exception_handler(request: Request, exc: Exception):
     traceback_str = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
 
     # For production, log the full traceback but don't return it
-    logger.error("Error: {}", traceback_str)  # Log to your system
+    logger.error("Root cause: {}\nError: {}", root_cause, traceback_str)
 
     return JSONResponse(
         status_code=500,
         content={
             "error": {
                 "type": exc.__class__.__name__,
-                "message": root_cause,
-                # Include location only for validation errors
+                "message": "Something went wrong with the server. I'm on it!",
                 "loc": getattr(exc, "loc", None),
             }
         },

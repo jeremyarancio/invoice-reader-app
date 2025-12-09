@@ -1,24 +1,21 @@
-from abc import ABC, abstractmethod
 from typing import BinaryIO
 
-from ml_server.domain.invoice import InvoiceExtraction
+from ml_server.domain.parser import ParserPrediction
+from ml_server.services.exceptions import FileFormatNotHandledException
+from ml_server.services.ports.parser import IParser
 from ml_server.utils.logger import get_logger
 
 logger = get_logger()
 
 
-class ParserInteface(ABC):
-    """Interface/Port for infrastructure adapter."""
-
-    @abstractmethod
-    async def parse(self, file: BinaryIO) -> InvoiceExtraction:
-        pass
-
-
 class ParserService:
     @staticmethod
-    async def parse(file: BinaryIO, content_type: str, parser: ParserInteface) -> InvoiceExtraction:
+    def parse(
+        file: BinaryIO, content_type: str, parser: IParser, allowed_formats: list[str]
+    ) -> ParserPrediction:
+        if content_type not in allowed_formats:
+            raise FileFormatNotHandledException(f"Unsupported content type: {content_type}")
         logger.info("Starting invoice parsing")
-        invoice_extraction = await parser.parse(file)
+        parsed_data = parser.parse(file)
         logger.info("Invoice parsing completed successfully")
-        return invoice_extraction
+        return parsed_data

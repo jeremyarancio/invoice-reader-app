@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field
 
 class ClientData(BaseModel):
     client_name: str
-    street_number: int
+    street_number: str
     street_address: str
     zipcode: str
     city: str

@@ -3,7 +3,6 @@ from uuid import UUID, uuid4
 
 from invoice_reader.domain.client import Client
 from invoice_reader.domain.invoice import File, Invoice, InvoiceData
-from invoice_reader.domain.parser import ParsedInvoiceData
 from invoice_reader.services.exceptions import (
     EntityNotFoundException,
     ExistingEntityException,
@@ -168,18 +167,16 @@ class InvoiceService:
         parser: IParser,
         client_repository: IClientRepository,
         user_id: UUID,
-    ) -> tuple[ParsedInvoiceData, Client | None]:
-        parsed_data = parser.parse(file=file)
+    ) -> tuple[InvoiceData, Client | None]:
+        invoice_data, client_data = parser.parse(file=file)
         client = (
-            client_repository.get_by_name(
-                client_name=parsed_data.client.client_name, user_id=user_id
-            )
-            if parsed_data.client.client_name
+            client_repository.get_by_name(client_name=client_data.client_name, user_id=user_id)
+            if client_data.client_name
             else None
         )
         if not client:
             logger.warning(
                 "Client with the name {} not found in the database during parsing.",
-                parsed_data.client.client_name,
+                client_data.client_name,
             )
-        return parsed_data.invoice, client
+        return invoice_data, client

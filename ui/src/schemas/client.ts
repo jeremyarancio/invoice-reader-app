@@ -15,7 +15,7 @@ export type Client = {
 
 export interface CreateClient {
     client_name: string;
-    street_number: number;
+    street_number: string;
     street_address: string;
     zipcode: string;
     city: string;

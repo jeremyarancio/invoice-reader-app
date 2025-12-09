@@ -6,15 +6,18 @@ from typing import Annotated
 from fastapi import Depends, FastAPI, Request, UploadFile
 from fastapi.responses import JSONResponse
 
-from ml_server.domain.invoice import InvoiceExtraction
 from ml_server.interfaces.dependencies.parser import get_parser
+from ml_server.interfaces.schemas.parser import ParsedDataInterface
 from ml_server.services.exceptions import CustomException
-from ml_server.services.parser import ParserInteface, ParserService
+from ml_server.services.parser import ParserService
+from ml_server.services.ports.parser import IParser
+from ml_server.settings import get_settings
 from ml_server.utils.logger import get_logger
 
 logger = get_logger()
 
-# Initialize FastAPI app
+settings = get_settings()
+
 app = FastAPI(
     title="Invoice Reader ML Server",
     description="A FastAPI server for managing Machine Learning and AI features.",
@@ -72,12 +75,15 @@ async def health_check():
 
 
 @app.post("/v1/parse")
-async def parse(
-    upload_file: UploadFile, parser: Annotated[ParserInteface, Depends(get_parser)]
-) -> InvoiceExtraction:
+def parse(
+    upload_file: UploadFile, parser: Annotated[IParser, Depends(get_parser)]
+) -> ParsedDataInterface:
     file = upload_file.file
     content_type = upload_file.content_type if upload_file.content_type else "not specified"
-    invoice_extraction = await ParserService.parse(
-        file=file, content_type=content_type, parser=parser
+    parsed_data = ParserService.parse(
+        file=file,
+        content_type=content_type,
+        parser=parser,
+        allowed_formats=settings.allowed_formats,
     )
-    return invoice_extraction
+    return ParsedDataInterface.from_parsed_data(parsed_data.data)

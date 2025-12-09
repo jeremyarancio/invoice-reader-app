@@ -9,7 +9,7 @@ class ClientModel(SQLModel, table=True):
     client_id: UUID = Field(primary_key=True)
     user_id: UUID = Field(foreign_key="user.user_id")
     client_name: str
-    street_number: int
+    street_number: str  # Database migration
     street_address: str
     zipcode: str
     city: str

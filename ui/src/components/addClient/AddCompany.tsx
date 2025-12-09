@@ -25,7 +25,7 @@ function AddCompany({ onSuccess, onError }: Props) {
 
     const formSchema = z.object({
         client_name: z.string(),
-        street_number: z.coerce.number(),
+        street_number: z.string(),
         street_address: z.string(),
         zipcode: z.string(),
         city: z.string(),

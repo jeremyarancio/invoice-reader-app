@@ -10,7 +10,7 @@ from invoice_reader.interfaces.schemas.client import ClientCreate, ClientUpdate
 def client_data() -> ClientData:
     return ClientData(
         client_name="Test Client",  # NOTE: match client_id with client_name when parsed
-        street_number=123,
+        street_number="123",
         street_address="Test St",
         city="Test City",
         country="Test Country",
@@ -56,7 +56,7 @@ def client_update(client_data: ClientData) -> ClientUpdate:
         data=client_data.model_copy(
             update={
                 "client_name": "Updated Client Name",
-                "street_number": 456,
+                "street_number": "456",
             },
             deep=True,
         )

@@ -1,12 +1,19 @@
+from pydantic import BaseModel
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class ParserConfig(BaseModel):
+    model_name: str = "gemini-2.5-flash"
 
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
-    parser_api_url: str = "http://localhost:8000"
-    parser_api_key: str = "your_api_key"
-    model_name: str = "nanonets/Nanonets-OCR-s"
+    allowed_formats: list[str] = ["application/pdf"]
+
+    gemini_api_key: str = ""
+    parser_config: ParserConfig = ParserConfig()
 
 
-settings = Settings()
+def get_settings() -> Settings:
+    return Settings()  # type: ignore

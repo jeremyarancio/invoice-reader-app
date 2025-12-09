@@ -8,3 +8,8 @@ class CustomException(Exception):
 
 class ParserException(CustomException):
     pass
+
+
+class FileFormatNotHandledException(CustomException):
+    def __init__(self, message: str):
+        super().__init__(message=message, status_code=415)
