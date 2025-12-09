@@ -28,7 +28,10 @@ FROM base AS prod
 
 ENTRYPOINT ["/entrypoint.sh"]
 
-CMD fastapi run --host 0.0.0.0 --port 8000 "$API_PATH"
+CMD uvicorn "$API_PATH" \
+    --host 0.0.0.0 \
+    --port 8000 \
+    --workers 2
 
 FROM base AS dev
 

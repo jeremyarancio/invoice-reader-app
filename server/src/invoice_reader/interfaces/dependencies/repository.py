@@ -1,8 +1,10 @@
+from functools import lru_cache
 from typing import Annotated
 
 import sqlmodel
 from fastapi import Depends
 from sqlalchemy.engine import Engine
+from sqlalchemy.pool import QueuePool
 
 from invoice_reader.infrastructure.models import *  # noqa: F403
 from invoice_reader.infrastructure.repositories import (
@@ -24,8 +26,22 @@ from invoice_reader.settings import get_settings
 settings = get_settings()
 
 
+@lru_cache
 def get_engine() -> Engine:
-    return sqlmodel.create_engine(settings.database_url, echo=False)
+    """
+    Create database engine with connection pooling.
+    Uses lru_cache to create a singleton engine shared across all requests.
+    """
+    return sqlmodel.create_engine(
+        settings.database_url,
+        echo=False,
+        # Connection pooling configuration
+        poolclass=QueuePool,
+        pool_size=10,  # Maintain 10 connections per worker
+        max_overflow=20,  # Allow up to 20 additional connections under load
+        pool_pre_ping=True,  # Verify connections are alive before using
+        pool_recycle=3600,  # Recycle connections after 1 hour (3600 seconds)
+    )
 
 
 def get_session(engine: Annotated[Engine, Depends(get_engine)]):
