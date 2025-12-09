@@ -10,6 +10,11 @@ services:
             - /var/run/docker.sock:/var/run/docker.sock
         networks:
             - app-network
+        logging:
+            driver: "json-file"
+            options:
+                max-size: "10m"
+                max-file: "3"
 
     postgres:
         restart: unless-stopped
@@ -22,6 +27,11 @@ services:
             POSTGRES_USER: ${POSTGRES_USER:-postgres}
             POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
             POSTGRES_DB: ${POSTGRES_DB:-postgres}
+        logging:
+            driver: "json-file"
+            options:
+                max-size: "10m"
+                max-file: "3"
             
     ui:
         networks:
@@ -30,6 +40,11 @@ services:
             - "traefik.enable=true"
             - "traefik.http.routers.ui.rule=Host(`app.${DOMAIN_NAME:-localhost}`)"
             - "traefik.http.services.ui.loadbalancer.server.port=5173"
+        logging:
+            driver: "json-file"
+            options:
+                max-size: "10m"
+                max-file: "3"
 
     server:
         labels:
@@ -40,10 +55,20 @@ services:
             - postgres
         networks:
             - app-network
+        logging:
+            driver: "json-file"
+            options:
+                max-size: "10m"
+                max-file: "3"
 
     ml-server:
         networks:
             - app-network
+        logging:
+            driver: "json-file"
+            options:
+                max-size: "10m"
+                max-file: "3"
 
     prometheus:
         container_name: prometheus
@@ -56,6 +81,11 @@ services:
             - server
         networks:
             - app-network
+        logging:
+            driver: "json-file"
+            options:
+                max-size: "10m"
+                max-file: "3"
 
     grafana:
         container_name: grafana
@@ -72,6 +102,11 @@ services:
             - prometheus
         networks:
             - app-network
+        logging:
+            driver: "json-file"
+            options:
+                max-size: "10m"
+                max-file: "3"
 
 volumes:
     postgres_data:

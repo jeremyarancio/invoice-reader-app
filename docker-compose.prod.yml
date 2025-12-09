@@ -72,9 +72,15 @@ services:
             - "30"
         volumes:
             - /var/run/docker.sock:/var/run/docker.sock
+            - /root/.docker/config.json:/config.json
         environment:
             - REPO_USER=${GITHUB_USERNAME}
             - REPO_PASS=${GITHUB_TOKEN}
+        logging:
+            driver: "json-file"
+            options:
+                max-size: "10m"
+                max-file: "3"
 
 volumes:
     letsencrypt:
