@@ -61,7 +61,7 @@ class SQLModelClientRepository(IClientRepository):
             user_id=model.user_id,
             data=ClientData(
                 client_name=model.client_name,
-                street_number=str(model.street_number),  # TODO: Database migration
+                street_number=model.street_number,
                 street_address=model.street_address,
                 zipcode=model.zipcode,
                 city=model.city,

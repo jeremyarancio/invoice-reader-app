@@ -17,7 +17,7 @@ from invoice_reader.services.exceptions import InfrastructureException
 
 @pytest.fixture
 def parser():
-    return MLServerParser()
+    return MLServerParser(parser_endpoint_url="http://mocked-endpoint/api/v1/parse")
 
 
 @pytest.fixture
