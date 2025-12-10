@@ -11,15 +11,11 @@ function ApiErrorHandler() {
             (response) => response,
             (error: AxiosError) => {
                 const status = error.response?.status;
-                const responseData = error.response?.data as any;
 
                 console.log(error);
 
                 if (status && status >= 500) {
                     const message =
-                        responseData?.detail ||
-                        responseData?.error?.message ||
-                        responseData?.message ||
                         "An unexpected server error occurred. Please try again later.";
                     showAlert("error", "Server Error", message);
                 } else if (!status) {
