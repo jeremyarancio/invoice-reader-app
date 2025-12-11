@@ -1,4 +1,11 @@
-import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
+import {
+    ComposedChart,
+    Area,
+    CartesianGrid,
+    XAxis,
+    YAxis,
+    Bar,
+} from "recharts";
 import {
     Card,
     CardContent,
@@ -21,15 +28,37 @@ import {
 } from "@/components/ui/select";
 import { useState } from "react";
 
-const chartData = [
-    { date: "2024-02-27", clientName: "Epam", invoiced: 4500, pending: 0 },
-    { date: "2024-07-28", clientName: "Epam", invoiced: 2800, pending: 0 },
-    { date: "2024-09-29", clientName: "SAP", invoiced: 0, pending: 2200 },
-    { date: "2024-10-30", clientName: "Epam", invoiced: 8500, pending: 0 },
-    { date: "2025-01-27", clientName: "Epam", invoiced: 100, pending: 0 },
-    { date: "2025-07-28", clientName: "Epam", invoiced: 4500, pending: 0 },
-    { date: "2025-09-29", clientName: "SAP", invoiced: 2500, pending: 0 },
-    { date: "2025-10-30", clientName: "Epam", invoiced: 3000, pending: 8500 },
+const data = [
+    {
+        clientName: "Epam",
+        gross_amount: 4500,
+        issuedDate: new Date("2024-02-27"),
+        paidDate: new Date("2024-03-05"),
+    },
+    {
+        clientName: "SAP",
+        gross_amount: 4500,
+        issuedDate: new Date("2024-02-27"),
+        paidDate: new Date("2024-03-05"),
+    },
+    {
+        clientName: "Epam",
+        gross_amount: 4500,
+        issuedDate: new Date("2024-04-27"),
+        paidDate: new Date("2024-03-05"),
+    },
+    {
+        clientName: "SAP",
+        gross_amount: 4500,
+        issuedDate: new Date("2024-04-27"),
+        paidDate: null,
+    },
+    {
+        clientName: "Epam",
+        gross_amount: 8500,
+        issuedDate: new Date("2025-05-27"),
+        paidDate: new Date("2025-06-05"),
+    },
 ];
 
 const chartConfig = {
@@ -43,9 +72,51 @@ const chartConfig = {
     },
 } satisfies ChartConfig;
 
+const CustomBar = (props: any) => {
+    const { fill, x, y, width, height, payload, fillOpacity } = props;
+
+    // Only render bar if there's actual monthly invoiced or pending data
+    if (payload.monthlyInvoiced === 0 && payload.monthlyPending === 0) {
+        return null;
+    }
+
+    return (
+        <rect
+            x={x}
+            y={y}
+            width={width}
+            height={height}
+            fill={fill}
+            fillOpacity={fillOpacity || 1}
+        />
+    );
+};
+
+const CustomActiveBar = (props: any) => {
+    const { fill, x, y, width, payload, height, stroke, strokeWidth } = props;
+
+    // Only render active bar if there's actual monthly invoiced or pending data
+    if (payload.monthlyInvoiced === 0 && payload.monthlyPending === 0) {
+        return null;
+    }
+
+    return (
+        <rect
+            x={x}
+            y={y}
+            width={width}
+            height={height}
+            fill={fill}
+            fillOpacity={0.6}
+            stroke={stroke}
+            strokeWidth={strokeWidth || 2}
+        />
+    );
+};
+
 function RevenueChart() {
     const availableYears = Array.from(
-        new Set(chartData.map((item) => new Date(item.date).getFullYear()))
+        new Set(data.map((item) => new Date(item.issuedDate).getFullYear()))
     ).sort((a, b) => b - a);
 
     const [selectedYear, setSelectedYear] = useState(
@@ -54,60 +125,65 @@ function RevenueChart() {
 
     const year = parseInt(selectedYear);
 
-    const generateYearMonths = () => {
-        const months = [];
-        for (let month = 0; month < 12; month++) {
-            months.push({
-                month: month,
-                date: `${year}-${String(month + 1).padStart(2, "0")}-01`,
-                invoiced: 0,
-                pending: 0,
-                clientName: "",
-            });
-        }
-        return months;
-    };
-
-    const aggregateByMonth = (data: typeof chartData) => {
-        const yearMonths = generateYearMonths();
-
-        data.forEach((item) => {
-            const itemDate = new Date(item.date);
-            if (itemDate.getFullYear() === year) {
-                const monthIndex = itemDate.getMonth();
-                yearMonths[monthIndex].invoiced += item.invoiced;
-                yearMonths[monthIndex].pending += item.pending;
-                if (
-                    item.clientName &&
-                    !yearMonths[monthIndex].clientName.includes(item.clientName)
-                ) {
-                    yearMonths[monthIndex].clientName +=
-                        (yearMonths[monthIndex].clientName ? ", " : "") +
-                        item.clientName;
-                }
-            }
-        });
-
-        return yearMonths;
-    };
-
-    const calculateCumulative = (data: ReturnType<typeof aggregateByMonth>) => {
-        let cumulativeInvoiced = 0;
-        let cumulativePending = 0;
-
-        return data.map((item) => {
-            cumulativeInvoiced += item.invoiced;
-            cumulativePending += item.pending;
-
+    const convertDataToAreaChartFormat = (d: typeof data) => {
+        const chartData = d.map((item) => {
             return {
-                ...item,
-                invoiced: cumulativeInvoiced,
-                pending: cumulativePending,
+                date: item.paidDate || item.issuedDate,
+                invoiced: item.paidDate ? item.gross_amount : 0,
+                pending: item.paidDate ? 0 : item.gross_amount,
             };
         });
+
+        const generateYearMonths = () => {
+            const months = [];
+            for (let month = 0; month < 12; month++) {
+                months.push({
+                    month: month,
+                    invoiced: 0,
+                    pending: 0,
+                });
+            }
+            return months;
+        };
+
+        const aggregateByMonth = (data: typeof chartData) => {
+            const yearMonths = generateYearMonths();
+
+            data.forEach((item) => {
+                if (item.date.getFullYear() === year) {
+                    const monthIndex = item.date.getMonth();
+                    yearMonths[monthIndex].invoiced += item.invoiced;
+                    yearMonths[monthIndex].pending += item.pending;
+                }
+            });
+
+            return yearMonths;
+        };
+
+        const calculateCumulative = (
+            data: ReturnType<typeof aggregateByMonth>
+        ) => {
+            let cumulativeInvoiced = 0;
+            let cumulativePending = 0;
+
+            return data.map((item) => {
+                cumulativeInvoiced += item.invoiced;
+                cumulativePending += item.pending;
+
+                return {
+                    ...item,
+                    monthlyInvoiced: item.invoiced,
+                    monthlyPending: item.pending,
+                    invoiced: cumulativeInvoiced,
+                    pending: cumulativePending,
+                };
+            });
+        };
+
+        return calculateCumulative(aggregateByMonth(chartData));
     };
 
-    const filteredData = calculateCumulative(aggregateByMonth(chartData));
+    const areaChartData = convertDataToAreaChartFormat(data);
 
     return (
         <Card className="pt-0">
@@ -141,7 +217,7 @@ function RevenueChart() {
                     config={chartConfig}
                     className="aspect-auto h-[250px] w-full"
                 >
-                    <AreaChart data={filteredData}>
+                    <ComposedChart data={areaChartData}>
                         <defs>
                             <linearGradient
                                 id="filInvoiced"
@@ -153,12 +229,12 @@ function RevenueChart() {
                                 <stop
                                     offset="5%"
                                     stopColor="var(--color-invoiced)"
-                                    stopOpacity={0.8}
+                                    stopOpacity={0.4}
                                 />
                                 <stop
                                     offset="95%"
                                     stopColor="var(--color-invoiced)"
-                                    stopOpacity={0.1}
+                                    stopOpacity={0.05}
                                 />
                             </linearGradient>
                             <linearGradient
@@ -171,12 +247,12 @@ function RevenueChart() {
                                 <stop
                                     offset="5%"
                                     stopColor="var(--color-pending)"
-                                    stopOpacity={0.8}
+                                    stopOpacity={0.4}
                                 />
                                 <stop
                                     offset="95%"
                                     stopColor="var(--color-pending)"
-                                    stopOpacity={0.1}
+                                    stopOpacity={0.05}
                                 />
                             </linearGradient>
                         </defs>
@@ -200,7 +276,7 @@ function RevenueChart() {
                             tickMargin={10}
                         />
                         <ChartTooltip
-                            cursor={true}
+                            cursor={false}
                             content={
                                 <ChartTooltipContent
                                     indicator="line"
@@ -212,19 +288,33 @@ function RevenueChart() {
                                             year: "numeric",
                                         });
                                     }}
-                                    formatter={(value, name, item) => (
-                                        <div className="flex flex-col gap-1">
-                                            {item.payload.clientName && (
-                                                <span className="text-xs text-muted-foreground">
-                                                    {item.payload.clientName}
+                                    formatter={(value, name, item) => {
+                                        if (
+                                            item.payload.monthlyInvoiced ===
+                                                0 &&
+                                            item.payload.monthlyPending === 0
+                                        ) {
+                                            return null;
+                                        }
+                                        return (
+                                            <div className="flex flex-col gap-1">
+                                                {item.payload.clientName && (
+                                                    <span className="text-xs text-muted-foreground">
+                                                        {
+                                                            item.payload
+                                                                .clientName
+                                                        }
+                                                    </span>
+                                                )}
+                                                <span>
+                                                    {name}: $
+                                                    {Number(
+                                                        value
+                                                    ).toLocaleString()}
                                                 </span>
-                                            )}
-                                            <span>
-                                                {name}: $
-                                                {Number(value).toLocaleString()}
-                                            </span>
-                                        </div>
-                                    )}
+                                            </div>
+                                        );
+                                    }}
                                 />
                             }
                         />
@@ -233,16 +323,42 @@ function RevenueChart() {
                             type="monotone"
                             fill="url(#filInvoiced)"
                             stroke="var(--color-invoiced)"
+                            strokeWidth={2}
                             stackId="a"
+                            activeDot={false}
                         />
                         <Area
                             dataKey="pending"
                             type="monotone"
                             fill="url(#fillPending)"
                             stroke="var(--color-pending)"
+                            strokeWidth={2}
                             stackId="a"
+                            activeDot={false}
                         />
-                    </AreaChart>
+                        <Bar
+                            dataKey="invoiced"
+                            fill="var(--color-invoiced)"
+                            fillOpacity={0.3}
+                            stackId="b"
+                            radius={[0, 0, 0, 0]}
+                            shape={CustomBar}
+                            activeBar={
+                                <CustomActiveBar stroke="var(--color-invoiced)" />
+                            }
+                        />
+                        <Bar
+                            dataKey="pending"
+                            fill="var(--color-pending)"
+                            fillOpacity={0.3}
+                            stackId="b"
+                            radius={[0, 4, 0, 0]}
+                            shape={CustomBar}
+                            activeBar={
+                                <CustomActiveBar stroke="var(--color-pending)" />
+                            }
+                        />
+                    </ComposedChart>
                 </ChartContainer>
             </CardContent>
         </Card>
