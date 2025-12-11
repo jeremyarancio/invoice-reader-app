@@ -22,7 +22,7 @@ import {
 import { useState } from "react";
 
 const chartData = [
-    { date: "2024-01-27", clientName: "Epam", invoiced: 4500, pending: 0 },
+    { date: "2024-02-27", clientName: "Epam", invoiced: 4500, pending: 0 },
     { date: "2024-07-28", clientName: "Epam", invoiced: 2800, pending: 0 },
     { date: "2024-09-29", clientName: "SAP", invoiced: 0, pending: 2200 },
     { date: "2024-10-30", clientName: "Epam", invoiced: 8500, pending: 0 },
@@ -35,38 +35,63 @@ const chartData = [
 const chartConfig = {
     invoiced: {
         label: "Invoiced",
-        color: "var(--chart-1)",
+        color: "var(--chart-3)",
     },
     pending: {
         label: "Pending",
-        color: "var(--chart-2)",
+        color: "var(--chart-4)",
     },
 } satisfies ChartConfig;
 
 function RevenueChart() {
-    const now = new Date();
+    const availableYears = Array.from(
+        new Set(chartData.map((item) => new Date(item.date).getFullYear()))
+    ).sort((a, b) => b - a);
+
     const [selectedYear, setSelectedYear] = useState(
-        now.getFullYear().toString()
+        availableYears[0]?.toString() || new Date().getFullYear().toString()
     );
 
-    // Filter data for selected year
     const year = parseInt(selectedYear);
-    const yearStart = new Date(year, 0, 1);
-    const yearEnd = new Date(year, 11, 31, 23, 59, 59);
 
-    const yearData = chartData.filter((item) => {
-        const date = new Date(item.date);
-        return date >= yearStart && date <= yearEnd;
-    });
+    const generateYearMonths = () => {
+        const months = [];
+        for (let month = 0; month < 12; month++) {
+            months.push({
+                month: month,
+                date: `${year}-${String(month + 1).padStart(2, "0")}-01`,
+                invoiced: 0,
+                pending: 0,
+                clientName: "",
+            });
+        }
+        return months;
+    };
 
-    // Add January 1st starting point if not already present
-    const dataWithStart = [
-        { date: `${year}-01-01`, clientName: "Start", invoiced: 0, pending: 0 },
-        ...yearData.filter((item) => item.date !== `${year}-01-01`),
-    ];
+    const aggregateByMonth = (data: typeof chartData) => {
+        const yearMonths = generateYearMonths();
 
-    // Accumulate invoiced and pending values from start of year
-    const accumulateData = (data: typeof chartData) => {
+        data.forEach((item) => {
+            const itemDate = new Date(item.date);
+            if (itemDate.getFullYear() === year) {
+                const monthIndex = itemDate.getMonth();
+                yearMonths[monthIndex].invoiced += item.invoiced;
+                yearMonths[monthIndex].pending += item.pending;
+                if (
+                    item.clientName &&
+                    !yearMonths[monthIndex].clientName.includes(item.clientName)
+                ) {
+                    yearMonths[monthIndex].clientName +=
+                        (yearMonths[monthIndex].clientName ? ", " : "") +
+                        item.clientName;
+                }
+            }
+        });
+
+        return yearMonths;
+    };
+
+    const calculateCumulative = (data: ReturnType<typeof aggregateByMonth>) => {
         let cumulativeInvoiced = 0;
         let cumulativePending = 0;
 
@@ -82,14 +107,14 @@ function RevenueChart() {
         });
     };
 
-    const filteredData = accumulateData(dataWithStart);
+    const filteredData = calculateCumulative(aggregateByMonth(chartData));
 
     return (
         <Card className="pt-0">
             <CardHeader className="flex items-center gap-2 space-y-0 py-5 sm:flex-row">
                 <div className="grid flex-1 gap-1">
                     <CardTitle>Revenue</CardTitle>
-                    <CardDescription>Monthly revenue</CardDescription>
+                    <CardDescription>Cumulative yearly revenue</CardDescription>
                 </div>
                 <Select value={selectedYear} onValueChange={setSelectedYear}>
                     <SelectTrigger
@@ -99,15 +124,15 @@ function RevenueChart() {
                         <SelectValue placeholder="Select year" />
                     </SelectTrigger>
                     <SelectContent className="rounded-xl">
-                        <SelectItem value="2024" className="rounded-lg">
-                            2024
-                        </SelectItem>
-                        <SelectItem value="2025" className="rounded-lg">
-                            2025
-                        </SelectItem>
-                        <SelectItem value="2026" className="rounded-lg">
-                            2026
-                        </SelectItem>
+                        {availableYears.map((year) => (
+                            <SelectItem
+                                key={year}
+                                value={year.toString()}
+                                className="rounded-lg"
+                            >
+                                {year}
+                            </SelectItem>
+                        ))}
                     </SelectContent>
                 </Select>
             </CardHeader>
@@ -166,7 +191,6 @@ function RevenueChart() {
                                 const date = new Date(value);
                                 return date.toLocaleDateString("en-EU", {
                                     month: "short",
-                                    day: "numeric",
                                 });
                             }}
                         />
@@ -181,9 +205,11 @@ function RevenueChart() {
                                 <ChartTooltipContent
                                     indicator="line"
                                     labelFormatter={(value) => {
-                                        return new Date(value).toLocaleDateString("en-EU", {
-                                            month: "short",
-                                            day: "numeric",
+                                        return new Date(
+                                            value
+                                        ).toLocaleDateString("en-EU", {
+                                            month: "long",
+                                            year: "numeric",
                                         });
                                     }}
                                     formatter={(value, name, item) => (
@@ -194,7 +220,8 @@ function RevenueChart() {
                                                 </span>
                                             )}
                                             <span>
-                                                {name}: ${Number(value).toLocaleString()}
+                                                {name}: $
+                                                {Number(value).toLocaleString()}
                                             </span>
                                         </div>
                                     )}
@@ -203,14 +230,14 @@ function RevenueChart() {
                         />
                         <Area
                             dataKey="invoiced"
-                            type="monotoneY"
+                            type="monotone"
                             fill="url(#filInvoiced)"
                             stroke="var(--color-invoiced)"
                             stackId="a"
                         />
                         <Area
                             dataKey="pending"
-                            type="monotoneY"
+                            type="monotone"
                             fill="url(#fillPending)"
                             stroke="var(--color-pending)"
                             stackId="a"
