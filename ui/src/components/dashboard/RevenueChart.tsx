@@ -5,6 +5,7 @@ import {
     XAxis,
     YAxis,
     Bar,
+    type TooltipProps,
 } from "recharts";
 import {
     Card,
@@ -17,7 +18,6 @@ import {
     type ChartConfig,
     ChartContainer,
     ChartTooltip,
-    ChartTooltipContent,
 } from "@/components/ui/chart";
 import {
     Select,
@@ -79,6 +79,18 @@ const data = [
         gross_amount: 12500,
         issuedDate: new Date("2025-08-27"),
         paidDate: new Date("2025-09-05"),
+    },
+    {
+        clientName: "SAP",
+        gross_amount: 5400,
+        issuedDate: new Date("2025-09-27"),
+        paidDate: null,
+    },
+    {
+        clientName: "SAP",
+        gross_amount: 5400,
+        issuedDate: new Date("2025-09-27"),
+        paidDate: new Date("2025-09-27"),
     },
 ];
 
@@ -168,7 +180,66 @@ function RevenueChart() {
     };
 
     const areaChartData = convertDataToChartFormat(data, year);
-    console.log("Area Chart Data:", areaChartData);
+
+    const CustomTooltip = ({
+        active,
+        payload,
+    }: TooltipProps<string | number, string>) => {
+        if (!active || !payload) return null;
+
+        const monthData = payload[0].payload as MonthlyChartData;
+
+        // Only show tooltip for months with invoices
+        if (monthData.clientRevenue.length === 0) {
+            return null;
+        }
+
+        return (
+            <div className="rounded-lg border bg-background p-3 shadow-sm">
+                <div className="space-y-2">
+                    {monthData.clientRevenue.map((client) => (
+                        <div key={client.clientName} className="space-y-1">
+                            <div className="font-medium text-sm">
+                                {client.clientName}
+                            </div>
+                            <div className="grid grid-cols-2 gap-2 text-xs">
+                                {client.sumInvoiced > 0 && (
+                                    <div className="flex items-center gap-1">
+                                        <div
+                                            className="h-2 w-2 rounded-full"
+                                            style={{
+                                                backgroundColor:
+                                                    "var(--color-invoiced)",
+                                            }}
+                                        />
+                                        <span>
+                                            Invoiced: $
+                                            {client.sumInvoiced.toLocaleString()}
+                                        </span>
+                                    </div>
+                                )}
+                                {client.sumPending > 0 && (
+                                    <div className="flex items-center gap-1">
+                                        <div
+                                            className="h-2 w-2 rounded-full"
+                                            style={{
+                                                backgroundColor:
+                                                    "var(--color-pending)",
+                                            }}
+                                        />
+                                        <span>
+                                            Pending: $
+                                            {client.sumPending.toLocaleString()}
+                                        </span>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+    };
 
     return (
         <Card className="pt-0">
@@ -261,22 +332,8 @@ function RevenueChart() {
                             tickMargin={10}
                         />
                         <ChartTooltip
-                            cursor={false}
-                            content={
-                                <ChartTooltipContent
-                                    labelKey="clientRevenue"
-                                    indicator="line"
-                                    hideLabel={false}
-                                    labelFormatter={(value) => {
-                                        return new Date(
-                                            value
-                                        ).toLocaleDateString("en-EU", {
-                                            month: "long",
-                                            year: "numeric",
-                                        });
-                                    }}
-                                />
-                            }
+                            content={<CustomTooltip />}
+                            cursor={{ fill: "rgba(0, 0, 0, 0.05)" }}
                         />
                         <Area
                             dataKey="accumulatedInvoiced"
@@ -299,9 +356,17 @@ function RevenueChart() {
                         <Bar
                             dataKey="sumInvoiced"
                             fill="var(--color-invoiced)"
-                            fillOpacity={0.2}
+                            fillOpacity={0.3}
                             stackId="b"
                             radius={[10, 10, 0, 0]}
+                            isAnimationActive={true}
+                            activeBar={{
+                                fill: "var(--color-invoiced)",
+                                fillOpacity: 0.8,
+                                stroke: "var(--color-invoiced)",
+                                strokeWidth: 2,
+                                strokeOpacity: 0.9,
+                            }}
                         />
                         <Bar
                             dataKey="sumPending"
@@ -309,6 +374,14 @@ function RevenueChart() {
                             fillOpacity={0.3}
                             stackId="b"
                             radius={[10, 10, 0, 0]}
+                            isAnimationActive={true}
+                            activeBar={{
+                                fill: "var(--color-pending)",
+                                fillOpacity: 0.8,
+                                stroke: "var(--color-pending)",
+                                strokeWidth: 2,
+                                strokeOpacity: 0.9,
+                            }}
                         />
                     </ComposedChart>
                 </ChartContainer>
