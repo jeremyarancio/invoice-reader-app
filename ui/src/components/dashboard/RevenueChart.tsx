@@ -19,14 +19,6 @@ import {
     ChartContainer,
     ChartTooltip,
 } from "@/components/ui/chart";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
-import { useState } from "react";
 
 type MonthlyChartData = {
     //AreaChart
@@ -43,56 +35,6 @@ type MonthlyChartData = {
         sumPending: number;
     }[];
 };
-const data = [
-    {
-        clientName: "Epam",
-        gross_amount: 4500,
-        issuedDate: new Date("2024-02-27"),
-        paidDate: new Date("2024-03-05"),
-    },
-    {
-        clientName: "SAP",
-        gross_amount: 4500,
-        issuedDate: new Date("2024-02-27"),
-        paidDate: new Date("2024-03-05"),
-    },
-    {
-        clientName: "Epam",
-        gross_amount: 4500,
-        issuedDate: new Date("2024-04-27"),
-        paidDate: new Date("2024-04-28"),
-    },
-    {
-        clientName: "SAP",
-        gross_amount: 4500,
-        issuedDate: new Date("2024-04-27"),
-        paidDate: null,
-    },
-    {
-        clientName: "Epam",
-        gross_amount: 8500,
-        issuedDate: new Date("2025-05-27"),
-        paidDate: new Date("2025-06-05"),
-    },
-    {
-        clientName: "Alma",
-        gross_amount: 12500,
-        issuedDate: new Date("2025-08-27"),
-        paidDate: new Date("2025-09-05"),
-    },
-    {
-        clientName: "SAP",
-        gross_amount: 5400,
-        issuedDate: new Date("2025-09-27"),
-        paidDate: null,
-    },
-    {
-        clientName: "SAP",
-        gross_amount: 5400,
-        issuedDate: new Date("2025-09-27"),
-        paidDate: new Date("2025-09-27"),
-    },
-];
 
 const chartConfig = {
     invoiced: {
@@ -105,17 +47,17 @@ const chartConfig = {
     },
 } satisfies ChartConfig;
 
-function RevenueChart() {
-    const availableYears = Array.from(
-        new Set(data.map((item) => new Date(item.issuedDate).getFullYear()))
-    ).sort((a, b) => b - a);
+interface RevenueChartProps {
+    data: {
+        clientName: string;
+        grossAmount: number;
+        issuedDate: Date;
+        paidDate?: Date;
+    }[];
+    year: string;
+}
 
-    const [selectedYear, setSelectedYear] = useState(
-        availableYears[0]?.toString() || new Date().getFullYear().toString()
-    );
-
-    const year = parseInt(selectedYear);
-
+function RevenueChart({ data, year }: RevenueChartProps) {
     const convertDataToChartFormat = (
         d: typeof data,
         year: number
@@ -157,11 +99,11 @@ function RevenueChart() {
 
             // Update client-specific amounts
             if (isInvoiced) {
-                clientEntry.sumInvoiced += item.gross_amount;
-                monthlyData[monthIndex].sumInvoiced += item.gross_amount;
+                clientEntry.sumInvoiced += item.grossAmount;
+                monthlyData[monthIndex].sumInvoiced += item.grossAmount;
             } else {
-                clientEntry.sumPending += item.gross_amount;
-                monthlyData[monthIndex].sumPending += item.gross_amount;
+                clientEntry.sumPending += item.grossAmount;
+                monthlyData[monthIndex].sumPending += item.grossAmount;
             }
         });
 
@@ -179,7 +121,7 @@ function RevenueChart() {
         return monthlyData;
     };
 
-    const areaChartData = convertDataToChartFormat(data, year);
+    const areaChartData = convertDataToChartFormat(data, parseInt(year));
 
     const CustomTooltip = ({
         active,
@@ -248,25 +190,6 @@ function RevenueChart() {
                     <CardTitle>Revenue</CardTitle>
                     <CardDescription>Cumulative yearly revenue</CardDescription>
                 </div>
-                <Select value={selectedYear} onValueChange={setSelectedYear}>
-                    <SelectTrigger
-                        className="hidden w-[160px] rounded-lg sm:ml-auto sm:flex"
-                        aria-label="Select a year"
-                    >
-                        <SelectValue placeholder="Select year" />
-                    </SelectTrigger>
-                    <SelectContent className="rounded-xl">
-                        {availableYears.map((year) => (
-                            <SelectItem
-                                key={year}
-                                value={year.toString()}
-                                className="rounded-lg"
-                            >
-                                {year}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
             </CardHeader>
             <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
                 <ChartContainer
@@ -320,7 +243,7 @@ function RevenueChart() {
                             tickMargin={8}
                             minTickGap={32}
                             tickFormatter={(value) => {
-                                const date = new Date(year, value);
+                                const date = new Date(parseInt(year), value);
                                 return date.toLocaleDateString("en-EU", {
                                     month: "short",
                                 });

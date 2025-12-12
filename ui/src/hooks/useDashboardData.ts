@@ -1,50 +1,78 @@
-import { useMemo } from "react";
 import { useFetchInvoices } from "@/hooks/api/invoice";
 import { useFetchClients } from "@/hooks/api/client";
-import { useCurrencyStore } from "@/stores/currencyStore";
-import {
-    calculateDashboardMetrics,
-    type DashboardMetrics,
-} from "@/lib/utils/dashboardCalculations";
+import { useCurrencyStore, type Currency } from "@/stores/currencyStore";
 
-interface UseDashboardDataReturn {
-    metrics: DashboardMetrics | null;
+export function useDashboard(): {
+    revenueChartData: {
+        clientName: string;
+        grossAmount: number;
+        issuedDate: Date;
+        paidDate?: Date;
+    }[];
+    selectedCurrency: Currency;
+    totalRevenue: number;
+    nPendingInvoice: number;
+    totalPendingRevenue: number;
+    availableYears: string[];
     isLoading: boolean;
     error: Error | null;
     hasData: boolean;
-}
-export function useDashboardData(): UseDashboardDataReturn {
+} {
     const { selectedCurrency } = useCurrencyStore();
-
     const {
         invoices,
         isLoading: invoicesLoading,
         error: invoicesError,
     } = useFetchInvoices(1, 1000);
-
     const {
         clients,
         isLoading: clientsLoading,
         error: clientsError,
     } = useFetchClients(1, 100);
 
+    const hasData = (invoices?.length ?? 0) > 0;
+    const error = invoicesError || clientsError;
     const isLoading = invoicesLoading || clientsLoading;
-    const error = (invoicesError || clientsError) as Error | null;
 
-    const metrics = useMemo(() => {
-        if (!invoices || !clients || invoices.length === 0) {
-            return null;
-        }
+    const availableYears = Array.from(
+        new Set(invoices.map((item) => new Date(item.issuedDate).getFullYear()))
+    )
+        .sort((a, b) => b - a)
+        .map((year) => year.toString());
 
-        return calculateDashboardMetrics(invoices, clients, selectedCurrency);
-    }, [invoices, clients, selectedCurrency]);
+    const revenueChartData = invoices.map((invoice) => {
+        return {
+            issuedDate: invoice.issuedDate,
+            paidDate: invoice.paidDate,
+            grossAmount: invoice.grossAmount,
+            clientName:
+                clients.find((c) => c.id === invoice.clientId)?.clientName ||
+                "Unknown",
+        };
+    });
 
-    const hasData = (invoices?.length ?? 0) > 0 || (clients?.length ?? 0) > 0;
+    const totalRevenue = invoices.reduce(
+        (sum, invoice) => sum + invoice.grossAmount,
+        0
+    );
+
+    const nPendingInvoice = invoices.filter(
+        (invoice) => !invoice.paidDate
+    ).length;
+
+    const totalPendingRevenue = invoices
+        .filter((invoice) => !invoice.paidDate)
+        .reduce((sum, invoice) => sum + invoice.grossAmount, 0);
 
     return {
-        metrics,
-        isLoading,
+        revenueChartData,
+        selectedCurrency,
+        totalRevenue,
+        nPendingInvoice,
+        totalPendingRevenue,
+        availableYears,
         error,
+        isLoading,
         hasData,
     };
 }

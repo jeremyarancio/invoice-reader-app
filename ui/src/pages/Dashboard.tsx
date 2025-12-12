@@ -1,5 +1,3 @@
-import { useDashboardData } from "@/hooks/useDashboardData";
-import { useCurrencyStore } from "@/stores/currencyStore";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { MetricCard } from "@/components/dashboard/MetricCard";
 import { ClientAnalyticsSection } from "@/components/dashboard/ClientAnalyticsSection";
@@ -10,11 +8,30 @@ import { DollarSign, FileText, Clock, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import RevenueChart from "@/components/dashboard/RevenueChart";
+import { useState, useEffect } from "react";
+import { useDashboard as useDashboard } from "@/hooks/useDashboardData";
 
 export default function Dashboard() {
-    const { selectedCurrency } = useCurrencyStore();
-    const { metrics, isLoading, error, hasData } = useDashboardData();
     const navigate = useNavigate();
+    const {
+        revenueChartData,
+        selectedCurrency,
+        totalRevenue,
+        nPendingInvoice,
+        totalPendingRevenue,
+        availableYears,
+        isLoading,
+        error,
+        hasData,
+    } = useDashboard();
+    const [selectedYear, setSelectedYear] = useState<string>("");
+
+    // Set selectedYear to the most recent year once data is loaded
+    useEffect(() => {
+        if (availableYears.length > 0 && !selectedYear) {
+            setSelectedYear(availableYears[0]);
+        }
+    }, [availableYears, selectedYear]);
 
     if (isLoading) {
         return (
@@ -76,7 +93,12 @@ export default function Dashboard() {
     if (error) {
         return (
             <div className="max-w-7xl mx-auto px-4 py-8">
-                <DashboardHeader currency={selectedCurrency} />
+                <DashboardHeader
+                    currency={selectedCurrency}
+                    selectedYear={selectedYear}
+                    availableYears={availableYears.map((y) => y.toString())}
+                    setSelectedYear={setSelectedYear}
+                />
                 <div className="flex flex-col items-center justify-center py-16 text-center">
                     <AlertTriangle className="h-16 w-16 text-destructive mb-4" />
                     <h2 className="text-2xl font-bold mb-2">
@@ -94,10 +116,15 @@ export default function Dashboard() {
         );
     }
 
-    if (!hasData || !metrics) {
+    if (!hasData) {
         return (
             <div className="max-w-7xl mx-auto px-4 py-8">
-                <DashboardHeader currency={selectedCurrency} />
+                <DashboardHeader
+                    currency={selectedCurrency}
+                    selectedYear={selectedYear}
+                    availableYears={availableYears}
+                    setSelectedYear={setSelectedYear}
+                />
                 <div className="flex flex-col items-center justify-center py-16 text-center">
                     <FileText className="h-16 w-16 text-muted-foreground mb-4" />
                     <h2 className="text-2xl font-bold mb-2">
@@ -125,21 +152,26 @@ export default function Dashboard() {
 
     return (
         <div className="max-w-7xl mx-auto px-4 py-8">
-            <DashboardHeader currency={selectedCurrency} />
+            <DashboardHeader
+                currency={selectedCurrency}
+                selectedYear={selectedYear}
+                availableYears={availableYears}
+                setSelectedYear={setSelectedYear}
+            />
 
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                 <MetricCard
                     title="Total Revenue"
-                    value={metrics.totalRevenue}
+                    value={totalRevenue}
                     currency={selectedCurrency}
                     icon={DollarSign}
                     colorScheme="default"
                 />
                 <MetricCard
                     title="Pending Payments"
-                    value={metrics.pendingAmount}
-                    subtitle={`${metrics.unpaidInvoices} invoice${
-                        metrics.unpaidInvoices !== 1 ? "s" : ""
+                    value={totalPendingRevenue}
+                    subtitle={`${nPendingInvoice} invoice${
+                        nPendingInvoice !== 1 ? "s" : ""
                     }`}
                     currency={selectedCurrency}
                     icon={Clock}
@@ -148,13 +180,16 @@ export default function Dashboard() {
             </div>
 
             <div className="flex flex-col gap-6 mb-8">
-                <RevenueChart />
+                <RevenueChart
+                    year={selectedYear?.toString() ?? ""}
+                    data={revenueChartData}
+                />
 
-                <ClientAnalyticsSection
+                {/* <ClientAnalyticsSection
                     clients={metrics.topClients}
                     currency={selectedCurrency}
                     totalClients={metrics.topClients.length}
-                />
+                /> */}
             </div>
 
             <QuickActionsSection />
