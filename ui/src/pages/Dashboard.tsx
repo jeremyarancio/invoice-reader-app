@@ -16,7 +16,6 @@ export default function Dashboard() {
     const { metrics, isLoading, error, hasData } = useDashboardData();
     const navigate = useNavigate();
 
-    // Loading state
     if (isLoading) {
         return (
             <div className="max-w-7xl mx-auto px-4 py-8">
@@ -95,7 +94,6 @@ export default function Dashboard() {
         );
     }
 
-    // Empty state (no data)
     if (!hasData || !metrics) {
         return (
             <div className="max-w-7xl mx-auto px-4 py-8">
@@ -125,7 +123,6 @@ export default function Dashboard() {
         );
     }
 
-    // Success state with data
     return (
         <div className="max-w-7xl mx-auto px-4 py-8">
             <DashboardHeader currency={selectedCurrency} />
