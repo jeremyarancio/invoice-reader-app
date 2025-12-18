@@ -69,33 +69,47 @@ function AddInvoiceForm({ file, parsedInvoice, clients }: Props) {
         }
     };
 
-    const formSchema = z.object({
-        invoiceNumber: z.string().min(1, "Invoice number is required"),
-        invoiceDescription: z
-            .string()
-            .min(1, "Invoice description is required")
-            .max(100, "Invoice description must be less than 100 characters"),
-        grossAmount: z.coerce // Number type
-            .number()
-            .min(0, "Gross amount must be a positive number")
-            .max(1000000, "Gross amount must be less than 1,000,000"),
-        currency: z.string().min(1, "Currency is required"),
-        vat: z.coerce.number().min(0, "VAT is required").max(50, "VAT must be less than 50%"),
-        client_id: z.string().min(1, "Client is required"),
-        issuedDate: z.date({
-            required_error: "Issued date is required",
-        }),
-        paidDate: z.date().optional(),
-    });
+    const formSchema = z
+        .object({
+            invoiceNumber: z.string().min(1, "Invoice number is required"),
+            invoiceDescription: z
+                .string()
+                .min(1, "Invoice description is required")
+                .max(
+                    100,
+                    "Invoice description must be less than 100 characters"
+                ),
+            grossAmount: z.coerce // Number type
+                .number()
+                .min(0, "Gross amount must be a positive number")
+                .max(1000000, "Gross amount must be less than 1,000,000"),
+            currency: z.string().min(1, "Currency is required"),
+            vat: z.coerce
+                .number()
+                .min(0, "VAT is required")
+                .max(50, "VAT must be less than 50%"),
+            client_id: z.string().min(1, "Client is required"),
+            issuedDate: z.date({
+                required_error: "Issued date is required",
+            }),
+            paidDate: z.date().optional(),
+        })
+        .refine((data) => !data.paidDate || data.paidDate >= data.issuedDate, {
+            message: "Paid date cannot be before issued date",
+            path: ["paidDate"],
+        });
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
             invoiceNumber: parsedInvoice?.invoice.invoice_number || "",
-            invoiceDescription: parsedInvoice?.invoice.invoice_description || "",
+            invoiceDescription:
+                parsedInvoice?.invoice.invoice_description || "",
             grossAmount: parsedInvoice?.invoice.gross_amount || undefined,
             currency: parsedInvoice?.invoice.currency
-                ? CURRENCIES[parsedInvoice.invoice.currency as keyof typeof CURRENCIES]?.symbol || parsedInvoice.invoice.currency
+                ? CURRENCIES[
+                      parsedInvoice.invoice.currency as keyof typeof CURRENCIES
+                  ]?.symbol || parsedInvoice.invoice.currency
                 : undefined,
             vat: parsedInvoice?.invoice.vat || undefined,
             client_id: parsedInvoice?.client_id || "",
@@ -199,14 +213,17 @@ function AddInvoiceForm({ file, parsedInvoice, clients }: Props) {
                                         </SelectTrigger>
                                     </FormControl>
                                     <SelectContent className="bg-stone-50">
-                                        {Object.entries(CURRENCIES).map(([key, value]) => (
-                                            <SelectItem
-                                                key={key}
-                                                value={value.symbol}
-                                            >
-                                                {value.symbol} - {value.name}
-                                            </SelectItem>
-                                        ))}
+                                        {Object.entries(CURRENCIES).map(
+                                            ([key, value]) => (
+                                                <SelectItem
+                                                    key={key}
+                                                    value={value.symbol}
+                                                >
+                                                    {value.symbol} -{" "}
+                                                    {value.name}
+                                                </SelectItem>
+                                            )
+                                        )}
                                     </SelectContent>
                                 </Select>
                                 <FormMessage />
@@ -372,7 +389,6 @@ function AddInvoiceForm({ file, parsedInvoice, clients }: Props) {
                                                 date > new Date() ||
                                                 date < new Date("1900-01-01")
                                             }
-                                            initialFocus
                                         />
                                     </PopoverContent>
                                 </Popover>

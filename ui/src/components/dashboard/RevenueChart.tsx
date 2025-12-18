@@ -20,6 +20,13 @@ import {
     ChartTooltip,
 } from "@/components/ui/chart";
 
+type RawData = {
+    clientName: string;
+    grossAmount: number;
+    issuedDate: Date;
+    paidDate?: Date;
+};
+
 type MonthlyChartData = {
     //AreaChart
     month: number;
@@ -48,140 +55,134 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 interface RevenueChartProps {
-    data: {
-        clientName: string;
-        grossAmount: number;
-        issuedDate: Date;
-        paidDate?: Date;
-    }[];
+    data: RawData[];
     year: string;
 }
 
-function RevenueChart({ data, year }: RevenueChartProps) {
-    const convertDataToChartFormat = (
-        d: typeof data,
-        year: number
-    ): MonthlyChartData[] => {
-        // Step 1: Generate all 12 months with initial values
-        const monthlyData: MonthlyChartData[] = Array.from(
-            { length: 12 },
-            (_, month) => ({
-                month: month,
-                accumulatedInvoiced: 0,
-                accumulatedPending: 0,
+const convertDataToChartFormat = (
+    data: RawData[],
+    year: number
+): MonthlyChartData[] => {
+    // Step 1: Generate all 12 months with initial values
+    const monthlyData: MonthlyChartData[] = Array.from(
+        { length: 12 },
+        (_, month) => ({
+            month: month,
+            accumulatedInvoiced: 0,
+            accumulatedPending: 0,
+            sumInvoiced: 0,
+            sumPending: 0,
+            clientRevenue: [],
+        })
+    );
+
+    // Step 2: Aggregate data by month and client
+    data.forEach((item) => {
+        const date = item.paidDate || item.issuedDate;
+        if (date.getFullYear() !== year) return;
+
+        const monthIndex = date.getMonth();
+        const isInvoiced = !!item.paidDate;
+
+        // Find or create client entry for this month
+        let clientEntry = monthlyData[monthIndex].clientRevenue.find(
+            (c) => c.clientName === item.clientName
+        );
+
+        if (!clientEntry) {
+            clientEntry = {
+                clientName: item.clientName,
                 sumInvoiced: 0,
                 sumPending: 0,
-                clientRevenue: [],
-            })
-        );
-
-        // Step 2: Aggregate data by month and client
-        d.forEach((item) => {
-            const date = item.paidDate || item.issuedDate;
-            if (date.getFullYear() !== year) return;
-
-            const monthIndex = date.getMonth();
-            const isInvoiced = item.paidDate !== null;
-
-            // Find or create client entry for this month
-            let clientEntry = monthlyData[monthIndex].clientRevenue.find(
-                (c) => c.clientName === item.clientName
-            );
-
-            if (!clientEntry) {
-                clientEntry = {
-                    clientName: item.clientName,
-                    sumInvoiced: 0,
-                    sumPending: 0,
-                };
-                monthlyData[monthIndex].clientRevenue.push(clientEntry);
-            }
-
-            // Update client-specific amounts
-            if (isInvoiced) {
-                clientEntry.sumInvoiced += item.grossAmount;
-                monthlyData[monthIndex].sumInvoiced += item.grossAmount;
-            } else {
-                clientEntry.sumPending += item.grossAmount;
-                monthlyData[monthIndex].sumPending += item.grossAmount;
-            }
-        });
-
-        // Step 3: Calculate cumulative values
-        let cumulativeInvoiced = 0;
-        let cumulativePending = 0;
-
-        monthlyData.forEach((monthlyData) => {
-            cumulativeInvoiced += monthlyData.sumInvoiced;
-            cumulativePending += monthlyData.sumPending;
-            monthlyData.accumulatedInvoiced = cumulativeInvoiced;
-            monthlyData.accumulatedPending = cumulativePending;
-        });
-
-        return monthlyData;
-    };
-
-    const areaChartData = convertDataToChartFormat(data, parseInt(year));
-
-    const CustomTooltip = ({
-        active,
-        payload,
-    }: TooltipProps<string | number, string>) => {
-        if (!active || !payload) return null;
-
-        const monthData = payload[0].payload as MonthlyChartData;
-
-        // Only show tooltip for months with invoices
-        if (monthData.clientRevenue.length === 0) {
-            return null;
+            };
+            monthlyData[monthIndex].clientRevenue.push(clientEntry);
         }
 
-        return (
-            <div className="rounded-lg border bg-background p-3 shadow-sm">
-                <div className="space-y-2">
-                    {monthData.clientRevenue.map((client) => (
-                        <div key={client.clientName} className="space-y-1">
-                            <div className="font-medium text-sm">
-                                {client.clientName}
-                            </div>
-                            <div className="grid grid-cols-2 gap-2 text-xs">
-                                {client.sumInvoiced > 0 && (
-                                    <div className="flex items-center gap-1">
-                                        <div
-                                            className="h-2 w-2 rounded-full"
-                                            style={{
-                                                backgroundColor:
-                                                    "var(--color-invoiced)",
-                                            }}
-                                        />
-                                        <span>
-                                            Invoiced: $
-                                            {client.sumInvoiced.toLocaleString()}
-                                        </span>
-                                    </div>
-                                )}
-                                {client.sumPending > 0 && (
-                                    <div className="flex items-center gap-1">
-                                        <div
-                                            className="h-2 w-2 rounded-full"
-                                            style={{
-                                                backgroundColor:
-                                                    "var(--color-pending)",
-                                            }}
-                                        />
-                                        <span>
-                                            Pending: $
-                                            {client.sumPending.toLocaleString()}
-                                        </span>
-                                    </div>
-                                )}
-                            </div>
+        // Update client-specific amounts
+        if (isInvoiced) {
+            clientEntry.sumInvoiced += item.grossAmount;
+            monthlyData[monthIndex].sumInvoiced += item.grossAmount;
+        } else {
+            clientEntry.sumPending += item.grossAmount;
+            monthlyData[monthIndex].sumPending += item.grossAmount;
+        }
+    });
+
+    // Step 3: Calculate cumulative values
+    let cumulativeInvoiced = 0;
+    let cumulativePending = 0;
+
+    monthlyData.forEach((monthlyData) => {
+        cumulativeInvoiced += monthlyData.sumInvoiced;
+        cumulativePending += monthlyData.sumPending;
+        monthlyData.accumulatedInvoiced = cumulativeInvoiced;
+        monthlyData.accumulatedPending = cumulativePending;
+    });
+
+    return monthlyData;
+};
+
+const ChartToolTip = ({
+    active,
+    payload,
+}: TooltipProps<string | number, string>) => {
+    if (!active || !payload) return null;
+
+    const monthData = payload[0].payload as MonthlyChartData;
+
+    // Only show tooltip for months with invoices
+    if (monthData.clientRevenue.length === 0) {
+        return null;
+    }
+
+    return (
+        <div className="rounded-lg border bg-background p-3 shadow-sm">
+            <div className="space-y-2">
+                {monthData.clientRevenue.map((client) => (
+                    <div key={client.clientName} className="space-y-1">
+                        <div className="font-medium text-base">
+                            {client.clientName}
                         </div>
-                    ))}
-                </div>
+                        <div className="text-sm">
+                            {client.sumInvoiced > 0 && (
+                                <div className="flex items-center gap-1">
+                                    <div
+                                        className="h-2 w-2 rounded-full"
+                                        style={{
+                                            backgroundColor:
+                                                "var(--color-invoiced)",
+                                        }}
+                                    />
+                                    <span>
+                                        Invoiced: $
+                                        {client.sumInvoiced.toString()}
+                                    </span>
+                                </div>
+                            )}
+                            {client.sumPending > 0 && (
+                                <div className="flex items-center gap-1">
+                                    <div
+                                        className="h-2 w-2 rounded-full"
+                                        style={{
+                                            backgroundColor:
+                                                "var(--color-pending)",
+                                        }}
+                                    />
+                                    <span>
+                                        Pending: ${client.sumPending.toString()}
+                                    </span>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                ))}
             </div>
-        );
-    };
+        </div>
+    );
+};
+
+function RevenueChart({ data, year }: RevenueChartProps) {
+    const areaChartData = convertDataToChartFormat(data, parseInt(year));
 
     return (
         <Card className="pt-0">
@@ -241,7 +242,7 @@ function RevenueChart({ data, year }: RevenueChartProps) {
                             tickLine={false}
                             axisLine={false}
                             tickMargin={8}
-                            minTickGap={32}
+                            minTickGap={20}
                             tickFormatter={(value) => {
                                 const date = new Date(parseInt(year), value);
                                 return date.toLocaleDateString("en-EU", {
@@ -254,10 +255,7 @@ function RevenueChart({ data, year }: RevenueChartProps) {
                             axisLine={false}
                             tickMargin={10}
                         />
-                        <ChartTooltip
-                            content={<CustomTooltip />}
-                            cursor={{ fill: "rgba(0, 0, 0, 0.05)" }}
-                        />
+                        <ChartTooltip content={<ChartToolTip />} />
                         <Area
                             dataKey="accumulatedInvoiced"
                             type="monotone"

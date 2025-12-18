@@ -2,7 +2,7 @@ import { useFetchInvoices } from "@/hooks/api/invoice";
 import { useFetchClients } from "@/hooks/api/client";
 import { useCurrencyStore, type Currency } from "@/stores/currencyStore";
 
-export function useDashboard(): {
+export function useDashboard(selectedYear?: string): {
     revenueChartData: {
         clientName: string;
         grossAmount: number;
@@ -51,16 +51,25 @@ export function useDashboard(): {
         };
     });
 
-    const totalRevenue = invoices.reduce(
+    // Filter invoices by selected year for metrics
+    const filteredInvoices = selectedYear
+        ? invoices.filter(
+              (invoice) =>
+                  new Date(invoice.issuedDate).getFullYear().toString() ===
+                  selectedYear
+          )
+        : invoices;
+
+    const totalRevenue = filteredInvoices.reduce(
         (sum, invoice) => sum + invoice.grossAmount,
         0
     );
 
-    const nPendingInvoice = invoices.filter(
+    const nPendingInvoice = filteredInvoices.filter(
         (invoice) => !invoice.paidDate
     ).length;
 
-    const totalPendingRevenue = invoices
+    const totalPendingRevenue = filteredInvoices
         .filter((invoice) => !invoice.paidDate)
         .reduce((sum, invoice) => sum + invoice.grossAmount, 0);
 

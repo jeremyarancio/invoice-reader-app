@@ -192,7 +192,8 @@ function ViewInvoiceForm({ invoice, clients }: Props) {
                                                             key={key}
                                                             value={value.symbol}
                                                         >
-                                                            {value.symbol} - {value.name}
+                                                            {value.symbol} -{" "}
+                                                            {value.name}
                                                         </SelectItem>
                                                     )
                                                 )}
@@ -276,7 +277,9 @@ function ViewInvoiceForm({ invoice, clients }: Props) {
                                                     )}
                                                 >
                                                     {field.value ? (
-                                                        toEuropeanDate(field.value)
+                                                        toEuropeanDate(
+                                                            field.value
+                                                        )
                                                     ) : (
                                                         <span>Pick a date</span>
                                                     )}
@@ -294,7 +297,6 @@ function ViewInvoiceForm({ invoice, clients }: Props) {
                                                 mode="single"
                                                 selected={field.value}
                                                 onSelect={field.onChange}
-                                                initialFocus
                                             />
                                         </PopoverContent>
                                     </Popover>
@@ -332,7 +334,9 @@ function ViewInvoiceForm({ invoice, clients }: Props) {
                                                     )}
                                                 >
                                                     {field.value ? (
-                                                        toEuropeanDate(field.value)
+                                                        toEuropeanDate(
+                                                            field.value
+                                                        )
                                                     ) : (
                                                         <span>Pick a date</span>
                                                     )}
@@ -350,7 +354,6 @@ function ViewInvoiceForm({ invoice, clients }: Props) {
                                                 mode="single"
                                                 selected={field.value}
                                                 onSelect={field.onChange}
-                                                initialFocus
                                             />
                                         </PopoverContent>
                                     </Popover>

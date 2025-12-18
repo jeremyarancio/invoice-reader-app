@@ -1,6 +1,5 @@
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { MetricCard } from "@/components/dashboard/MetricCard";
-import { ClientAnalyticsSection } from "@/components/dashboard/ClientAnalyticsSection";
 import { QuickActionsSection } from "@/components/dashboard/QuickActionsSection";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -13,6 +12,7 @@ import { useDashboard as useDashboard } from "@/hooks/useDashboardData";
 
 export default function Dashboard() {
     const navigate = useNavigate();
+    const [selectedYear, setSelectedYear] = useState<string>("");
     const {
         revenueChartData,
         selectedCurrency,
@@ -23,8 +23,7 @@ export default function Dashboard() {
         isLoading,
         error,
         hasData,
-    } = useDashboard();
-    const [selectedYear, setSelectedYear] = useState<string>("");
+    } = useDashboard(selectedYear);
 
     // Set selectedYear to the most recent year once data is loaded
     useEffect(() => {
@@ -159,7 +158,7 @@ export default function Dashboard() {
                 setSelectedYear={setSelectedYear}
             />
 
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <div className="grid sm:grid-cols-2 gap-4 mb-8">
                 <MetricCard
                     title="Total Revenue"
                     value={totalRevenue}
@@ -181,8 +180,8 @@ export default function Dashboard() {
 
             <div className="flex flex-col gap-6 mb-8">
                 <RevenueChart
-                    year={selectedYear?.toString() ?? ""}
                     data={revenueChartData}
+                    year={selectedYear?.toString() ?? ""}
                 />
 
                 {/* <ClientAnalyticsSection
