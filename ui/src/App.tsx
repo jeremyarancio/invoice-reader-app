@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Dashboard from "@/pages/Dashboard";
 import Invoices from "@/pages/Invoices";
 import Clients from "@/pages/Clients";
 import SidebarLayout from "@/components/SidebarLayout";
@@ -42,7 +43,7 @@ function App() {
                                     <Route element={<SidebarLayout />}>
                                         <Route
                                             path="/"
-                                            element={<Invoices />}
+                                            element={<Dashboard />}
                                         />
                                         <Route
                                             path="/invoices"

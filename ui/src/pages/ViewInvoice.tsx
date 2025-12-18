@@ -1,7 +1,4 @@
-import {
-    useFetchInvoice,
-    useFetchInvoiceUrl,
-} from "@/hooks/api/invoice";
+import { useFetchInvoice, useFetchInvoiceUrl } from "@/hooks/api/invoice";
 import { useNavigate, useParams } from "react-router-dom";
 import { useFetchClients } from "@/hooks/api/client";
 import PdfPreview from "@/components/PdfPreview";
@@ -15,7 +12,6 @@ function ViewInvoice() {
     const { invoice, isLoading: isInvoiceLoading } = useFetchInvoice(invoiceId);
     const { clients, isLoading: isClientsLoading } = useFetchClients();
     const { url: invoiceUrl } = useFetchInvoiceUrl(invoiceId);
-
 
     return (
         <>
@@ -41,14 +37,9 @@ function ViewInvoice() {
                     )}
                 </div>
                 <div className="col-span-2 md:px-20 w-full">
-                    {!isInvoiceLoading &&
-                        !isClientsLoading &&
-                        !!invoice && (
-                            <ViewInvoiceForm
-                                invoice={invoice}
-                                clients={clients}
-                            />
-                        )}
+                    {!isInvoiceLoading && !isClientsLoading && !!invoice && (
+                        <ViewInvoiceForm invoice={invoice} clients={clients} />
+                    )}
                 </div>
             </div>
         </>

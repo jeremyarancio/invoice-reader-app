@@ -1,4 +1,4 @@
-import { Inbox, User, Bug, DollarSign } from "lucide-react";
+import { Inbox, User, Bug, DollarSign, LayoutDashboard } from "lucide-react";
 
 import {
     Sidebar,
@@ -23,6 +23,11 @@ import {
 
 // Menu items.
 const items = [
+    {
+        title: "Dashboard",
+        url: "/",
+        icon: LayoutDashboard,
+    },
     {
         title: "Invoices",
         url: "/invoices",
