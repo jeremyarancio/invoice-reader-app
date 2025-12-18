@@ -31,3 +31,7 @@ class IInvoiceRepository(ABC):
     @abstractmethod
     def get_by_client_id(self, client_id: UUID) -> list[Invoice]:
         raise NotImplementedError
+
+    @abstractmethod
+    def get_by_year(self, year: int) -> list[Invoice]:
+        raise NotImplementedError
