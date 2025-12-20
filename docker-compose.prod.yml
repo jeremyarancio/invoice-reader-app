@@ -16,6 +16,10 @@ services:
             - 443:443
         volumes:
             - letsencrypt:/letsencrypt
+        labels:
+            - "traefik.http.middlewares.api-ratelimit.ratelimit.average=100"
+            - "traefik.http.middlewares.api-ratelimit.ratelimit.period=1m"
+            - "traefik.http.middlewares.api-ratelimit.ratelimit.burst=100"
 
     ui:
         image: ghcr.io/${GITHUB_REPOSITORY}-ui:latest
@@ -41,6 +45,7 @@ services:
             - "traefik.http.routers.server.tls=true"
             - "traefik.http.routers.server.tls.certresolver=myresolver"
             - "traefik.http.routers.server.entrypoints=websecure"
+            - "traefik.http.routers.server.middlewares=api-ratelimit"
             - "com.centurylinklabs.watchtower.enable=true"
         env_file:
             - "./server/.env.prod"
