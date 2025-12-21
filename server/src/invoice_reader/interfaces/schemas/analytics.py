@@ -1,4 +1,3 @@
-from datetime import date
 from typing import Annotated
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -8,17 +7,28 @@ from invoice_reader.domain.invoice import Currency
 
 
 class ClientMonthBreakdown(BaseModel):
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        populate_by_name=True,
+        from_attributes=True,
+    )
+
     client_name: str
-    gross_amount: float
-    issued_date: date
-    paid_date: date | None
+    total_invoiced: float
+    total_pending: float
 
 
 class MonthRevenue(BaseModel):
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        populate_by_name=True,
+        from_attributes=True,
+    )
+
     month: Annotated[int, Field(ge=1, le=12)]
     total_invoiced: float
     total_pending: float
-    client: ClientMonthBreakdown
+    clients: list[ClientMonthBreakdown]
 
 
 class MonthlyRevenueResponse(BaseModel):
@@ -28,5 +38,6 @@ class MonthlyRevenueResponse(BaseModel):
         from_attributes=True,
     )
 
-    monthly_revenues: list[MonthRevenue]
+    revenues: list[MonthRevenue]
     selected_currency: Currency
+    year: int

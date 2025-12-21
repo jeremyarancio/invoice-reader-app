@@ -132,7 +132,7 @@ class ClientService:
             # Convert gross amount to all currencies
             converted_gross_amounts = {
                 currency: exchange_rate.convert(
-                    amount=invoice.data.gross_amount, to_currency=currency
+                    value=invoice.data.gross_amount, from_currency=currency
                 )
                 for currency in Currency
             }

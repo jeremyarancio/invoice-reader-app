@@ -7,30 +7,28 @@ import { DollarSign, FileText, Clock, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import RevenueChart from "@/components/dashboard/RevenueChart";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useDashboard as useDashboard } from "@/hooks/useDashboardData";
+import { useCurrencyStore } from "@/stores/currencyStore";
 
 export default function Dashboard() {
     const navigate = useNavigate();
-    const [selectedYear, setSelectedYear] = useState<string>("");
+    const currentYear = new Date().getFullYear();
+    const availableYears = Array.from({ length: 6 }, (_, i) =>
+        (currentYear - i).toString()
+    );
+    const [selectedYear, setSelectedYear] = useState<string>(
+        currentYear.toString()
+    );
     const {
-        revenueChartData,
-        selectedCurrency,
+        monthlyChartData,
         totalRevenue,
-        nPendingInvoice,
-        totalPendingRevenue,
-        availableYears,
+        totalPending,
         isLoading,
         error,
         hasData,
     } = useDashboard(selectedYear);
-
-    // Set selectedYear to the most recent year once data is loaded
-    useEffect(() => {
-        if (availableYears.length > 0 && !selectedYear) {
-            setSelectedYear(availableYears[0]);
-        }
-    }, [availableYears, selectedYear]);
+    const { selectedCurrency } = useCurrencyStore();
 
     if (isLoading) {
         return (
@@ -168,10 +166,7 @@ export default function Dashboard() {
                 />
                 <MetricCard
                     title="Pending Payments"
-                    value={totalPendingRevenue}
-                    subtitle={`${nPendingInvoice} invoice${
-                        nPendingInvoice !== 1 ? "s" : ""
-                    }`}
+                    value={totalPending}
                     currency={selectedCurrency}
                     icon={Clock}
                     colorScheme="warning"
@@ -179,10 +174,7 @@ export default function Dashboard() {
             </div>
 
             <div className="flex flex-col gap-6 mb-8">
-                <RevenueChart
-                    data={revenueChartData}
-                    year={selectedYear?.toString() ?? ""}
-                />
+                <RevenueChart data={monthlyChartData} />
 
                 {/* <ClientAnalyticsSection
                     clients={metrics.topClients}

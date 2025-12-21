@@ -15,6 +15,7 @@ from invoice_reader.interfaces.api.routers import (
     client_router,
     invoice_router,
     user_router,
+    analytics_router,
 )
 from invoice_reader.settings import get_settings
 from invoice_reader.utils.logger import get_logger
@@ -34,6 +35,7 @@ app = FastAPI(lifespan=lifespan, title="Invoice Reader API", version="1.0.0")
 app.include_router(user_router)
 app.include_router(invoice_router)
 app.include_router(client_router)
+app.include_router(analytics_router)
 
 app.add_middleware(
     CORSMiddleware,
