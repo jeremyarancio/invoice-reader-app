@@ -57,7 +57,8 @@ class AnalyticsService:
 
             if not client_name:
                 logger.error(
-                    "Client not found by id during analytics calculations: {}. Here's the clients: {}",
+                    "Client not found by id during analytics calculations: {}. "
+                    "Here's the clients: {}",
                     client_id,
                     client_lookup,
                 )
