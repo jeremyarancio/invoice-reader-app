@@ -12,6 +12,7 @@ from prometheus_fastapi_instrumentator import Instrumentator
 from invoice_reader.domain.exceptions import CustomException
 from invoice_reader.infrastructure.repositories.exchange_rate import InMemoryExchangeRateRepository
 from invoice_reader.interfaces.api.routers import (
+    analytics_router,
     client_router,
     invoice_router,
     user_router,
@@ -34,6 +35,7 @@ app = FastAPI(lifespan=lifespan, title="Invoice Reader API", version="1.0.0")
 app.include_router(user_router)
 app.include_router(invoice_router)
 app.include_router(client_router)
+app.include_router(analytics_router)
 
 app.add_middleware(
     CORSMiddleware,

@@ -13,5 +13,5 @@ class ExchangeRates(BaseModel):
     rates: Rates
     fetched_at: datetime = Field(default_factory=datetime.now)
 
-    def convert(self, amount: float, to_currency: Currency) -> float:
-        return amount * self.rates[to_currency]
+    def convert(self, value: float, from_currency: Currency) -> float:
+        return value / self.rates[from_currency]

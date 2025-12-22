@@ -20,6 +20,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { CURRENCIES } from "@/schemas/invoice";
 
 // Menu items.
 const items = [
@@ -75,12 +76,14 @@ export function AppSidebar() {
                             <Select value={selectedCurrency} onValueChange={setSelectedCurrency}>
                                 <SelectTrigger className="w-full">
                                     <DollarSign className="mr-2 h-4 w-4" />
-                                    <SelectValue placeholder="Select currency" />
+                                    <SelectValue placeholder="Select currency">
+                                        {CURRENCIES[selectedCurrency]?.symbol} - {CURRENCIES[selectedCurrency]?.name}
+                                    </SelectValue>
                                 </SelectTrigger>
                                 <SelectContent position="popper" side="right" align="start" sideOffset={5} className="z-50">
                                     {currencies.map((currency) => (
                                         <SelectItem key={currency} value={currency}>
-                                            {currency}
+                                            {CURRENCIES[currency]?.symbol} - {CURRENCIES[currency]?.name}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>

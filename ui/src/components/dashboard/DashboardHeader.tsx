@@ -22,7 +22,6 @@ export function DashboardHeader({
     availableYears,
     setSelectedYear,
 }: DashboardHeaderProps) {
-    const currencyName = CURRENCIES[currency]?.name || currency;
     const { user } = useFetchUser();
 
     return (
@@ -38,7 +37,7 @@ export function DashboardHeader({
                     Showing values in:
                 </span>
                 <span className="items-center rounded-md bg-primary/10 px-2.5 py-0.5 text-sm font-medium text-primary">
-                    {currencyName} ({CURRENCIES[currency]?.symbol})
+                    {CURRENCIES[currency]?.symbol}
                 </span>
                 <Select value={selectedYear} onValueChange={setSelectedYear}>
                     <SelectTrigger

@@ -1,3 +1,4 @@
+from datetime import date
 from uuid import UUID
 
 from sqlmodel import Session, select
@@ -39,6 +40,18 @@ class InMemoryInvoiceRepository(IInvoiceRepository):
     def get_by_client_id(self, client_id: UUID) -> list[Invoice]:
         return [invoice for invoice in self.invoices.values() if invoice.client_id == client_id]
 
+    def get_by_year(self, year: int, user_id: UUID) -> list[Invoice]:
+        return [
+            invoice
+            for invoice in self.invoices.values()
+            if invoice.user_id == user_id
+            and (
+                invoice.data.paid_date.year == year
+                if invoice.data.paid_date
+                else invoice.data.issued_date.year == year
+            )
+        ]
+
 
 class SQLModelInvoiceRepository(IInvoiceRepository):
     def __init__(self, session: Session):
@@ -60,7 +73,7 @@ class SQLModelInvoiceRepository(IInvoiceRepository):
             storage_path=invoice.storage_path,
         )
 
-    def _to_entity(self, model: InvoiceModel) -> Invoice:
+    def _to_invoice(self, model: InvoiceModel) -> Invoice:
         """Convert infrastructure model to domain entity."""
         return Invoice(
             id_=model.invoice_id,
@@ -87,7 +100,7 @@ class SQLModelInvoiceRepository(IInvoiceRepository):
         invoice_model = self.session.exec(
             select(InvoiceModel).where(InvoiceModel.invoice_id == invoice_id)
         ).one_or_none()
-        return self._to_entity(invoice_model) if invoice_model else None
+        return self._to_invoice(invoice_model) if invoice_model else None
 
     def delete(self, invoice_id: UUID) -> None:
         invoice_model = self.session.exec(
@@ -100,7 +113,7 @@ class SQLModelInvoiceRepository(IInvoiceRepository):
         invoice_models = self.session.exec(
             select(InvoiceModel).where(InvoiceModel.user_id == user_id)
         ).all()
-        return [self._to_entity(model) for model in invoice_models]
+        return [self._to_invoice(model) for model in invoice_models]
 
     def get_by_invoice_number(self, invoice_number: str, user_id: UUID) -> Invoice | None:
         invoice_model = self.session.exec(
@@ -109,7 +122,7 @@ class SQLModelInvoiceRepository(IInvoiceRepository):
                 InvoiceModel.user_id == user_id,
             )
         ).one_or_none()
-        return self._to_entity(invoice_model) if invoice_model else None
+        return self._to_invoice(invoice_model) if invoice_model else None
 
     def update(self, invoice: Invoice) -> None:
         existing_invoice_model = self.session.exec(
@@ -123,4 +136,16 @@ class SQLModelInvoiceRepository(IInvoiceRepository):
         invoice_models = self.session.exec(
             select(InvoiceModel).where(InvoiceModel.client_id == client_id)
         ).all()
-        return [self._to_entity(model) for model in invoice_models]
+        return [self._to_invoice(model) for model in invoice_models]
+
+    def get_by_year(self, year: int, user_id: UUID) -> list[Invoice]:
+        start_date = date(year, 1, 1)
+        end_date = date(year + 1, 1, 1)
+        invoice_models = self.session.exec(
+            select(InvoiceModel).where(
+                InvoiceModel.user_id == user_id,
+                InvoiceModel.invoiced_date >= start_date,
+                InvoiceModel.invoiced_date < end_date,
+            )
+        ).all()
+        return [self._to_invoice(invoice_model) for invoice_model in invoice_models]
