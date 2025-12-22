@@ -22,7 +22,6 @@ export function DashboardHeader({
     availableYears,
     setSelectedYear,
 }: DashboardHeaderProps) {
-    const currencyName = CURRENCIES[currency]?.name || currency;
     const { user } = useFetchUser();
 
     return (
