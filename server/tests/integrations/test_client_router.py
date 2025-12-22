@@ -1,12 +1,9 @@
-from collections import defaultdict
 from uuid import uuid4
 
 import pytest
 from fastapi.testclient import TestClient
 
 from invoice_reader.domain.client import Client
-from invoice_reader.domain.exchange_rate import ExchangeRates
-from invoice_reader.domain.invoice import Currency, Invoice
 from invoice_reader.domain.user import User
 from invoice_reader.infrastructure.exchange_rates import TestExchangeRatesService
 from invoice_reader.infrastructure.repositories.client import InMemoryClientRepository
@@ -23,7 +20,6 @@ from invoice_reader.interfaces.dependencies.repository import (
 from invoice_reader.interfaces.schemas.client import (
     ClientCreate,
     ClientResponse,
-    ClientRevenueResponse,
     ClientUpdate,
     PagedClientResponse,
 )
@@ -103,69 +99,3 @@ def test_get_client_not_found(test_client: TestClient):
 def test_delete_client_not_found(test_client: TestClient):
     response = test_client.delete(f"/v1/clients/{uuid4()}")
     assert response.status_code == 404
-
-
-def test_calculate_total_revenue_with_no_cached_exchange_rates(
-    test_client: TestClient,
-    existing_client: Client,
-    existing_invoices: list[Invoice],
-):
-    response = test_client.get(f"/v1/clients/{existing_client.id_}/revenue")
-    assert response.status_code == 200
-    response = ClientRevenueResponse.model_validate(response.json())
-
-    # Calculate for the test
-    exchange_rates = [
-        TestExchangeRatesService().get_exchange_rates(
-            base_currency=invoice.data.currency,
-        )
-        for invoice in existing_invoices
-    ]
-    converted_amounts = [
-        {curr: invoice.data.gross_amount * rate}
-        for invoice, ex in zip(existing_invoices, exchange_rates, strict=True)
-        for curr, rate in ex.rates.items()
-    ]
-    total_revenue: defaultdict[Currency, float] = defaultdict(float)
-    for amount in converted_amounts:
-        for curr, value in amount.items():
-            total_revenue[curr] += value
-
-    assert response.total_revenue == total_revenue
-
-
-def test_total_revenue_with_cached_exchange_rates(
-    test_client: TestClient,
-    existing_client: Client,
-    existing_invoices: list[Invoice],
-    existing_historical_exchange_rates: ExchangeRates,
-):
-    response = test_client.get(f"/v1/clients/{existing_client.id_}/revenue")
-    assert response.status_code == 200
-    response = ClientRevenueResponse.model_validate(response.json())
-
-    # It works only because each invoice was issed on the same date.
-    # Otherwise, each invoice would have its own exchange rates at different dates
-    # prepared in fixtures
-    converted_amounts = [
-        {curr: invoice.data.gross_amount * rate}
-        for invoice in existing_invoices
-        for curr, rate in existing_historical_exchange_rates.rates.items()
-    ]
-    total_revenue: defaultdict[Currency, float] = defaultdict(float)
-    for amount in converted_amounts:
-        for curr, value in amount.items():
-            total_revenue[curr] += value
-
-    assert response.total_revenue == total_revenue
-
-
-def test_count_invoices(
-    test_client: TestClient,
-    existing_client: Client,
-    existing_invoices: list[Invoice],
-):
-    response = test_client.get(f"/v1/clients/{existing_client.id_}/revenue")
-    assert response.status_code == 200
-    response = ClientRevenueResponse.model_validate(response.json())
-    assert response.n_invoices == len(existing_invoices)

@@ -40,6 +40,18 @@ class InMemoryInvoiceRepository(IInvoiceRepository):
     def get_by_client_id(self, client_id: UUID) -> list[Invoice]:
         return [invoice for invoice in self.invoices.values() if invoice.client_id == client_id]
 
+    def get_by_year(self, year: int, user_id: UUID) -> list[Invoice]:
+        return [
+            invoice
+            for invoice in self.invoices.values()
+            if invoice.user_id == user_id
+            and (
+                invoice.data.paid_date.year == year
+                if invoice.data.paid_date
+                else invoice.data.issued_date.year == year
+            )
+        ]
+
 
 class SQLModelInvoiceRepository(IInvoiceRepository):
     def __init__(self, session: Session):
