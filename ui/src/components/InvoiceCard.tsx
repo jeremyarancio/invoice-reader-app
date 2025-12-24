@@ -51,10 +51,10 @@ function InvoiceCard({
                         <p
                             className={`${
                                 status === "paid"
-                                    ? "text-green-500"
+                                    ? "text-green-600 dark:text-green-400"
                                     : status === "unpaid"
-                                    ? "text-yellow-500"
-                                    : "text-red-500"
+                                    ? "text-yellow-600 dark:text-yellow-400"
+                                    : "text-red-600 dark:text-red-400"
                             } font-semibold whitespace-nowrap`}
                         >
                             {status === "paid"

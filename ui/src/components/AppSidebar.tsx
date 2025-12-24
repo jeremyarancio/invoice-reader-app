@@ -21,6 +21,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { CURRENCIES } from "@/schemas/invoice";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 // Menu items.
 const items = [
@@ -94,6 +95,11 @@ export function AppSidebar() {
             </SidebarContent>
             <SidebarFooter className="flex-col space-y-2">
                 <SidebarMenu>
+                    <SidebarMenuItem>
+                        <div className="flex items-center justify-between px-2">
+                            <ThemeToggle />
+                        </div>
+                    </SidebarMenuItem>
                     <SidebarMenuItem>
                         <SidebarMenuButton asChild>
                             <a
