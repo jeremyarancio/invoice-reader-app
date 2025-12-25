@@ -15,16 +15,16 @@ function CardToggle({ onEdit, onDelete }: Props) {
             <Popover>
                 <PopoverTrigger asChild>
                     <button>
-                        <EllipsisVertical className="size-6 text-gray-500 hover:text-gray-700 cursor-pointer" />
+                        <EllipsisVertical className="size-6 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 cursor-pointer" />
                     </button>
                 </PopoverTrigger>
-                <PopoverContent className="bg-stone-50 w-30" align="start">
+                <PopoverContent className="card-toggle-popover" align="start">
                     <div className="font-base space-y-2 grid grid-cols-1 ">
-                        <button onClick={onEdit} className="flex items-center space-x-2 w-full hover:bg-stone-100 hover:cursor-pointer">
+                        <button onClick={onEdit} className="card-toggle-button">
                             <Pencil />
                             <p>Edit</p>
                         </button>
-                        <button onClick={onDelete} className="flex items-center space-x-2 hover:bg-stone-100 hover:cursor-pointer">
+                        <button onClick={onDelete} className="card-toggle-button">
                             <Trash2 />
                             <p>Delete</p>
                         </button>

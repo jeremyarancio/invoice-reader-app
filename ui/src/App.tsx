@@ -19,10 +19,11 @@ import ViewClient from "@/pages/ViewClient";
 import { AlertProvider } from "@/contexts/AlertContext";
 import AppAlert from "@/components/AppAlert";
 import ApiErrorHandler from "@/components/ApiErrorHandler";
+import { ThemeProvider } from "@/components/ThemeProvider";
 
 function App() {
     return (
-        <>
+        <ThemeProvider>
             <QueryClientProvider client={queryClient}>
                 <AuthProvider>
                     <AlertProvider>
@@ -85,7 +86,7 @@ function App() {
                     </AlertProvider>
                 </AuthProvider>
             </QueryClientProvider>
-        </>
+        </ThemeProvider>
     );
 }
 
