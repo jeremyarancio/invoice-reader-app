@@ -63,7 +63,7 @@
   }
 
   h3 {
-    @apply text-lg font-medium font-sans text-muted-foreground;
+    @apply text-lg font-medium font-sans text-foreground;
   }
 
   p {
@@ -75,7 +75,7 @@
   .button-primary {
     @apply bg-primary text-primary-foreground hover:bg-primary/90;
     @apply ring-1 ring-border font-semibold text-sm rounded-lg px-2 h-8;
-    @apply hover:cursor-pointer transition-colors;
+    @apply transition-all duration-200 ease-in-out transform hover:-translate-y-0.5 hover:cursor-pointer;
   }
 
   .button-secondary {
@@ -87,7 +87,7 @@
   .app-card {
     @apply flex justify-between w-full h-30 pl-6 pr-4 py-4 rounded-lg;
     @apply border border-border bg-card text-card-foreground shadow-lg;
-    @apply transition-all duration-200 ease-in-out transform hover:-translate-y-0.5 hover:cursor-pointer;
+    @apply transition-all duration-200 ease-in-out transform hover:-translate-y-1.5 hover:cursor-pointer;
   }
 
   .card-toggle-button {
@@ -119,7 +119,7 @@
   --accent: oklch(0.97 0.001 106.424);
   --accent-foreground: oklch(0.216 0.006 56.043);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.923 0.003 48.717);
+  --border: oklch(60.626% 0.02412 46.708);
   --input: oklch(0.923 0.003 48.717);
   --ring: oklch(0.709 0.01 56.259);
   
@@ -144,7 +144,7 @@
 .dark {
   --background: oklch(17.21% 0.01962 63.355);
   --foreground: oklch(0.985 0.001 106.423);
-  --card: oklch(0.216 0.006 56.043);
+  --card: oklch(25.648% 0.00941 52.952);
   --card-foreground: oklch(0.985 0.001 106.423);
   --popover: oklch(0.216 0.006 56.043);
   --popover-foreground: oklch(0.985 0.001 106.423);
@@ -157,7 +157,7 @@
   --accent: oklch(0.268 0.007 34.298);
   --accent-foreground: oklch(0.985 0.001 106.423);
   --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
+  --border: oklch(0.553 0.013 58.071);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.553 0.013 58.071);
   
