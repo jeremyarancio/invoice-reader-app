@@ -2,8 +2,10 @@ from typing import TypedDict
 from uuid import UUID
 
 from invoice_reader.domain.invoice import Currency
+from invoice_reader.services.exchange_rates import get_exchange_rate
 from invoice_reader.services.interfaces.exchange_rates import IExchangeRateService
 from invoice_reader.services.interfaces.repositories.client import IClientRepository
+from invoice_reader.services.interfaces.repositories.exchange_rate import IExchangeRateRepository
 from invoice_reader.services.interfaces.repositories.invoice import IInvoiceRepository
 from invoice_reader.utils.logger import get_logger
 
@@ -34,12 +36,16 @@ class AnalyticsService:
         invoice_repository: IInvoiceRepository,
         client_repository: IClientRepository,
         exchange_rate_service: IExchangeRateService,
+        exchange_rate_repository: IExchangeRateRepository,
     ) -> MonthlyRevenues:
+        exchange_rates = get_exchange_rate(
+            exchange_rate_repository=exchange_rate_repository,
+            exchange_rate_service=exchange_rate_service,
+        )
+        clients = client_repository.get_all(user_id=user_id)
         invoices = invoice_repository.get_by_year(year=year, user_id=user_id)
-        all_clients = client_repository.get_all(user_id=user_id)
-        exchange_rates = exchange_rate_service.get_exchange_rates(base_currency=currency)
 
-        client_lookup = {client.id_: client.data.client_name for client in all_clients}
+        client_lookup = {client.id_: client.data.client_name for client in clients}
 
         month_revenues: MonthlyRevenues = {
             month: {"total_invoiced": 0, "total_pending": 0, "clients": {}}
@@ -65,7 +71,9 @@ class AnalyticsService:
                 client_name = "Unknown"
 
             converted_amount = exchange_rates.convert(
-                invoice.data.gross_amount, from_currency=invoice.data.currency
+                invoice.data.gross_amount,
+                from_currency=invoice.data.currency,
+                to_currency=currency,
             )
 
             if invoice.client_id not in month_revenues[month]["clients"]:

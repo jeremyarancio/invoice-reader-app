@@ -36,5 +36,4 @@ class PagedClientResponse(BaseModel):
 class ClientRevenueResponse(BaseModel):
     client_id: UUID
     n_invoices: int
-    # In case of error with the Exchange rates service
     total_revenue: dict[Currency, float] | None = None

@@ -1,17 +1,22 @@
-import { useFetchClient } from "@/hooks/api/client";
+import { useFetchClient, useFetchClientRevenue } from "@/hooks/api/client";
 import { useNavigate, useParams } from "react-router-dom";
 import ViewClientForm from "@/components/ViewClientForm";
 import { ArrowLeft } from "lucide-react";
 import { useCurrencyStore } from "@/stores/currencyStore";
 import { Skeleton } from "@/components/ui/skeleton";
+import { CURRENCIES } from "@/schemas/invoice";
 
 function ViewClient() {
     const { clientId } = useParams();
     const navigate = useNavigate();
     const { client, isLoading: isClientLoading } = useFetchClient(clientId!);
+    const { clientRevenue, isLoading: isClientRevenueLoading } =
+        useFetchClientRevenue(clientId!);
     const { selectedCurrency } = useCurrencyStore();
 
-    if (isClientLoading) {
+    const isLoading = isClientLoading || isClientRevenueLoading;
+
+    if (isLoading) {
         return (
             <>
                 <div className="mt-10 ml-10 mb-20">
@@ -68,16 +73,16 @@ function ViewClient() {
                     </h2>
                     <div className="flex justify-between items-center">
                         <span className="text-muted-foreground">
-                            Total Revenue ({selectedCurrency}):
+                            Estimated total Revenue ({selectedCurrency}):
                         </span>
                         <div className="font-semibold text-lg">
-                            {client?.totalRevenue
+                            {clientRevenue?.total_revenue
                                 ? `${
-                                      client.totalRevenue[
+                                      clientRevenue.total_revenue[
                                           selectedCurrency
-                                      ]?.toFixed(2) || "0.00"
-                                  } ${selectedCurrency}`
-                                : "Unable to calculate (exchange rate error)"}
+                                      ]?.toFixed(1) || "0.0"
+                                  } ${CURRENCIES[selectedCurrency].symbol}`
+                                : "Unable to calculate."}
                         </div>
                     </div>
                 </div>

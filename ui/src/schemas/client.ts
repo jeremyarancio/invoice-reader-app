@@ -9,8 +9,6 @@ export type ClientData = {
 
 export type Client = {
     id: string;
-    totalRevenue?: Record<string, number>;
-    nInvoices: number;
 } & ClientData;
 
 export interface CreateClient {

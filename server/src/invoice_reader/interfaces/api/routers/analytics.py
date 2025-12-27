@@ -8,6 +8,7 @@ from invoice_reader.interfaces.dependencies.auth import get_current_user_id
 from invoice_reader.interfaces.dependencies.exchange_rates import get_exchange_rates_service
 from invoice_reader.interfaces.dependencies.repository import (
     get_client_repository,
+    get_exchange_rate_repository,
     get_invoice_repository,
 )
 from invoice_reader.interfaces.schemas.analytics import (
@@ -18,6 +19,7 @@ from invoice_reader.interfaces.schemas.analytics import (
 from invoice_reader.services.analytics import AnalyticsService
 from invoice_reader.services.interfaces.exchange_rates import IExchangeRateService
 from invoice_reader.services.interfaces.repositories.client import IClientRepository
+from invoice_reader.services.interfaces.repositories.exchange_rate import IExchangeRateRepository
 from invoice_reader.services.interfaces.repositories.invoice import IInvoiceRepository
 
 router = APIRouter(
@@ -34,6 +36,9 @@ def get_monthly_revenues(
     invoice_repository: Annotated[IInvoiceRepository, Depends(get_invoice_repository)],
     client_repository: Annotated[IClientRepository, Depends(get_client_repository)],
     exchange_rate_service: Annotated[IExchangeRateService, Depends(get_exchange_rates_service)],
+    exchange_rate_repository: Annotated[
+        IExchangeRateRepository, Depends(get_exchange_rate_repository)
+    ],
 ) -> MonthlyRevenueResponse:
     monthly_revenues = AnalyticsService.get_monthly_revenue(
         user_id=user_id,
@@ -42,6 +47,7 @@ def get_monthly_revenues(
         invoice_repository=invoice_repository,
         client_repository=client_repository,
         exchange_rate_service=exchange_rate_service,
+        exchange_rate_repository=exchange_rate_repository,
     )
 
     return MonthlyRevenueResponse(

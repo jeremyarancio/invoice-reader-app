@@ -13,5 +13,18 @@ class ExchangeRates(BaseModel):
     rates: Rates
     fetched_at: datetime = Field(default_factory=datetime.now)
 
-    def convert(self, value: float, from_currency: Currency) -> float:
+    def convert_to_base(self, value: float, from_currency: Currency) -> float:
+        if from_currency == self.base_currency:
+            return value
         return value / self.rates[from_currency]
+
+    def convert_from_base(self, value: float, to_currency: Currency) -> float:
+        if to_currency == self.base_currency:
+            return value
+        return value * self.rates[to_currency]
+
+    def convert(self, value: float, from_currency: Currency, to_currency: Currency) -> float:
+        if from_currency == to_currency:
+            return value
+        base_value = self.convert_to_base(value, from_currency)
+        return self.convert_from_base(base_value, to_currency)

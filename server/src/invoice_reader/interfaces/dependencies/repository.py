@@ -1,4 +1,3 @@
-from functools import lru_cache
 from typing import Annotated
 
 import sqlmodel
@@ -26,7 +25,6 @@ from invoice_reader.settings import get_settings
 settings = get_settings()
 
 
-@lru_cache
 def get_engine() -> Engine:
     """
     Create database engine with connection pooling.

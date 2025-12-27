@@ -11,7 +11,7 @@ function Clients() {
 
     const { clients, isLoading } = useFetchClients();
 
-    const filteredClients = clients?.filter((client) => {
+    const filteredClients = clients.filter((client) => {
         const query = searchQuery.toLowerCase();
 
         return (
@@ -52,8 +52,6 @@ function Clients() {
                         <ClientCard
                             clientId={client.id}
                             clientName={client.clientName}
-                            totalInvoice={client.nInvoices}
-                            totalRevenue={client.totalRevenue}
                         />
                     </div>
                 ))}

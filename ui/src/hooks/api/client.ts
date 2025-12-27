@@ -17,31 +17,16 @@ import type { AxiosError } from "axios";
 import { useAlert } from "@/contexts/AlertContext";
 
 export const useFetchClient = (clientId: string) => {
-    const {
-        data: clientData,
-        isLoading: clientLoading,
-        error: clientError,
-    } = useQuery({
+    const { data, isLoading, error } = useQuery({
         queryKey: ["client", clientId],
         queryFn: () => fetchClient(clientId),
         enabled: !!clientId,
     });
-    const {
-        data: clientRevenue,
-        isLoading: revenueLoading,
-        error: revenueError,
-    } = useQuery({
-        queryKey: ["clientRevenue", clientId],
-        queryFn: () => fetchClientRevenue(clientId),
-    });
-    const client =
-        clientData && clientRevenue
-            ? mapGetClientToClient(clientData, clientRevenue)
-            : null;
+    const client = data ? mapGetClientToClient(data) : null;
     return {
         client,
-        isLoading: clientLoading || revenueLoading,
-        error: clientError || revenueError,
+        isLoading: isLoading,
+        error: error,
     };
 };
 
@@ -53,17 +38,10 @@ export const useFetchClients = (
         queryKey: ["clients", pageNumber, perPage],
         queryFn: async () => {
             const pagedClients = await fetchClients(pageNumber, perPage);
-            const clientsWithRevenue = await Promise.all(
-                pagedClients.clients.map(async (client) => {
-                    const revenue = await fetchClientRevenue(client.client_id);
-                    return mapGetClientToClient(client, revenue);
-                })
-            );
-            return clientsWithRevenue;
+            return pagedClients;
         },
     });
-    const clients = data || [];
-
+    const clients = data?.clients.map((c) => mapGetClientToClient(c)) || [];
     return { clients, isLoading, error };
 };
 
@@ -147,4 +125,16 @@ export const useUpdateClient = () => {
             client_id: clientId,
             data: mapClientToUpdateClient(clientData),
         });
+};
+
+export const useFetchClientRevenue = (clientId: string) => {
+    const { data: clientRevenue, isLoading, error } = useQuery({
+        queryKey: ["clientRevenue", clientId],
+        queryFn: () => fetchClientRevenue(clientId),
+    });
+    return {
+        clientRevenue,
+        isLoading: isLoading,
+        error: error,
+    };
 };

@@ -2,7 +2,11 @@ from uuid import UUID
 
 from invoice_reader.domain.client import Client, ClientData
 from invoice_reader.domain.invoice import Currency
-from invoice_reader.services.exceptions import EntityNotFoundException, ExistingEntityException
+from invoice_reader.services.exceptions import (
+    EntityNotFoundException,
+    ExistingEntityException,
+)
+from invoice_reader.services.exchange_rates import get_exchange_rate
 from invoice_reader.services.interfaces.exchange_rates import IExchangeRateService
 from invoice_reader.services.interfaces.repositories import IClientRepository
 from invoice_reader.services.interfaces.repositories.exchange_rate import IExchangeRateRepository
@@ -87,8 +91,9 @@ class ClientService:
         )
         client_repository.update(client=updated_client)
 
-    @staticmethod
+    @classmethod
     def calculate_total_revenue(
+        cls,
         client_id: UUID,
         invoice_repository: IInvoiceRepository,
         exchange_rate_service: IExchangeRateService,
@@ -97,47 +102,19 @@ class ClientService:
         logger.info("Calculating total revenue for client: {}", client_id)
         total_revenue = {currency: 0.0 for currency in Currency}
         invoices = invoice_repository.get_by_client_id(client_id=client_id)
+        exchange_rates = get_exchange_rate(
+            exchange_rate_repository=exchange_rate_repository,
+            exchange_rate_service=exchange_rate_service,
+        )
+        # Convert each invoice to all currencies and accumulate
         for invoice in invoices:
-            # Check the persisted exchange rates first
-            exchange_rate = exchange_rate_repository.get(
-                base_currency=invoice.data.currency,
-                rate_date=invoice.data.issued_date,
-            )
-            if not exchange_rate:
-                logger.info(
-                    "No cached exchange rates for invoice_id {}, fetching from external service.",
-                    invoice.id_,
+            for target_currency in Currency:
+                converted_amount = exchange_rates.convert(
+                    value=invoice.data.gross_amount,
+                    from_currency=invoice.data.currency,
+                    to_currency=target_currency,
                 )
-                try:
-                    # Fetch from the external service if not found in the repository
-                    exchange_rate = exchange_rate_service.get_exchange_rates(
-                        base_currency=invoice.data.currency,
-                    )
-                    # Persist the fetched exchange rates for future use
-                    exchange_rate_repository.add(exchange_rate=exchange_rate)
-                    logger.info(
-                        "Fetched and cached exchange rates for invoice_id {}: {}",
-                        invoice.id_,
-                        exchange_rate.model_dump_json(),
-                    )
-                except Exception:
-                    return None
-            else:
-                logger.info(
-                    "Cached exchange rates found for invoice_id {}: {}",
-                    invoice.id_,
-                    exchange_rate.model_dump_json(),
-                )
-
-            # Convert gross amount to all currencies
-            converted_gross_amounts = {
-                currency: exchange_rate.convert(
-                    value=invoice.data.gross_amount, from_currency=currency
-                )
-                for currency in Currency
-            }
-            for currency, amount in converted_gross_amounts.items():
-                total_revenue[currency] += amount
+                total_revenue[target_currency] += converted_amount
 
         return total_revenue
 
