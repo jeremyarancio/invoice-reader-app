@@ -1,0 +1,88 @@
+<View>
+  <Style>
+    /* Layout: image on left, table on right */
+    .container {
+      display: flex;
+      flex-direction: row;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 20px;
+      max-width: 100%;
+    }
+
+    .image-panel {
+      flex: 1;
+      max-width: 50%;
+      overflow: auto;
+    }
+
+    .annotation-panel {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5px;
+      max-height: 80vh;
+      overflow-y: auto;
+      min-width: 400px;
+    }
+
+    /* Styling for text areas */
+    input[type="text"][name^="table"] { border-radius: 0px; }
+    input[type="text"][name^="table_value"] { border-left: none; }
+    div[class*=" TextAreaRegion_mark"] {
+      background: none;
+      height: 33px;
+      border-radius: 0;
+      min-width: 135px;
+    }
+  </Style>
+
+  <Text value="Indicate the values" name="text"/>
+
+  <View className="container">
+    <!-- LEFT SIDE: Image -->
+    <View className="image-panel">
+      <Image name="png" value="$image"/>
+    </View>
+
+    <!-- RIGHT SIDE: Annotation fields -->
+    <View className="annotation-panel">
+      <Text name="gross_amount_key" value="gross_amount"/>
+      <Number name="gross_amount" toName="text" min="0" required="true" maxSubmissions="1"/>
+
+      <Text name="vat_key" value="vat"/>
+      <Number name="vat" toName="text" min="0" max="100" required="true" maxSubmissions="1"/>
+
+      <Text name="issued_date_key" value="issued_date"/>
+      <DateTime name="issued_date" toName="text" only="date" format="%d-%m-%Y"/>
+
+      <Text name="invoice_number_key" value="invoice_number"/>
+      <TextArea name="invoice_number" toName="text" skipDuplicates="true" required="true" maxSubmissions="1"/>
+
+      <Text name="currency_key" value="currency"/>
+      <Choices name="currency" toName="text" showInline="true" choice="single" required="true">
+        <Choice alias="eur" value="eur" />
+        <Choice alias="czk" value="czk" />
+        <Choice alias="usd" value="usd" />
+        <Choice alias="gbp" value="gbp" />
+      </Choices>
+
+      <Text name="client_name_key" value="client_name"/>
+      <TextArea name="client_name" toName="text" skipDuplicates="true" required="true" maxSubmissions="1"/>
+
+      <Text name="client_street_address_number_key" value="client_street_address_number"/>
+      <TextArea name="client_street_address_number" toName="text" skipDuplicates="true" required="true" maxSubmissions="1"/>
+
+      <Text name="client_street_address_key" value="client_street_address"/>
+      <TextArea name="client_street_address" toName="text" skipDuplicates="true" required="true" maxSubmissions="1"/>
+      <Text name="client_city_key" value="client_city"/>
+      <TextArea name="client_city" toName="text" skipDuplicates="true" required="true" maxSubmissions="1"/>
+      
+      <Text name="client_zipcode_key" value="client_zipcode"/>
+      <TextArea name="client_zipcode" toName="text" skipDuplicates="true" required="true" maxSubmissions="1"/>
+
+      <Text name="client_country_key" value="client_country"/>
+      <TextArea name="client_country" toName="text" placeholder="fra-usa-spa (ISO 3166-1 alpha-3)" skipDuplicates="true" required="true" maxSubmissions="1"/>
+    </View>
+  </View>
+</View>

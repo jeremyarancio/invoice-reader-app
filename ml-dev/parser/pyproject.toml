@@ -1,0 +1,35 @@
+[project]
+name = "parser"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "boto3>=1.40.61",
+    "label-studio-sdk>=2.0.12",
+    "paddleocr[all]>=3.3.0",
+    "paddlepaddle==3.2.0",
+    "typer>=0.20.0",
+]
+
+[tool.uv.sources]
+paddlepaddle = { index = "paddlepaddle-cpu" }
+
+[[tool.uv.index]]
+name = "paddlepaddle-cpu"
+url = "https://www.paddlepaddle.org.cn/packages/stable/cpu/"
+explicit = true
+
+[dependency-groups]
+dev = [
+    "datasets>=4.3.0",
+    "google-genai>=1.46.0",
+    "huggingface-hub>=0.36.0",
+    "ipykernel>=7.0.1",
+    "pytest>=9.0.1",
+]
+
+[build-system]
+requires = ["uv_build >= 0.9.5, <0.10.0"]
+build-backend = "uv_build"
+
+[project.scripts]
+parser-cli = "parser.interface.cli:app"

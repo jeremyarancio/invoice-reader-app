@@ -1,0 +1,23 @@
+services:
+  label-studio:
+    image: heartexlabs/label-studio:latest
+    container_name: label-studio
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - LABEL_STUDIO_HOST=http://localhost:8080
+      - LABEL_STUDIO_USERNAME=${LABEL_STUDIO_USERNAME:-admin@example.com}
+      - LABEL_STUDIO_PASSWORD=${LABEL_STUDIO_PASSWORD:-password}
+    volumes:
+      - label-studio:/label-studio/data
+    networks:
+      - label-studio-network
+
+
+volumes:
+  label-studio:
+
+networks:
+  label-studio-network:
+    driver: bridge
